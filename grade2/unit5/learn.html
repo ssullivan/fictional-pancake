@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Learn Measuring Length</title>
+<title>Learn Numbers to 1,000</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=JetBrains+Mono:wght@500;700&display=swap">
@@ -11,34 +11,19 @@
 <link rel="stylesheet" href="../../shared/learn.css?v=66c57fd0">
 <link rel="stylesheet" href="../../shared/k5.css?v=da17b270">
 <style>
-/* things to measure */
-.ob .body,.ob .er,.ob .cap{stroke:rgba(10,35,64,.8);stroke-width:1.5}
-.ob .body{fill:var(--gold)}
-.ob .er,.k-eraser .body,.eraser{fill:#ff9fb2}
-.eraser{stroke:rgba(10,35,64,.8);stroke-width:1.5}
-.ob .wood{fill:#f2d0a0}.ob .lead{fill:#2a2a2a}
-.ob .band{stroke:rgba(10,35,64,.55);stroke-width:2}
-.k-crayon .body{fill:#ff7b7b}
-.k-marker .body,.k-glue .body{fill:var(--chalk)}
-.ob .cap{fill:var(--cyan)}
-.k-book .body,.k-poster .body{fill:var(--cyan)}
-.k-rope .body{fill:var(--good)}
-.k-rug .body{fill:#c9a4ff}
-.k-box .body,.k-bench .body{fill:#d9a066}
-.clip rect{fill:none;stroke:#cfd8e3;stroke-width:2.5}
-/* rulers, meter sticks, and the 10 cm strip */
-.rul{fill:rgba(255,201,60,.14);stroke:var(--gold);stroke-width:2}
-.span{fill:rgba(127,227,255,.28)}
-.ref{fill:rgba(127,227,255,.3);stroke:var(--cyan);stroke-width:2}
-.mst{stroke:rgba(10,35,64,.8);stroke-width:1.5}
-.mst.a{fill:var(--gold)}.mst.b{fill:var(--cyan)}
-.lbl.dk{fill:#0a2340}
-/* line plots */
-.xm{fill:var(--gold);font:700 22px var(--mono);text-anchor:middle;dominant-baseline:central}
-.xm.hi{fill:var(--cyan)}
-.colhi{fill:rgba(127,227,255,.12);stroke:var(--cyan);stroke-width:2}
-.chip.cur{border-color:var(--gold);color:var(--gold)}
-.chip.done{background:rgba(95,224,168,.18);border-color:var(--good)}
+/* base-ten diagrams: hundreds, tens (tr: from a broken hundred), and ones */
+.flat rect{fill:var(--gold);stroke:rgba(10,35,64,.8);stroke-width:1}
+.flat line{stroke:rgba(10,35,64,.35);stroke-width:.8}
+.flat.new rect{fill:var(--good);stroke:#fff;stroke-width:2.5}
+.rod.tr rect{fill:var(--good)}
+.unit1.c{fill:var(--good)}
+.dim{opacity:.2}
+/* place-value chart */
+table.pv{border-collapse:collapse;margin:0 auto 12px;font:700 22px var(--mono)}
+table.pv th{color:var(--dim);font-size:14px;padding:6px 10px}
+table.pv td{border:1.5px solid rgba(170,205,255,.4);padding:8px 18px;text-align:center}
+table.pv td.p0{color:var(--gold)}table.pv td.p1{color:var(--cyan)}table.pv td.p2{color:var(--good)}
+table.pv td.hi{outline:3px solid #fff;outline-offset:-3px}
 </style>
 </head>
 <body class="young">
@@ -47,9 +32,9 @@
   <section id="home">
     <a class="back" href="../">← Grade 2</a>
     <header class="hero">
-      <p class="eyebrow">Learn · Illustrative Mathematics K–5 · Grade 2 · Unit 3</p>
-      <h1>Measuring <span>Length</span></h1>
-      <p class="lede">Short lessons you can play with. Measure with cubes and rulers, in centimeters, meters, inches, and feet, solve length stories, and make line plots, then check yourself. Tap <b>Read to me</b> to hear any step read aloud.</p>
+      <p class="eyebrow">Learn · Illustrative Mathematics K–5 · Grade 2 · Unit 5</p>
+      <h1>Numbers to <span>1,000</span></h1>
+      <p class="lede">Short lessons you can play with. Make hundreds from tens, build and name three-digit numbers, write them in expanded form, and find, compare, and order them, then check yourself. Tap <b>Read to me</b> to hear any step read aloud.</p>
       <div class="stats"><span class="pill">Steps done <b id="hdone">0</b>/<span id="htot">0</span></span></div>
     </header>
     <div class="zones" id="chapters"></div>
@@ -57,9 +42,9 @@
       <h2>For grown-ups</h2>
       <div><h4>How it works</h4><p>Five short chapters follow the unit’s lessons in order. Each step shows one idea with something to tap or move, then a quick check. A wrong answer names the likely mistake and gives one more try.</p></div>
       <div><h4>Read to me</h4><p>The Read to me buttons read each step and quick check aloud with the device’s built-in voice, for students still learning to read. Progress is saved on this device.</p></div>
-      <div><h4>Numbers</h4><p>Lengths are whole centimeters, inches, feet, and meters, all within 100, and things are drawn at real-life sizes (a crayon is about 9 cm). Differences need at most one broken ten.</p></div>
-      <div><h4>Try it for real</h4><p>Measuring real things is the heart of this unit. A ruler, a tape measure, and a few household objects are all it takes.</p></div>
-      <div><h4>Not covered</h4><p>Center Days (Lessons 7, 13, and 17) and Make a Yard Stick (Lesson 18) are hands-on, optional lessons that work better in class. There’s no practice game for this unit yet.</p></div>
+      <div><h4>Numbers</h4><p>All numbers are within 1,000. The blocks are base-ten diagrams: a big square is a hundred, a stick is a ten, and a small square is a one. There’s no adding or subtracting in this unit; that comes in Unit 7.</p></div>
+      <div><h4>The big idea</h4><p>10 ones make a ten and 10 tens make a hundred, so each digit’s place tells what it’s worth. The same number can be built different ways, like 3 hundreds and 14 tens for 440.</p></div>
+      <div><h4>Not covered</h4><p>Center Days (Lessons 7 and 13) and Hundreds of Objects (Lesson 14) are optional lessons that work better in class. There’s no practice game for this unit yet.</p></div>
     </section>
   </section>
 
@@ -83,9 +68,9 @@
 <script src="../../shared/figures.js?v=90a5b6ae"></script>
 <script src="../../shared/k5.js?v=989249f9"></script>
 <script src="../../shared/learn.js?v=32164502"></script>
-<script src="lessons.js?v=486735dc"></script>
+<script src="lessons.js?v=d1df3143"></script>
 <script>
-Learn.init({saveKey:'g2u3-learn',readAloud:true,icons:ICON,chapters:CH});
+Learn.init({saveKey:'g2u5-learn',readAloud:true,icons:ICON,chapters:CH});
 </script>
 </body>
 </html>

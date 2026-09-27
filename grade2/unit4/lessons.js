@@ -2,12 +2,8 @@
    Number lines (numLine), steppers, and choice buttons come from shared/k5.js. */
 
 /* ---------- figures ---------- */
-/* A number line from lo to hi with every number shown when there's room, else every 5 or 10 (or o.lab).
-   Tick numbers too close to a labelled dot are left off so they don't overlap. */
-function line(lo,hi,o={}){
-  const u=o.u||Math.min(34,560/(hi-lo)),lab=o.lab||(v=>hi-lo<=12||v%(hi-lo<=30?5:10)===0),near=(o.pts||[]).filter(p=>p.t!=null).map(p=>p.v);
-  return numLine(lo,hi,{ls:'',end:true,...o,u,lab:v=>lab(v)&&near.every(w=>w===v||Math.abs(w-v)*u>=30)});
-}
+/* a number line from lo to hi with every number shown when there's room, else every 5 or 10 */
+const line=(lo,hi,o={})=>numLine(lo,hi,{u:Math.min(34,560/(hi-lo)),ls:'',end:true,lab:v=>hi-lo<=12||v%(hi-lo<=30?5:10)===0,...o});
 /* jumps from a by each of steps (signed), labelled +n or −n: hopsFrom(34, [10, 10, 3]) */
 const sgn=n=>n>0?`+${n}`:`−${-n}`;
 function hopsFrom(a,steps){

@@ -12,6 +12,7 @@ When a unit gets a game or Learn page, add a row here and turn its "Coming soon"
 | `unit2/` | none yet | `learn.html` (5 chapters, Lessons 1–14) | Grade 2 Unit 2 |
 | `unit3/` | none yet | `learn.html` (5 chapters, Lessons 1–16) | Grade 2 Unit 3 |
 | `unit4/` | none yet | `learn.html` (5 chapters, Lessons 1–13) | Grade 2 Unit 4 |
+| `unit5/` | none yet | `learn.html` (5 chapters, Lessons 1–12) | Grade 2 Unit 5 |
 
 ## Building for Grade 2
 
