@@ -11,6 +11,7 @@
    tensOnesAdd(pairs)                widget: pick a + b, then join tens and ones
    tapes(rows, {diff})               tape diagram comparing two amounts
    partWhole(parts, total)           one tape split into parts, with the total above
+   numLine(lo, hi, {…})              a number line with arrows, jumps, dots, and tappable ticks (svg)
    stepper(k, label), steppers(el, st, lim, draw)          − n + buttons
    seg(label, opts), press(el, m)    a row of choice buttons */
 const range=n=>[...Array(n).keys()];
@@ -106,6 +107,35 @@ function partWhole(parts,total,label='Tape diagram'){
     x+=p.n*u;
   });
   return svgWrap(W+2*X,Y+H+6,o,label);
+}
+
+/* A number line from lo to hi, with a tick every `step` (taller every `big`). lab(v): which ticks get a number (default: the tall ones).
+   u: pixels per 1. ls: label class ('s' small, '' normal). end: an arrowhead on the right, since the line keeps going.
+   arrows: [{a, b, lv, q}] straight arrows above the line from a to b at level lv (0 is lowest), labelled with their length,
+     or ? when q and not shown.
+   hops: [{a, b, t, q}] curved jumps from a to b labelled t (q: blue).  pts: [{v, cls, t}] dots on the line (cls 'b': blue);
+     t is written under the dot in place of the tick's number.  tap: every tick can be tapped (data-v).  Returns the svg. */
+function numLine(lo,hi,{u=Math.min(18,380/(hi-lo)),step=1,big=5,lab=v=>v%big===0,ls='s',end=false,arrows=[],shown=false,hops=[],pts=[],tap=false,label='Number line'}={}){
+  const X=16,top=Math.max(0,...arrows.map(r=>r.lv||0)),Y=40+top*38+(hops.length?32:0),x=v=>X+(v-lo)*u,L='lbl'+(ls?' '+ls:''),said=new Set(pts.filter(p=>p.t!=null).map(p=>p.v));
+  let o=`<line class="axis" x1="${X}" y1="${Y}" x2="${x(hi)+(end?14:0)}" y2="${Y}"/>`;
+  if(end)o+=`<polygon class="arrh ax" points="${x(hi)+24},${Y} ${x(hi)+12},${Y-7} ${x(hi)+12},${Y+7}"/>`;
+  range(Math.round((hi-lo)/step)+1).forEach(i=>{
+    const v=lo+i*step,b=v%big===0;
+    o+=`<line class="tick" x1="${x(v)}" y1="${Y-(b?8:4)}" x2="${x(v)}" y2="${Y+(b?8:4)}"/>`+(lab(v)&&!said.has(v)?`<text class="${L}" x="${x(v)}" y="${Y+22}">${v}</text>`:'');
+  });
+  arrows.forEach(({a,b,lv=0,q})=>{
+    const y=Y-18-lv*38,d=b>a?1:-1,t=q&&!shown?'?':Math.abs(b-a);
+    o+=`<path class="guide" d="M${x(b)},${y}V${Y}${a?`M${x(a)},${y}V${Y}`:''}"/><line class="arr${q?' q':''}" x1="${x(a)}" y1="${y}" x2="${x(b)-d*6}" y2="${y}"/><polygon class="arrh${q?' q':''}" points="${x(b)},${y} ${x(b)-d*10},${y-6} ${x(b)-d*10},${y+6}"/><text class="lbl s${q?' cy':''}" x="${(x(a)+x(b))/2}" y="${y-12}">${t}</text>`;
+  });
+  hops.forEach(({a,b,t,q})=>{
+    /* a curve from a to b peaking h above the line; the arrowhead follows the curve's direction at b */
+    const xa=x(a),xb=x(b),m=(xa+xb)/2,y=Y-4,h=Math.min(30,8+Math.abs(xb-xa)*.35),n=Math.hypot(xb-m,2*h),ux=(xb-m)/n,uy=2*h/n,c=q?' q':'';
+    const bx=xb-ux*11,by=y-uy*11;
+    o+=`<path class="hop${c}" d="M${xa},${y}Q${m},${y-2*h} ${bx},${by}"/><polygon class="arrh${c}" points="${xb},${y} ${bx-uy*6},${by+ux*6} ${bx+uy*6},${by-ux*6}"/><text class="${L}${q?' cy':''}" x="${m}" y="${y-h-12}">${t}</text>`;
+  });
+  pts.forEach(({v,cls='',t})=>{o+=`<circle class="pt ${cls}" cx="${x(v)}" cy="${Y}" r="7"/>`+(t!=null?`<text class="${L} ${cls==='b'?'cy':'gd'}" x="${x(v)}" y="${Y+22}">${t}</text>`:'');});
+  if(tap)range(Math.round((hi-lo)/step)+1).forEach(i=>{const v=lo+i*step;o+=`<rect class="hit" data-v="${v}" x="${x(v)-step*u/2}" y="${Y-34}" width="${step*u}" height="66"/>`;});
+  return svgWrap(X*2+(hi-lo)*u+(end?26:0),Y+32,o,label);
 }
 
 /* − n + buttons. Markup for one number k; wire them all with steppers(). */

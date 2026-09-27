@@ -1,5 +1,5 @@
 /* Learn Measuring Length (Grade 2 Unit 3): figures, widgets, and the chapters. Loaded by learn.html.
-   Cubes, tape diagrams, and the controls come from shared/k5.js. */
+   Cubes, tape diagrams, number lines, and the controls come from shared/k5.js. */
 
 /* ---------- figures ---------- */
 const NAME={pencil:'pencil',crayon:'crayon',marker:'marker',glue:'glue stick',eraser:'eraser',book:'book',poster:'poster',rope:'jump rope',rug:'rug',box:'shoe box',bench:'bench'};
@@ -56,18 +56,8 @@ const footRow=(x,y,k,each)=>range(k).map(i=>{
 }).join('');
 /* a thing ft feet long with k foot rulers under it, room for max of them */
 const feetFig=(kind,ft,k,max=ft,each=false)=>svgWrap(40+max*96,110,thing(kind,20,10,ft*96)+footRow(20,52,k,each),`A ${NAME[kind]} with ${k} foot rulers under it`);
-/* A number line from 0 to max with arrows above it: [{a, b, lv, q}] goes from a to b at level lv (0 is lowest) and is labelled
-   with its length, or ? when q and not shown. */
-function lenLine(max,arrows,shown,label){
-  const u=Math.min(18,380/max),X=16,top=Math.max(0,...arrows.map(r=>r.lv||0)),Y=40+top*38,x=v=>X+v*u;
-  let o=`<line class="axis" x1="${X}" y1="${Y}" x2="${x(max)}" y2="${Y}"/>`;
-  range(max+1).forEach(v=>{const big=v%5===0;o+=`<line class="tick" x1="${x(v)}" y1="${Y-(big?8:4)}" x2="${x(v)}" y2="${Y+(big?8:4)}"/>`+(big?`<text class="lbl s" x="${x(v)}" y="${Y+22}">${v}</text>`:'');});
-  arrows.forEach(({a,b,lv=0,q})=>{
-    const y=Y-18-lv*38,d=b>a?1:-1,t=q&&!shown?'?':Math.abs(b-a);
-    o+=`<path class="guide" d="M${x(b)},${y}V${Y}${a?`M${x(a)},${y}V${Y}`:''}"/><line class="arr${q?' q':''}" x1="${x(a)}" y1="${y}" x2="${x(b)-d*6}" y2="${y}"/><polygon class="arrh${q?' q':''}" points="${x(b)},${y} ${x(b)-d*10},${y-6} ${x(b)-d*10},${y+6}"/><text class="lbl s${q?' cy':''}" x="${(x(a)+x(b))/2}" y="${y-12}">${t}</text>`;
-  });
-  return svgWrap(X*2+max*u,Y+32,o,label);
-}
+/* A number line from 0 to max with arrows above it (see numLine in shared/k5.js) */
+const lenLine=(max,arrows,shown,label)=>numLine(0,max,{arrows,shown,label});
 /* A line plot: counts {length: how many} from lo to hi, one X for each. mark: highlight that length.
    tap: lengths can be tapped (data-v). diff: [a, b] draws an arrow from a to b under the line. */
 function lineplot(counts,lo,hi,{mark=null,tap=false,diff=null,unit='inches',u=56,label}={}){

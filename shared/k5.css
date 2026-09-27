@@ -1,4 +1,4 @@
-/* Styles for shared/k5.js: ten-frames, cubes, base-ten blocks, tape diagrams, labels, and steppers on K–5 Learn pages.
+/* Styles for shared/k5.js: ten-frames, cubes, base-ten blocks, tape diagrams, number lines, labels, and steppers on K–5 Learn pages.
    Load after learn.css. */
 /* ten-frames and cubes */
 .cell{fill:rgba(9,32,61,.6);stroke:rgba(243,246,251,.55);stroke-width:1.5}
@@ -32,8 +32,20 @@
 .tape.t1{fill:rgba(127,227,255,.25);stroke:var(--cyan)}
 .tape.gap{fill:none;stroke:var(--cyan);stroke-dasharray:6 4}
 .tape.hi{stroke:#fff;stroke-width:4}
+/* number lines: axes and ticks (also bar graphs and rulers), arrows, jumps, and dots */
+.axis{stroke:var(--chalk);stroke-width:2.5}
+.tick{stroke:var(--chalk);stroke-width:2}
+.guide{fill:none;stroke:var(--dim);stroke-width:1.5;stroke-dasharray:4 4}
+.arr{stroke:var(--gold);stroke-width:3}
+.arrh{fill:var(--gold)}
+.arr.q{stroke:var(--cyan)}.arrh.q{fill:var(--cyan)}
+.arrh.ax{fill:var(--chalk)}
+.hop{fill:none;stroke:var(--gold);stroke-width:3}
+.hop.q{stroke:var(--cyan)}
+.pt{fill:var(--gold);stroke:#fff1b8;stroke-width:2}
+.pt.b{fill:var(--cyan);stroke:#d6f6ff}
 .lbl{fill:var(--chalk);font:700 17px var(--mono);text-anchor:middle;dominant-baseline:central}
-.lbl.s{font-size:14px}.lbl.big{font-size:30px}.lbl.cy{fill:var(--cyan)}.lbl.st{text-anchor:start}.lbl.en{text-anchor:end}
+.lbl.s{font-size:14px}.lbl.big{font-size:30px}.lbl.cy{fill:var(--cyan)}.lbl.gd{fill:var(--gold)}.lbl.st{text-anchor:start}.lbl.en{text-anchor:end}
 /* controls, equations, and stories */
 .stepper{display:inline-flex;align-items:center;gap:8px;font:700 16px var(--mono);color:var(--dim);margin-right:12px}
 .stepper .ghost-btn{min-width:48px;min-height:48px;font-size:24px;padding:0}

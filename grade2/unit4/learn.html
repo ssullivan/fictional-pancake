@@ -3,34 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Learn Adding, Subtracting &amp; Data</title>
+<title>Learn the Number Line</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=JetBrains+Mono:wght@500;700&display=swap">
 <link rel="stylesheet" href="../../shared/theme.css?v=524e6f82">
 <link rel="stylesheet" href="../../shared/learn.css?v=66c57fd0">
 <link rel="stylesheet" href="../../shared/k5.css?v=da17b270">
-<style>
-/* figures */
-.sticky{stroke:rgba(243,246,251,.6);stroke-width:1.5}
-.sticky.red{fill:#ff7b7b}.sticky.blue{fill:#6fa8ff}.sticky.green{fill:#5fe0a8}.sticky.yellow{fill:#ffc93c}
-.tapme{cursor:pointer}
-.p-sun circle{fill:var(--gold)}.p-sun line{stroke:var(--gold);stroke-width:2.5;stroke-linecap:round}
-.p-cloud circle,.p-cloud rect{fill:#dfe8f3}
-.p-rain{fill:#6fa8ff}
-.rowhi{fill:rgba(255,201,60,.14);stroke:var(--gold);stroke-width:1.5}
-.gl{stroke:rgba(170,205,255,.18);stroke-width:1}
-.bar{stroke:rgba(243,246,251,.7);stroke-width:1.5}
-.bar.red{fill:#ff7b7b}.bar.blue{fill:#6fa8ff}.bar.green{fill:#5fe0a8}.bar.yellow{fill:#ffc93c}
-.bar.hi{stroke:#fff;stroke-width:4}
-.match{stroke:#fff;stroke-width:2;stroke-dasharray:6 5}
-/* widgets */
-table.tally{border-collapse:collapse;margin:0 auto 12px;font:700 18px var(--mono)}
-table.tally caption{color:var(--dim);font:700 14px var(--mono);margin-bottom:6px}
-table.tally th,table.tally td{border:1.5px solid rgba(170,205,255,.4);padding:8px 14px;text-align:center}
-table.tally th{color:var(--dim);font-size:15px}
-.chip{font-size:15px;padding:9px 14px}
-</style>
 </head>
 <body class="young">
 
@@ -38,9 +17,9 @@ table.tally th{color:var(--dim);font-size:15px}
   <section id="home">
     <a class="back" href="../">← Grade 2</a>
     <header class="hero">
-      <p class="eyebrow">Learn · Illustrative Mathematics K–5 · Grade 2 · Unit 1</p>
-      <h1>Adding, Subtracting &amp; <span>Data</span></h1>
-      <p class="lede">Short lessons you can play with. Move counters and cubes, sort votes, and build graphs, then check yourself. Tap <b>Read to me</b> to hear any step read aloud.</p>
+      <p class="eyebrow">Learn · Illustrative Mathematics K–5 · Grade 2 · Unit 4</p>
+      <h1>Adding &amp; Subtracting on the <span>Number Line</span></h1>
+      <p class="lede">Short lessons you can play with. Find numbers on a number line, compare and estimate, then add and subtract with jumps, then check yourself. Tap <b>Read to me</b> to hear any step read aloud.</p>
       <div class="stats"><span class="pill">Steps done <b id="hdone">0</b>/<span id="htot">0</span></span></div>
     </header>
     <div class="zones" id="chapters"></div>
@@ -48,8 +27,9 @@ table.tally th{color:var(--dim);font-size:15px}
       <h2>For grown-ups</h2>
       <div><h4>How it works</h4><p>Five short chapters follow the unit’s lessons in order. Each step shows one idea with something to tap or move, then a quick check. A wrong answer names the likely mistake and gives one more try.</p></div>
       <div><h4>Read to me</h4><p>The Read to me buttons read each step and quick check aloud with the device’s built-in voice, for students still learning to read. Progress is saved on this device.</p></div>
-      <div><h4>Numbers</h4><p>Adding and subtracting stays within 20 (up to 50 for tens and ones), graphs have up to 10 in each category, and compare problems stay within 100 with no regrouping.</p></div>
-      <div><h4>Not covered</h4><p>Center Days (Lessons 6, 12, and 17) and Class Surveys (Lesson 18) are hands-on, optional lessons that work better in class. There’s no practice game for this unit yet.</p></div>
+      <div><h4>Numbers</h4><p>All numbers are within 100. Jumps stop at a ten on the way, or go by tens and then ones, so each problem needs at most one new or broken ten.</p></div>
+      <div><h4>The big idea</h4><p>On a number line, a number is a length from 0. Adding is a jump to the right, subtracting is a jump to the left, and the difference between two numbers is the distance between them.</p></div>
+      <div><h4>Not covered</h4><p>Center Days (Lessons 6 and 14) and Riddles (Lesson 15) are optional lessons that work better in class. There’s no practice game for this unit yet.</p></div>
     </section>
   </section>
 
@@ -73,9 +53,9 @@ table.tally th{color:var(--dim);font-size:15px}
 <script src="../../shared/figures.js?v=90a5b6ae"></script>
 <script src="../../shared/k5.js?v=3dfe0720"></script>
 <script src="../../shared/learn.js?v=32164502"></script>
-<script src="lessons.js?v=11c88133"></script>
+<script src="lessons.js?v=d0d6094c"></script>
 <script>
-Learn.init({saveKey:'g2u1-learn',readAloud:true,icons:ICON,chapters:CH});
+Learn.init({saveKey:'g2u4-learn',readAloud:true,icons:ICON,chapters:CH});
 </script>
 </body>
 </html>
