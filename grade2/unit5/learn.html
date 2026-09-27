@@ -7,24 +7,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=JetBrains+Mono:wght@500;700&display=swap">
-<link rel="stylesheet" href="../../shared/theme.css?v=524e6f82">
-<link rel="stylesheet" href="../../shared/learn.css?v=66c57fd0">
-<link rel="stylesheet" href="../../shared/k5.css?v=da17b270">
-<style>
-/* base-ten diagrams: hundreds, tens (tr: from a broken hundred), and ones */
-.flat rect{fill:var(--gold);stroke:rgba(10,35,64,.8);stroke-width:1}
-.flat line{stroke:rgba(10,35,64,.35);stroke-width:.8}
-.flat.new rect{fill:var(--good);stroke:#fff;stroke-width:2.5}
-.rod.tr rect{fill:var(--good)}
-.unit1.c{fill:var(--good)}
-.dim{opacity:.2}
-/* place-value chart */
-table.pv{border-collapse:collapse;margin:0 auto 12px;font:700 22px var(--mono)}
-table.pv th{color:var(--dim);font-size:14px;padding:6px 10px}
-table.pv td{border:1.5px solid rgba(170,205,255,.4);padding:8px 18px;text-align:center}
-table.pv td.p0{color:var(--gold)}table.pv td.p1{color:var(--cyan)}table.pv td.p2{color:var(--good)}
-table.pv td.hi{outline:3px solid #fff;outline-offset:-3px}
-</style>
+<link rel="stylesheet" href="../../shared/theme.css?v=4796e910">
+<link rel="stylesheet" href="../../shared/learn.css?v=6a514fa1">
+<link rel="stylesheet" href="../../shared/k5.css?v=7061b35a">
 </head>
 <body class="young">
 
@@ -44,7 +29,7 @@ table.pv td.hi{outline:3px solid #fff;outline-offset:-3px}
       <div><h4>Read to me</h4><p>The Read to me buttons read each step and quick check aloud with the device’s built-in voice, for students still learning to read. Progress is saved on this device.</p></div>
       <div><h4>Numbers</h4><p>All numbers are within 1,000. The blocks are base-ten diagrams: a big square is a hundred, a stick is a ten, and a small square is a one. There’s no adding or subtracting in this unit; that comes in Unit 7.</p></div>
       <div><h4>The big idea</h4><p>10 ones make a ten and 10 tens make a hundred, so each digit’s place tells what it’s worth. The same number can be built different ways, like 3 hundreds and 14 tens for 440.</p></div>
-      <div><h4>Not covered</h4><p>Center Days (Lessons 7 and 13) and Hundreds of Objects (Lesson 14) are optional lessons that work better in class. There’s no practice game for this unit yet.</p></div>
+      <div><h4>Not covered</h4><p>Center Days (Lessons 7 and 13) and Hundreds of Objects (Lesson 14) are optional lessons that work better in class. Practice it all in <a href="./">Dragon Duel</a>, the game for this unit.</p></div>
     </section>
   </section>
 
@@ -66,11 +51,12 @@ table.pv td.hi{outline:3px solid #fff;outline-offset:-3px}
 
 <script src="../../shared/util.js?v=81356bac"></script>
 <script src="../../shared/figures.js?v=90a5b6ae"></script>
-<script src="../../shared/k5.js?v=989249f9"></script>
-<script src="../../shared/learn.js?v=32164502"></script>
-<script src="lessons.js?v=d1df3143"></script>
+<script src="../../shared/k5.js?v=74b974e3"></script>
+<script src="../../shared/speak.js?v=b05e2ed3"></script>
+<script src="../../shared/learn.js?v=b83d1493"></script>
+<script src="lessons.js?v=34406348"></script>
 <script>
-Learn.init({saveKey:'g2u5-learn',readAloud:true,icons:ICON,chapters:CH});
+Learn.init({saveKey:'g2u5-learn',game:'Dragon Duel',readAloud:true,icons:ICON,chapters:CH});
 </script>
 </body>
 </html>

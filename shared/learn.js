@@ -1,6 +1,6 @@
 /* Learn page framework: a home screen of chapters, steps with a widget and a quick check, and hash routing
    (#c2s1 = chapter 2 step 1, #c2done = end of chapter 2). Progress is saved in localStorage.
-   Needs util.js. Screens and ids are in the page's HTML (#home, #lesson); styles are in learn.css.
+   Needs util.js (and speak.js with readAloud). Screens and ids are in the page's HTML (#home, #lesson); styles are in learn.css.
 
    Learn.init({
      saveKey: 'g6u1-learn',       localStorage key; unique across the whole site
@@ -21,22 +21,10 @@
    Next unlocks once a step's quick check is answered (steps without a check unlock right away). */
 const Learn=(()=>{
   let cfg,CH,save,TOTAL,cleanupW=null;
-  /* ---------- read aloud ---------- */
-  const canSpeak=()=>cfg.readAloud&&'speechSynthesis' in window;
-  const hush=()=>{if('speechSynthesis' in window)speechSynthesis.cancel();};
-  /* what to say for an element: its text, with each picture replaced by its description (aria-label) */
-  const speakable=e=>{const c=e.cloneNode(true);c.querySelectorAll('svg').forEach(v=>v.replaceWith(v.getAttribute('aria-label')||''));return c.textContent.replace(/\s+/g,' ').trim();};
-  /* a button that reads the text of the given elements aloud; a second tap stops it */
-  function sayBtn(label,els){
-    const b=document.createElement('button');b.type='button';b.className='say';
-    b.innerHTML=`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9h4l5-4v14l-5-4H3z"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg>${label}`;
-    b.onclick=()=>{
-      if(speechSynthesis.speaking){hush();return;}
-      const u=new SpeechSynthesisUtterance(els().map(speakable).filter(Boolean).map(t=>/[.?!:]$/.test(t)?t:t+'.').join(' '));
-      u.rate=.9;speechSynthesis.speak(u);
-    };
-    return b;
-  }
+  /* ---------- read aloud (shared/speak.js) ---------- */
+  const hasSay=typeof Say!=='undefined';
+  const canSpeak=()=>cfg.readAloud&&hasSay&&Say.ok();
+  const hush=()=>{if(hasSay)Say.hush();},sayBtn=(l,e)=>Say.btn(l,e);
 
   /* ---------- quick checks ---------- */
   const near=(a,b)=>Math.abs(a-b)<.011;

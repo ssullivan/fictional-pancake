@@ -12,7 +12,7 @@ When a unit gets a game or Learn page, add a row here and turn its "Coming soon"
 | `unit2/` | none yet | `learn.html` (5 chapters, Lessons 1–14) | Grade 2 Unit 2 |
 | `unit3/` | none yet | `learn.html` (5 chapters, Lessons 1–16) | Grade 2 Unit 3 |
 | `unit4/` | none yet | `learn.html` (5 chapters, Lessons 1–13) | Grade 2 Unit 4 |
-| `unit5/` | none yet | `learn.html` (5 chapters, Lessons 1–12) | Grade 2 Unit 5 |
+| `unit5/` | Dragon Duel (`index.html`, 5 stations + the Dragon’s Lair) | `learn.html` (5 chapters, Lessons 1–12) | Grade 2 Unit 5 |
 
 ## Building for Grade 2
 
@@ -22,7 +22,8 @@ Players are 7 and 8 years old, so on top of the root rules:
 - Money in cents and whole dollars (Unit 6): pennies, nickels, dimes, quarters, and dollar bills. No decimal prices.
 - Time to the nearest 5 minutes, with a.m. and p.m. (Unit 6).
 - Big tap targets, and pictures students can tap or drag instead of typed answers where the lesson allows it. Pages use `<body class="young">` (bigger text and buttons, in `shared/theme.css` and `learn.css`).
-- Learn pages turn on `readAloud` in `Learn.init`, so every step and quick check has a Read to me button.
+- Learn pages and games turn on `readAloud` (in `Learn.init` and `Game.init`, with `shared/speak.js` loaded), so every step, quick check, and problem has a Read to me button. A game's read-aloud never reads the picture, so give picture choices neutral labels ("Picture A").
+- Games are built like Unit 5's Dragon Duel (`unit5/index.html`, `stations.js`, `checks.js`): `<body class="young">`, `shared/k5.css` and `k5.js` for pictures, and mostly tap or multiple-choice answers.
 - No gendered pronouns for named students: repeat the name instead ("Mai gives 6 stickers to Diego. How many stickers does Mai have now?").
 - Skip the optional lessons (Center Days, and the projects at the end of each unit); say so in the game's "For grown-ups" section.
 

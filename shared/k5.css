@@ -11,6 +11,8 @@
 [data-i]{cursor:pointer}
 .hit{fill:transparent;cursor:pointer}
 .hit:hover{fill:rgba(255,201,60,.15)}
+.hit.right{fill:rgba(95,224,168,.35);stroke:var(--good);stroke-width:2}
+.hit.wrong{fill:rgba(255,154,134,.3);stroke:var(--bad);stroke-width:2;cursor:default}
 .cube{stroke:rgba(243,246,251,.7);stroke-width:1.5}
 .cube.a{fill:var(--gold)}.cube.b{fill:var(--cyan)}
 .cube.off{opacity:.2}
@@ -24,6 +26,13 @@
 .rod.new rect{fill:var(--good);stroke:#fff;stroke-width:2.5}
 .unit1.tr{fill:var(--good)}
 .rod.gone,.unit1.gone{opacity:.3}
+/* base-ten diagrams with hundreds (hto): flats, and tens from a broken hundred (tr) */
+.flat rect{fill:var(--gold);stroke:rgba(10,35,64,.8);stroke-width:1}
+.flat line{stroke:rgba(10,35,64,.35);stroke-width:.8}
+.flat.new rect{fill:var(--good);stroke:#fff;stroke-width:2.5}
+.rod.tr rect{fill:var(--good)}
+.unit1.c{fill:var(--good)}
+.fade{opacity:.2}
 .xout{stroke:var(--bad);stroke-width:3.5;stroke-linecap:round}
 /* tape diagrams */
 .brace{fill:none;stroke:var(--cyan);stroke-width:3}
@@ -46,6 +55,12 @@
 .pt.b{fill:var(--cyan);stroke:#d6f6ff}
 .lbl{fill:var(--chalk);font:700 17px var(--mono);text-anchor:middle;dominant-baseline:central}
 .lbl.s{font-size:14px}.lbl.big{font-size:30px}.lbl.cy{fill:var(--cyan)}.lbl.gd{fill:var(--gold)}.lbl.st{text-anchor:start}.lbl.en{text-anchor:end}
+/* place-value charts (pvChart) */
+table.pv{border-collapse:collapse;margin:0 auto 12px;font:700 22px var(--mono)}
+table.pv th{color:var(--dim);font-size:14px;padding:6px 10px}
+table.pv td{border:1.5px solid rgba(170,205,255,.4);padding:8px 18px;text-align:center}
+table.pv td.p0{color:var(--gold)}table.pv td.p1{color:var(--cyan)}table.pv td.p2{color:var(--good)}
+table.pv td.hi{outline:3px solid #fff;outline-offset:-3px}
 /* controls, equations, and stories */
 .stepper{display:inline-flex;align-items:center;gap:8px;font:700 16px var(--mono);color:var(--dim);margin-right:12px}
 .stepper .ghost-btn{min-width:48px;min-height:48px;font-size:24px;padding:0}

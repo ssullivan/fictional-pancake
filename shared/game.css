@@ -48,6 +48,9 @@
 .choice{background:#0a2340;border:2px solid rgba(170,205,255,.4);border-radius:12px;padding:14px;font:700 19px var(--display);text-align:center}
 .choice svg{display:block;width:100%;height:auto;max-height:120px}
 .choices.stack .choice{text-align:left;font:700 16px/1.4 var(--mono);padding:12px 14px}
+/* the problem's picture (#fig); tap problems mark .cand elements right or wrong */
+.fig{background:rgba(9,32,61,.65);border-radius:12px;border:1px solid rgba(170,205,255,.18);padding:10px;overflow-x:auto}
+.fig svg{display:block;width:100%;height:auto;max-height:420px;margin:0 auto}
 .hintbox{border-left:4px solid var(--cyan);padding:8px 14px;background:rgba(127,227,255,.08);border-radius:0 10px 10px 0;color:#d6f6ff}
 .fb ul{margin:0;padding-left:1.2em}
 .fb .work{font-family:var(--mono);font-size:14.5px;color:var(--chalk)}
@@ -61,6 +64,15 @@
 .done h2{font:800 clamp(32px,6vw,48px)/1 var(--display);margin:0}
 .done p{margin:0;color:var(--dim);max-width:44ch}
 .done .row{display:flex;flex-wrap:wrap;gap:12px;justify-content:center}
+/* young readers (see theme.css): bigger answers and buttons, and a Read to me button above the problem */
+.young #prompt{font-size:clamp(22px,4vw,28px)}
+.young .choice{min-height:64px;font-size:22px}
+.young .choices.stack .choice{font-size:18px}
+.young .ans input{font-size:28px;width:6em}
+.young .link-btn,.young .ghost-btn{padding:10px 16px;font-size:16px}
+.young .tapnote{font-size:16px}
+.card>.say{justify-self:start;margin:0}
+
 @media (prefers-reduced-motion:reduce){
   .done .bigstars svg{animation:none}
   .zone{transition:none}

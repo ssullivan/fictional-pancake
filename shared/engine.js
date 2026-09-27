@@ -1,6 +1,6 @@
 /* Game engine shared by every game: a home screen of stations (zones), rounds of 8 problems (10 for the boss),
    10 points for a first-try answer and 5 after a miss or a hint, stars saved in localStorage.
-   Needs util.js. Screens and ids are in the page's HTML (#home, #play, #done); styles are in game.css.
+   Needs util.js (and speak.js with readAloud). Screens and ids are in the page's HTML (#home, #play, #done); styles are in game.css.
 
    Game.init({
      saveKey: 'g6u3-save',          localStorage key; unique across the whole site
@@ -14,11 +14,13 @@
        stuck: 'Use "Show me a hint" when you’re stuck. …',       results message at 0–1 stars
        tap: 'Tap your answer in the picture.',                     note under a tap problem
      },
+     readAloud?: true,              a "Read to me" button that reads the problem, its choices, and the feedback (young readers)
      near: (x, y) => boolean,       optional: how close a typed number must be (default ±0.011)
      figure: (p, show) => html,     optional: draw p.fig another way (default p.fig(show, done))
      zoneNote: zone => html,        optional: extra line on a station card
      onQuestion: state => {},       optional: runs before each problem is shown
      onMiss: msg => boolean,        optional: runs after a wrong answer; return true to take over the screen
+     onAnswer: (state, ok) => {},   optional: runs when a problem ends, right (ok) or out of tries
    })
 
    A problem from gen() is {kind, prompt, explain, hint?, fig?} plus, by kind:
@@ -59,8 +61,10 @@ const Game=(()=>{
     G={z,i:0,n:zid==='boss'?10:8,pts:0,streak:0};
     $('zname').textContent=z.name;show('play');nextQ();
   }
+  const hush=()=>{if(typeof Say!=='undefined')Say.hush();};
   function advance(){G.i++;nextQ();}
   function nextQ(){
+    hush();
     if(G.i>=G.n)return finish();
     G.p=G.z.gen();G.tries=0;G.hinted=false;G.done=false;G.marks={};
     if(cfg.onQuestion)cfg.onQuestion(G);
@@ -146,6 +150,7 @@ const Game=(()=>{
   /* Ends the problem: shows the worked answer and a Next button. */
   function finishQ(ok,title,msg){
     G.done=true;
+    if(cfg.onAnswer)cfg.onAnswer(G,ok);
     drawFig();
     $('pts').textContent=G.pts;setStreak();
     $('answer').querySelectorAll('button').forEach(b=>b.disabled=true);
@@ -173,7 +178,9 @@ const Game=(()=>{
     const tap=e=>{const c=e.target.closest('.cand');if(c&&G&&!G.done&&G.p.kind==='tap'&&!c.classList.contains('wrong'))return submit(c.dataset.id),true;};
     $('fig').addEventListener('click',tap);
     $('fig').addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&tap(e))e.preventDefault();});
-    $('quit').addEventListener('click',()=>{renderHome();show('home');});
+    $('quit').addEventListener('click',()=>{hush();renderHome();show('home');});
+    /* read the problem, then its choices, then any hint and feedback; never the picture, which could give the answer away */
+    if(cfg.readAloud&&typeof Say!=='undefined'&&Say.ok())$('prompt').before(Say.btn('Read to me',()=>[$('prompt'),...$('answer').querySelectorAll('.choice'),...($('hint').hidden?[]:[$('hint')]),...$('feedback').querySelectorAll('h4,p:not(.work)')]));
     $('again').addEventListener('click',()=>start(G.z.id));
     $('tomap').addEventListener('click',()=>{renderHome();show('home');});
     renderHome();

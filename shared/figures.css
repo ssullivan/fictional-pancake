@@ -1,7 +1,5 @@
 /* Diagram styles for shared/figures.js: double number lines, tape diagrams, ratio tables, shapes, coins.
    Load after game.css. */
-.fig{background:rgba(9,32,61,.65);border-radius:12px;border:1px solid rgba(170,205,255,.18);padding:10px;overflow-x:auto}
-.fig svg{display:block;width:100%;height:auto;max-height:420px;margin:0 auto}
 .ic-a{fill:rgba(255,201,60,.35);stroke:var(--gold);stroke-width:2.5}
 .ic-b{fill:rgba(127,227,255,.3);stroke:var(--cyan);stroke-width:2.5}
 .ic-c{fill:rgba(255,138,196,.3);stroke:var(--pink);stroke-width:2.5;stroke-linejoin:round}

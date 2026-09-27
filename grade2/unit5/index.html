@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Dragon Duel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=JetBrains+Mono:wght@500;700&display=swap">
+<link rel="stylesheet" href="../../shared/theme.css?v=4796e910">
+<link rel="stylesheet" href="../../shared/game.css?v=d555ddc9">
+<link rel="stylesheet" href="../../shared/k5.css?v=7061b35a">
+<style>
+/* tens in groups of 10 (a hundred), and the missing part of an equation */
+.grp10{fill:none;stroke:var(--good);stroke-width:3;stroke-dasharray:6 4}
+.rod.ghost rect{fill:none;stroke:var(--good);stroke-dasharray:3 2}.rod.ghost line{display:none}
+.eqn{display:block;margin-top:8px;font:700 26px var(--mono)}
+.eqn .q{background:var(--gold);color:#1a1300;border-radius:6px;padding:0 10px}
+table.pv{margin:0 auto}
+/* the dragon in the final round: 10 hearts, one knocked off for each right answer */
+.foe{display:flex;align-items:center;gap:14px;background:rgba(95,224,168,.08);border:1.5px solid rgba(95,224,168,.45);border-radius:14px;padding:10px 14px}
+.foe svg{width:64px;height:64px;flex:none}
+.foe .hearts{display:flex;flex-wrap:wrap;gap:4px;font-size:22px;line-height:1}
+.foe .hearts span{color:#ff6b8a}
+.foe .hearts span.gone{color:rgba(170,205,255,.25)}
+.foe p{margin:4px 0 0;font:700 14px var(--mono);color:var(--dim)}
+.foe.hit svg{animation:shake .45s}
+@keyframes shake{25%{transform:translateX(-6px) rotate(-6deg)}50%{transform:translateX(6px) rotate(5deg)}75%{transform:translateX(-3px)}}
+@media (prefers-reduced-motion:reduce){.foe.hit svg{animation:none}}
+</style>
+</head>
+<body class="young">
+
+<div class="app">
+  <section id="home">
+    <a class="back" href="../">← Grade 2</a>
+    <header class="hero">
+      <p class="eyebrow">Illustrative Mathematics K–5 · Grade 2 · Unit 5 · Numbers to 1,000</p>
+      <h1>Dragon <span>Duel</span></h1>
+      <p class="lede">A dragon has come to the castle! Train with hundreds, tens, and ones at each station. Then face the dragon in its lair. Each station matches lessons from class. Tap <b>Read to me</b> to hear any problem.</p>
+      <div class="stats">
+        <span class="pill">Points <b id="hp">0</b></span>
+        <span class="pill">Stars <b id="hs">0</b>/<span id="hsMax">18</span></span>
+      </div>
+    </header>
+    <div class="zones" id="zones"></div>
+    <section class="grownups">
+      <h2>For grown-ups</h2>
+      <div><h4>How a round works</h4><p>Each station deals 8 fresh problems (the Dragon’s Lair deals 10). A right answer on the first try earns 10 points. After a wrong answer, the game names the likely mistake and gives one more try for 5 points. In the Dragon’s Lair, each right answer knocks one heart off the dragon.</p></div>
+      <div><h4>Read to me</h4><p>The Read to me button reads the problem, the choices, and the feedback aloud with the device’s built-in voice. It never reads the picture, since that could give the answer away.</p></div>
+      <div><h4>Mistakes it catches</h4><p>Leaving out a 0 (25 for 205), switching the tens and ones, adding the digits (18 for 567), writing “four hundred six” as 4006, counting ticks by ones on a line that counts by tens, and reading &gt; and &lt; backwards.</p></div>
+      <div><h4>Learn it first</h4><p>Each station matches a chapter of the <a href="learn.html">Learn page</a> for this unit, which walks through the ideas step by step.</p></div>
+      <div><h4>Not covered</h4><p>Center Days (Lessons 7 and 13) and Hundreds of Objects (Lesson 14) are hands-on, optional lessons that work better in class.</p></div>
+    </section>
+  </section>
+
+  <section id="play" hidden>
+    <div class="bar">
+      <button id="quit" class="ghost-btn" type="button">← Stations</button>
+      <div class="bar-mid"><div class="zn" id="zname"></div><div class="track"><div id="prog"></div></div></div>
+      <div class="bar-stats"><span class="pill" id="streak">Streak <b>0</b></span><span class="pill">Pts <b id="pts">0</b></span></div>
+    </div>
+    <div class="foe" id="foe" hidden></div>
+    <article class="card">
+      <p class="eyebrow" id="qnum"></p>
+      <h2 id="prompt"></h2>
+      <div class="fig" id="fig"></div>
+      <div id="answer"></div>
+      <div id="hint" class="hintbox" hidden></div>
+      <div id="feedback" role="status" aria-live="polite"></div>
+    </article>
+  </section>
+
+  <section id="done" hidden>
+    <div class="card done">
+      <p class="eyebrow" id="dzone"></p>
+      <div class="bigstars stars" id="dstars"></div>
+      <h2 id="dtitle"></h2>
+      <p id="dmsg"></p>
+      <div class="row">
+        <button class="btn" id="again" type="button">Play again</button>
+        <button class="ghost-btn" id="tomap" type="button">Back to stations</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script src="../../shared/util.js?v=81356bac"></script>
+<script src="../../shared/figures.js?v=90a5b6ae"></script>
+<script src="../../shared/k5.js?v=74b974e3"></script>
+<script src="../../shared/speak.js?v=b05e2ed3"></script>
+<script src="../../shared/engine.js?v=fa60a417"></script>
+<script src="stations.js?v=9d5127dd"></script>
+<script>
+/* the dragon's hearts in the final round: one knocked off for each right answer */
+let hits=0;
+function drawFoe(G,hit){
+  const foe=$('foe');foe.hidden=G.z.id!=='boss';if(foe.hidden)return;
+  foe.innerHTML=`<svg viewBox="0 0 64 64" aria-hidden="true">${DRAGON}</svg><div><div class="hearts" role="img" aria-label="The dragon has ${10-hits} of 10 hearts left">${range(10).map(i=>`<span class="${i<10-hits?'':'gone'}">♥</span>`).join('')}</div><p>${hits===10?'You beat the dragon!':hit?'Hit! The dragon loses a heart.':'Answer right to knock off a heart.'}</p></div>`;
+  foe.classList.toggle('hit',!!hit);
+}
+Game.init({
+  saveKey:'g2u5-save',
+  zones:ZONES,icons:ICON,readAloud:true,
+  words:{
+    right:'Great job!',
+    miss:'Not quite. Look at the hundreds, tens, and ones again.',
+    titles:['Keep training','Good start','Brave knight','Dragon champion!'],
+    next:'Try the next station, or face the dragon.',
+    stuck:'Tap “Show me a hint” when you’re stuck. It shows how to think about it.',
+    tap:'Tap your answer on the number line.'
+  },
+  onQuestion:G=>{if(G.i===0)hits=0;drawFoe(G,false);},
+  onAnswer:(G,ok)=>{if(ok)hits++;drawFoe(G,ok);}
+});
+</script>
+</body>
+</html>

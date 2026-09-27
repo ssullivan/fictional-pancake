@@ -1,38 +1,7 @@
 /* Learn Numbers to 1,000 (Grade 2 Unit 5): figures, widgets, and the chapters. Loaded by learn.html.
-   Number lines (numLine), steppers, and choice buttons come from shared/k5.js. */
+   Base-ten diagrams (htoFig, numBlocks), place-value charts (pvChart), number names (numWords), number lines (numLine), steppers, and choice buttons come from shared/k5.js. */
 
 /* ---------- figures ---------- */
-/* Base-ten diagrams small enough for hundreds: a hundred is a 10 × 10 square, a ten a stick of 10, a one a small square (C pixels each). */
-const C=7,FW=10*C;
-const grid=(x,y,cols,rows)=>range(cols-1).map(i=>`<line x1="${x+(i+1)*C}" y1="${y}" x2="${x+(i+1)*C}" y2="${y+rows*C}"/>`).join('')+range(rows-1).map(i=>`<line x1="${x}" y1="${y+(i+1)*C}" x2="${x+cols*C}" y2="${y+(i+1)*C}"/>`).join('');
-const flat=(x,y,cls='')=>`<g class="flat ${cls}"><rect x="${x}" y="${y}" width="${FW}" height="${FW}"/>${grid(x,y,10,10)}</g>`;
-const stick=(x,y,cls='')=>`<g class="rod ${cls}"><rect x="${x}" y="${y}" width="${C}" height="${FW}"/>${grid(x,y,1,10)}</g>`;
-const cube=(x,y,cls='')=>`<rect class="unit1 ${cls}" x="${x}" y="${y}" width="${C}" height="${C}"/>`;
-/* h hundreds (rows of 5), t tens (a gap after every 5), and o ones (columns of 5) from x, y.
-   cls: {h, t, o} classes for each place; tr: the last tr tens came from a broken hundred. Returns [markup, width, height]. */
-function hto(x,y,h,t,o,{cls={},tr=0}={}){
-  let m='',X=x;
-  range(h).forEach(i=>{m+=flat(x+i%5*(FW+8),y+Math.floor(i/5)*(FW+8),cls.h||'');});
-  if(h)X+=Math.min(h,5)*(FW+8)+6;
-  range(t).forEach(i=>{m+=stick(X+i*(C+4)+Math.floor(i/5)*5,y,(i>=t-tr?'tr':'')+' '+(cls.t||''));});
-  if(t)X+=t*(C+4)+Math.floor((t-1)/5)*5+10;
-  range(o).forEach(i=>{m+=cube(X+Math.floor(i/5)*(C+5),y+FW-C-(i%5)*(C+5),cls.o||'');});
-  if(o)X+=Math.ceil(o/5)*(C+5);
-  return [m,X-x,Math.max(FW,Math.ceil(h/5)*(FW+8)-8)];
-}
-const htoFig=(h,t,o,opt={},label)=>{const [m,w,ht]=hto(8,8,h,t,o,opt);return svgWrap(Math.max(w+16,120),ht+16,m,label||`${h} hundreds, ${t} tens, and ${o} ones`);};
-const digits=n=>[Math.floor(n/100),Math.floor(n/10)%10,n%10];
-const fig=n=>{const [h,t,o]=digits(n);return htoFig(h,t,o,{cls:{h:'',t:'b',o:'c'}},`${n} in base-ten blocks`);};
-
-/* number names up to 999 */
-const ONES=['zero','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen'],
-  TENS=['','','twenty','thirty','forty','fifty','sixty','seventy','eighty','ninety'];
-function words(n){
-  const h=Math.floor(n/100),r=n%100,rw=r<20?ONES[r]:TENS[Math.floor(r/10)]+(r%10?'-'+ONES[r%10]:'');
-  return h?`${ONES[h]} hundred${r?' '+rw:''}`:rw;
-}
-/* a place-value chart: rows [[label, n]]; hi: the column to outline in every row (0 hundreds, 1 tens, 2 ones) */
-const chart=(rows,hi=-1)=>`<table class="pv"><tr><th></th><th>Hundreds</th><th>Tens</th><th>Ones</th></tr>${rows.map(([l,n])=>`<tr><th>${l}</th>${digits(n).map((d,i)=>`<td class="p${i}${i===hi?' hi':''}">${d}</td>`).join('')}</tr>`).join('')}</table>`;
 
 /* ---------- Chapter 1: make a hundred ---------- */
 function wTenTens(el){
@@ -69,8 +38,8 @@ function wBuild(el){
   el.innerHTML=`<div class="fig" data-f></div><div class="wrow">${stepper('h','Hundreds')}${stepper('t','Tens')}${stepper('o','Ones')}</div><p class="readout" data-r></p>`;
   const draw=()=>{
     const {h,t,o}=st,n=h*100+t*10+o;['h','t','o'].forEach(k=>{q(k).textContent=st[k];});
-    q('f').innerHTML=fig(n);
-    q('r').innerHTML=`${h} hundreds, ${t} tens, ${o} ones<br><span class="ok"><b>${n}</b>: ${words(n)}</span>`+(h&&(!t||!o)?`<br><span class="dimline">${!t&&!o?'No tens and no ones: write 0 in both places.':!t?'No tens: write 0 in the tens place.':'No ones: write 0 in the ones place.'}</span>`:'');
+    q('f').innerHTML=numBlocks(n);
+    q('r').innerHTML=`${h} hundreds, ${t} tens, ${o} ones<br><span class="ok"><b>${n}</b>: ${numWords(n)}</span>`+(h&&(!t||!o)?`<br><span class="dimline">${!t&&!o?'No tens and no ones: write 0 in both places.':!t?'No tens: write 0 in the tens place.':'No ones: write 0 in the ones place.'}</span>`:'');
   };
   steppers(el,st,{h:[1,9],t:[0,9],o:[0,9]},draw);
   draw();
@@ -81,8 +50,8 @@ function wNames(el){
   el.innerHTML=seg('Number',NAMES.map((n,i)=>[i,n]))+`<p class="eq" data-w></p><div data-c></div><div class="fig" data-f></div><p class="readout" data-r></p>`;
   const draw=()=>{
     const n=NAMES[p],[h,t,o]=digits(n);press(el,p);
-    q('w').textContent=words(n);q('c').innerHTML=chart([['',n]]);q('f').innerHTML=fig(n);
-    q('r').innerHTML=`<b>${words(n)}</b> is ${h} hundreds, ${t} tens, and ${o} ones: <b>${n}</b>.`+(!t||!o?`<br><span class="dimline">There are no ${!t?'tens':'ones'}, so that place gets a 0.</span>`:'');
+    q('w').textContent=numWords(n);q('c').innerHTML=pvChart([['',n]]);q('f').innerHTML=numBlocks(n);
+    q('r').innerHTML=`<b>${numWords(n)}</b> is ${h} hundreds, ${t} tens, and ${o} ones: <b>${n}</b>.`+(!t||!o?`<br><span class="dimline">There are no ${!t?'tens':'ones'}, so that place gets a 0.</span>`:'');
   };
   el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){p=+b.dataset.m;draw();}});
   draw();
@@ -94,7 +63,7 @@ function wExpanded(el){
   const q=Q(el);let p=0,k=-1;
   el.innerHTML=seg('Number',EXP.map((n,i)=>[i,n]))+`<div class="chips" data-c></div><div class="fig" data-f></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const n=EXP[p],[h,t,o]=digits(n),parts=[h*100,t*10,o],dim=i=>k>=0&&k!==i?' dim':'';press(el,p);
+    const n=EXP[p],[h,t,o]=digits(n),parts=[h*100,t*10,o],dim=i=>k>=0&&k!==i?' fade':'';press(el,p);
     q('c').innerHTML=parts.map((v,i)=>v?`<button type="button" class="chip" data-e="${i}" aria-pressed="${i===k}">${v}</button>`:'').join('');
     q('f').innerHTML=htoFig(h,t,o,{cls:{h:dim(0),t:'b'+dim(1),o:'c'+dim(2)}},`${n} in base-ten blocks`);
     q('r').innerHTML=`<b>${n} = ${parts.filter(v=>v).join(' + ')}</b><br><span class="dimline">`+(k<0?'Tap each part to find its blocks.':`${parts[k]} is ${[h,t,o][k]} ${['hundreds','tens','ones'][k]}.`)+`</span>`;
@@ -153,7 +122,7 @@ function wPlaceCompare(el){
   el.innerHTML=seg('Numbers',PVC.map(([a,b],i)=>[i,`${a} and ${b}`]))+`<div data-c></div><p class="readout" data-r></p>`;
   const draw=()=>{
     const [a,b]=PVC[p],da=digits(a),db=digits(b),i=da.findIndex((d,j)=>d!==db[j]),pl=['hundreds','tens','ones'][i];press(el,p);
-    q('c').innerHTML=chart([['',a],['',b]],i);
+    q('c').innerHTML=pvChart([['',a],['',b]],i);
     q('r').innerHTML=(i?`Same ${i===1?'hundreds':'hundreds and tens'}, so look at the ${pl}.<br>`:'Start with the biggest place: hundreds.<br>')+`${da[i]} ${pl} ${da[i]>db[i]?'is more than':'is less than'} ${db[i]} ${pl}.<br><span class="ok"><b>${a} ${a>b?'>':'<'} ${b}</b></span>`;
   };
   el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){p=+b.dataset.m;draw();}});
@@ -193,7 +162,7 @@ const ICON={
   order:'<g font-family="monospace" font-weight="700" font-size="12" text-anchor="middle"><text x="32" y="18" fill="#7fe3ff">65</text><text x="32" y="34" fill="#f3f6fb">506</text><text x="32" y="50" fill="#ffc93c">560</text></g>',
 };
 const CH=[
-  {icon:'hundred',title:'Make a hundred',lessons:'Lessons 1–2',blurb:'Put 10 tens together to make a hundred, and count how many hundreds you can make.',steps:[
+  {icon:'hundred',title:'Make a hundred',game:{zone:'hundred',name:'Tower of Tens'},lessons:'Lessons 1–2',blurb:'Put 10 tens together to make a hundred, and count how many hundreds you can make.',steps:[
     {title:'10 tens make a hundred',widget:wTenTens,
       body:'<p>A <b>ten</b> is 10 ones in a stick. Put <b>10 tens</b> together and you get a <b>hundred</b>.</p><p>Tap <b>+</b> to add tens until you have a hundred.</p>',
       check:{kind:'num',unit:'tens',answer:3,fig:F.seven,q:'Here are 7 tens. How many more tens do you need to make a hundred?',
@@ -205,7 +174,7 @@ const CH=[
         misc:[[40,'That’s the number of tens. Every 10 tens make 1 hundred.'],[400,'400 is the number. How many hundreds is that?']],
         explain:'10 tens make 1 hundred, so 40 tens make 4 hundreds. That’s 400.'}}
   ]},
-  {icon:'digits',title:'Three-digit numbers',lessons:'Lessons 3–4',blurb:'Build numbers with hundreds, tens, and ones, and read and write their names.',steps:[
+  {icon:'digits',title:'Three-digit numbers',game:{zone:'build',name:'Block Forge'},lessons:'Lessons 3–4',blurb:'Build numbers with hundreds, tens, and ones, and read and write their names.',steps:[
     {title:'Hundreds, tens, and ones',widget:wBuild,
       body:'<p>A three-digit number tells how many <b>hundreds</b>, <b>tens</b>, and <b>ones</b>. In 235, the 2 means 2 hundreds.</p><p>Change the blocks and watch the number.</p>',
       check:{kind:'num',answer:205,fig:F.n205,q:'What number do the blocks show?',
@@ -218,7 +187,7 @@ const CH=[
         why:{a:'460 is four hundred sixty. Six is ones, not tens.',c:'Four hundred is 400. It only needs three digits: 4 hundreds, 0 tens, 6 ones.'},
         explain:'Four hundred six is 4 hundreds, 0 tens, and 6 ones: 406.'}}
   ]},
-  {icon:'expand',title:'Expanded form',lessons:'Lessons 5–6',blurb:'Write a number as hundreds plus tens plus ones, and make the same number different ways.',steps:[
+  {icon:'expand',title:'Expanded form',game:{zone:'expand',name:'Spell Scrolls'},lessons:'Lessons 5–6',blurb:'Write a number as hundreds plus tens plus ones, and make the same number different ways.',steps:[
     {title:'Hundreds + tens + ones',widget:wExpanded,
       body:'<p><b>Expanded form</b> shows what each digit is worth. 342 = 300 + 40 + 2.</p><p>Pick a number. Tap each part to find its blocks.</p>',
       check:{kind:'num',answer:567,q:'What number is 500 + 60 + 7?',fig:htoFig(5,6,7,{cls:{t:'b',o:'c'}},'5 hundreds, 6 tens, and 7 ones'),
@@ -231,7 +200,7 @@ const CH=[
         why:{a:'15 tens is 150. 400 + 150 + 2 is 552, not 452.',c:'That’s 425. The 5 tens and 2 ones got switched.'},
         explain:'Break 1 of the 4 hundreds into 10 tens: 3 hundreds, 10 + 5 = 15 tens, 2 ones. 300 + 150 + 2 = 452.'}}
   ]},
-  {icon:'line',title:'The number line to 1,000',lessons:'Lessons 8–9',blurb:'Find three-digit numbers on number lines counting by hundreds and tens, and compare them.',steps:[
+  {icon:'line',title:'The number line to 1,000',game:{zone:'line',name:'Number Bridge'},lessons:'Lessons 8–9',blurb:'Find three-digit numbers on number lines counting by hundreds and tens, and compare them.',steps:[
     {title:'Find a number',widget:wLocate,
       body:'<p>On a number line to 1,000, the ticks can count by <b>hundreds</b>. To find a number, find its hundreds first. Then zoom in and count by <b>tens</b>.</p><p>Pick a number.</p>',
       check:{kind:'num',answer:470,fig:F.dot470,q:'The ticks count by tens. What number is the dot at?',
@@ -244,7 +213,7 @@ const CH=[
         why:{b:'587 is to the right of 578, so 587 is greater. The open side faces the bigger number.',c:'They have the same digits, but not in the same places.'},
         explain:'587 is to the right of 578, so 587 > 578. Same hundreds, and 8 tens is more than 7 tens.'}}
   ]},
-  {icon:'order',title:'Compare and order',lessons:'Lessons 10–12',blurb:'Compare numbers place by place, starting with hundreds, and put numbers in order.',steps:[
+  {icon:'order',title:'Compare and order',game:{zone:'compare',name:'Knight’s Challenge'},lessons:'Lessons 10–12',blurb:'Compare numbers place by place, starting with hundreds, and put numbers in order.',steps:[
     {title:'Compare by place',widget:wPlaceCompare,
       body:'<p>To compare, start with the <b>hundreds</b>. If they’re the same, look at the <b>tens</b>. Then the <b>ones</b>.</p><p>Pick two numbers.</p>',
       check:{kind:'mc',q:'Which number is greatest?',

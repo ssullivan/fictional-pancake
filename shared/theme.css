@@ -62,7 +62,13 @@ button{font:inherit;color:inherit;cursor:pointer}
 .fb.good h4{color:var(--good)}.fb.bad h4{color:var(--bad)}
 .fb p{margin:0}
 
+/* Read to me buttons (speak.js) */
+.say{display:inline-block;background:rgba(127,227,255,.1);border:1.5px solid rgba(127,227,255,.55);border-radius:999px;color:var(--cyan);padding:7px 14px;font:700 14px var(--mono);margin:0 0 10px}
+.say:hover{background:rgba(127,227,255,.2)}
+.say svg{width:1.1em;height:1.1em;vertical-align:-.2em;margin-right:.4em;fill:currentColor}
+.say svg path+path{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
 /* young readers (Grade 2): <body class="young"> makes text and tap targets bigger */
 body.young{font-size:18px}
 .young .hero p.lede{font-size:19px}
 .young .btn{padding:14px 26px;font-size:20px}
+.young .say{font-size:16px;padding:9px 16px}

@@ -1,4 +1,4 @@
-/* Pictures and controls for K–5 Learn pages: ten-frames, cubes, base-ten blocks, tape diagrams, and − n + steppers.
+/* Pictures and controls for K–5 pages: ten-frames, cubes, base-ten blocks, tape diagrams, number lines, and − n + steppers.
    Styles are in k5.css. Needs util.js and figures.js (svgWrap).
 
    range(n)                          [0, 1, …, n-1]
@@ -12,6 +12,9 @@
    tapes(rows, {diff})               tape diagram comparing two amounts
    partWhole(parts, total)           one tape split into parts, with the total above
    numLine(lo, hi, {…})              a number line with arrows, jumps, dots, and tappable ticks (svg)
+   hto(x, y, h, t, o, {cls, tr}), htoFig(h, t, o, opt, label)   small base-ten diagrams with hundreds; numBlocks(n) draws n
+   digits(n), numWords(n)            [hundreds, tens, ones] of n, and its name ("four hundred six")
+   pvChart(rows, hi)                 a hundreds-tens-ones chart (html table)
    stepper(k, label), steppers(el, st, lim, draw)          − n + buttons
    seg(label, opts), press(el, m)    a row of choice buttons */
 const range=n=>[...Array(n).keys()];
@@ -114,7 +117,8 @@ function partWhole(parts,total,label='Tape diagram'){
    arrows: [{a, b, lv, q}] straight arrows above the line from a to b at level lv (0 is lowest), labelled with their length,
      or ? when q and not shown.
    hops: [{a, b, t, q}] curved jumps from a to b labelled t (q: blue).  pts: [{v, cls, t}] dots on the line (cls 'b': blue);
-     t is written under the dot, and tick numbers too close to it are left off.  tap: every tick can be tapped (data-v).  Returns the svg. */
+     t is written under the dot, and tick numbers too close to it are left off.  tap: every tick can be tapped (data-v);
+   tap 'cand' makes each tick a tap answer for engine.js instead (.cand, data-id = the number).  Returns the svg. */
 function numLine(lo,hi,{u=Math.min(18,380/(hi-lo)),step=1,big=5,lab=v=>v%big===0,ls='s',end=false,arrows=[],shown=false,hops=[],pts=[],tap=false,label='Number line'}={}){
   const X=16,top=Math.max(0,...arrows.map(r=>r.lv||0)),Y=40+top*38+(hops.length?32:0),x=v=>X+(v-lo)*u,L='lbl'+(ls?' '+ls:''),near=pts.filter(p=>p.t!=null).map(p=>p.v);
   let o=`<line class="axis" x1="${X}" y1="${Y}" x2="${x(hi)+(end?14:0)}" y2="${Y}"/>`;
@@ -134,9 +138,43 @@ function numLine(lo,hi,{u=Math.min(18,380/(hi-lo)),step=1,big=5,lab=v=>v%big===0
     o+=`<path class="hop${c}" d="M${xa},${y}Q${m},${y-2*h} ${bx},${by}"/><polygon class="arrh${c}" points="${xb},${y} ${bx-uy*6},${by+ux*6} ${bx+uy*6},${by-ux*6}"/><text class="${L}${q?' cy':''}" x="${m}" y="${y-h-12}">${t}</text>`;
   });
   pts.forEach(({v,cls='',t})=>{o+=`<circle class="pt ${cls}" cx="${x(v)}" cy="${Y}" r="7"/>`+(t!=null?`<text class="${L} ${cls==='b'?'cy':'gd'}" x="${x(v)}" y="${Y+22}">${t}</text>`:'');});
-  if(tap)range(Math.round((hi-lo)/step)+1).forEach(i=>{const v=lo+i*step;o+=`<rect class="hit" data-v="${v}" x="${x(v)-step*u/2}" y="${Y-34}" width="${step*u}" height="66"/>`;});
+  if(tap)range(Math.round((hi-lo)/step)+1).forEach(i=>{const v=lo+i*step,at=`x="${x(v)-step*u/2}" y="${Y-34}" width="${step*u}" height="66"`;o+=tap==='cand'?`<rect class="cand hit" data-id="${v}" tabindex="0" role="button" aria-label="Tick mark ${i+1}" ${at}/>`:`<rect class="hit" data-v="${v}" ${at}/>`;});
   return svgWrap(X*2+(hi-lo)*u+(end?26:0),Y+32,o,label);
 }
+
+/* Base-ten diagrams small enough for hundreds: a hundred is a 10 × 10 square, a ten a stick of 10, a one a small square (BT pixels each). */
+const BT=7,FW=10*BT;
+const btGrid=(x,y,cols,rows)=>range(cols-1).map(i=>`<line x1="${x+(i+1)*BT}" y1="${y}" x2="${x+(i+1)*BT}" y2="${y+rows*BT}"/>`).join('')+range(rows-1).map(i=>`<line x1="${x}" y1="${y+(i+1)*BT}" x2="${x+cols*BT}" y2="${y+(i+1)*BT}"/>`).join('');
+const flat=(x,y,cls='')=>`<g class="flat ${cls}"><rect x="${x}" y="${y}" width="${FW}" height="${FW}"/>${btGrid(x,y,10,10)}</g>`;
+const stick=(x,y,cls='')=>`<g class="rod ${cls}"><rect x="${x}" y="${y}" width="${BT}" height="${FW}"/>${btGrid(x,y,1,10)}</g>`;
+const cube1=(x,y,cls='')=>`<rect class="unit1 ${cls}" x="${x}" y="${y}" width="${BT}" height="${BT}"/>`;
+/* h hundreds (rows of 5), t tens (a gap after every 5), and o ones (columns of 5) from x, y.
+   cls: {h, t, o} classes for each place; tr: the last tr tens came from a broken hundred. Returns [markup, width, height]. */
+function hto(x,y,h,t,o,{cls={},tr=0}={}){
+  let m='',X=x;
+  range(h).forEach(i=>{m+=flat(x+i%5*(FW+8),y+Math.floor(i/5)*(FW+8),cls.h||'');});
+  if(h)X+=Math.min(h,5)*(FW+8)+6;
+  range(t).forEach(i=>{m+=stick(X+i*(BT+4)+Math.floor(i/5)*5,y,(i>=t-tr?'tr':'')+' '+(cls.t||''));});
+  if(t)X+=t*(BT+4)+Math.floor((t-1)/5)*5+10;
+  range(o).forEach(i=>{m+=cube1(X+Math.floor(i/5)*(BT+5),y+FW-BT-(i%5)*(BT+5),cls.o||'');});
+  if(o)X+=Math.ceil(o/5)*(BT+5);
+  return [m,X-x,Math.max(FW,Math.ceil(h/5)*(FW+8)-8)];
+}
+const htoFig=(h,t,o,opt={},label)=>{const [m,w,ht]=hto(8,8,h,t,o,opt);return svgWrap(Math.max(w+16,120),ht+16,m,label||`${h} hundreds, ${t} tens, and ${o} ones`);};
+const digits=n=>[Math.floor(n/100),Math.floor(n/10)%10,n%10];
+/* n in blocks: hundreds gold, tens blue, ones green */
+const numBlocks=(n,label)=>{const [h,t,o]=digits(n);return htoFig(h,t,o,{cls:{t:'b',o:'c'}},label||`${n} in base-ten blocks`);};
+/* the name of a whole number up to 999: numWords(406) is "four hundred six" */
+const numWords=(()=>{
+  const ONES=['zero','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen'],
+    TENS=['','','twenty','thirty','forty','fifty','sixty','seventy','eighty','ninety'];
+  return n=>{
+    const h=Math.floor(n/100),r=n%100,rw=r<20?ONES[r]:TENS[Math.floor(r/10)]+(r%10?'-'+ONES[r%10]:'');
+    return h?`${ONES[h]} hundred${r?' '+rw:''}`:rw;
+  };
+})();
+/* a place-value chart: rows [[label, n]]; hi: the column to outline in every row (0 hundreds, 1 tens, 2 ones) */
+const pvChart=(rows,hi=-1)=>`<table class="pv"><tr><th></th><th>Hundreds</th><th>Tens</th><th>Ones</th></tr>${rows.map(([l,n])=>`<tr><th>${l}</th>${digits(n).map((d,i)=>`<td class="p${i}${i===hi?' hi':''}">${d}</td>`).join('')}</tr>`).join('')}</table>`;
 
 /* − n + buttons. Markup for one number k; wire them all with steppers(). */
 const stepper=(k,label)=>`<span class="stepper"><span>${label}</span><button type="button" class="ghost-btn" data-k="${k}" data-d="-1" aria-label="${label}: one less">−</button><b data-${k}></b><button type="button" class="ghost-btn" data-k="${k}" data-d="1" aria-label="${label}: one more">+</button></span>`;
