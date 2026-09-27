@@ -82,7 +82,8 @@ const Learn=(()=>{
     $('snum').textContent=`Step ${si+1} of ${ch.steps.length} · ${ch.lessons}`;
     $('stitle').textContent=st.title;$('sbody').innerHTML=st.body;
     if(canSpeak())$('sbody').prepend(sayBtn('Read to me',()=>[$('stitle'),...$('sbody').querySelectorAll('p')]));
-    const w=$('widget');w.innerHTML='';w.hidden=!st.widget;
+    /* a fresh, empty #widget each step, so listeners a widget added to it don't outlive its step */
+    const old=$('widget'),w=old.cloneNode(false);old.replaceWith(w);w.hidden=!st.widget;
     if(st.widget)cleanupW=st.widget(w)||null;
     const next=$('next'),gate=$('gate');
     const finish=()=>{save.steps[key]=1;persist();next.disabled=false;gate.textContent='';dots(ci,si);};
