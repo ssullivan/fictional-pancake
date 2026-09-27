@@ -445,7 +445,8 @@ const PCTX=[
   {whole:(W)=>`A water tank holds ${W} liters.`,part:p=>`How many liters is ${p}% of the tank?`,have:a=>`It has ${a} liters in it.`,u:'liters'},
   {whole:(W)=>`A hiking trail is ${W} kilometers long.`,part:p=>`How far is ${p}% of the trail?`,have:a=>`Priya has hiked ${a} kilometers.`,u:'kilometers'},
   {whole:(W)=>`A phone battery holds ${W} units of charge.`,part:p=>`How many units is ${p}% of a full charge?`,have:a=>`It has ${a} units right now.`,u:'units'},
-  {whole:(W)=>`Noah’s savings goal is $${W}.`,part:p=>`How many dollars is ${p}% of the goal?`,have:a=>`Noah has saved $${a}.`,u:'dollars'}
+  {whole:(W)=>`Noah’s savings goal is $${W}.`,part:p=>`How many dollars is ${p}% of the goal?`,have:a=>`Noah has saved $${a}.`,u:'dollars',over:1},
+  {whole:(W)=>`A bread recipe calls for ${W} grams of flour.`,part:p=>`Diego makes a batch with ${p}% of that flour. How many grams is that?`,have:a=>`Diego used ${a} grams of flour.`,u:'grams',over:1}
 ];
 function genStrip(){
   const type=pick(['coins','coins','dnlA','dnlA','dnlP','tape','tape']);
@@ -459,7 +460,7 @@ function genStrip(){
       explain:`${list.map(c=>c.v).join(' + ')} = ${tot} cents. ${tot} out of 100 cents is ${tot}%.`};
   }
   if(type==='dnlA'||type==='dnlP'){
-    const s=pick([20,25,50,25]),over=s!==20&&Math.random()<.35,top=over?150:100,c=pick(PCTX);
+    const c=pick(PCTX),s=pick([20,25,50,25]),over=c.over&&s!==20&&Math.random()<.5,top=over?150:100;
     const unit=pick([2,3,4,5,6,8,10,12,15,20,25]),W=unit*100/s;
     const js=[];for(let p=s;p<=top;p+=s)if(p!==100)js.push(p);const P=pick(js),A=W*P/100;
     const ticks=[];for(let p=0;p<=top;p+=s){const hit=p===P;ticks.push({t:W*p/100,b:p,st:p===0||p===100?1:(hit?(type==='dnlP'?1:0):2),sb:type==='dnlA'||!hit?1:0,q:hit?(type==='dnlA'?'t':'b'):null});}
@@ -543,7 +544,7 @@ function pctLine(W,P,x,{askA,askP,askW}){
 }
 function genDetect(){
   const c=pick(DCTX),type=pick(['part','whole','pct']);
-  const P=pick([10,15,20,30,35,40,45,60,65,70,80,90,120,150]),W=20*R(1,15),x=W*P/100;
+  const P=pick([10,15,20,25,30,35,40,45,60,65,70,75,80,90]),W=20*R(1,15),x=W*P/100;
   const hint=`Find 10% first (the whole ÷ 10) or 1% (the whole ÷ 100), then scale up.`;
   if(type==='part')return {kind:'num',unit:c.all,answer:x,fig:pctLine(W,P,x,{askA:1}),
     prompt:`There are ${W} ${c.all} ${c.where}. ${P}% of them ${c.verb}. How many ${c.all} ${c.verb}?`,hint,
