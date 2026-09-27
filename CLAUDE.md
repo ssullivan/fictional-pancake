@@ -1,6 +1,6 @@
 # Math games
 
-Static HTML math games served with GitHub Pages at https://ssullivan.github.io/fictional-pancake/ (from `main`, repo root).
+Static HTML math games served with GitHub Pages at https://ssullivan.github.io/fictional-pancake/ (from `main`, repo root). Grades so far: 2 (`grade2/`, page skeleton only) and 6 (`grade6/`).
 
 Maintainability comes first: anything two pages share belongs in `shared/`, not in copies.
 
@@ -13,11 +13,12 @@ shared/                   used by every grade; each file's header comment docume
   game.css, engine.js     game screens and the game engine (Game.init)
   figures.css, figures.js double number lines, ratio tables, diagram styles
   learn.css, learn.js     Learn page screens and framework (Learn.init)
+  landing.css             grade cards (root page) and unit cards (grade pages)
   util.js                 R, pick, shuffle, gcd, lcm, $, Q, parseNum
 tools/                    check.mjs, fuzz.mjs, snap.mjs (see Checking a change)
 grade6/
   index.html              grade page: one card per IM unit, with Learn/Play links
-  CLAUDE.md               that grade's games and IM curriculum reference
+  CLAUDE.md               that grade's games, grade-specific rules, and IM curriculum reference
   unit3/index.html        game page: HTML, unit-only CSS, and Game.init({...})
   unit3/stations.js       the game's problem generators, ZONES, and ICON
   unit3/checks.js         the game's number limits and real-world checks for the fuzz test
@@ -26,7 +27,7 @@ grade6/
 ```
 
 - Everything for a unit lives in `grade<N>/unit<M>/`. Pages load `shared/` with `../../shared/...`.
-- When adding a game or tutorial, add its link to that unit's card on `grade<N>/index.html` (and turn a "Coming soon" card into a real one). When adding a grade, create `grade<N>/index.html` and `grade<N>/CLAUDE.md` from Grade 6's, and add a card to the root `index.html`.
+- When adding a game or tutorial, add its link to that unit's card on `grade<N>/index.html` (and turn a "Coming soon" card into a real one). When adding a grade, create `grade<N>/index.html` and `grade<N>/CLAUDE.md` from Grade 6's (or Grade 2's for K–5), add a card to the root `index.html` in grade order, and update its "Grades …" eyebrow.
 - Games and tutorials link back to their grade page with `href="../"` ("← Grade N").
 - The old top-level folders (`area_and_surface_area/`, `introducing_ratios/`, `unit_rates_and_percentages/`, `arithmetic_in_base_ten/`) are redirect stubs so old links and bookmarks keep working (the hash is kept). Don't put new content there.
 - Use relative links only (the site is served under `/fictional-pancake/`, not `/`).
@@ -36,7 +37,7 @@ grade6/
 
 ## Building games
 
-Games are aligned to Illustrative Mathematics (IM) 6–8 Math. Every game runs on `shared/engine.js` (stations, 8 problems a round and 10 for the boss, 10/5 points, hints, stars in `localStorage`, `#<zone id>` links). To build one, copy `grade6/unit3/` (index.html, stations.js, checks.js), then:
+Games are aligned to Illustrative Mathematics (IM): IM K–5 Math for Grades K–5, IM 6–8 Math for Grades 6–8. Each grade's `CLAUDE.md` has its curriculum reference and any rules for that age. Every game runs on `shared/engine.js` (stations, 8 problems a round and 10 for the boss, 10/5 points, hints, stars in `localStorage`, `#<zone id>` links). To build one, copy `grade6/unit3/` (index.html, stations.js, checks.js), then:
 - write the generators in `stations.js`: each returns a problem (`num`, `pair`, `mc`, or `tap`; the shapes are documented at the top of `engine.js`), and `ZONES` lists the stations with the boss last as `id:'boss'`;
 - set the save key, words, and any hooks in `Game.init` (Unit 1 shows the hooks: its own figure drawing, a zone note, and a Build-it mode);
 - set limits for every station in `checks.js`, plus a `check` for each real-world rule.

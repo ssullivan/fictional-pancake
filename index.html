@@ -8,29 +8,29 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=JetBrains+Mono:wght@500;700&display=swap">
 <link rel="stylesheet" href="shared/theme.css?v=951e4d28">
-<style>
-.games{list-style:none;margin:0;padding:0;display:grid;gap:16px;grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}
-.game{display:grid;gap:8px;height:100%;padding:20px;border-radius:14px;text-decoration:none;color:inherit;
-  background:var(--sheet);border:1px solid rgba(170,205,255,.25);transition:background .15s,transform .15s}
-.game:hover{background:var(--sheet2);transform:translateY(-2px)}
-.game h2{font:800 26px/1.05 var(--display);margin:0}
-.game p{margin:0;color:var(--dim)}
-.game .go{font:700 13px/1 var(--mono);color:var(--gold);margin-top:6px}
-</style>
+<link rel="stylesheet" href="shared/landing.css?v=af7e67b0">
 </head>
 <body>
 <main class="app">
   <header class="hero">
-    <p class="eyebrow">Middle school math</p>
+    <p class="eyebrow">Grades 2 and 6</p>
     <h1>Math <span>Games</span></h1>
     <p class="lede">Pick your grade, then learn a unit step by step and practice it with a game. Each one lines up with a unit from class.</p>
   </header>
 
-  <!-- One card per grade. To add a grade: create gradeN/index.html (copy grade6/index.html), then add a card below. -->
-  <ul class="games">
+  <!-- One card per grade, in order. To add a grade: create gradeN/index.html and gradeN/CLAUDE.md (copy Grade 6's), then add a card below. -->
+  <ul class="grade-list">
     <li>
-      <a class="game" href="grade6/">
-        <p class="eyebrow">Illustrative Mathematics</p>
+      <a class="grade-card" href="grade2/">
+        <p class="eyebrow">Illustrative Mathematics K–5</p>
+        <h2>Grade 2</h2>
+        <p>Adding and subtracting, measuring length, numbers to 1,000, shapes, time, and money.</p>
+        <span class="go">Choose a unit →</span>
+      </a>
+    </li>
+    <li>
+      <a class="grade-card" href="grade6/">
+        <p class="eyebrow">Illustrative Mathematics 6–8</p>
         <h2>Grade 6</h2>
         <p>Area and surface area, ratios, rates and percentages, and decimals.</p>
         <span class="go">Choose a unit →</span>
