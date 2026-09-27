@@ -13,6 +13,7 @@ shared/                   used by every grade; each file's header comment docume
   game.css, engine.js     game screens and the game engine (Game.init)
   figures.css, figures.js double number lines, ratio tables, diagram styles
   learn.css, learn.js     Learn page screens and framework (Learn.init)
+  k5.css, k5.js           ten-frames, cubes, base-ten blocks, tape diagrams, steppers: K–5 Learn pages
   landing.css             grade cards (root page) and unit cards (grade pages)
   util.js                 R, pick, shuffle, gcd, lcm, $, Q, parseNum
 tools/                    check.mjs, fuzz.mjs, snap.mjs (see Checking a change)
@@ -56,7 +57,7 @@ Interactive tutorials live next to each game as `grade<N>/unit<M>/learn.html` an
 
 - Chapters follow the IM sections in lesson order. Each step has one idea, something to move (slider, tap, drag), and a quick check with named mistakes; `Next` unlocks after the check.
 - Routing is by hash (`#c2s1`, `#c2done`); progress is saved in `localStorage`. When the unit has a game, each chapter ends with a link to the matching game zone (`./#<zone id>` starts that zone); leave out `game` until it does.
-- For young readers (Grades K–2), use `<body class="young">` and `Learn.init({readAloud: true})`. Grade 2 Unit 1 (`grade2/unit1/`) is the template for those.
+- For young readers (Grades K–2), use `<body class="young">` and `Learn.init({readAloud: true})`. Grade 2 Unit 1 (`grade2/unit1/`) is the template for those. K–5 pages load `shared/k5.css` and `k5.js` for their pictures and controls.
 - 3D uses three.js (pinned version, loaded through an import map from cdn.jsdelivr.net, only when a 3D step opens). Every 3D widget needs a flat SVG fallback for devices or networks without WebGL.
 - Nets are defined as flat faces hinged to a parent face; `buildNet(...).check()` confirms a net folds closed. Run it on every net (and confirm invalid cube nets fail) before shipping.
 

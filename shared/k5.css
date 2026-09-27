@@ -1,0 +1,44 @@
+/* Styles for shared/k5.js: ten-frames, cubes, base-ten blocks, tape diagrams, labels, and steppers on K–5 Learn pages.
+   Load after learn.css. */
+/* ten-frames and cubes */
+.cell{fill:rgba(9,32,61,.6);stroke:rgba(243,246,251,.55);stroke-width:1.5}
+.ctr circle{stroke-width:2}
+.ctr.a circle{fill:var(--gold);stroke:#fff1b8}
+.ctr.b circle{fill:var(--cyan);stroke:#d6f6ff}
+.ctr.moved circle{stroke:#fff;stroke-width:4}
+.ctr.gone circle{opacity:.25}
+.ctr path{stroke:var(--bad);stroke-width:4;stroke-linecap:round}
+[data-i]{cursor:pointer}
+.hit{fill:transparent;cursor:pointer}
+.hit:hover{fill:rgba(255,201,60,.15)}
+.cube{stroke:rgba(243,246,251,.7);stroke-width:1.5}
+.cube.a{fill:var(--gold)}.cube.b{fill:var(--cyan)}
+.cube.off{opacity:.2}
+.extra{fill:none;stroke:#fff;stroke-width:3;stroke-dasharray:5 4}
+/* base-ten blocks: tr = a one from a broken ten, gone = taken away */
+.rod rect,.unit1{stroke:rgba(10,35,64,.8);stroke-width:1}
+.rod line{stroke:rgba(10,35,64,.55);stroke-width:1}
+.rod.a rect,.unit1.a{fill:var(--gold)}
+.rod.b rect,.unit1.b{fill:var(--cyan)}
+.rod rect{fill:var(--gold)}
+.rod.new rect{fill:var(--good);stroke:#fff;stroke-width:2.5}
+.unit1.tr{fill:var(--good)}
+.rod.gone,.unit1.gone{opacity:.3}
+.xout{stroke:var(--bad);stroke-width:3.5;stroke-linecap:round}
+/* tape diagrams */
+.brace{fill:none;stroke:var(--cyan);stroke-width:3}
+.tape{stroke-width:2.5}
+.tape.t0{fill:rgba(255,201,60,.3);stroke:var(--gold)}
+.tape.t1{fill:rgba(127,227,255,.25);stroke:var(--cyan)}
+.tape.gap{fill:none;stroke:var(--cyan);stroke-dasharray:6 4}
+.tape.hi{stroke:#fff;stroke-width:4}
+.lbl{fill:var(--chalk);font:700 17px var(--mono);text-anchor:middle;dominant-baseline:central}
+.lbl.s{font-size:14px}.lbl.big{font-size:30px}.lbl.cy{fill:var(--cyan)}.lbl.st{text-anchor:start}.lbl.en{text-anchor:end}
+/* controls, equations, and stories */
+.stepper{display:inline-flex;align-items:center;gap:8px;font:700 16px var(--mono);color:var(--dim);margin-right:12px}
+.stepper .ghost-btn{min-width:48px;min-height:48px;font-size:24px;padding:0}
+.stepper b{color:var(--gold);min-width:1.4em;text-align:center;font-size:24px}
+.eq{margin:0 0 10px;font:700 24px var(--mono)}
+.eq .q{background:var(--gold);color:#1a1300;border-radius:6px;padding:0 8px}
+.story{margin:0 0 10px;font-size:19px}
+.choice svg{max-height:130px}
