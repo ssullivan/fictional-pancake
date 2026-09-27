@@ -4,11 +4,12 @@
 
    Learn.init({
      saveKey: 'g6u1-learn',       localStorage key; unique across the whole site
-     game: 'Blueprint Builders',  the unit's game (index.html next to learn.html)
+     game?: 'Blueprint Builders', the unit's game (index.html next to learn.html), if it has one
+     readAloud?: true,            a "Read to me" button on each step and quick check (browser speech; for young readers)
      icons: {iconId: '<svg markup, 64×64 viewBox>'},
      chapters: [{
        icon, title, lessons, blurb,
-       game: {zone, name},        the game zone to practice in at the end of the chapter (./#zone)
+       game?: {zone, name},       the game zone to practice in at the end of the chapter (./#zone)
        steps: [{
          title, body,             body is HTML
          widget?: el => cleanup?, draws into el; may return a function that runs when the step is left
@@ -20,11 +21,29 @@
    Next unlocks once a step's quick check is answered (steps without a check unlock right away). */
 const Learn=(()=>{
   let cfg,CH,save,TOTAL,cleanupW=null;
+  /* ---------- read aloud ---------- */
+  const canSpeak=()=>cfg.readAloud&&'speechSynthesis' in window;
+  const hush=()=>{if('speechSynthesis' in window)speechSynthesis.cancel();};
+  /* what to say for an element: its text, with each picture replaced by its description (aria-label) */
+  const speakable=e=>{const c=e.cloneNode(true);c.querySelectorAll('svg').forEach(v=>v.replaceWith(v.getAttribute('aria-label')||''));return c.textContent.replace(/\s+/g,' ').trim();};
+  /* a button that reads the text of the given elements aloud; a second tap stops it */
+  function sayBtn(label,els){
+    const b=document.createElement('button');b.type='button';b.className='say';
+    b.innerHTML=`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9h4l5-4v14l-5-4H3z"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg>${label}`;
+    b.onclick=()=>{
+      if(speechSynthesis.speaking){hush();return;}
+      const u=new SpeechSynthesisUtterance(els().map(speakable).filter(Boolean).map(t=>/[.?!:]$/.test(t)?t:t+'.').join(' '));
+      u.rate=.9;speechSynthesis.speak(u);
+    };
+    return b;
+  }
+
   /* ---------- quick checks ---------- */
   const near=(a,b)=>Math.abs(a-b)<.011;
   function renderCheck(el,c,onDone){
     el.innerHTML=`<section class="check" aria-label="Quick check"><p class="eyebrow">Quick check</p><p class="cq">${c.q}</p>${c.fig?`<div class="fig">${c.fig}</div>`:''}<div data-a></div><div data-fb role="status" aria-live="polite"></div></section>`;
     const q=Q(el),ans=q('a'),fb=q('fb');let tries=0,done=false;
+    if(canSpeak())el.querySelector('.cq').before(sayBtn('Read the question',()=>[el.querySelector('.cq'),...ans.querySelectorAll('.choice')]));
     if(c.kind==='num'){
       ans.innerHTML=`<form class="ans" autocomplete="off"><label class="sr" for="cin">Your answer</label><input id="cin" inputmode="decimal" placeholder="?"><span class="unit">${c.unit||''}</span><button class="btn">Check</button></form>`;
       ans.querySelector('form').addEventListener('submit',e=>{e.preventDefault();submit($('cin').value);});
@@ -74,6 +93,7 @@ const Learn=(()=>{
     $('cname').textContent=`${ci+1}. ${ch.title}`;dots(ci,si);
     $('snum').textContent=`Step ${si+1} of ${ch.steps.length} · ${ch.lessons}`;
     $('stitle').textContent=st.title;$('sbody').innerHTML=st.body;
+    if(canSpeak())$('sbody').prepend(sayBtn('Read to me',()=>[$('stitle'),...$('sbody').querySelectorAll('p')]));
     const w=$('widget');w.innerHTML='';w.hidden=!st.widget;
     if(st.widget)cleanupW=st.widget(w)||null;
     const next=$('next'),gate=$('gate');
@@ -89,7 +109,7 @@ const Learn=(()=>{
     const ch=CH[ci],nx=CH[ci+1];
     $('cname').textContent=`${ci+1}. ${ch.title}`;dots(ci,-1);
     $('snum').textContent=`Chapter ${ci+1} complete`;$('stitle').textContent='Nice work!';
-    $('sbody').innerHTML=`<p>You finished <b>${ch.title}</b>.</p><div class="practice"><p class="eyebrow">Practice it</p><a class="btn" href="./#${ch.game.zone}">Play ${ch.game.name} →</a><p>in ${cfg.game}, the game for this unit.</p></div>`;
+    $('sbody').innerHTML=`<p>You finished <b>${ch.title}</b>.</p>`+(ch.game&&cfg.game?`<div class="practice"><p class="eyebrow">Practice it</p><a class="btn" href="./#${ch.game.zone}">Play ${ch.game.name} →</a><p>in ${cfg.game}, the game for this unit.</p></div>`:'');
     $('widget').hidden=true;$('check').hidden=true;$('gate').textContent='';
     $('prev').href=`#c${ci+1}s${ch.steps.length}`;$('prev').textContent='← Back';
     const next=$('next');next.disabled=false;next.textContent=nx?`Next: ${nx.title} →`:'Back to chapters';
@@ -97,6 +117,7 @@ const Learn=(()=>{
   }
   function route(){
     if(cleanupW){try{cleanupW();}catch(e){}cleanupW=null;}
+    hush();
     const m=location.hash.match(/^#c(\d+)(?:s(\d+)|(done))$/),ci=m?+m[1]-1:-1;
     if(!CH[ci]){renderHome();show('home');return;}
     if(m[3])renderDone(ci);else renderStep(ci,Math.min(Math.max(+m[2],1),CH[ci].steps.length)-1);

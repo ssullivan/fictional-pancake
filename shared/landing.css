@@ -24,4 +24,4 @@
 .links .learn:hover{background:rgba(127,227,255,.12)}
 .unit-card.soon{background:transparent;border-style:dashed}
 .unit-card.soon h2{color:var(--dim)}
-.unit-card.soon .tag{font:700 13px/1 var(--mono);color:var(--dim);margin-top:8px}
+.unit-card .tag{font:700 13px/1 var(--mono);color:var(--dim);margin-top:8px}

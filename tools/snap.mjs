@@ -112,7 +112,11 @@ async function shot(name) {
   const {cssContentSize: s} = await cmd('Page.getLayoutMetrics');
   const {data} = await cmd('Page.captureScreenshot', {format: 'png', captureBeyondViewport: true, clip: {x: 0, y: 0, width: s.width, height: s.height, scale: 1}});
   await writeFile(join(OUT, name + '.png'), Buffer.from(data, 'base64'));
+  // pages must never scroll sideways (figures scroll inside their own box)
+  const [sw, iw] = await ev('[document.documentElement.scrollWidth, innerWidth]');
+  if (sw > iw) { console.log(`OVERFLOW ${name}: page is ${sw}px wide on a ${iw}px screen`); overflows++; }
 }
+let overflows = 0;
 
 // The game state: a top-level `G` in the older inline games, `Game.state` in shared/engine.js.
 const STATE = `(typeof Game!=='undefined'?Game.state:G)`;
@@ -205,7 +209,7 @@ for (const width of WIDTHS) {
     await shot(`${tag}-home-after`); n++;
   }
 }
-console.log(`${n} screenshots in ${OUT}`);
+console.log(`${n} screenshots in ${OUT}` + (overflows ? `, ${overflows} scroll sideways` : ''));
 ws.close(); server.close();
 await new Promise(r => { chrome.on('exit', r); chrome.kill(); });
 await rm(profile, {recursive: true, force: true, maxRetries: 10, retryDelay: 200});

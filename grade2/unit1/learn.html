@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Learn Adding, Subtracting &amp; Data</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=JetBrains+Mono:wght@500;700&display=swap">
+<link rel="stylesheet" href="../../shared/theme.css?v=524e6f82">
+<link rel="stylesheet" href="../../shared/learn.css?v=66c57fd0">
+<style>
+/* figures */
+.cell{fill:rgba(9,32,61,.6);stroke:rgba(243,246,251,.55);stroke-width:1.5}
+.ctr circle{stroke-width:2}
+.ctr.a circle{fill:var(--gold);stroke:#fff1b8}
+.ctr.b circle{fill:var(--cyan);stroke:#d6f6ff}
+.ctr.moved circle{stroke:#fff;stroke-width:4}
+.ctr.gone circle{opacity:.25}
+.ctr path{stroke:var(--bad);stroke-width:4;stroke-linecap:round}
+[data-i]{cursor:pointer}
+.hit{fill:transparent;cursor:pointer}
+.hit:hover{fill:rgba(255,201,60,.15)}
+.cube{stroke:rgba(243,246,251,.7);stroke-width:1.5}
+.cube.a{fill:var(--gold)}.cube.b{fill:var(--cyan)}
+.cube.off{opacity:.2}
+.extra{fill:none;stroke:#fff;stroke-width:3;stroke-dasharray:5 4}
+.rod rect,.unit1{stroke:rgba(10,35,64,.8);stroke-width:1}
+.rod line{stroke:rgba(10,35,64,.55);stroke-width:1}
+.rod.a rect,.unit1.a{fill:var(--gold)}
+.rod.b rect,.unit1.b{fill:var(--cyan)}
+.rod rect{fill:var(--gold)}
+.rod.new rect{fill:var(--good);stroke:#fff;stroke-width:2.5}
+.sticky{stroke:rgba(243,246,251,.6);stroke-width:1.5}
+.sticky.red{fill:#ff7b7b}.sticky.blue{fill:#6fa8ff}.sticky.green{fill:#5fe0a8}.sticky.yellow{fill:#ffc93c}
+.tapme{cursor:pointer}
+.p-sun circle{fill:var(--gold)}.p-sun line{stroke:var(--gold);stroke-width:2.5;stroke-linecap:round}
+.p-cloud circle,.p-cloud rect{fill:#dfe8f3}
+.p-rain{fill:#6fa8ff}
+.rowhi{fill:rgba(255,201,60,.14);stroke:var(--gold);stroke-width:1.5}
+.axis{stroke:var(--chalk);stroke-width:2.5}
+.gl{stroke:rgba(170,205,255,.18);stroke-width:1}
+.bar{stroke:rgba(243,246,251,.7);stroke-width:1.5}
+.bar.red{fill:#ff7b7b}.bar.blue{fill:#6fa8ff}.bar.green{fill:#5fe0a8}.bar.yellow{fill:#ffc93c}
+.bar.hi{stroke:#fff;stroke-width:4}
+.match{stroke:#fff;stroke-width:2;stroke-dasharray:6 5}
+.brace{fill:none;stroke:var(--cyan);stroke-width:3}
+.tape{stroke-width:2.5}
+.tape.t0{fill:rgba(255,201,60,.3);stroke:var(--gold)}
+.tape.t1{fill:rgba(127,227,255,.25);stroke:var(--cyan)}
+.tape.gap{fill:none;stroke:var(--cyan);stroke-dasharray:6 4}
+.lbl{fill:var(--chalk);font:700 17px var(--mono);text-anchor:middle;dominant-baseline:central}
+.lbl.s{font-size:14px}.lbl.big{font-size:30px}.lbl.cy{fill:var(--cyan)}.lbl.st{text-anchor:start}.lbl.en{text-anchor:end}
+/* widgets */
+.stepper{display:inline-flex;align-items:center;gap:8px;font:700 16px var(--mono);color:var(--dim);margin-right:12px}
+.stepper .ghost-btn{min-width:48px;min-height:48px;font-size:24px;padding:0}
+.stepper b{color:var(--gold);min-width:1.4em;text-align:center;font-size:24px}
+.eq{margin:0 0 10px;font:700 24px var(--mono)}
+.eq .q{background:var(--gold);color:#1a1300;border-radius:6px;padding:0 8px}
+.story{margin:0 0 10px;font-size:19px}
+table.tally{border-collapse:collapse;margin:0 auto 12px;font:700 18px var(--mono)}
+table.tally caption{color:var(--dim);font:700 14px var(--mono);margin-bottom:6px}
+table.tally th,table.tally td{border:1.5px solid rgba(170,205,255,.4);padding:8px 14px;text-align:center}
+table.tally th{color:var(--dim);font-size:15px}
+.chip{font-size:15px;padding:9px 14px}
+.choice svg{max-height:130px}
+</style>
+</head>
+<body class="young">
+
+<div class="app">
+  <section id="home">
+    <a class="back" href="../">← Grade 2</a>
+    <header class="hero">
+      <p class="eyebrow">Learn · Illustrative Mathematics K–5 · Grade 2 · Unit 1</p>
+      <h1>Adding, Subtracting &amp; <span>Data</span></h1>
+      <p class="lede">Short lessons you can play with. Move counters and cubes, sort votes, and build graphs, then check yourself. Tap <b>Read to me</b> to hear any step read aloud.</p>
+      <div class="stats"><span class="pill">Steps done <b id="hdone">0</b>/<span id="htot">0</span></span></div>
+    </header>
+    <div class="zones" id="chapters"></div>
+    <section class="grownups">
+      <h2>For grown-ups</h2>
+      <div><h4>How it works</h4><p>Five short chapters follow the unit’s lessons in order. Each step shows one idea with something to tap or move, then a quick check. A wrong answer names the likely mistake and gives one more try.</p></div>
+      <div><h4>Read to me</h4><p>The Read to me buttons read each step and quick check aloud with the device’s built-in voice, for students still learning to read. Progress is saved on this device.</p></div>
+      <div><h4>Numbers</h4><p>Adding and subtracting stays within 20 (up to 50 for tens and ones), graphs have up to 10 in each category, and compare problems stay within 100 with no regrouping.</p></div>
+      <div><h4>Not covered</h4><p>Center Days (Lessons 6, 12, and 17) and Class Surveys (Lesson 18) are hands-on, optional lessons that work better in class. There’s no practice game for this unit yet.</p></div>
+    </section>
+  </section>
+
+  <section id="lesson" hidden>
+    <div class="bar">
+      <a class="ghost-btn" href="#">← Chapters</a>
+      <div class="bar-mid"><div class="zn" id="cname"></div><div class="dots" id="dots"></div></div>
+    </div>
+    <article class="card">
+      <p class="eyebrow" id="snum"></p>
+      <h2 id="stitle"></h2>
+      <div class="sbody" id="sbody"></div>
+      <div id="widget"></div>
+      <div id="check"></div>
+      <div class="nav"><a class="ghost-btn" id="prev" href="#">← Back</a><button type="button" class="btn" id="next">Next →</button><span class="gate" id="gate"></span></div>
+    </article>
+  </section>
+</div>
+
+<script src="../../shared/util.js?v=81356bac"></script>
+<script src="../../shared/figures.js?v=90a5b6ae"></script>
+<script src="../../shared/learn.js?v=32164502"></script>
+<script src="lessons.js?v=934ced7e"></script>
+<script>
+Learn.init({saveKey:'g2u1-learn',readAloud:true,icons:ICON,chapters:CH});
+</script>
+</body>
+</html>

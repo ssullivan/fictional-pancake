@@ -78,3 +78,19 @@ a{color:var(--cyan)}
 
 .fb .work{font-family:var(--mono);font-size:14.5px}
 @media (prefers-reduced-motion:reduce){.zone{transition:none}}
+
+/* "Read to me" (readAloud) */
+.say{display:inline-block;background:rgba(127,227,255,.1);border:1.5px solid rgba(127,227,255,.55);border-radius:999px;color:var(--cyan);padding:7px 14px;font:700 14px var(--mono);margin:0 0 10px}
+.say:hover{background:rgba(127,227,255,.2)}
+.say svg{width:1.1em;height:1.1em;vertical-align:-.2em;margin-right:.4em;fill:currentColor}
+.say svg path+path{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+.check .say{justify-self:start;margin:0}
+
+/* young readers: bigger text and tap targets (see theme.css) */
+.young .sbody{font-size:20px}
+.young .cq{font-size:22px}
+.young .readout{font-size:17px}
+.young .ghost-btn{padding:10px 16px;font-size:16px}
+.young .ans input{font-size:28px;width:5em}
+.young .choice{min-height:64px;font-size:22px}
+.young .say{font-size:16px;padding:9px 16px}

@@ -2,12 +2,13 @@
 
 General rules for games and Learn pages are in the root `CLAUDE.md`. Grade 2 follows **IM K–5 Math**, not IM 6–8.
 
-## Grade 2 games
+## Grade 2 pages
 
-None yet. When a unit gets a game, add a row here and turn its "Coming soon" card on `index.html` into a real one (see `grade6/index.html`).
+When a unit gets a game or Learn page, add a row here and turn its "Coming soon" card on `index.html` into a real one (see `grade6/index.html`).
 
-| Folder | Game | Unit |
-|---|---|---|
+| Folder | Game | Learn page | Unit |
+|---|---|---|---|
+| `unit1/` | none yet | `learn.html` (5 chapters, Lessons 1–16) | Grade 2 Unit 1 |
 
 ## Building for Grade 2
 
@@ -16,7 +17,9 @@ Players are 7 and 8 years old, so on top of the root rules:
 - Whole numbers only, within the unit's range: within 20 for fluency, within 100 (Units 1–4), within 1,000 (Units 5 and 7). No fractions except halves, thirds, and fourths of shapes (Unit 6).
 - Money in cents and whole dollars (Unit 6): pennies, nickels, dimes, quarters, and dollar bills. No decimal prices.
 - Time to the nearest 5 minutes, with a.m. and p.m. (Unit 6).
-- Big tap targets, and pictures students can tap or drag instead of typed answers where the lesson allows it.
+- Big tap targets, and pictures students can tap or drag instead of typed answers where the lesson allows it. Pages use `<body class="young">` (bigger text and buttons, in `shared/theme.css` and `learn.css`).
+- Learn pages turn on `readAloud` in `Learn.init`, so every step and quick check has a Read to me button.
+- No gendered pronouns for named students: repeat the name instead ("Mai gives 6 stickers to Diego. How many stickers does Mai have now?").
 - Skip the optional lessons (Center Days, and the projects at the end of each unit); say so in the game's "For grown-ups" section.
 
 ## Curriculum reference: IM K–5 Grade 2
