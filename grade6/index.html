@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Grade 6 Math</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+:root{
+  color-scheme:dark;
+  --bg:#0d2a4e;--sheet:#12365f;--sheet2:#184373;--line:rgba(170,205,255,.13);
+  --chalk:#f3f6fb;--dim:#a9c4e4;--gold:#ffc93c;--cyan:#7fe3ff;
+  --display:'Bricolage Grotesque',system-ui,sans-serif;
+  --body:'Atkinson Hyperlegible',system-ui,-apple-system,sans-serif;
+  --mono:'JetBrains Mono',ui-monospace,Menlo,monospace;
+}
+*{box-sizing:border-box}
+html,body{background:var(--bg)}
+body{
+  margin:0;color:var(--chalk);font:16px/1.5 var(--body);
+  background-image:
+    linear-gradient(var(--line) 1px,transparent 1px),
+    linear-gradient(90deg,var(--line) 1px,transparent 1px);
+  background-size:28px 28px;min-height:100vh;
+}
+main{max-width:960px;margin:0 auto;padding:28px 16px 56px}
+:focus-visible{outline:3px solid var(--cyan);outline-offset:3px}
+.back{display:inline-block;margin-bottom:14px;color:var(--dim);font:700 13px var(--mono);text-decoration:none}
+.back:hover{color:var(--chalk)}
+.eyebrow{font:700 12px/1.2 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin:0}
+header{display:grid;gap:14px;padding-bottom:26px;border-bottom:2px dashed rgba(170,205,255,.3);margin-bottom:26px}
+h1{font:800 clamp(40px,8vw,72px)/.95 var(--display);margin:0;letter-spacing:-.02em}
+h1 span{color:var(--gold)}
+header p.lede{margin:0;max-width:56ch;color:var(--dim);font-size:17px}
+.units{list-style:none;margin:0;padding:0;display:grid;gap:16px;grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}
+.unit{display:grid;gap:8px;align-content:start;height:100%;padding:20px;border-radius:14px;
+  background:var(--sheet);border:1px solid rgba(170,205,255,.25)}
+.unit h2{font:800 26px/1.05 var(--display);margin:0}
+.unit h2 small{display:block;font:700 15px/1.3 var(--body);color:var(--dim);margin-top:4px}
+.unit p{margin:0;color:var(--dim)}
+.links{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px}
+.links a{font:700 13px/1 var(--mono);text-decoration:none;padding:10px 14px;border-radius:999px;transition:background .15s}
+.links .play{color:#1a1300;background:var(--gold)}
+.links .play:hover{background:#ffd866}
+.links .learn{color:var(--cyan);border:1.5px solid rgba(127,227,255,.55)}
+.links .learn:hover{background:rgba(127,227,255,.12)}
+.unit.soon{background:transparent;border-style:dashed}
+.unit.soon h2{color:var(--dim)}
+.unit.soon .tag{font:700 13px/1 var(--mono);color:var(--dim);margin-top:8px}
+</style>
+</head>
+<body>
+<main>
+  <a class="back" href="../">← All grades</a>
+  <header>
+    <p class="eyebrow">Illustrative Mathematics · Grade 6</p>
+    <h1>Grade <span>6</span></h1>
+    <p class="lede">Pick a unit. Learn it step by step, then practice it with a game. Each one lines up with a unit from class.</p>
+  </header>
+
+  <!-- One card per IM unit, in order. To add a game or tutorial: put it in unitN/ (index.html, learn.html), then add its link to that unit's card. -->
+  <ul class="units">
+    <li class="unit">
+      <p class="eyebrow">Unit 1</p>
+      <h2>Area &amp; Surface Area <small>Blueprint Builders</small></h2>
+      <p>Slide shapes into rectangles, find areas of triangles and polygons, and fold 3D nets.</p>
+      <div class="links"><a class="learn" href="unit1/learn.html">Learn →</a><a class="play" href="unit1/">Play →</a></div>
+    </li>
+    <li class="unit">
+      <p class="eyebrow">Unit 2</p>
+      <h2>Introducing Ratios <small>Mix Masters</small></h2>
+      <p>Keep recipes and paint mixes the same, find the better deal, and split totals with tape diagrams.</p>
+      <div class="links"><a class="play" href="unit2/">Play →</a></div>
+    </li>
+    <li class="unit">
+      <p class="eyebrow">Unit 3</p>
+      <h2>Unit Rates &amp; Percentages <small>Rate Racers</small></h2>
+      <p>Convert units, find unit rates, compare speed and pace, and solve percent problems.</p>
+      <div class="links"><a class="play" href="unit3/">Play →</a></div>
+    </li>
+    <li class="unit soon">
+      <p class="eyebrow">Unit 4</p>
+      <h2>Dividing Fractions</h2>
+      <p class="tag">Coming soon</p>
+    </li>
+    <li class="unit">
+      <p class="eyebrow">Unit 5</p>
+      <h2>Arithmetic in Base Ten <small>Decimal Diner</small></h2>
+      <p>Ring up orders, place the decimal point, split the bill, and divide decimals at the food truck.</p>
+      <div class="links"><a class="play" href="unit5/">Play →</a></div>
+    </li>
+    <li class="unit soon">
+      <p class="eyebrow">Unit 6</p>
+      <h2>Expressions &amp; Equations</h2>
+      <p class="tag">Coming soon</p>
+    </li>
+    <li class="unit soon">
+      <p class="eyebrow">Unit 7</p>
+      <h2>Rational Numbers</h2>
+      <p class="tag">Coming soon</p>
+    </li>
+    <li class="unit soon">
+      <p class="eyebrow">Unit 8</p>
+      <h2>Data Sets &amp; Distributions</h2>
+      <p class="tag">Coming soon</p>
+    </li>
+    <li class="unit soon">
+      <p class="eyebrow">Unit 9</p>
+      <h2>Putting It All Together</h2>
+      <p class="tag">Coming soon</p>
+    </li>
+  </ul>
+</main>
+</body>
+</html>
