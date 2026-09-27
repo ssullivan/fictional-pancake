@@ -8,7 +8,7 @@ When a unit gets a game or Learn page, add a row here and turn its "Coming soon"
 
 | Folder | Game | Learn page | Unit |
 |---|---|---|---|
-| none yet | | | |
+| `unit1/` | none yet | `learn.html` (5 chapters, Lessons 1–7) | Grade 4 Unit 1 |
 
 ## Building for Grade 4
 
