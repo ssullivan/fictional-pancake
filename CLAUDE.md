@@ -25,6 +25,16 @@ When building a game:
 - Skip open-ended lessons (Fermi problems, projects); say so in the game's "For grown-ups" section.
 - Avoid gendered pronouns for named students; reword instead.
 
+## Learn pages
+
+Interactive tutorials live next to each game as `<unit folder>/learn.html` and get a card in the landing page's Learn section. Unit 1 (`area_and_surface_area/learn.html`) is the template.
+
+- Chapters follow the IM sections in lesson order. Each step has one idea, something to move (slider, tap, drag), and a quick check with named mistakes; `Next` unlocks after the check.
+- Routing is by hash (`#c2s1`, `#c2done`); progress is saved in `localStorage`. Each chapter ends with a link to the matching game zone (`./#<zone id>` starts that zone).
+- 3D uses three.js (pinned version, loaded through an import map from cdn.jsdelivr.net, only when a 3D step opens). Every 3D widget needs a flat SVG fallback for devices or networks without WebGL.
+- Nets are defined as flat faces hinged to a parent face; `buildNet(...).check()` confirms a net folds closed. Run it on every net (and confirm invalid cube nets fail) before shipping.
+- Screenshot every step with headless Chrome (`--use-angle=swiftshader --enable-unsafe-swiftshader` for WebGL), including phone width.
+
 ## Curriculum reference: IM Grade 6
 
 The current version is **IM v.360** (accessim.org), which replaced v.III. The lesson titles below come from the v.III teacher guide (im.kendallhunt.com/MS/teachers/1/<unit>/index.html), because AccessIM doesn't show titles without a sign-in. v.360 uses the same unit order and titles; lesson counts and section groupings can differ (noted where known). Check against the teacher's materials before relying on exact lesson numbers.

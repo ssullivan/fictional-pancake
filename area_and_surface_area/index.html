@@ -37,6 +37,7 @@ button{font:inherit;color:inherit;cursor:pointer}
 .hero{display:grid;gap:14px;padding-bottom:26px;border-bottom:2px dashed rgba(170,205,255,.3);margin-bottom:26px}
 .hero h1{font:800 clamp(40px,8vw,72px)/.95 var(--display);margin:0;letter-spacing:-.02em;text-wrap:balance}
 .hero h1 span{color:var(--gold)}
+.hero p.lede a{color:var(--cyan)}
 .hero p.lede{margin:0;max-width:56ch;color:var(--dim);font-size:17px}
 .stats{display:flex;flex-wrap:wrap;gap:10px}
 .pill{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border:1.5px solid rgba(170,205,255,.35);border-radius:999px;font:700 14px var(--mono);font-variant-numeric:tabular-nums;background:rgba(13,42,78,.7)}
@@ -174,7 +175,7 @@ button{font:inherit;color:inherit;cursor:pointer}
     <header class="hero">
       <p class="eyebrow">Illustrative Mathematics · Grade 6 · Unit 1 · Area &amp; Surface Area</p>
       <h1>Blueprint <span>Builders</span></h1>
-      <p class="lede">Every building starts on graph paper. Measure the shapes, find their areas, and fold up the nets. Each zone matches lessons from class.</p>
+      <p class="lede">Every building starts on graph paper. Measure the shapes, find their areas, and fold up the nets. Each zone matches lessons from class. <a href="learn.html">New to this? Learn it first →</a></p>
       <div class="stats">
         <span class="pill">Points <b id="hp">0</b></span>
         <span class="pill">Stars <b id="hs">0</b>/<span id="hsMax">21</span></span>
@@ -880,6 +881,8 @@ $('quit').addEventListener('click',()=>{renderHome();show('home');});
 $('again').addEventListener('click',()=>start(G.z.id));
 $('tomap').addEventListener('click',()=>{renderHome();show('home');});
 renderHome();
+/* learn.html links straight to a zone, e.g. index.html#para */
+{const z=location.hash.slice(1);if(ZONES.some(q=>q.id===z))start(z);}
 </script>
 </body>
 </html>

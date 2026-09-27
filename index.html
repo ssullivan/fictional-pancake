@@ -39,16 +39,37 @@ header p.lede{margin:0;max-width:56ch;color:var(--dim);font-size:17px}
 .game h2{font:800 26px/1.05 var(--display);margin:0}
 .game p{margin:0;color:var(--dim)}
 .game .go{font:700 13px/1 var(--mono);color:var(--gold);margin-top:6px}
+.sec{font:800 28px/1.1 var(--display);margin:0 0 14px}
+.sec+p{margin:-8px 0 16px;color:var(--dim)}
+.games+.sec{margin-top:36px}
+.game.learn{border-color:rgba(127,227,255,.45)}
+.game.learn .go{color:var(--cyan)}
 </style>
 </head>
 <body>
 <main>
   <header>
-    <p class="eyebrow">Practice games</p>
+    <p class="eyebrow">Grade 6 math</p>
     <h1>Math <span>Games</span></h1>
-    <p class="lede">Pick a game to play. Each one lines up with a unit from class.</p>
+    <p class="lede">Learn a unit step by step, then practice it with a game. Each one lines up with a unit from class.</p>
   </header>
 
+  <h2 class="sec">Learn</h2>
+  <p>Interactive lessons that teach each unit step by step.</p>
+  <!-- To add a tutorial: put learn.html in the unit's game folder, then add a card below. -->
+  <ul class="games">
+    <li>
+      <a class="game learn" href="area_and_surface_area/learn.html">
+        <p class="eyebrow">Grade 6 · Unit 1 · Area &amp; Surface Area</p>
+        <h2>Area &amp; Surface Area</h2>
+        <p>Slide shapes into rectangles, turn triangles into parallelograms, and fold 3D nets.</p>
+        <span class="go">Start learning →</span>
+      </a>
+    </li>
+  </ul>
+
+  <h2 class="sec">Play</h2>
+  <p>Practice games with fresh problems every round.</p>
   <!-- To add a game: put it in its own folder with an index.html, then add a card below. -->
   <ul class="games">
     <li>
