@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Learn Equal Groups</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=JetBrains+Mono:wght@500;700&display=swap">
+<link rel="stylesheet" href="../../shared/theme.css?v=4796e910">
+<link rel="stylesheet" href="../../shared/learn.css?v=6a514fa1">
+<link rel="stylesheet" href="../../shared/k5.css?v=82be5938">
+<style>
+/* sharing plates, pairs, array rows and columns, square tiles, extra cubes, and the 1–20 number buttons */
+.lbl.dm{fill:var(--dim)}
+.plate{fill:rgba(170,205,255,.08);stroke:var(--chalk);stroke-width:2.5}
+.pairbox{fill:none;stroke:rgba(170,205,255,.55);stroke-width:2}
+.band{fill:rgba(255,201,60,.14);stroke:var(--gold);stroke-width:2.5}
+.band.b{fill:rgba(127,227,255,.12);stroke:var(--cyan)}
+.tile{fill:var(--gold);stroke:#0a2340;stroke-width:1.5}
+.rim{fill:none;stroke:#fff;stroke-width:3}
+.cube.x{fill:var(--good)}
+.nums{display:grid;grid-template-columns:repeat(10,1fr);gap:6px;margin-bottom:12px}
+.nums button{min-height:52px;border-radius:10px;border:2px solid rgba(170,205,255,.4);background:#0a2340;color:var(--chalk);font:700 20px var(--mono)}
+.nums .ev{background:var(--gold);border-color:var(--gold);color:#1a1300}
+.nums .od{background:rgba(127,227,255,.25);border-color:var(--cyan)}
+.nums [aria-pressed="true"]{outline:3px solid #fff;outline-offset:2px}
+@media (max-width:560px){.nums{grid-template-columns:repeat(5,1fr)}}
+</style>
+</head>
+<body class="young">
+
+<div class="app">
+  <section id="home">
+    <a class="back" href="../">← Grade 2</a>
+    <header class="hero">
+      <p class="eyebrow">Learn · Illustrative Mathematics K–5 · Grade 2 · Unit 8</p>
+      <h1>Equal <span>Groups</span></h1>
+      <p class="lede">Short lessons you can play with. Share fairly and make pairs, find odd and even numbers, build arrays in rows and columns, and cut rectangles into squares, then check yourself. Tap <b>Read to me</b> to hear any step read aloud.</p>
+      <div class="stats"><span class="pill">Steps done <b id="hdone">0</b>/<span id="htot">0</span></span></div>
+    </header>
+    <div class="zones" id="chapters"></div>
+    <section class="grownups">
+      <h2>For grown-ups</h2>
+      <div><h4>How it works</h4><p>Five short chapters follow the unit’s lessons in order. Each step shows one idea with something to tap or move, then a quick check. A wrong answer names the likely mistake and gives one more try.</p></div>
+      <div><h4>Read to me</h4><p>The Read to me buttons read each step and quick check aloud with the device’s built-in voice, for students still learning to read. Progress is saved on this device.</p></div>
+      <div><h4>Numbers</h4><p>Odd and even numbers are within 20. Arrays have up to 5 rows and 5 columns, so every total is 25 or less and can be found by adding equal addends or counting on.</p></div>
+      <div><h4>The big idea</h4><p>An even number makes pairs, or two equal groups, with none left over: it’s a double, like 7 + 7. An odd number is a double and 1 more. An array has the same number in every row, so its total is a sum of equal addends, by rows or by columns. This is the start of multiplication in Grade 3.</p></div>
+      <div><h4>Not covered</h4><p>Patterns with Even and Odd Numbers (Lesson 5) and the Center Days (Lessons 6 and 13) are optional lessons that work better in class. There’s no practice game for this unit yet.</p></div>
+    </section>
+  </section>
+
+  <section id="lesson" hidden>
+    <div class="bar">
+      <a class="ghost-btn" href="#">← Chapters</a>
+      <div class="bar-mid"><div class="zn" id="cname"></div><div class="dots" id="dots"></div></div>
+    </div>
+    <article class="card">
+      <p class="eyebrow" id="snum"></p>
+      <h2 id="stitle"></h2>
+      <div class="sbody" id="sbody"></div>
+      <div id="widget"></div>
+      <div id="check"></div>
+      <div class="nav"><a class="ghost-btn" id="prev" href="#">← Back</a><button type="button" class="btn" id="next">Next →</button><span class="gate" id="gate"></span></div>
+    </article>
+  </section>
+</div>
+
+<script src="../../shared/util.js?v=dfcc3c50"></script>
+<script src="../../shared/figures.js?v=90a5b6ae"></script>
+<script src="../../shared/k5.js?v=a044a123"></script>
+<script src="../../shared/speak.js?v=b05e2ed3"></script>
+<script src="../../shared/learn.js?v=ce9dd4c5"></script>
+<script src="lessons.js?v=87f6d725"></script>
+<script>
+Learn.init({saveKey:'g2u8-learn',readAloud:true,icons:ICON,chapters:CH});
+</script>
+</body>
+</html>
