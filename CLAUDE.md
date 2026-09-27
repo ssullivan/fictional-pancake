@@ -14,11 +14,13 @@ Static HTML math games served with GitHub Pages at https://ssullivan.github.io/f
 | `area_and_surface_area/` | Blueprint Builders | Grade 6 Unit 1 |
 | `introducing_ratios/` | Mix Masters | Grade 6 Unit 2 |
 | `unit_rates_and_percentages/` | Rate Racers | Grade 6 Unit 3 |
+| `arithmetic_in_base_ten/` | Decimal Diner | Grade 6 Unit 5 |
 
-Games are aligned to Illustrative Mathematics (IM) 6–8 Math. The Unit 2 and 3 games share one engine (stations, 8 problems a round, 10/5 points, hints, `localStorage` save); build new games from `unit_rates_and_percentages/index.html`.
+Games are aligned to Illustrative Mathematics (IM) 6–8 Math. The Unit 2, 3, and 5 games share one engine (stations, 8 problems a round, 10/5 points, hints, `localStorage` save); build new games from `unit_rates_and_percentages/index.html`.
 
 When building a game:
 - Generated problems must make sense in the real world, not just compute (no part bigger than its whole, no 150% of a full tank, realistic amounts).
+- Keep numbers friendly enough to do in your head (basic facts, few nonzero digits, at most one regroup) so the concept is the challenge, not the arithmetic. Enforce these limits in the fuzz test too.
 - Fuzz-test every generator in Node before shipping (thousands of problems per station: no NaN/undefined, no duplicate choices, answer present, plus a check for each real-world constraint), and screenshot each station with headless Chrome, including one at phone width.
 - Skip open-ended lessons (Fermi problems, projects); say so in the game's "For grown-ups" section.
 - Avoid gendered pronouns for named students; reword instead.
