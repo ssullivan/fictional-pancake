@@ -1,0 +1,453 @@
+/* Decimal Diner (Grade 6 Unit 5): the problem generators, station list, and icons. Loaded by index.html and by tools/fuzz.mjs. */
+const r4=n=>Math.round(n*1e4)/1e4;
+const fmt=n=>r4(n).toLocaleString('en-US',{maximumFractionDigits:4});
+const money=n=>'$'+(Math.round(n*100)/100).toFixed(2);
+const cash=n=>Number.isInteger(n)?'$'+n:money(n);
+const S=p=>10**p;
+const toInt=(n,p)=>Math.round(n*S(p));
+/* decimal places and nonzero digits of a number as written */
+const places=n=>{const s=String(r4(n)),i=s.indexOf('.');return i<0?0:s.length-i-1;};
+const nz=n=>String(r4(n)).replace(/[^1-9]/g,'').length;
+const near=(x,y)=>Math.round(x*1e4)===Math.round(y*1e4);
+const WHO=['Lin','Andre','Priya','Diego','Jada','Noah','Mai','Kiran','Elena','Han'];
+const PN=['ones','tenths','hundredths','thousandths','ten-thousandths'];
+const PN1=['one','tenth','hundredth','thousandth','ten-thousandth'];
+const pn=(k,p)=>`${k} ${k===1?PN1[p]:PN[p]}`;
+
+/* Column-by-column add or subtract. n = regroups needed.
+   naive = the answer if you skip regrouping (add: drop the carry; subtract: smaller digit from bigger). */
+function colOps(a,b,sub){
+  const p=Math.max(places(a),places(b));let A=toInt(a,p),B=toInt(b,p),c=0,n=0,naive=0,k=1;
+  while(A||B){
+    const x=A%10,y=B%10;
+    if(sub){const d=x-y-c;c=d<0?1:0;naive+=Math.abs(x-y)*k;}
+    else{const s=x+y+c;c=s>=10?1:0;naive+=((x+y)%10)*k;}
+    n+=c;A=Math.floor(A/10);B=Math.floor(B/10);k*=10;
+  }
+  return {n,naive:naive/S(p)};
+}
+/* friendly prices: quarters, or dimes under $5 */
+const moneyOK=c=>Number.isInteger(c)&&(c%25===0||(c%10===0&&c<500));
+
+/* ---------- shared figures ---------- */
+function vertFig(a,b,op,{p=null,raw=false,res=null}={}){
+  return ()=>{
+    const P=p??Math.max(places(a),places(b));
+    const sa=raw?fmt(a):a.toFixed(P),sb=raw?fmt(b):b.toFixed(P),sr=res??'?';
+    const w=Math.max(sa.length,sb.length,sr.length)+1;
+    const rows=[`  ${sa.padStart(w)}`,`${op} ${sb.padStart(w)}`,`  ${'─'.repeat(w)}`,
+      res==null?`  ${' '.repeat(w-1)}<span class="q">?</span>`:`  <span class="bad">${sr.padStart(w)}</span>`];
+    return `<pre class="vert" role="img" aria-label="${sa} ${op} ${sb} written in columns">${rows.join('\n')}</pre>`;
+  };
+}
+/* base-ten diagram: strip = 0.1, small square = 0.01 */
+function blocksFig(gs){
+  return show=>{
+    let x=14,o='';const y0=20,H=100;
+    gs.forEach((g,gi)=>{
+      const gx=x;
+      for(let i=0;i<g.t;i++){o+=`<rect class="ic-a" x="${x}" y="${y0}" width="10" height="${H}"/>`;x+=16;}
+      x+=6;
+      for(let i=0;i<g.h;i++){const c=i%5,r=Math.floor(i/5);o+=`<rect class="ic-b" x="${x+c*16}" y="${y0+H-10-r*16}" width="10" height="10"/>`;}
+      x+=Math.min(5,g.h)*16;
+      if(show)o+=`<text class="ftxt big mid rev" x="${(gx+x)/2}" y="${y0+H+30}">${fmt(g.t/10+g.h/100)}</text>`;
+      if(gi<gs.length-1){o+=`<text class="ftxt big mid" x="${x+22}" y="${y0+H/2+7}">+</text>`;x+=46;}
+    });
+    return svgWrap(x+10,y0+H+44,o,'Base-ten diagram: strips are tenths, small squares are hundredths');
+  };
+}
+/* area diagram, not to scale */
+function areaFig(A,t,b){
+  return show=>{
+    const W=320,x0=44,y0=34,H=130,w1=W*.62,w2=W-w1;
+    let o=`<rect class="ic-a" x="${x0}" y="${y0}" width="${w1}" height="${H}"/><rect class="ic-b" x="${x0+w1}" y="${y0}" width="${w2}" height="${H}"/>`;
+    o+=`<text class="ftxt big mid" x="${x0+w1/2}" y="${y0-12}">${A}</text><text class="ftxt big mid" x="${x0+w1+w2/2}" y="${y0-12}">${fmt(t/10)}</text><text class="ftxt big mid" x="${x0-24}" y="${y0+H/2+7}">${b}</text>`;
+    if(show)o+=`<text class="ftxt big mid rev" x="${x0+w1/2}" y="${y0+H/2+7}">${A*b}</text><text class="ftxt big mid rev" x="${x0+w1+w2/2}" y="${y0+H/2+7}">${fmt(t*b/10)}</text>`;
+    return svgWrap(W+x0+14,y0+H+12,o,'Area diagram split into two rectangles');
+  };
+}
+/* 1 m by 1 m square in hundredths */
+function gridFig(d1,d2){
+  return (show,done)=>{
+    const c=22,x0=80,y0=30,N=10*c;let o='';
+    for(let i=0;i<10;i++)for(let j=0;j<10;j++)o+=`<rect class="${i<d1&&j>=10-d2?'shade':'cell'}" x="${x0+i*c}" y="${y0+j*c}" width="${c}" height="${c}"/>`;
+    o+=`<rect class="frame" x="${x0}" y="${y0}" width="${N}" height="${N}"/><rect class="frame" style="stroke:var(--gold)" x="${x0}" y="${y0+N-d2*c}" width="${d1*c}" height="${d2*c}"/>`;
+    o+=`<text class="ftxt mid" x="${x0+N/2}" y="${y0-10}">1 m</text><text class="ftxt mid" x="${x0+d1*c/2}" y="${y0+N+24}">${fmt(d1/10)} m</text><text class="ftxt" text-anchor="end" x="${x0-8}" y="${y0+N-d2*c/2+5}">${fmt(d2/10)} m</text>`;
+    if(show)o+=`<text class="ftxt rev" x="${x0+N+10}" y="${y0+20}">each</text><text class="ftxt rev" x="${x0+N+10}" y="${y0+40}">square</text><text class="ftxt rev" x="${x0+N+10}" y="${y0+60}">= 0.01</text>`;
+    if(done)o+=`<text class="ftxt rev" x="${x0+N+10}" y="${y0+N-28}">${d1*d2}</text><text class="ftxt rev" x="${x0+N+10}" y="${y0+N-8}">shaded</text>`;
+    return svgWrap(x0+N+90,y0+N+34,o,'Hundredths grid with a shaded rectangle');
+  };
+}
+/* partial quotients: hint shows the first chunk, the answer shows them all */
+function pqFig(N,d,chunks){
+  return (show,done)=>{
+    const L=String(N).length,ds=String(d),pad=' '.repeat(ds.length+3),mp=' '.repeat(ds.length+1)+'− ';
+    let rem=N;const lines=[`${ds} ) ${N}`];
+    const n=done?chunks.length:show?1:0;
+    for(let i=0;i<n;i++){const c=chunks[i],sub=c*d;rem-=sub;lines.push(`${mp}${String(sub).padStart(L)}   <span class="rev">${c} × ${d}</span>`,`${pad}${String(rem).padStart(L)}`);}
+    if(done)lines.push(`<span class="rev">${chunks.join(' + ')} = ${chunks.reduce((a,b)=>a+b)} groups</span>`);
+    return `<pre class="vert" role="img" aria-label="Partial quotients for ${N} divided by ${d}">${lines.join('\n')}</pre>`;
+  };
+}
+/* dividing past the ones place: leftovers become tenths, then hundredths */
+function longFig(X,n){
+  const q=Math.floor(X/n),steps=[`${n} × ${q} = ${n*q}, ${X-n*q} left over`];
+  let rem=X%n,p=0;
+  while(rem&&p<3){const v=rem*10,qd=Math.floor(v/n),r=v%n;steps.push(`${pn(rem,p)} = ${pn(v,p+1)}`,`${pn(v,p+1)} ÷ ${n} = ${pn(qd,p+1)}${r?`, ${r} left over`:''}`);rem=r;p++;}
+  return (show,done)=>{
+    const lines=[`${X} ÷ ${n} = <span class="q">?</span>`];
+    if(show)lines.push(...steps.slice(0,done?steps.length:2).map(s=>`<span class="rev">${s}</span>`));
+    if(done)lines.push(`${X} ÷ ${n} = ${fmt(X/n)}`);
+    return `<pre class="vert sm" role="img" aria-label="${X} divided by ${n}, step by step">${lines.join('\n')}</pre>`;
+  };
+}
+/* multiply both numbers in a division by the same power of ten */
+function scaleFig(a,b,s){
+  return show=>{
+    const k=S(s);let o=`<text class="ftxt big mid" x="90" y="34">${fmt(a)}</text><text class="ftxt big mid" x="170" y="34">÷</text><text class="ftxt big mid" x="250" y="34">${fmt(b)}</text>`;
+    if(show){
+      [90,250].forEach(x=>o+=`<line class="tick rev" x1="${x}" y1="46" x2="${x}" y2="80"/><polygon points="${x},92 ${x-7},80 ${x+7},80" style="fill:var(--cyan)"/><text class="ftxt rev" x="${x+12}" y="74">× ${k}</text>`);
+      o+=`<text class="ftxt big mid rev" x="90" y="122">${fmt(toInt(a,s))}</text><text class="ftxt big mid rev" x="170" y="122">÷</text><text class="ftxt big mid rev" x="250" y="122">${fmt(toInt(b,s))}</text>`;
+    }
+    return svgWrap(340,show?136:48,o,'Division scaled by '+k);
+  };
+}
+/* rows: [label, cents, when shown: 1 always · 'show' with hint · 'done' after answering] */
+function receiptFig(rows){
+  return (show,done)=>`<table class="rt" aria-label="Receipt"><tbody>${rows.map(([l,c,w,cls])=>`<tr class="${cls||''}"><td class="l">${l}</td><td>${(w===1||(w==='show'&&show)||done)?`<span${w===1?'':' style="color:var(--cyan)"'}>${money(c/100)}</span>`:'<span class="q">?</span>'}</td></tr>`).join('')}</tbody></table>`;
+}
+
+/* ---------- menu ---------- */
+const MENU=[
+  {n:'taco',pl:'tacos',c:[200,225,250,275]},
+  {n:'burrito',pl:'burritos',c:[450,475,500,525]},
+  {n:'grilled cheese',pl:'grilled cheeses',c:[325,350,375]},
+  {n:'fruit cup',pl:'fruit cups',c:[150,175,200]},
+  {n:'lemonade',pl:'lemonades',c:[125,140,150,175]},
+  {n:'bottle of water',pl:'bottles of water',c:[75,100,120]},
+  {n:'bag of chips',pl:'bags of chips',c:[75,90,100,125]},
+  {n:'cookie',pl:'cookies',c:[50,60,75]},
+  {n:'smoothie',pl:'smoothies',c:[350,375,400,425]},
+  {n:'veggie wrap',pl:'veggie wraps',c:[425,450,475]}
+];
+const BILLS=[5,10,20];
+const billFor=c=>BILLS.find(b=>b*100>c);
+function order2(){let a,b,ca,cb;do{[a,b]=shuffle(MENU);ca=pick(a.c);cb=pick(b.c);}while(colOps(ca/100,cb/100).n>1);return {a,b,ca,cb};}
+
+/* ---------- Station 1: add & subtract (Lessons 1–4) ---------- */
+const DIFF=[
+  {s:(w,a,b)=>`A bottle has ${a} liters of juice. ${w} pours out ${b} liters. How many liters are left?`,u:'liters',min:.5,max:2},
+  {s:(w,a,b)=>`A ribbon is ${a} meters long. ${w} cuts off ${b} meters. How many meters are left?`,u:'meters',min:1,max:5},
+  {s:(w,a,b)=>`A bag has ${a} kilograms of rice. ${w} uses ${b} kilograms. How many kilograms are left?`,u:'kilograms',min:1,max:3}
+];
+function genAdd(){
+  const type=pick(['blocks','total','total','change','diff','diff','error']),who=pick(WHO);
+  if(type==='blocks'){
+    let t1,h1,t2,h2;do{t1=R(1,5);t2=R(1,5);h1=R(1,9);h2=R(1,9);}while(h1+h2<10||t1+t2+1>9);
+    const A=(10*t1+h1)/100,B=(10*t2+h2)/100,T=t1+t2,H=h1+h2,sum=(10*T+H)/100;
+    return {kind:'num',unit:'',answer:sum,fig:blocksFig([{t:t1,h:h1},{t:t2,h:h2}]),
+      prompt:`Each strip is 0.1 and each small square is 0.01. What number do the two groups make <b>altogether</b>?`,
+      hint:`Count all the strips (tenths) and all the small squares (hundredths). 10 small squares make 1 strip, so bundle 10 of them.`,
+      misc:[[T/10+(H-10)/100,'You have 10 or more small squares. Bundle 10 of them into 1 more strip (0.1).'],[+`0.${T}${H}`,`${H} hundredths won’t fit in the hundredths place. Bundle 10 hundredths into 1 tenth.`]],
+      explain:`${fmt(A)} + ${fmt(B)} is ${T} tenths and ${H} hundredths. Bundle 10 hundredths into 1 tenth: ${T+1} tenths and ${H-10} hundredths = ${fmt(sum)}.`,
+      m:{t:type,nums:[A,B],ans:'num',regroup:colOps(A,B).n}};
+  }
+  if(type==='total'){
+    const {a,b,ca,cb}=order2(),t=ca+cb,op=colOps(ca/100,cb/100);
+    return {kind:'num',unit:'dollars',answer:t/100,fig:vertFig(ca/100,cb/100,'+',{p:2}),
+      prompt:`${who} orders a ${a.n} for ${money(ca/100)} and a ${b.n} for ${money(cb/100)}. What is the <b>total</b>?`,
+      hint:'Line up the decimal points and add each place: hundredths, tenths, then ones. If a place adds up to 10 or more, regroup it as 1 of the next place.',
+      misc:[[op.naive,'Check your regrouping. When a place adds up to 10 or more, carry 1 to the next place to the left.']],
+      explain:`${money(ca/100)} + ${money(cb/100)} = ${money(t/100)}.`,
+      m:{t:type,cash:[ca,cb],ans:'cash',regroup:op.n}};
+  }
+  if(type==='change'){
+    const o=order2(),two=Math.random()<.5,items=two?[[o.a,o.ca],[o.b,o.cb]]:[[o.a,o.ca]];
+    const t=items.reduce((s,x)=>s+x[1],0),bill=billFor(t),ch=bill*100-t,up=Math.ceil(t/100);
+    const list=items.map(([f,c])=>`a ${f.n} (${money(c/100)})`).join(' and ');
+    return {kind:'num',unit:'dollars',answer:ch/100,fig:vertFig(bill,t/100,'−',{p:2}),
+      prompt:`${who} buys ${list} and pays with a $${bill} bill. How much <b>change</b> does ${who} get?`,
+      hint:`${two?`Add to find the total first. Then c`:'C'}ount up from the total: first to the next whole dollar, then to $${bill}.`,
+      misc:[[colOps(bill,t/100,true).naive,`Watch the zeros in $${bill}.00. You can’t take a digit from 0 without regrouping, so regroup or count up instead.`],[t/100,'That’s the total. Change is what’s left of the bill.'],[bill+t/100,'Change means subtract: bill − total.']],
+      explain:`${two?`Total: ${money(o.ca/100)} + ${money(o.cb/100)} = ${money(t/100)}. `:''}${t%100?`Count up: ${money(t/100)} + ${money((up*100-t)/100)} = ${money(up)}, then + ${money(bill-up)} = ${money(bill)}. `:''}Change: ${money(bill)} − ${money(t/100)} = ${money(ch/100)}.`,
+      m:{t:type,cash:items.map(x=>x[1]),ans:'cash',total:t,bill}};
+  }
+  if(type==='diff'){
+    const c=pick(DIFF);let a,b,pa,pb,d,op;
+    do{pa=pick([1,2]);pb=3-pa;a=R(2,c.max*S(pa))/S(pa);b=R(1,pb===1?c.max*10:99)/S(pb);d=(toInt(a,2)-toInt(b,2))/100;op=colOps(a,b,true);}
+    while(places(a)!==pa||places(b)!==pb||nz(a)>2||nz(b)>2||a<c.min||b<.1||d<.1||nz(d)>2||op.n>1);
+    const short=pa===1?a:b;
+    return {kind:'num',unit:c.u,answer:d,fig:vertFig(a,b,'−',{p:2}),
+      prompt:c.s(who,fmt(a),fmt(b)),
+      hint:`Write ${fmt(short)} as ${short.toFixed(2)} so both numbers have hundredths. Line up the decimal points, then subtract place by place.`,
+      misc:[[op.naive,'In each place, subtract the bottom digit from the top digit. If the top digit is smaller, regroup from the place to the left.'],[(toInt(a,2)+toInt(b,2))/100,'That’s the sum. The question asks how much is left, so subtract.']],
+      explain:`${a.toFixed(2)} − ${b.toFixed(2)} = ${fmt(d)} ${c.u}.`,
+      m:{t:type,nums:[a,b],ans:'num',regroup:op.n,min:c.min,max:c.max}};
+  }
+  let a,b,w;
+  do{a=R(2,39)/10;b=R(1,299)/100;w=(toInt(a,1)+toInt(b,2))/100;}
+  while(places(a)!==1||places(b)!==2||nz(a)>2||nz(b)>2||colOps(a,b).n||colOps(toInt(a,1),toInt(b,2)).n||near(w,Math.abs(a-b)));
+  const sum=(toInt(a,2)+toInt(b,2))/100;
+  return {kind:'mc',stack:true,answer:'align',
+    choices:[{id:'align',label:`${who} lined up the last digits instead of the decimal points.`},{id:'regroup',label:`${who} forgot to regroup.`},{id:'op',label:`${who} subtracted instead of adding.`}],
+    why:{regroup:'No place adds up to 10 or more here, so there’s nothing to regroup. Look at where the decimal points are.',op:'Subtracting gives a different answer. Look at where the decimal points are.'},
+    fig:vertFig(a,b,'+',{raw:true,res:w.toFixed(2)}),
+    prompt:`${who} added ${fmt(a)} + ${fmt(b)} like this and got ${w.toFixed(2)}. <b>What went wrong?</b>`,
+    hint:'Tenths must line up with tenths and hundredths with hundredths. Are the decimal points in a straight column?',
+    explain:`Line up the decimal points: ${a.toFixed(2)} + ${fmt(b)} = ${fmt(sum)}.`,
+    m:{t:'error',nums:[a,b],regroup:0}};
+}
+
+/* ---------- Station 2: where the decimal point goes (Lessons 5–6) ---------- */
+const FACTS=[[12,4],[15,3],[25,4],[14,5],[16,3],[25,3],[12,6],[15,6],[18,5],[35,2],[45,2],[24,3],[12,8],[15,5],[16,5],[25,2]];
+const asFrac=(d,p)=>`${fmt(d/S(p))} = ${d} × 1/${S(p)}`;
+function genPoint(){
+  const type=pick(['place','place','word','fact','fact','size']);
+  if(type==='place'){
+    let d1,d2,p1,p2;do{d1=R(2,9);d2=R(2,9);p1=R(0,2);p2=R(0,2);}while(p1+p2<1||p1+p2>3);
+    const a=d1/S(p1),b=d2/S(p2),pr=d1*d2,E=p1+p2,ans=pr/S(E);
+    const es=shuffle([E-2,E-1,E+1,E+2].filter(e=>e>=0&&e<=4)).slice(0,3),all=[E,...es].sort((x,y)=>x-y);
+    const why={};es.forEach(e=>why['e'+e]=`${e<E?'Too big':'Too small'}. That’s ${pr} ${PN[e]}, but ${fmt(a)} × ${fmt(b)} is ${pr} ${PN[E]}.`);
+    const parts=[[d1,p1],[d2,p2]].filter(x=>x[1]).map(x=>asFrac(...x));
+    return {kind:'mc',choices:all.map(e=>({id:'e'+e,label:fmt(pr/S(e))})),answer:'e'+E,why,
+      prompt:`What is <b>${fmt(a)} × ${fmt(b)}</b>?`,
+      hint:`${d1} × ${d2} = ${pr}. Then ${parts.join(' and ')}. What size are the pieces when you multiply the fractions?`,
+      explain:`${d1} × ${d2} = ${pr}, and the pieces are ${PN[E]} (1/${S(E)}). ${pr} ${PN[E]} = ${fmt(ans)}.`,
+      m:{t:type,nums:[a,b]}};
+  }
+  if(type==='word'){
+    let d1,d2,p1,p2;do{d1=R(2,4);d2=R(2,4);p1=R(1,2);p2=R(1,2);}while(d1*d2>9||p1+p2>3);
+    const a=d1/S(p1),b=d2/S(p2),pr=d1*d2,E=p1+p2,why={};
+    [1,2,3,4].forEach(k=>{if(k!==E)why['u'+k]=`1/${S(p1)} × 1/${S(p2)} = 1/${S(E)}, so the pieces are ${PN[E]}, not ${PN[k]}.`;});
+    return {kind:'mc',choices:[1,2,3,4].map(k=>({id:'u'+k,label:PN[k]})),answer:'u'+E,why,
+      prompt:`${fmt(a)} × ${fmt(b)} is ${d1} ${PN[p1]} times ${d2} ${PN[p2]}. ${d1} × ${d2} = ${pr}. So the product is ${pr} <b>what</b>?`,
+      hint:`A ${PN1[p1]} is 1/${S(p1)} and a ${PN1[p2]} is 1/${S(p2)}. Multiply those fractions.`,
+      explain:`1/${S(p1)} × 1/${S(p2)} = 1/${S(E)}, so ${fmt(a)} × ${fmt(b)} = ${pr} ${PN[E]} = ${fmt(pr/S(E))}.`,
+      m:{t:type,nums:[a,b]}};
+  }
+  if(type==='fact'){
+    const [x,y]=pick(FACTS);let pa,pb;do{pa=R(0,2);pb=R(0,1);}while(pa+pb<1);
+    const a=x/S(pa),b=y/S(pb),xy=x*y,E=pa+pb,ans=xy/S(E);
+    const parts=[];if(pa)parts.push(`${fmt(a)} is ${x} ÷ ${S(pa)}`);if(pb)parts.push(`${fmt(b)} is ${y} ÷ ${S(pb)}`);
+    return {kind:'num',unit:'',answer:ans,
+      prompt:`${x} × ${y} = ${xy}. Use that to find <b>${fmt(a)} × ${fmt(b)}</b>.`,
+      hint:`${parts.join(' and ')}. So divide ${xy} by ${S(E)}.`,
+      misc:[[xy/S(E-1),'Close! Check how many times you divided by 10.'],[xy/S(E+1),'Close! Check how many times you divided by 10.'],[xy,`${fmt(a)} × ${fmt(b)} is not the same as ${x} × ${y}. Divide ${xy} by ${S(E)}.`]],
+      explain:`${xy} ÷ ${S(E)} = ${fmt(ans)}.`,
+      m:{t:type,nums:[a,b],ans:'num'}};
+  }
+  const n=pick([8,12,20,30,40,60]),m=pick([0.5,0.4,0.9,0.25,0.8,1.5,2.5,1.2]),less=m<1;
+  return {kind:'mc',choices:[{id:'less',label:`Less than ${n}`},{id:'more',label:`More than ${n}`},{id:'same',label:`Equal to ${n}`}],answer:less?'less':'more',
+    why:{less:`${fmt(m)} is more than 1, so ${fmt(m)} groups of ${n} is more than ${n}.`,more:`${fmt(m)} is less than 1, so you only get part of ${n}.`,same:`Only 1 × ${n} equals ${n}.`},
+    prompt:`Without multiplying: is <b>${fmt(m)} × ${n}</b> more or less than ${n}?`,
+    hint:`Is ${fmt(m)} more than 1 or less than 1? ${fmt(m)} × ${n} means ${fmt(m)} groups of ${n}.`,
+    explain:`${fmt(m)} × ${n} = ${fmt(m*n)}. Multiplying by a number ${less?'less':'more'} than 1 makes it ${less?'smaller':'bigger'}.`,
+    m:{t:'size',nums:[m]}};
+}
+
+/* ---------- Station 3: multiplying decimals (Lessons 7–8) ---------- */
+const PRODUCE=[{n:'apples',p:[2,3]},{n:'grapes',p:[3,4]},{n:'cheese',p:[6,8]},{n:'cherries',p:[4,6]},{n:'tomatoes',p:[2,4]},{n:'trail mix',p:[6,8]},{n:'bananas',p:[0.6,0.8]},{n:'carrots',p:[1.2,1.5]}];
+const AREA=[{n:'garden bed',bmax:4},{n:'patio',bmax:6},{n:'rug',bmax:3}];
+const PART={0.25:'a quarter',0.5:'half',0.75:'three quarters'};
+function genMul(){
+  const type=pick(['price','price','area','area','grid','grid']),who=pick(WHO);
+  if(type==='price'){
+    const it=pick(PRODUCE),p=pick(it.p),w=Number.isInteger(p)?pick([0.25,0.5,0.75,1.5,2.5]):pick([2,3,4,5]),cost=toInt(w*p,2)/100;
+    const W=Math.floor(w),f=w-W;
+    const hint=Number.isInteger(p)
+      ?(W?`${fmt(w)} = ${W} + ${fmt(f)}. Find ${W} × ${cash(p)} and ${fmt(f)} × ${cash(p)} (that’s ${PART[f]} of ${cash(p)}), then add.`:`${fmt(w)} pound is ${PART[w]} of a pound, so find ${PART[w]} of ${cash(p)}.`)
+      :`Think in cents: ${cash(p)} is ${toInt(p,2)} cents. What is ${w} × ${toInt(p,2)} cents?`;
+    return {kind:'num',unit:'dollars',answer:cost,
+      prompt:`${who} buys ${fmt(w)} pound${w===1?'':'s'} of ${it.n} at ${cash(p)} per pound. How much does it cost?`,hint,
+      misc:[[cost*10,'Too big. Check where the decimal point goes.'],[cost/10,'Too small. Check where the decimal point goes.'],[w+p,'Multiply the pounds by the price per pound.']],
+      explain:`${fmt(w)} × ${cash(p)} = ${money(cost)}.`,
+      m:{t:type,nums:[w],cash:[toInt(p,2)],ans:'cash'}};
+  }
+  if(type==='area'){
+    const c=pick(AREA);let A,t,b,ans;
+    do{A=R(1,4);t=R(1,9);b=R(2,c.bmax);ans=(10*A+t)*b/10;}while(nz(ans)>2||colOps(A*b,t*b/10).n>1);
+    const a=(10*A+t)/10;
+    return {kind:'num',unit:'square meters',answer:ans,fig:areaFig(A,t,b),
+      prompt:`A ${c.n} is ${fmt(a)} meters long and ${b} meters wide. What is its <b>area</b>?`,
+      hint:`Split ${fmt(a)} into ${A} + ${fmt(t/10)}. Find ${A} × ${b} and ${fmt(t/10)} × ${b}, then add.`,
+      misc:[[A*b,`That’s only ${A} × ${b}. Add the other piece: ${fmt(t/10)} × ${b}.`],[A*b+t*b,`${fmt(t/10)} × ${b} is ${t*b} tenths, which is ${fmt(t*b/10)}, not ${t*b}.`],[2*(10*A+t+10*b)/10,'That’s the perimeter. Area is length × width.']],
+      explain:`${A} × ${b} = ${A*b} and ${fmt(t/10)} × ${b} = ${fmt(t*b/10)}. ${A*b} + ${fmt(t*b/10)} = ${fmt(ans)} square meters.`,
+      m:{t:type,nums:[a,b],ans:'num',regroup:colOps(A*b,t*b/10).n}};
+  }
+  const d1=R(2,9),d2=R(2,9),ans=d1*d2/100;
+  return {kind:'num',unit:'square meters',answer:ans,fig:gridFig(d1,d2),
+    prompt:`The big square is 1 meter on each side. The shaded rectangle is ${fmt(d1/10)} m by ${fmt(d2/10)} m. What is its <b>area</b>?`,
+    hint:'Each small square is 0.1 m by 0.1 m, so its area is 0.01 square meters. How many small squares are shaded?',
+    misc:[[d1*d2/10,'Each small square is 0.01, not 0.1. It takes 100 of them to fill the big square.'],[d1*d2,'That’s the number of small squares. Each one is only 0.01 square meters.'],[(d1+d2)/10,'To find area, multiply the length by the width.'],[d1*d2/1000,'Too small. Each small square is 0.01.']],
+    explain:`${fmt(d1/10)} × ${fmt(d2/10)} = ${d1*d2} hundredths = ${fmt(ans)} square meters.`,
+    m:{t:'grid',nums:[d1/10,d2/10],ans:'num'}};
+}
+
+/* ---------- Station 4: dividing whole numbers (Lessons 9–11) ---------- */
+const PQ=[
+  {d:[12],max:600,s:(N,d)=>`A farm packs ${N} eggs into cartons of ${d}. How many cartons does it fill?`},
+  {d:[6,8,12,15],max:750,s:(N,d)=>`${N} chairs are set up in rows of ${d}. How many rows are there?`},
+  {d:[4,6,12],max:300,s:(N,d)=>`The food truck bakes ${N} muffins and packs them in boxes of ${d}. How many boxes?`},
+  {d:[4,5,8],max:500,s:(N,d)=>`${N} stickers come on sheets of ${d}. How many sheets are there?`}
+];
+const SHARE=[
+  {cash:1,max:40,s:(X,n)=>`${n} friends split a $${X} lunch bill equally. How much does each friend pay?`,u:'dollars'},
+  {max:15,s:(X,n)=>`${[8,11,18].includes(X)?'An':'A'} ${X}-meter rope is cut into ${n} equal pieces. How long is each piece?`,u:'meters'},
+  {max:8,s:(X,n)=>`${X} liters of lemonade is poured equally into ${n} pitchers. How many liters go in each pitcher?`,u:'liters'}
+];
+function shareNums(c){
+  let X,n,v;do{n=pick([2,4,5]);X=R(3,c.max);v=X/n;}while(X<n||Number.isInteger(v)||nz(v)>(c.cash?3:2)||(c.cash&&!moneyOK(toInt(v,2))));
+  return {X,n,v,q:Math.floor(X/n),r:X%n};
+}
+function genDiv(){
+  const type=pick(['pq','pq','pq','share','share','rem']);
+  if(type==='pq'){
+    const c=pick(PQ);let d,T,U,N;do{d=pick(c.d);T=R(1,4);U=R(1,9);N=d*(10*T+U);}while(N>c.max||N<60);
+    const q=10*T+U,left=N-10*T*d;
+    return {kind:'num',unit:'',answer:q,fig:pqFig(N,d,[10*T,U]),
+      prompt:c.s(N,d),
+      hint:`Take out an easy chunk first: ${10*T} groups of ${d} is ${10*T*d}. How many more groups of ${d} fit in what’s left?`,
+      misc:[[10*T,`${10*T} groups of ${d} only uses ${10*T*d}. There are ${left} left: keep going.`],[T+U,`The first chunk is ${10*T} groups, not ${T}.`],[N-d,`Divide: how many groups of ${d} fit in ${N}?`]],
+      explain:`${10*T} × ${d} = ${10*T*d}. ${N} − ${10*T*d} = ${left}. ${U} × ${d} = ${U*d}. ${10*T} + ${U} = ${q}.`,
+      m:{t:type,whole:[N,d],ans:'count'}};
+  }
+  const c=type==='rem'?pick(SHARE.slice(1)):pick(SHARE),{X,n,v,q,r}=shareNums(c);
+  const show=c.cash?money:fmt,rw=c.cash?`${r} dollar${r>1?'s':''}`:`${r} ${c.u.replace(/s$/,'')}${r>1?'s':''}`;
+  if(type==='rem'){
+    const why={dot:`The remainder is ${r} whole${r>1?'s':''}, not ${r} tenths. Split the ${r} into ${n} equal parts too: ${r} ÷ ${n} = ${fmt(r/n)}.`,hun:`The remainder is ${r} whole${r>1?'s':''}, not ${r} hundredths. ${r} ÷ ${n} = ${fmt(r/n)}.`};
+    return {kind:'mc',choices:shuffle([{id:'ok',label:fmt(v)},{id:'dot',label:fmt(q+r/10)},{id:'hun',label:fmt(q+r/100)}]),answer:'ok',why,fig:longFig(X,n),
+      prompt:`${X} ÷ ${n} is ${q} with ${r} left over. What is ${X} ÷ ${n} <b>as a decimal</b>?`,
+      hint:`The ${r} left over is ${r*10} tenths. Keep dividing: split the tenths into ${n} equal groups.`,
+      explain:`${q} with ${r} left over. ${r} ÷ ${n} = ${fmt(r/n)}, so ${X} ÷ ${n} = ${fmt(v)}.`,
+      m:{t:type,whole:[X,n]}};
+  }
+  return {kind:'num',unit:c.u,answer:v,fig:longFig(X,n),
+    prompt:c.s(X,n),
+    hint:`${X} ÷ ${n} is ${q} with ${rw} left over. Keep going: ${r} = ${r*10} tenths. Split those into ${n} equal groups.`,
+    misc:[[q+r/10,`${q} remainder ${r} is not ${q}.${r}. The ${rw} left over still has to be split ${n} ways.`],[q,`Don’t drop the ${rw} left over. Split it into tenths${c.cash?' (dimes)':''} and keep dividing.`],[X*n,'Splitting into equal parts means dividing.']],
+    explain:`${X} ÷ ${n} = ${q} with ${r} left over. ${r} ÷ ${n} = ${fmt(r/n)}. So each ${c.cash?'friend pays':'is'} ${show(v)}${c.cash?'':' '+c.u}.`,
+    m:{t:c.cash?'split':'share',whole:[X,n],ans:c.cash?'cash':'num',max:c.max}};
+}
+
+/* ---------- Station 5: dividing decimals (Lessons 12–13) ---------- */
+const DW=[
+  {max:6,u:'liters',s:(X,n)=>`${fmt(X)} liters of juice is poured equally into ${n} pitchers. How many liters go in each pitcher?`},
+  {max:5,u:'meters',s:(X,n)=>`A ${fmt(X)}-meter board is cut into ${n} equal pieces. How long is each piece?`},
+  {max:5,u:'dollars',cash:1,s:(X,n)=>`${n} pencils cost ${money(X)}. How much does one pencil cost?`}
+];
+const SC=[
+  {bs:[0.2,0.25,0.3,0.4,0.5],max:4,u:'cups',s:(a,b)=>`A jug holds ${fmt(a)} liters of lemonade. Each cup holds ${fmt(b)} liters. How many cups can be filled?`},
+  {bs:[0.2,0.25,0.3,0.4,0.5,0.6,0.75,0.8],max:6,u:'pieces',s:(a,b,w)=>`A ribbon is ${fmt(a)} meters long. ${w} cuts it into pieces that are ${fmt(b)} meters long. How many pieces?`},
+  {bs:[0.2,0.25,0.5],max:3,u:'snack bags',s:(a,b)=>`A bag holds ${fmt(a)} kilograms of trail mix. It is split into snack bags of ${fmt(b)} kilograms each. How many snack bags?`}
+];
+function scaleNums(){
+  const c=pick(SC);let b,k,a;do{b=pick(c.bs);k=R(2,12);a=toInt(k*b,2)/100;}while(a>c.max||a<1||nz(a)>2);
+  const s=Math.max(places(a),places(b));
+  return {c,a,b,k,s,A:toInt(a,s),B:toInt(b,s)};
+}
+function genDdiv(){
+  const type=pick(['dw','dw','scale','scale','same','bigger']);
+  if(type==='dw'){
+    const c=pick(DW);let d,n,X;do{d=R(2,9);n=R(2,9);X=d*n/10;}while(X>c.max||X<1||Number.isInteger(X));
+    const v=d/10,show=c.cash?money:fmt;
+    return {kind:'num',unit:c.u,answer:v,
+      prompt:c.s(X,n),
+      hint:`Think in tenths: ${fmt(X)} is ${d*n} tenths. ${d*n} tenths ÷ ${n} = how many tenths?`,
+      misc:[[d,`${fmt(X)} is ${d*n} tenths, so the answer is ${d} tenths, not ${d}.`],[d/100,'Too small. Check the decimal point.'],[X*n,'Splitting into equal parts means dividing.']],
+      explain:`${d*n} tenths ÷ ${n} = ${d} tenths, so ${show(X)} ÷ ${n} = ${show(v)}.`,
+      m:{t:type,nums:[X],ans:c.cash?'cash':'num',cash:c.cash?[toInt(X,2)]:[],max:c.max}};
+  }
+  const {c,a,b,k,s,A,B}=scaleNums();
+  if(type==='scale')return {kind:'num',unit:c.u,answer:k,fig:scaleFig(a,b,s),
+    prompt:c.s(a,b,pick(WHO)),
+    hint:`Multiply both numbers by ${S(s)}. ${fmt(a)} ÷ ${fmt(b)} has the same answer as ${fmt(A)} ÷ ${fmt(B)}.`,
+    misc:[[k/10,'Check the decimal point. Multiply both numbers by the same amount first.'],[k*10,'Multiply both numbers by the same amount, not just one of them.'],[a*b,`How many groups of ${fmt(b)} fit in ${fmt(a)}? That’s division.`]],
+    explain:`${fmt(a)} ÷ ${fmt(b)} = ${fmt(A)} ÷ ${fmt(B)} = ${k} ${c.u}.`,
+    m:{t:type,nums:[a,b],ans:'count',max:c.max}};
+  if(type==='same'){
+    const K=S(s);
+    return {kind:'mc',choices:shuffle([{id:'ok',label:`${fmt(A)} ÷ ${fmt(B)}`},{id:'top',label:`${fmt(A)} ÷ ${fmt(b)}`},{id:'bot',label:`${fmt(a)} ÷ ${fmt(B)}`},{id:'mix',label:`${fmt(A*10)} ÷ ${fmt(B)}`}]),answer:'ok',
+      why:{top:`Only ${fmt(a)} was multiplied by ${K}. Multiply both numbers by the same amount.`,bot:`Only ${fmt(b)} was multiplied by ${K}. Multiply both numbers by the same amount.`,mix:`${fmt(a)} was multiplied by ${K*10} but ${fmt(b)} by ${K}. Use the same number for both.`},
+      prompt:`Which has the <b>same answer</b> as ${fmt(a)} ÷ ${fmt(b)}?`,
+      hint:'If you multiply both numbers in a division by the same amount, the answer stays the same.',
+      explain:`Multiply both by ${K}: ${fmt(a)} ÷ ${fmt(b)} = ${fmt(A)} ÷ ${fmt(B)} = ${k}.`,
+      m:{t:type,nums:[a,b]}};
+  }
+  const n=pick([6,8,12,20]),m=pick([0.5,0.25,0.2,0.1,2,4]),more=m<1;
+  return {kind:'mc',choices:[{id:'more',label:`More than ${n}`},{id:'less',label:`Less than ${n}`},{id:'same',label:`Equal to ${n}`}],answer:more?'more':'less',
+    why:{more:`${n} ÷ ${fmt(m)} splits ${n} into ${fmt(m)} equal parts, so each part is less than ${n}.`,less:`How many ${fmt(m)}s fit in ${n}? Each one is less than 1, so more than ${n} of them fit.`,same:`Only ${n} ÷ 1 equals ${n}.`},
+    prompt:`Without dividing: is <b>${n} ÷ ${fmt(m)}</b> more or less than ${n}?`,
+    hint:`${n} ÷ ${fmt(m)} asks “how many ${fmt(m)}s fit in ${n}?” Is ${fmt(m)} more or less than 1?`,
+    explain:`${n} ÷ ${fmt(m)} = ${fmt(n/m)}. Dividing by a number ${more?'less':'more'} than 1 gives ${more?'more':'less'} than you started with.`,
+    m:{t:'bigger',nums:[m]}};
+}
+
+/* ---------- Station 6: multi-step orders (Lesson 14) ---------- */
+const PACKS=['granola bars','juice boxes','tortillas','bottles of water','muffins'];
+const US=[25,40,50,60,75,80,100,125,150],NS=[2,3,4,5,6,8,10,12];
+function genRush(){
+  const type=pick(['change','change','split','deal','deal','rate']),who=pick(WHO);
+  if(type==='change'){
+    let a,b,ca,cb,k,t;do{[a,b]=shuffle(MENU);ca=pick(a.c);cb=pick(b.c);k=R(2,3);t=k*ca+cb;}while(t>=2000);
+    const bill=billFor(t),ch=bill*100-t;
+    return {kind:'num',unit:'dollars',answer:ch/100,
+      fig:receiptFig([[`${k} × ${a.n} at ${money(ca/100)}`,k*ca,'show'],[`1 × ${b.n}`,cb,1],['Total',t,'show','tot'],['Paid',bill*100,1],['Change',ch,'done','tot']]),
+      prompt:`${who} orders ${k} ${a.pl} at ${money(ca/100)} each and a ${b.n} for ${money(cb/100)}, then pays with a $${bill} bill. How much <b>change</b> does ${who} get?`,
+      hint:`Step 1: ${k} × ${money(ca/100)}. Step 2: add the ${b.n}. Step 3: subtract the total from $${bill}.`,
+      misc:[[t/100,`That’s the total. Now find the change from $${bill}.`],[bill-(ca+cb)/100,`${k} ${a.pl} cost ${k} × ${money(ca/100)}, not just ${money(ca/100)}.`]],
+      explain:`${k} × ${money(ca/100)} = ${money(k*ca/100)}. ${money(k*ca/100)} + ${money(cb/100)} = ${money(t/100)}. ${money(bill)} − ${money(t/100)} = ${money(ch/100)}.`,
+      m:{t:'rchange',cash:[ca,cb],ans:'cash',total:t,bill}};
+  }
+  if(type==='split'){
+    let a,ca,k,n,t,c;do{a=pick(MENU.filter(x=>x.c[0]>=200));ca=pick(a.c);k=R(2,4);n=pick([2,3,4]);t=k*ca;c=t/n;}while(!moneyOK(c)||k<=n);
+    return {kind:'num',unit:'dollars',answer:c/100,
+      fig:receiptFig([[`${k} × ${a.n} at ${money(ca/100)}`,t,'show','tot'],[`Each of ${n} friends`,c,'done']]),
+      prompt:`${n} friends order ${k} ${a.pl} at ${money(ca/100)} each and split the cost equally. How much does each friend pay?`,
+      hint:`Find the whole bill first (${k} × ${money(ca/100)}), then split it into ${n} equal parts.`,
+      misc:[[t/100,`That’s the whole bill. Split it ${n} ways.`],[ca/100,`That’s the price of one ${a.n}. Find the whole bill, then split it.`],[ca/100/n,`Find the price of all ${k} ${a.pl} first.`]],
+      explain:`${k} × ${money(ca/100)} = ${money(t/100)}. ${money(t/100)} ÷ ${n} = ${money(c/100)}.`,
+      m:{t:'rsplit',cash:[ca],ans:'cash'}};
+  }
+  const item=pick(PACKS);
+  if(type==='deal'){
+    let uA,uB,nA,nB;const same=Math.random()<.15;
+    do{uA=pick(US);uB=same?uA:pick(US);nA=pick(NS);nB=pick(NS);}while(nA===nB||nA*uA>1500||nB*uB>1500||(!same&&Math.abs(uA-uB)<10)||!moneyOK(nA*uA)||!moneyOK(nB*uB));
+    const ans=uA===uB?'S':uA<uB?'A':'B',each=`Pack A costs ${money(uA/100)} each and Pack B costs ${money(uB/100)} each.`;
+    return {kind:'mc',choices:[{id:'A',label:'Pack A'},{id:'B',label:'Pack B'},{id:'S',label:'Same price each'}],answer:ans,
+      why:{A:each,B:each,S:each},
+      prompt:`Pack A: ${nA} ${item} for ${money(nA*uA/100)}. Pack B: ${nB} ${item} for ${money(nB*uB/100)}. Which is the <b>better deal</b>?`,
+      hint:`Find the price of 1 in each pack: divide the price by the number of ${item}.`,
+      explain:`A: ${money(nA*uA/100)} ÷ ${nA} = ${money(uA/100)} each. B: ${money(nB*uB/100)} ÷ ${nB} = ${money(uB/100)} each. ${ans==='S'?'They cost the same.':`Pack ${ans} costs less for each one.`}`,
+      m:{t:type,cash:[nA*uA,nB*uB,uA,uB]}};
+  }
+  let u,n1,n2;do{u=pick(US);n1=pick([2,3,4,5,6]);n2=R(2,10);}while(n1===n2||!moneyOK(n1*u)||!moneyOK(n2*u)||n2*u>2000);
+  return {kind:'num',unit:'dollars',answer:n2*u/100,
+    prompt:`${n1} ${item} cost ${money(n1*u/100)}. At that price, how much do ${n2} ${item} cost?`,
+    hint:`Find the price of 1 first: ${money(n1*u/100)} ÷ ${n1}. Then multiply by ${n2}.`,
+    misc:[[n1*u/100+(n2-n1),'Find the price of 1 first, then multiply. Don’t add.'],[u/100,`That’s the price of 1. Now multiply by ${n2}.`]],
+    explain:`${money(n1*u/100)} ÷ ${n1} = ${money(u/100)} each. ${n2} × ${money(u/100)} = ${money(n2*u/100)}.`,
+    m:{t:type,cash:[n1*u,u],ans:'cash'}};
+}
+
+/* ---------- stations ---------- */
+/* drop mistake values that happen to equal the answer */
+const fin=p=>{if(p.misc)p.misc=p.misc.filter(([x])=>isFinite(x)&&!near(x,p.answer));return p;};
+const ICON={
+  reg:'<rect x="14" y="6" width="36" height="52" rx="3" fill="rgba(255,201,60,.15)" stroke="#ffc93c" stroke-width="2.5"/><g stroke="#a9c4e4" stroke-width="2"><line x1="20" y1="17" x2="44" y2="17"/><line x1="20" y1="26" x2="44" y2="26"/><line x1="20" y1="35" x2="36" y2="35"/></g><text x="32" y="52" text-anchor="middle" font-family="JetBrains Mono,monospace" font-weight="700" font-size="11" fill="#7fe3ff">4.25</text>',
+  point:'<g fill="rgba(127,227,255,.15)" stroke="#7fe3ff" stroke-width="2"><rect x="4" y="30" width="16" height="24" rx="3"/><rect x="24" y="30" width="16" height="24" rx="3"/><rect x="44" y="30" width="16" height="24" rx="3"/></g><circle cx="22" cy="10" r="5" fill="#ffc93c"/><path d="M22,18 L22,26" stroke="#ffc93c" stroke-width="2.5" stroke-dasharray="3 3"/>',
+  weigh:'<line x1="32" y1="14" x2="32" y2="54" stroke="#f3f6fb" stroke-width="3"/><line x1="10" y1="18" x2="54" y2="18" stroke="#f3f6fb" stroke-width="3"/><path d="M3,34 L10,18 L17,34 Z" fill="rgba(255,201,60,.35)" stroke="#ffc93c" stroke-width="2"/><path d="M47,34 L54,18 L61,34 Z" fill="rgba(127,227,255,.3)" stroke="#7fe3ff" stroke-width="2"/><rect x="20" y="54" width="24" height="5" fill="#f3f6fb"/>',
+  share:'<circle cx="32" cy="32" r="24" fill="rgba(127,227,255,.15)" stroke="#7fe3ff" stroke-width="2.5"/><path d="M32,8 L32,56 M8,32 L56,32" stroke="#7fe3ff" stroke-width="2.5"/><path d="M32,32 L32,8 A24,24 0 0 1 56,32 Z" fill="rgba(255,201,60,.55)" stroke="#ffc93c" stroke-width="2.5"/>',
+  pour:'<path d="M8,14 L34,14 L32,52 L10,52 Z" fill="rgba(127,227,255,.2)" stroke="#7fe3ff" stroke-width="2.5"/><path d="M40,34 L56,34 L54,54 L42,54 Z" fill="rgba(255,201,60,.35)" stroke="#ffc93c" stroke-width="2.5"/><path d="M34,18 Q44,20 47,30" fill="none" stroke="#7fe3ff" stroke-width="2.5" stroke-dasharray="3 3"/>',
+  rush:'<circle cx="32" cy="36" r="20" fill="rgba(255,201,60,.12)" stroke="#ffc93c" stroke-width="3"/><line x1="32" y1="36" x2="32" y2="24" stroke="#f3f6fb" stroke-width="3" stroke-linecap="round"/><line x1="32" y1="36" x2="41" y2="40" stroke="#f3f6fb" stroke-width="3" stroke-linecap="round"/><rect x="27" y="8" width="10" height="6" rx="2" fill="#ffc93c"/>',
+  boss:'<rect x="6" y="6" width="52" height="52" rx="4" fill="none" stroke="#7fe3ff" stroke-width="2" stroke-dasharray="5 4"/><polygon points="32,12 38,26 53,27 41,37 45,52 32,43 19,52 23,37 11,27 26,26" fill="#ffc93c"/>'
+};
+const ZONES=[
+  {id:'reg',name:'Cash Register',lessons:'Lessons 1–4',blurb:'Add up orders and make change. Line up the decimal points and regroup.',gen:genAdd},
+  {id:'point',name:'Decimal Point Drop',lessons:'Lessons 5–6',blurb:'Tenths times hundredths makes what? Put the decimal point in the right place.',gen:genPoint},
+  {id:'weigh',name:'Weigh Station',lessons:'Lessons 7–8',blurb:'Price by the pound, area diagrams, and hundredths grids.',gen:genMul},
+  {id:'share',name:'Fair Share',lessons:'Lessons 9–11',blurb:'Partial quotients, and splitting leftovers into tenths.',gen:genDiv},
+  {id:'pour',name:'Pour & Cut',lessons:'Lessons 12–13',blurb:'Divide decimals by scaling: 1.8 ÷ 0.3 is the same as 18 ÷ 3.',gen:genDdiv},
+  {id:'rush',name:'Rush Order',lessons:'Lesson 14',blurb:'Multi-step orders: totals, change, splitting the bill, and the better deal.',gen:genRush},
+  {id:'boss',name:'Dinner Rush',lessons:'Whole unit · 10 problems',blurb:'A mixed review from every station. Aim for 3 stars.',gen:()=>pick([genAdd,genPoint,genMul,genDiv,genDdiv,genRush])()}
+];
+ZONES.forEach(z=>{const g=z.gen;z.gen=()=>fin(g());});

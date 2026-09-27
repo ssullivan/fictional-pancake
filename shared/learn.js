@@ -1,0 +1,114 @@
+/* Learn page framework: a home screen of chapters, steps with a widget and a quick check, and hash routing
+   (#c2s1 = chapter 2 step 1, #c2done = end of chapter 2). Progress is saved in localStorage.
+   Needs util.js. Screens and ids are in the page's HTML (#home, #lesson); styles are in learn.css.
+
+   Learn.init({
+     saveKey: 'g6u1-learn',       localStorage key; unique across the whole site
+     game: 'Blueprint Builders',  the unit's game (index.html next to learn.html)
+     icons: {iconId: '<svg markup, 64×64 viewBox>'},
+     chapters: [{
+       icon, title, lessons, blurb,
+       game: {zone, name},        the game zone to practice in at the end of the chapter (./#zone)
+       steps: [{
+         title, body,             body is HTML
+         widget?: el => cleanup?, draws into el; may return a function that runs when the step is left
+         check?: {kind: 'num', q, answer, unit?, misc?: [[wrong value, message]], explain, fig?}
+               | {kind: 'mc', q, answer, choices: [{id, label}], why: {id: message}, explain, fig?, stack?}
+       }]
+     }]
+   })
+   Next unlocks once a step's quick check is answered (steps without a check unlock right away). */
+const Learn=(()=>{
+  let cfg,CH,save,TOTAL,cleanupW=null;
+  /* ---------- quick checks ---------- */
+  const near=(a,b)=>Math.abs(a-b)<.011;
+  function renderCheck(el,c,onDone){
+    el.innerHTML=`<section class="check" aria-label="Quick check"><p class="eyebrow">Quick check</p><p class="cq">${c.q}</p>${c.fig?`<div class="fig">${c.fig}</div>`:''}<div data-a></div><div data-fb role="status" aria-live="polite"></div></section>`;
+    const q=Q(el),ans=q('a'),fb=q('fb');let tries=0,done=false;
+    if(c.kind==='num'){
+      ans.innerHTML=`<form class="ans" autocomplete="off"><label class="sr" for="cin">Your answer</label><input id="cin" inputmode="decimal" placeholder="?"><span class="unit">${c.unit||''}</span><button class="btn">Check</button></form>`;
+      ans.querySelector('form').addEventListener('submit',e=>{e.preventDefault();submit($('cin').value);});
+    }else{
+      ans.innerHTML=`<div class="choices${c.stack?' stack':''}">${c.choices.map(x=>`<button type="button" class="choice" data-c="${x.id}">${x.label}</button>`).join('')}</div>`;
+      ans.querySelectorAll('.choice').forEach(b=>b.addEventListener('click',()=>{if(!done&&!b.disabled)submit(b.dataset.c);}));
+    }
+    const mark=(id,cls)=>{const b=ans.querySelector(`.choice[data-c="${id}"]`);if(b){b.classList.add(cls);if(cls==='no')b.disabled=true;}};
+    function submit(v){
+      if(done)return;let ok,msg;
+      if(c.kind==='num'){
+        const n=parseNum(v);
+        if(isNaN(n)){fb.innerHTML='<div class="fb info"><p>Type a number first.</p></div>';return;}
+        ok=near(n,c.answer);
+        if(!ok){const m=(c.misc||[]).find(([x])=>near(n,x));msg=m?m[1]:'Not quite. Look at the picture again.';}
+      }else{ok=v===c.answer;if(!ok)msg=c.why[v]||'Not quite.';}
+      tries++;
+      if(ok){if(c.kind==='mc')mark(v,'yes');return end(true,tries===1?'Nice!':'Got it!','');}
+      if(c.kind==='mc')mark(v,'no');
+      if(tries<(c.kind==='mc'&&c.choices.length===2?1:2)){fb.innerHTML=`<div class="fb bad"><h4>Not yet</h4><p>${msg}</p><p>Try once more.</p></div>`;const i=$('cin');if(i)i.select();return;}
+      if(c.kind==='mc')mark(c.answer,'yes');
+      end(false,'Here’s how it works',msg);
+    }
+    function end(ok,title,msg){
+      done=true;ans.querySelectorAll('button').forEach(b=>b.disabled=true);ans.querySelectorAll('input').forEach(i=>i.readOnly=true);
+      fb.innerHTML=`<div class="fb ${ok?'good':'bad'}"><h4>${title}</h4>${msg?`<p>${msg}</p>`:''}<p class="work">${c.explain}</p></div>`;
+      onDone();
+    }
+  }
+
+  /* ---------- save & pages ---------- */
+  const persist=()=>{try{localStorage.setItem(cfg.saveKey,JSON.stringify(save));}catch(e){}};
+  const skey=(ci,si)=>`c${ci+1}s${si+1}`;
+  function show(id){['home','lesson'].forEach(s=>$(s).hidden=s!==id);window.scrollTo(0,0);}
+  function renderHome(){
+    $('hdone').textContent=Object.keys(save.steps).filter(k=>save.steps[k]).length;$('htot').textContent=TOTAL;
+    $('chapters').innerHTML=CH.map((c,ci)=>{
+      const d=c.steps.filter((_,si)=>save.steps[skey(ci,si)]).length,first=c.steps.findIndex((_,si)=>!save.steps[skey(ci,si)]);
+      return `<a class="zone" href="#c${ci+1}s${first<0?1:first+1}"><svg class="icon" viewBox="0 0 64 64" aria-hidden="true">${cfg.icons[c.icon]}</svg><p class="eyebrow">Chapter ${ci+1} · ${c.lessons}</p><h3>${c.title}</h3><p>${c.blurb}</p><span class="meta"><span class="prog${d===c.steps.length?' full':''}">${d===c.steps.length?'✓ Done':`${d}/${c.steps.length} steps`}</span><span class="go">${d?(d===c.steps.length?'Review →':'Continue →'):'Start →'}</span></span></a>`;
+    }).join('');
+  }
+  function dots(ci,si){
+    $('dots').innerHTML=CH[ci].steps.map((_,i)=>`<a href="#c${ci+1}s${i+1}" class="dot${i===si?' cur':''}${save.steps[skey(ci,i)]?' done':''}" aria-label="Step ${i+1}${save.steps[skey(ci,i)]?', done':''}"></a>`).join('');
+  }
+  function renderStep(ci,si){
+    const ch=CH[ci],st=ch.steps[si],key=skey(ci,si),last=si+1===ch.steps.length;
+    $('cname').textContent=`${ci+1}. ${ch.title}`;dots(ci,si);
+    $('snum').textContent=`Step ${si+1} of ${ch.steps.length} · ${ch.lessons}`;
+    $('stitle').textContent=st.title;$('sbody').innerHTML=st.body;
+    const w=$('widget');w.innerHTML='';w.hidden=!st.widget;
+    if(st.widget)cleanupW=st.widget(w)||null;
+    const next=$('next'),gate=$('gate');
+    const finish=()=>{save.steps[key]=1;persist();next.disabled=false;gate.textContent='';dots(ci,si);};
+    $('check').hidden=!st.check;$('check').innerHTML='';
+    if(st.check){renderCheck($('check'),st.check,finish);const ok=!!save.steps[key];next.disabled=!ok;gate.textContent=ok?'':'Answer the quick check to go on.';}
+    else{next.disabled=false;gate.textContent='';}
+    $('prev').href=si?`#c${ci+1}s${si}`:'#';$('prev').textContent=si?'← Back':'← Chapters';
+    next.textContent=last?'Finish chapter →':'Next →';
+    next.onclick=()=>{if(!st.check){save.steps[key]=1;persist();}location.hash=last?`#c${ci+1}done`:`#c${ci+1}s${si+2}`;};
+  }
+  function renderDone(ci){
+    const ch=CH[ci],nx=CH[ci+1];
+    $('cname').textContent=`${ci+1}. ${ch.title}`;dots(ci,-1);
+    $('snum').textContent=`Chapter ${ci+1} complete`;$('stitle').textContent='Nice work!';
+    $('sbody').innerHTML=`<p>You finished <b>${ch.title}</b>.</p><div class="practice"><p class="eyebrow">Practice it</p><a class="btn" href="./#${ch.game.zone}">Play ${ch.game.name} →</a><p>in ${cfg.game}, the game for this unit.</p></div>`;
+    $('widget').hidden=true;$('check').hidden=true;$('gate').textContent='';
+    $('prev').href=`#c${ci+1}s${ch.steps.length}`;$('prev').textContent='← Back';
+    const next=$('next');next.disabled=false;next.textContent=nx?`Next: ${nx.title} →`:'Back to chapters';
+    next.onclick=()=>{location.hash=nx?`#c${ci+2}s1`:'#';};
+  }
+  function route(){
+    if(cleanupW){try{cleanupW();}catch(e){}cleanupW=null;}
+    const m=location.hash.match(/^#c(\d+)(?:s(\d+)|(done))$/),ci=m?+m[1]-1:-1;
+    if(!CH[ci]){renderHome();show('home');return;}
+    if(m[3])renderDone(ci);else renderStep(ci,Math.min(Math.max(+m[2],1),CH[ci].steps.length)-1);
+    show('lesson');
+  }
+
+  function init(c){
+    cfg=c;CH=c.chapters;save={steps:{}};
+    try{const s=JSON.parse(localStorage.getItem(cfg.saveKey)||'null');if(s&&s.steps)save=s;}catch(e){}
+    TOTAL=CH.reduce((s,c)=>s+c.steps.length,0);
+    addEventListener('hashchange',route);
+    route();
+  }
+  return {init};
+})();
