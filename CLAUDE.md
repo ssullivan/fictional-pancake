@@ -1,6 +1,6 @@
 # Math games
 
-Static HTML math games served with GitHub Pages at https://ssullivan.github.io/fictional-pancake/ (from `main`, repo root). Grades so far: 2 (`grade2/`), 4 (`grade4/`, page skeleton only), and 6 (`grade6/`).
+Static HTML math games served with GitHub Pages at https://ssullivan.github.io/fictional-pancake/ (from `main`, repo root). Grades so far: 2 (`grade2/`), 3 (`grade3/`, page skeleton only), 4 (`grade4/`, page skeleton only), and 6 (`grade6/`).
 
 Maintainability comes first: anything two pages share belongs in `shared/`, not in copies.
 
