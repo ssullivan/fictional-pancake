@@ -394,7 +394,7 @@ function genEquiv(){
 function dnl(topL,botL,ticks,{ft=fmt,fb=fmt}={}){
   return show=>{
     const W=620,x0=34,x1=W-60,max=ticks[ticks.length-1].t,X=v=>x0+(x1-x0)*v/max,yT=62,yB=136;
-    let out=`<text class="ftxt" x="4" y="18">${topL}</text><text class="ftxt" x="4" y="192">${botL}</text>`;
+    let out=`<text class="ftxt" x="4" y="18">${topL}</text><text class="ftxt" x="4" y="202">${botL}</text>`;
     [yT,yB].forEach(y=>out+=`<line class="nl" x1="${x0-14}" y1="${y}" x2="${W-30}" y2="${y}"/><polygon class="nl-arrow" points="${W-18},${y} ${W-32},${y-7} ${W-32},${y+7}"/>`);
     ticks.forEach(k=>{
       const x=X(k.t),rt=k.st===2,rb=k.sb===2;
@@ -402,7 +402,7 @@ function dnl(topL,botL,ticks,{ft=fmt,fb=fmt}={}){
       if(k.q==='t')out+=qbox(x,yT-28);else if(k.st===1||(rt&&show))out+=`<text class="ftxt big mid${rt?' rev':''}" x="${x}" y="${yT-20}">${ft(k.t)}</text>`;
       if(k.q==='b')out+=qbox(x,yB+30);else if(k.sb===1||(rb&&show))out+=`<text class="ftxt big mid${rb?' rev':''}" x="${x}" y="${yB+36}">${fb(k.b)}</text>`;
     });
-    return svgWrap(W,204,out,'Double number line');
+    return svgWrap(W,212,out,'Double number line');
   };
 }
 function genDnl(){
