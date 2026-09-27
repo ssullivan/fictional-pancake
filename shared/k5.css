@@ -1,4 +1,4 @@
-/* Styles for shared/k5.js: ten-frames, cubes, base-ten blocks, tape diagrams, number lines, labels, and steppers on K–5 Learn pages.
+/* Styles for shared/k5.js: ten-frames, cubes, base-ten blocks, tape diagrams, number lines, labels, steppers, shapes, clocks, and money on K–5 pages.
    Load after learn.css. */
 /* ten-frames and cubes */
 .cell{fill:rgba(9,32,61,.6);stroke:rgba(243,246,251,.55);stroke-width:1.5}
@@ -69,3 +69,35 @@ table.pv td.hi{outline:3px solid #fff;outline-offset:-3px}
 .eq .q{background:var(--gold);color:#1a1300;border-radius:6px;padding:0 8px}
 .story{margin:0 0 10px;font-size:19px}
 .choice svg{max-height:130px}
+/* flat shapes (shapeAt), solid shapes (solidFig), equal parts (shareFig), and pattern blocks (pbFig) */
+.shp{fill:rgba(255,201,60,.28);stroke:var(--gold);stroke-width:3;stroke-linejoin:round}
+.shp.b{fill:rgba(127,227,255,.22);stroke:var(--cyan)}
+.sqc{fill:none;stroke:var(--chalk);stroke-width:2}
+.sf{stroke:#0a2340;stroke-width:2;stroke-linejoin:round}
+.sf.f{fill:#f0c24a}.sf.t{fill:#ffe08a}.sf.r{fill:#c99a26}
+.hid{stroke:var(--chalk);stroke-width:2.5;stroke-dasharray:6 5}
+.pc{fill:rgba(170,205,255,.1);stroke:var(--chalk);stroke-width:3;stroke-linejoin:round}
+.pc.on{fill:var(--gold)}
+.pb{stroke:#0a2340;stroke-width:2;stroke-linejoin:round}
+.pb.triangle{fill:#5fe0a8}.pb.rhombus{fill:#6f9bff}.pb.trapezoid{fill:#ff7b7b}.pb.hexagon{fill:var(--gold)}
+.pb.out{fill:none;stroke:var(--chalk);stroke-width:2.5;stroke-dasharray:7 5}
+/* clocks (clockFig) */
+.clk{fill:#f3f6fb;stroke:var(--gold);stroke-width:5}
+.clk-sh{fill:rgba(255,201,60,.55)}
+.clk-t{stroke:#0a2340;stroke-width:1.5}.clk-t.f{stroke-width:3.5}
+.clk-n{fill:#0a2340;font-family:var(--mono);font-weight:700;text-anchor:middle;dominant-baseline:central}
+.clk-h{stroke:#0a2340;stroke-width:9;stroke-linecap:round}
+.clk-m{stroke:#e0445e;stroke-width:5;stroke-linecap:round}
+.clk-c{fill:#0a2340}
+.dayam{fill:#ffe08a}.daypm{fill:#2a4f86;stroke:rgba(170,205,255,.4)}
+.lbl.dk{fill:#0a2340}
+/* picture rows (picRow): side by side, two to a row on a phone */
+.picrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;max-width:720px;margin:0 auto}
+/* coins and dollar bills (moneyFig) */
+.cn circle{stroke-width:2}
+.cn.ag circle{fill:#cdd6e1;stroke:#f3f6fb}.cn.cu circle{fill:#d9895a;stroke:#f5c6a5}
+.cn circle.in{fill:none;stroke:rgba(10,35,64,.3);stroke-width:1.5}
+.cn text{fill:#0a2340;font:700 10px var(--mono);text-anchor:middle;dominant-baseline:central}
+.bill rect{fill:#9fd8a8;stroke:#d8f5dd;stroke-width:2}
+.bill .in{fill:none;stroke:#2f6b3a;stroke-width:1.5}
+.bill text{fill:#1d4a26;font:800 22px var(--mono);text-anchor:middle;dominant-baseline:central}

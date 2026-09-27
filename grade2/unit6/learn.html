@@ -3,13 +3,21 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Learn the Number Line</title>
+<title>Learn Geometry, Time, and Money</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=JetBrains+Mono:wght@500;700&display=swap">
 <link rel="stylesheet" href="../../shared/theme.css?v=4796e910">
 <link rel="stylesheet" href="../../shared/learn.css?v=6a514fa1">
 <link rel="stylesheet" href="../../shared/k5.css?v=3171a21f">
+<style>
+/* the dot grid for drawing shapes, and the centimeter grid */
+.dotg{fill:var(--dim)}.dotg.first{fill:var(--gold);stroke:#fff1b8;stroke-width:2}
+.drawn{fill:none;stroke:var(--gold);stroke-width:4;stroke-linejoin:round;stroke-linecap:round}
+.gridl{stroke:rgba(170,205,255,.2);stroke-width:1}
+.pc[data-i]:hover{stroke:var(--gold)}
+.thumb[aria-pressed="true"]{border-color:var(--gold)}
+</style>
 </head>
 <body class="young">
 
@@ -17,19 +25,19 @@
   <section id="home">
     <a class="back" href="../">← Grade 2</a>
     <header class="hero">
-      <p class="eyebrow">Learn · Illustrative Mathematics K–5 · Grade 2 · Unit 4</p>
-      <h1>Adding &amp; Subtracting on the <span>Number Line</span></h1>
-      <p class="lede">Short lessons you can play with. Find numbers on a number line, compare and estimate, then add and subtract with jumps, then check yourself. Tap <b>Read to me</b> to hear any step read aloud.</p>
+      <p class="eyebrow">Learn · Illustrative Mathematics K–5 · Grade 2 · Unit 6</p>
+      <h1>Geometry, Time &amp; <span>Money</span></h1>
+      <p class="lede">Short lessons you can play with. Count sides and faces, cut shapes into halves, thirds, and fourths, tell time, and count coins and dollars, then check yourself. Tap <b>Read to me</b> to hear any step read aloud.</p>
       <div class="stats"><span class="pill">Steps done <b id="hdone">0</b>/<span id="htot">0</span></span></div>
     </header>
     <div class="zones" id="chapters"></div>
     <section class="grownups">
       <h2>For grown-ups</h2>
-      <div><h4>How it works</h4><p>Five short chapters follow the unit’s lessons in order. Each step shows one idea with something to tap or move, then a quick check. A wrong answer names the likely mistake and gives one more try.</p></div>
+      <div><h4>How it works</h4><p>Five short chapters follow the unit’s four sections in order. Each step shows one idea with something to tap or move, then a quick check. A wrong answer names the likely mistake and gives one more try.</p></div>
       <div><h4>Read to me</h4><p>The Read to me buttons read each step and quick check aloud with the device’s built-in voice, for students still learning to read. Progress is saved on this device.</p></div>
-      <div><h4>Numbers</h4><p>All numbers are within 100. Jumps stop at a ten on the way, or go by tens and then ones, so each problem needs at most one new or broken ten.</p></div>
-      <div><h4>The big idea</h4><p>On a number line, a number is a length from 0. Adding is a jump to the right, subtracting is a jump to the left, and the difference between two numbers is the distance between them.</p></div>
-      <div><h4>Not covered</h4><p>Center Days (Lessons 6 and 14) and Riddles (Lesson 15) are optional lessons that work better in class. There’s no practice game for this unit yet.</p></div>
+      <div><h4>Numbers</h4><p>Times are to the nearest 5 minutes. Money is in cents up to a dollar, and whole dollars, written like “$2 and 35¢” (no decimal points yet). Equal parts are only halves, thirds, and fourths of shapes.</p></div>
+      <div><h4>The big idea</h4><p>Shapes are named by their sides and corners, not by how they look. Equal parts must be the same size, but can be different shapes. Clocks and coins are both about counting by groups: 5 minutes a number, and 25, 10, 5, or 1 cent a coin.</p></div>
+      <div><h4>Not covered</h4><p>Center Days (Lessons 5, 10, 14, and 20) and Pattern Block Puzzles (Lesson 21) are optional lessons that work better in class. Practice it all in <a href="./">Clockwork Carnival</a>, the game for this unit.</p></div>
     </section>
   </section>
 
@@ -54,9 +62,9 @@
 <script src="../../shared/k5.js?v=28899186"></script>
 <script src="../../shared/speak.js?v=b05e2ed3"></script>
 <script src="../../shared/learn.js?v=b83d1493"></script>
-<script src="lessons.js?v=501d8a75"></script>
+<script src="lessons.js?v=5d4657d2"></script>
 <script>
-Learn.init({saveKey:'g2u4-learn',readAloud:true,icons:ICON,chapters:CH});
+Learn.init({saveKey:'g2u6-learn',game:'Clockwork Carnival',readAloud:true,icons:ICON,chapters:CH});
 </script>
 </body>
 </html>

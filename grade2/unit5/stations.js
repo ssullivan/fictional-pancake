@@ -1,16 +1,8 @@
 /* Dragon Duel (Grade 2 Unit 5): the problem generators, station list, and icons. Loaded by index.html and by tools/fuzz.mjs.
-   Base-ten diagrams, number names, place-value charts, and number lines come from shared/k5.js. */
+   Base-ten diagrams, number names, place-value charts, and number lines come from shared/k5.js; mcOf and miscOf from shared/util.js. */
 const place=['hundreds','tens','ones'];
 const say=(n,w)=>`${n} ${n===1?w.replace(/s$/,''):w}`;
 const htoSay=(h,t,o)=>`${say(h,'hundreds')}, ${say(t,'tens')}, ${say(o,'ones')}`;
-/* wrong answers with their messages, leaving out any that equal the answer or repeat */
-const miscOf=(answer,list)=>list.filter(([v],i)=>v!==answer&&list.findIndex(([w])=>w===v)===i);
-/* choices a, b, c in random order from [[label, message or null for the answer], …] */
-function mcOf(list,extra={}){
-  const ids=shuffle(['a','b','c']).slice(0,list.length),why={};let answer;
-  const choices=list.map(([label,msg],i)=>{if(msg===null)answer=ids[i];else why[ids[i]]=msg;return {id:ids[i],label};}).sort((x,y)=>x.id<y.id?-1:1);
-  return {kind:'mc',choices,answer,why,...extra};
-}
 /* a three-digit number; zero: its tens or ones digit is 0 */
 function num3(zero=Math.random()<.35){
   const h=R(1,9);let t=R(1,9),o=R(1,9);
