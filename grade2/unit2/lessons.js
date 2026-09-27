@@ -1,5 +1,5 @@
 /* Learn Adding and Subtracting within 100 (Grade 2 Unit 2): figures, widgets, and the chapters. Loaded by learn.html.
-   Ten-frames, base-ten blocks, tape diagrams, and the controls come from shared/k5.js. */
+   Ten-frames, base-ten blocks, tape diagrams, jumps, and the controls come from shared/k5.js. */
 const tensOf=n=>Math.floor(n/10);
 
 /* ---------- figures ---------- */
@@ -15,18 +15,6 @@ function bpic(items,label){
 }
 /* one number as blocks, t tens and u ones (u can be more than 9 after breaking a ten) */
 const tu=(t,u,label=`${t} tens and ${u} ones`)=>bpic([{t,u}],label);
-/* Counting on or back in jumps: start, then moves like [-3,-5,-10]. shown: how many jumps to draw. */
-function jumps(start,moves,shown=moves.length){
-  const G=96,R=24,Y=78,W=2*R+moves.length*G+16;let o='',v=start;
-  const node=(i,val)=>`<circle class="jn${i?'':' st'}" cx="${8+R+i*G}" cy="${Y}" r="${R}"/><text class="lbl" x="${8+R+i*G}" y="${Y}">${val}</text>`;
-  o+=node(0,start);
-  moves.slice(0,shown).forEach((d,i)=>{
-    const x0=8+R+i*G,x1=x0+G;v+=d;
-    o+=`<path class="jarc" d="M${x0+8},${Y-R} Q${(x0+x1)/2},${Y-R-52} ${x1-8},${Y-R}"/><polygon class="jhead" points="${x1-8},${Y-R} ${x1-18},${Y-R-8} ${x1-4},${Y-R-12}"/><text class="lbl cy" x="${(x0+x1)/2}" y="${Y-R-34}">${d>0?'+':'−'}${Math.abs(d)}</text>`+node(i+1,v);
-  });
-  return svgWrap(W,Y+R+6,o,`Jumps from ${start}: `+moves.slice(0,shown).map(d=>(d>0?'plus ':'minus ')+Math.abs(d)).join(', '));
-}
-
 /* ---------- Chapter 1: add and subtract to compare ---------- */
 const BEADS=[[47,25],[38,16],[56,34]];
 function wCompare(el){

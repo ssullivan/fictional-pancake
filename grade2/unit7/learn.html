@@ -3,13 +3,20 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Learn Numbers to 1,000</title>
+<title>Learn Adding &amp; Subtracting within 1,000</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=JetBrains+Mono:wght@500;700&display=swap">
 <link rel="stylesheet" href="../../shared/theme.css?v=4796e910">
 <link rel="stylesheet" href="../../shared/learn.css?v=6a514fa1">
 <link rel="stylesheet" href="../../shared/k5.css?v=82be5938">
+<style>
+/* column names on the place-value mat, and lines of an equation worked by place */
+.lbl.dm{fill:var(--dim)}
+.bp{padding:4px 8px}
+.bp .eq{font-size:22px}
+.bp .eq b{color:var(--gold)}
+</style>
 </head>
 <body class="young">
 
@@ -17,9 +24,9 @@
   <section id="home">
     <a class="back" href="../">← Grade 2</a>
     <header class="hero">
-      <p class="eyebrow">Learn · Illustrative Mathematics K–5 · Grade 2 · Unit 5</p>
-      <h1>Numbers to <span>1,000</span></h1>
-      <p class="lede">Short lessons you can play with. Make hundreds from tens, build and name three-digit numbers, write them in expanded form, and find, compare, and order them, then check yourself. Tap <b>Read to me</b> to hear any step read aloud.</p>
+      <p class="eyebrow">Learn · Illustrative Mathematics K–5 · Grade 2 · Unit 7</p>
+      <h1>Adding &amp; Subtracting <span>within 1,000</span></h1>
+      <p class="lede">Short lessons you can play with. Jump by hundreds, tens, and ones, add and subtract by place, make a new ten or hundred, and break a ten or hundred to subtract, then check yourself. Tap <b>Read to me</b> to hear any step read aloud.</p>
       <div class="stats"><span class="pill">Steps done <b id="hdone">0</b>/<span id="htot">0</span></span></div>
     </header>
     <div class="zones" id="chapters"></div>
@@ -27,9 +34,9 @@
       <h2>For grown-ups</h2>
       <div><h4>How it works</h4><p>Five short chapters follow the unit’s lessons in order. Each step shows one idea with something to tap or move, then a quick check. A wrong answer names the likely mistake and gives one more try.</p></div>
       <div><h4>Read to me</h4><p>The Read to me buttons read each step and quick check aloud with the device’s built-in voice, for students still learning to read. Progress is saved on this device.</p></div>
-      <div><h4>Numbers</h4><p>All numbers are within 1,000. The blocks are base-ten diagrams: a big square is a hundred, a stick is a ten, and a small square is a one. There’s no adding or subtracting in this unit; that comes in Unit 7.</p></div>
-      <div><h4>The big idea</h4><p>10 ones make a ten and 10 tens make a hundred, so each digit’s place tells what it’s worth. The same number can be built different ways, like 3 hundreds and 14 tens for 440.</p></div>
-      <div><h4>Not covered</h4><p>Center Days (Lessons 7 and 13) and Hundreds of Objects (Lesson 14) are optional lessons that work better in class. Practice it all in <a href="./">Dragon Duel</a>, the game for this unit.</p></div>
+      <div><h4>Numbers</h4><p>All numbers are within 1,000, shown with base-ten blocks (a big square is a hundred, a stick is a ten, a small square is a one) and open number lines, which show jumps but aren’t drawn to scale. Quick checks that ask for an answer need at most one new ten or hundred, or one broken ten or hundred. Problems that need two trades (Lessons 9 and 15) are done with blocks one trade at a time, and their quick checks ask what needs to happen instead.</p></div>
+      <div><h4>The big idea</h4><p>Add and subtract like units: hundreds with hundreds, tens with tens, ones with ones. 10 ones make a ten and 10 tens make a hundred, so a ten or a hundred can be traded when there are too many or too few. Before subtracting, look at the numbers: if they’re close, counting on is often quicker.</p></div>
+      <div><h4>Not covered</h4><p>Center Days (Lessons 5, 11, and 17) and Paint Splattered Bar Graph (Lesson 18) are optional lessons that work better in class. There’s no practice game for this unit yet.</p></div>
     </section>
   </section>
 
@@ -54,9 +61,9 @@
 <script src="../../shared/k5.js?v=a044a123"></script>
 <script src="../../shared/speak.js?v=b05e2ed3"></script>
 <script src="../../shared/learn.js?v=b83d1493"></script>
-<script src="lessons.js?v=34406348"></script>
+<script src="lessons.js?v=d7e71103"></script>
 <script>
-Learn.init({saveKey:'g2u5-learn',game:'Dragon Duel',readAloud:true,icons:ICON,chapters:CH});
+Learn.init({saveKey:'g2u7-learn',readAloud:true,icons:ICON,chapters:CH});
 </script>
 </body>
 </html>

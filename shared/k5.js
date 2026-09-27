@@ -12,6 +12,7 @@
    tapes(rows, {diff})               tape diagram comparing two amounts
    partWhole(parts, total)           one tape split into parts, with the total above
    numLine(lo, hi, {…})              a number line with arrows, jumps, dots, and tappable ticks (svg)
+   jumps(start, moves, shown, ask)   an open number line: counting on or back in jumps, not drawn to scale (svg)
    hto(x, y, h, t, o, {cls, tr}), htoFig(h, t, o, opt, label)   small base-ten diagrams with hundreds; numBlocks(n) draws n
    digits(n), numWords(n)            [hundreds, tens, ones] of n, and its name ("four hundred six")
    pvChart(rows, hi)                 a hundreds-tens-ones chart (html table)
@@ -147,6 +148,19 @@ function numLine(lo,hi,{u=Math.min(18,380/(hi-lo)),step=1,big=5,lab=v=>v%big===0
   pts.forEach(({v,cls='',t})=>{o+=`<circle class="pt ${cls}" cx="${x(v)}" cy="${Y}" r="7"/>`+(t!=null?`<text class="${L} ${cls==='b'?'cy':'gd'}" x="${x(v)}" y="${Y+22}">${t}</text>`:'');});
   if(tap)range(Math.round((hi-lo)/step)+1).forEach(i=>{const v=lo+i*step,at=`x="${x(v)-step*u/2}" y="${Y-34}" width="${step*u}" height="66"`;o+=tap==='cand'?`<rect class="cand hit" data-id="${v}" tabindex="0" role="button" aria-label="Tick mark ${i+1}" ${at}/>`:`<rect class="hit" data-v="${v}" ${at}/>`;});
   return svgWrap(X*2+(hi-lo)*u+(end?26:0),Y+32,o,label);
+}
+
+/* Counting on or back in jumps, not drawn to scale: start, then moves like [-3,-5,-10]. shown: how many jumps to draw.
+   ask: the last number is a ?. */
+function jumps(start,moves,shown=moves.length,ask=false){
+  const G=96,R=24,Y=78,W=2*R+moves.length*G+16,end=moves.slice(0,shown).reduce((s,d)=>s+d,start);let o='',v=start;
+  const node=(i,val)=>`<circle class="jn${i?'':' st'}" cx="${8+R+i*G}" cy="${Y}" r="${R}"/><text class="lbl${ask&&i===shown?' cy':''}" x="${8+R+i*G}" y="${Y}">${ask&&i===shown?'?':val}</text>`;
+  o+=node(0,start);
+  moves.slice(0,shown).forEach((d,i)=>{
+    const x0=8+R+i*G,x1=x0+G;v+=d;
+    o+=`<path class="jarc" d="M${x0+8},${Y-R} Q${(x0+x1)/2},${Y-R-52} ${x1-8},${Y-R}"/><polygon class="jhead" points="${x1-8},${Y-R} ${x1-18},${Y-R-8} ${x1-4},${Y-R-12}"/><text class="lbl cy" x="${(x0+x1)/2}" y="${Y-R-34}">${d>0?'+':'−'}${Math.abs(d)}</text>`+node(i+1,v);
+  });
+  return svgWrap(W,Y+R+6,o,`Jumps from ${start}: `+moves.slice(0,shown).map(d=>(d>0?'plus ':'minus ')+Math.abs(d)).join(', ')+(shown?(ask?', landing on a question mark':`, landing on ${end}`):''));
 }
 
 /* Base-ten diagrams small enough for hundreds: a hundred is a 10 × 10 square, a ten a stick of 10, a one a small square (BT pixels each). */

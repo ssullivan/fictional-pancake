@@ -30,6 +30,8 @@
 .flat rect{fill:var(--gold);stroke:rgba(10,35,64,.8);stroke-width:1}
 .flat line{stroke:rgba(10,35,64,.35);stroke-width:.8}
 .flat.new rect{fill:var(--good);stroke:#fff;stroke-width:2.5}
+.flat.b rect{fill:var(--cyan)}
+.flat.gone{opacity:.3}
 .rod.tr rect{fill:var(--good)}
 .unit1.c{fill:var(--good)}
 .fade{opacity:.2}
@@ -53,6 +55,11 @@
 .hop.q{stroke:var(--cyan)}
 .pt{fill:var(--gold);stroke:#fff1b8;stroke-width:2}
 .pt.b{fill:var(--cyan);stroke:#d6f6ff}
+/* open number lines (jumps) */
+.jn{fill:rgba(9,32,61,.9);stroke:var(--cyan);stroke-width:2.5}
+.jn.st{stroke:var(--gold)}
+.jarc{fill:none;stroke:var(--cyan);stroke-width:2.5}
+.jhead{fill:var(--cyan)}
 .lbl{fill:var(--chalk);font:700 17px var(--mono);text-anchor:middle;dominant-baseline:central}
 .lbl.s{font-size:14px}.lbl.big{font-size:30px}.lbl.cy{fill:var(--cyan)}.lbl.gd{fill:var(--gold)}.lbl.st{text-anchor:start}.lbl.en{text-anchor:end}
 /* place-value charts (pvChart) */
