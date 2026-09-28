@@ -1,4 +1,5 @@
-/* Styles for shared/k5.js: ten-frames, cubes, base-ten blocks, tape diagrams, number lines, labels, steppers, shapes, clocks, and money on K–5 pages.
+/* Styles for shared/k5.js: ten-frames, cubes, base-ten blocks, tape diagrams, number lines, labels, steppers, shapes, clocks, money,
+   and factor pictures on K–5 pages.
    Load after learn.css. */
 /* ten-frames and cubes */
 .cell{fill:rgba(9,32,61,.6);stroke:rgba(243,246,251,.55);stroke-width:1.5}
@@ -61,7 +62,7 @@
 .jarc{fill:none;stroke:var(--cyan);stroke-width:2.5}
 .jhead{fill:var(--cyan)}
 .lbl{fill:var(--chalk);font:700 17px var(--mono);text-anchor:middle;dominant-baseline:central}
-.lbl.s{font-size:14px}.lbl.big{font-size:30px}.lbl.cy{fill:var(--cyan)}.lbl.gd{fill:var(--gold)}.lbl.st{text-anchor:start}.lbl.en{text-anchor:end}
+.lbl.s{font-size:14px}.lbl.big{font-size:30px}.lbl.cy{fill:var(--cyan)}.lbl.dm{fill:var(--dim)}.lbl.gd{fill:var(--gold)}.lbl.st{text-anchor:start}.lbl.en{text-anchor:end}
 /* place-value charts (pvChart) */
 table.pv{border-collapse:collapse;margin:0 auto 12px;font:700 22px var(--mono)}
 table.pv th{color:var(--dim);font-size:14px;padding:6px 10px}
@@ -108,3 +109,30 @@ table.pv td.hi{outline:3px solid #fff;outline-offset:-3px}
 .bill rect{fill:#9fd8a8;stroke:#d8f5dd;stroke-width:2}
 .bill .in{fill:none;stroke:#2f6b3a;stroke-width:1.5}
 .bill text{fill:#1d4a26;font:800 22px var(--mono);text-anchor:middle;dominant-baseline:central}
+/* factors and multiples: hops of n (hopLine: r red, b blue), tiles, number charts, and lockers */
+.tick.mn{stroke:rgba(243,246,251,.4);stroke-width:1.5}
+.land{fill:var(--gold)}
+.hop.r{stroke:#ff7b7b}.land.r{fill:#ff7b7b}
+.hop.b{stroke:var(--cyan)}.land.b{fill:var(--cyan)}
+.mark{fill:var(--cyan)}
+.ftile{fill:rgba(255,201,60,.55);stroke:#0a2340;stroke-width:1}
+.ftile.left{fill:rgba(255,154,134,.65)}
+.hc rect{fill:rgba(9,32,61,.6);stroke:rgba(243,246,251,.35);stroke-width:1}
+.hc.a rect{fill:rgba(255,201,60,.5)}
+.hc.b rect{fill:rgba(127,227,255,.4)}
+.hc.ab rect{fill:var(--good)}
+.hc.ab text{fill:#0a2340}
+.hc.one rect{fill:rgba(169,196,228,.25)}
+.hc.cur rect{stroke:#fff;stroke-width:3}
+.hc.cand{cursor:pointer}
+.hc.cand:hover rect{stroke:var(--gold);stroke-width:2}
+.hc.right rect{fill:var(--good);stroke:#fff;stroke-width:3}
+.hc.right text{fill:#0a2340}
+.hc.wrong rect{fill:rgba(255,154,134,.3);stroke:var(--bad);stroke-width:2}
+.hc.wrong{cursor:default}
+.lk{fill:rgba(127,227,255,.35);stroke:var(--cyan);stroke-width:1.5}
+.lk.open{fill:#061528}
+.lk.hi{stroke:var(--gold);stroke-width:3}
+.lk.sel{stroke:#fff;stroke-width:3}
+.door{fill:rgba(127,227,255,.6);stroke:var(--cyan);stroke-width:1}
+.vent{stroke:rgba(10,35,64,.6);stroke-width:2}

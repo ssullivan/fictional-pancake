@@ -1,6 +1,6 @@
 # Math games
 
-Static HTML math games served with GitHub Pages at https://ssullivan.github.io/fictional-pancake/ (from `main`, repo root). Grades so far: 2 (`grade2/`), 3 (`grade3/`, page skeleton only), 4 (`grade4/`, page skeleton only), and 6 (`grade6/`).
+Static HTML math games served with GitHub Pages at https://ssullivan.github.io/fictional-pancake/ (from `main`, repo root). Grades so far: 2 (`grade2/`), 3 (`grade3/`, page skeleton only), 4 (`grade4/`), and 6 (`grade6/`).
 
 Maintainability comes first: anything two pages share belongs in `shared/`, not in copies.
 
@@ -13,7 +13,7 @@ shared/                   used by every grade; each file's header comment docume
   game.css, engine.js     game screens and the game engine (Game.init)
   figures.css, figures.js double number lines, ratio tables, diagram styles
   learn.css, learn.js     Learn page screens and framework (Learn.init)
-  k5.css, k5.js           ten-frames, cubes, base-ten blocks, tape diagrams, number lines, shapes, clocks, coins, steppers: K–5 pages
+  k5.css, k5.js           ten-frames, cubes, base-ten blocks, tape diagrams, number lines, shapes, clocks, coins, factor pictures, steppers: K–5 pages
   landing.css             grade cards (root page) and unit cards (grade pages)
   util.js                 R, pick, shuffle, miscOf, mcOf, gcd, lcm, $, Q, parseNum
   speak.js                Read to me buttons for K–2 Learn pages and games (readAloud)
@@ -39,7 +39,7 @@ grade6/
 
 ## Building games
 
-Games are aligned to Illustrative Mathematics (IM): IM K–5 Math for Grades K–5, IM 6–8 Math for Grades 6–8. Each grade's `CLAUDE.md` has its curriculum reference and any rules for that age. Every game runs on `shared/engine.js` (stations, 8 problems a round and 10 for the boss, 10/5 points, hints, stars in `localStorage`, `#<zone id>` links). To build one, copy `grade6/unit3/` (index.html, stations.js, checks.js), or `grade2/unit5/` for K–2 (read aloud, young styles, K–5 pictures), then:
+Games are aligned to Illustrative Mathematics (IM): IM K–5 Math for Grades K–5, IM 6–8 Math for Grades 6–8. Each grade's `CLAUDE.md` has its curriculum reference and any rules for that age. Every game runs on `shared/engine.js` (stations, 8 problems a round and 10 for the boss, 10/5 points, hints, stars in `localStorage`, `#<zone id>` links). To build one, copy `grade6/unit3/` (index.html, stations.js, checks.js), or `grade2/unit5/` for K–2 (read aloud, young styles, K–5 pictures), or `grade4/unit1/` for Grades 3–5 (K–5 pictures, standard styles), then:
 - write the generators in `stations.js`: each returns a problem (`num`, `pair`, `mc`, or `tap`; the shapes are documented at the top of `engine.js`), and `ZONES` lists the stations with the boss last as `id:'boss'`;
 - set the save key, words, and any hooks in `Game.init` (Unit 1 shows the hooks: its own figure drawing, a zone note, and a Build-it mode);
 - set limits for every station in `checks.js`, plus a `check` for each real-world rule.

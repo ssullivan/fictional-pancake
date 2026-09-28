@@ -8,7 +8,7 @@ When a unit gets a game or Learn page, add a row here and turn its "Coming soon"
 
 | Folder | Game | Learn page | Unit |
 |---|---|---|---|
-| `unit1/` | none yet | `learn.html` (5 chapters, Lessons 1–7) | Grade 4 Unit 1 |
+| `unit1/` | Factor Factory (`index.html`, 5 stations + the Mega-Bot) | `learn.html` (5 chapters, Lessons 1–7) | Grade 4 Unit 1 |
 
 ## Building for Grade 4
 
@@ -19,7 +19,8 @@ Players are 9 and 10 years old, so on top of the root rules:
 - Whole numbers up to 1,000,000 (Unit 4), with few nonzero digits. Multiply up to 4-digit × 1-digit and 2-digit × 2-digit; divide up to 4-digit ÷ 1-digit. Use a remainder only when the story says what to do with it (Unit 6).
 - Measurement: km, m, cm; kg, g; L, mL; lb, oz; hours, minutes, seconds. Convert from a larger unit to a smaller one only.
 - Angles in whole degrees, in multiples of 5 when read from a protractor. A right angle is 90°, a straight angle 180°, a full turn 360°.
-- Pages use the standard body (no `young` class) and no `readAloud`; those are for K–2. Learn pages load `shared/k5.css` and `k5.js` for their pictures and controls.
+- Pages use the standard body (no `young` class) and no `readAloud`; those are for K–2. Learn pages and games load `shared/k5.css` and `k5.js` for their pictures and controls.
+- Games are built like Unit 1's Factor Factory (`unit1/index.html`, `stations.js`, `checks.js`): standard body, K–5 pictures, and typed, multiple-choice, and tap answers. Its `checks.js` shows how to check every stated fact (products, prime or composite) and every multiple-choice answer.
 - No gendered pronouns for named students: repeat the name instead.
 - Skip the optional lessons (practice days and the projects at the end of each unit); say so in the game's "For grown-ups" section.
 

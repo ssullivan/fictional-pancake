@@ -1,73 +1,7 @@
-/* Learn Factors and Multiples (Grade 4 Unit 1): figures, widgets, and the chapters. Loaded by learn.html.
-   Steppers and choice buttons come from shared/k5.js. */
+/* Learn Factors and Multiples (Grade 4 Unit 1): widgets and the chapters. Loaded by learn.html.
+   Factors, number lines with hops, tiles, number charts, lockers, steppers, and choice buttons come from shared/k5.js. */
 
-/* ---------- number facts ---------- */
-const factors=n=>range(n).map(i=>i+1).filter(d=>n%d===0);
-/* factor pairs [a, b] with a ≤ b */
-const pairsOf=n=>factors(n).filter(a=>a*a<=n).map(a=>[a,n/a]);
-const isPrime=n=>factors(n).length===2;
 const list=a=>a.join(', ');
-
-/* ---------- figures ---------- */
-/* A number line from 0 to max with k hops of n from 0 (the multiples of n). mark: a number to point at (cyan).
-   cls: 'r' or 'b' draws the hops red or blue instead of gold. */
-function hopLine(n,max,k,{mark=null,cls='',label}={}){
-  const W=600,X=20,u=(W-2*X)/max,Y=70,x=v=>X+v*u,h=Math.min(48,n*u*.55);
-  let o=`<line class="axis" x1="${X}" y1="${Y}" x2="${x(max)}" y2="${Y}"/>`;
-  if(u>=5)range(max+1).forEach(v=>{if(v%n)o+=`<line class="tick mn" x1="${x(v)}" y1="${Y-5}" x2="${x(v)}" y2="${Y+5}"/>`;});
-  range(Math.floor(max/n)+1).forEach(i=>{
-    const v=i*n;
-    o+=`<line class="tick" x1="${x(v)}" y1="${Y-9}" x2="${x(v)}" y2="${Y+9}"/><text class="lbl s${v===mark?' cy':i&&i<=k?'':' dm'}" x="${x(v)}" y="${Y+24}">${v}</text>`;
-  });
-  range(k).forEach(i=>{
-    const a=x(i*n),b=x((i+1)*n);
-    o+=`<path class="hop ${cls}" d="M${a},${Y-3} Q${(a+b)/2},${Y-3-2*h} ${b},${Y-3}"/><circle class="land ${cls}" cx="${b}" cy="${Y}" r="5"/>`;
-  });
-  if(mark!==null){
-    o+=`<polygon class="mark" points="${x(mark)},${Y+34} ${x(mark)-7},${Y+46} ${x(mark)+7},${Y+46}"/>`;
-    if(mark%n)o+=`<text class="lbl s cy" x="${x(mark)}" y="${Y+60}">${mark}</text>`;
-  }
-  return svgWrap(W,Y+(mark!==null?70:34),o,label||`Number line from 0 to ${max} with ${k} hops of ${n}`+(mark!==null?`, pointing at ${mark}`:''));
-}
-/* n tiles in `rows` equal rows; tiles that don't fit a full column are left over (red) */
-function tiles(rows,n,label){
-  const cols=Math.floor(n/rows),left=n-rows*cols,g=left?8:0,s=Math.min(28,(540-g)/(cols+(left?1:0)),280/rows);
-  let o='';
-  range(rows).forEach(r=>range(cols).forEach(c=>{o+=`<rect class="tile" x="${4+c*s}" y="${4+r*s}" width="${s}" height="${s}"/>`;}));
-  range(left).forEach(r=>{o+=`<rect class="tile left" x="${4+cols*s+g}" y="${4+r*s}" width="${s}" height="${s}"/>`;});
-  return svgWrap(8+cols*s+(left?g+s:0),8+rows*s,o,label||(left?`${n} tiles in ${rows} rows of ${cols}, with ${left} left over`:`${n} tiles in ${rows} rows of ${cols}`));
-}
-/* every rectangle n tiles make, side by side, each labelled rows × columns */
-function allRects(n){
-  const P=pairsOf(n),G=26,s=Math.min(18,(560-G*(P.length-1))/P.reduce((t,[,b])=>t+b,0)),H=P[P.length-1][0]*s;
-  let o='',x=4;
-  P.forEach(([a,b])=>{
-    range(a).forEach(r=>range(b).forEach(c=>{o+=`<rect class="tile" x="${x+c*s}" y="${4+r*s}" width="${s}" height="${s}"/>`;}));
-    o+=`<text class="lbl s" x="${x+b*s/2}" y="${H+24}">${a} × ${b}</text>`;
-    x+=b*s+G;
-  });
-  return svgWrap(Math.max(x-G+4,80),H+40,o,`Rectangles made of ${n} tiles: `+P.map(([a,b])=>`${a} by ${b}`).join(', '));
-}
-/* A chart of 1 to max, 10 in a row. cls(v): classes for that number's square. tap: squares can be tapped (data-v). */
-function chart(max,cls,{tap=false,label}={}){
-  const C=44;let o='';
-  range(max).forEach(i=>{
-    const v=i+1,x=2+i%10*C,y=2+Math.floor(i/10)*C;
-    o+=`<g class="hc ${cls(v)||''}"${tap?` data-v="${v}"`:''}><rect x="${x}" y="${y}" width="${C}" height="${C}"/><text class="lbl s" x="${x+C/2}" y="${y+C/2}">${v}</text></g>`;
-  });
-  return svgWrap(10*C+4,Math.ceil(max/10)*C+4,o,label||`Numbers 1 to ${max}`);
-}
-/* 20 lockers in two rows of 10; open[v] is true when locker v is open. hi: lockers outlined in gold. sel: the locker picked (cyan). */
-function lockers(open,{hi=[],sel=null}={}){
-  const L=28,G=2,H=64;let o='';
-  range(20).forEach(i=>{
-    const v=i+1,x=2+i%10*(L+G),y=4+Math.floor(i/10)*(H+34);
-    o+=`<g data-v="${v}"><rect class="lk${open[v]?' open':''}${hi.includes(v)?' hi':''}${v===sel?' sel':''}" x="${x}" y="${y}" width="${L}" height="${H}" rx="2"/>`
-      +(open[v]?`<polygon class="door" points="${x},${y} ${x+9},${y+8} ${x+9},${y+H-8} ${x},${y+H}"/>`:`<path class="vent" d="M${x+7},${y+10}h14M${x+7},${y+15}h14M${x+7},${y+20}h14"/>`)
-      +`<text class="lbl s${v===sel?' cy':''}" x="${x+L/2}" y="${y+H+16}">${v}</text></g>`;
-  });
-  return svgWrap(10*(L+G)+2,2*(H+34),o,'20 lockers. Open: '+(range(20).filter(i=>open[i+1]).map(i=>i+1).join(', ')||'none'));
-}
 
 /* ---------- Chapter 1: multiples ---------- */
 const HOPN=[2,3,4,5,6,7,8,9];
@@ -238,7 +172,7 @@ const ICON={
   pair:'<text x="32" y="30" fill="#ffc93c" font-size="17" font-weight="700" text-anchor="middle" font-family="monospace">6 × 7</text><text x="32" y="52" fill="#7fe3ff" font-size="17" font-weight="700" text-anchor="middle" font-family="monospace">= 42</text>',
 };
 const CH=[
-  {icon:'hops',title:'Multiples',lessons:'Lesson 1',blurb:'Skip-count on a number line to find multiples, and tell whether a number is a multiple.',steps:[
+  {icon:'hops',title:'Multiples',game:{zone:'hops',name:'Hop Belt'},lessons:'Lesson 1',blurb:'Skip-count on a number line to find multiples, and tell whether a number is a multiple.',steps:[
     {title:'Skip-count to find multiples',widget:wHops,
       body:'<p>Counting by 3s from 0 lands on 3, 6, 9, 12, … These are the <b>multiples</b> of 3. Each one is 3 times a whole number: 4 × 3 = 12.</p><p>Pick a number, then hop along the number line.</p>',
       check:{kind:'num',answer:30,fig:F.six,q:'Kiran counts by 6s: 6, 12, 18, … What is the 5th number Kiran says?',
@@ -251,7 +185,7 @@ const CH=[
         why:{a:'2 packs is 14 and 3 packs is 21. 17 is in between, so it’s not a multiple of 7.',b:'It ends in 7, but that doesn’t matter. 3 packs is 21 and 4 packs is 28, so 27 is not a multiple of 7.'},
         explain:'3 × 7 = 21, so 3 packs is 21 stickers. 21 is a multiple of 7.'}}
   ]},
-  {icon:'rect',title:'Factor pairs',lessons:'Lesson 2',blurb:'Arrange tiles in equal rows to find factor pairs, then find every pair for a number.',steps:[
+  {icon:'rect',title:'Factor pairs',game:{zone:'tiles',name:'Tile Press'},lessons:'Lesson 2',blurb:'Arrange tiles in equal rows to find factor pairs, then find every pair for a number.',steps:[
     {title:'Rectangles and factor pairs',widget:wRows,
       body:'<p>Put 12 tiles in 3 equal rows and you get a rectangle: 3 × 4 = 12. So <b>3 and 4 are a factor pair</b> of 12, and each is a <b>factor</b> of 12.</p><p>Pick a number of tiles, then change the rows. When do they make a rectangle?</p>',
       check:{kind:'num',unit:'plants',answer:6,fig:F.plants,q:'A gardener plants 24 tomato plants in 4 equal rows. How many plants are in each row?',
@@ -264,7 +198,7 @@ const CH=[
         why:{a:'4 × 4 = 16 too. A square is a rectangle, so 4 × 4 counts.',b:'3 × 5 = 15, not 16. 3 is not a factor of 16.'},
         explain:'Try 1, 2, 3, and 4 rows: 1 × 16, 2 × 8, and 4 × 4 work, and 3 doesn’t. After 4, the pairs turn around.'}}
   ]},
-  {icon:'prime',title:'Prime and composite',lessons:'Lesson 3',blurb:'See which numbers make only one rectangle, and sort the numbers to 30.',steps:[
+  {icon:'prime',title:'Prime and composite',game:{zone:'prime',name:'Prime Sorter'},lessons:'Lesson 3',blurb:'See which numbers make only one rectangle, and sort the numbers to 30.',steps:[
     {title:'One rectangle or more?',widget:wPrime,
       body:'<p>A number with exactly one factor pair (1 and itself) is <b>prime</b>. Its tiles make only one rectangle. A number with more factor pairs is <b>composite</b>.</p><p>Pick a number and see all its rectangles.</p>',
       check:{kind:'mc',q:'Which number is prime?',
@@ -278,7 +212,7 @@ const CH=[
         why:{b:'4 isn’t big, and it’s composite: 2 × 2 = 4. It’s about the factor 2.',c:'Only some end in 0, like 10 and 20. 4, 6, and 8 are even too.'},
         explain:'An even number is 2 × something. So besides 1 × the number, it has a pair with 2 in it. That makes it composite. 2 itself is prime: 1 × 2 is its only pair.'}}
   ]},
-  {icon:'lockers',title:'Common multiples and lockers',lessons:'Lessons 5–6',blurb:'Find multiples two numbers share, and solve the Locker Problem.',steps:[
+  {icon:'lockers',title:'Common multiples and lockers',game:{zone:'lockers',name:'Locker Room'},lessons:'Lessons 5–6',blurb:'Find multiples two numbers share, and solve the Locker Problem.',steps:[
     {title:'Common multiples',widget:wCommon,
       body:'<p>A number that is a multiple of two numbers is a <b>common multiple</b>. 12 is a multiple of 3 and of 4.</p><p>Pick two numbers. Show the multiples of each, then both.</p>',
       check:{kind:'num',unit:'minutes',answer:12,fig:F.buses,q:'The red bus leaves every 4 minutes. The blue bus leaves every 6 minutes. Both buses leave at 8:00. In how many minutes do they leave together again?',
@@ -291,7 +225,7 @@ const CH=[
         why:{a:'Locker 10 is even too, and it ends closed. Count the students who change locker 16.',b:'Locker 12 is a multiple of 4 too, and it ends closed. Count the factors of 16.'},
         explain:'The students who change locker 16 are its factors: 1, 2, 4, 8, and 16. That’s 5 changes: open, closed, open, closed, open. An odd number of changes leaves it open.'}}
   ]},
-  {icon:'pair',title:'Factors and multiples together',lessons:'Lesson 7',blurb:'Say how a factor and a multiple are related, and find all the factors of a number.',steps:[
+  {icon:'pair',title:'Factors and multiples together',game:{zone:'gears',name:'Gear Works'},lessons:'Lesson 7',blurb:'Say how a factor and a multiple are related, and find all the factors of a number.',steps:[
     {title:'Factor or multiple?',widget:wFM,
       body:'<p>6 × 7 = 42 says two things: 6 is a <b>factor</b> of 42, and 42 is a <b>multiple</b> of 6. The multiple is the number you land on. The size of the hops and the number of hops are its factors.</p><p>Pick two numbers. Do the hops land on the bigger one?</p>',
       check:{kind:'mc',stack:true,q:'Which is true about 7 and 56?',

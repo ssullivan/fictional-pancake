@@ -1,4 +1,5 @@
-/* Pictures and controls for K–5 pages: ten-frames, cubes, base-ten blocks, tape diagrams, number lines, and − n + steppers.
+/* Pictures and controls for K–5 pages: ten-frames, cubes, base-ten blocks, tape diagrams, number lines, shapes, clocks, money,
+   factor pictures, and − n + steppers.
    Styles are in k5.css. Needs util.js and figures.js (svgWrap).
 
    range(n)                          [0, 1, …, n-1]
@@ -24,7 +25,12 @@
    shareFig(shape, n, how, {shade}), PART, partName(n, k)   a circle or rectangle cut into halves, thirds, or fourths
    PB, pbFig(big, small, {show})     pattern blocks: a hexagon, trapezoid, or rhombus filled with smaller blocks
    clockFig(h, m, {shade, fives}), hm(h, m), dayBar(at)   a clock face, "3:05", and the day from midnight to midnight
-   COINS, moneyFig(list, {vals}), centsOf(list), amt(c)   coins and dollar bills, their total, and "$2 and 35¢" */
+   COINS, moneyFig(list, {vals}), centsOf(list), amt(c)   coins and dollar bills, their total, and "$2 and 35¢"
+   factors(n), pairsOf(n), isPrime(n)   the factors of n, its factor pairs [a, b] with a ≤ b, and whether it is prime
+   hopLine(n, max, k, {mark, cls, nums})   a number line with k hops of n from 0 (svg)
+   tiles(rows, n), allRects(n)       n tiles in equal rows (any left over in red), and every rectangle n tiles make (svg)
+   chart(max, cls, {lo, tap})        a number chart, 10 to a row, with each square colored by cls(v) (svg)
+   lockers(open, {hi, sel})          the Locker Problem's 20 lockers, open or closed (svg) */
 const range=n=>[...Array(n).keys()];
 const cellsOf=(...groups)=>groups.flatMap(([n,c])=>Array(n).fill(c));
 
@@ -370,4 +376,70 @@ function moneyFig(list,{vals=false,W=470,label}={}){
   });
   const say=(n,w)=>n?`${n} ${w}${n>1?'s':''}`:'';
   return svgWrap(w,y+row+6+L,o,label||[say(bills.length,'dollar bill'),say(coins.length,'coin')].filter(Boolean).join(' and '));
+}
+
+/* ---------- factors and multiples ---------- */
+const factors=n=>range(n).map(i=>i+1).filter(d=>n%d===0);
+/* factor pairs [a, b] with a ≤ b */
+const pairsOf=n=>factors(n).filter(a=>a*a<=n).map(a=>[a,n/a]);
+const isPrime=n=>factors(n).length===2;
+/* A number line from 0 to max with k hops of n from 0 (the multiples of n). mark: a number to point at (cyan).
+   cls: 'r' or 'b' draws the hops red or blue instead of gold. nums: how many multiples after 0 get their number (default all). */
+function hopLine(n,max,k,{mark=null,cls='',nums=Infinity,label}={}){
+  const W=600,X=20,u=(W-2*X)/max,Y=70,x=v=>X+v*u,h=Math.min(48,n*u*.55);
+  let o=`<line class="axis" x1="${X}" y1="${Y}" x2="${x(max)}" y2="${Y}"/>`;
+  if(u>=5)range(max+1).forEach(v=>{if(v%n)o+=`<line class="tick mn" x1="${x(v)}" y1="${Y-5}" x2="${x(v)}" y2="${Y+5}"/>`;});
+  range(Math.floor(max/n)+1).forEach(i=>{
+    const v=i*n;
+    o+=`<line class="tick" x1="${x(v)}" y1="${Y-9}" x2="${x(v)}" y2="${Y+9}"/>`+(i>nums?'':`<text class="lbl s${v===mark?' cy':i&&i<=k?'':' dm'}" x="${x(v)}" y="${Y+24}">${v}</text>`);
+  });
+  range(k).forEach(i=>{
+    const a=x(i*n),b=x((i+1)*n);
+    o+=`<path class="hop ${cls}" d="M${a},${Y-3} Q${(a+b)/2},${Y-3-2*h} ${b},${Y-3}"/><circle class="land ${cls}" cx="${b}" cy="${Y}" r="5"/>`;
+  });
+  if(mark!==null){
+    o+=`<polygon class="mark" points="${x(mark)},${Y+34} ${x(mark)-7},${Y+46} ${x(mark)+7},${Y+46}"/>`;
+    if(mark%n)o+=`<text class="lbl s cy" x="${x(mark)}" y="${Y+60}">${mark}</text>`;
+  }
+  return svgWrap(W,Y+(mark!==null?70:34),o,label||`Number line from 0 to ${max} with ${k} hops of ${n}`+(mark!==null?`, pointing at ${mark}`:''));
+}
+/* n tiles in `rows` equal rows; tiles that don't fit a full column are left over (red) */
+function tiles(rows,n,label){
+  const cols=Math.floor(n/rows),left=n-rows*cols,g=left?8:0,s=Math.min(28,(540-g)/(cols+(left?1:0)),280/rows);
+  let o='';
+  range(rows).forEach(r=>range(cols).forEach(c=>{o+=`<rect class="ftile" x="${4+c*s}" y="${4+r*s}" width="${s}" height="${s}"/>`;}));
+  range(left).forEach(r=>{o+=`<rect class="ftile left" x="${4+cols*s+g}" y="${4+r*s}" width="${s}" height="${s}"/>`;});
+  return svgWrap(8+cols*s+(left?g+s:0),8+rows*s,o,label||(left?`${n} tiles in ${rows} rows of ${cols}, with ${left} left over`:`${n} tiles in ${rows} rows of ${cols}`));
+}
+/* every rectangle n tiles make, side by side, each labelled rows × columns */
+function allRects(n){
+  const P=pairsOf(n),G=26,s=Math.min(18,(560-G*(P.length-1))/P.reduce((t,[,b])=>t+b,0)),H=P[P.length-1][0]*s;
+  let o='',x=4;
+  P.forEach(([a,b])=>{
+    range(a).forEach(r=>range(b).forEach(c=>{o+=`<rect class="ftile" x="${x+c*s}" y="${4+r*s}" width="${s}" height="${s}"/>`;}));
+    o+=`<text class="lbl s" x="${x+b*s/2}" y="${H+24}">${a} × ${b}</text>`;
+    x+=b*s+G;
+  });
+  return svgWrap(Math.max(x-G+4,80),H+40,o,`Rectangles made of ${n} tiles: `+P.map(([a,b])=>`${a} by ${b}`).join(', '));
+}
+/* A chart of lo to max, 10 in a row. cls(v): classes for that number's square ('a' gold, 'b' blue, 'ab' green, 'one' gray, 'cur' outlined).
+   tap: squares can be tapped (data-v); tap 'cand' makes each square a tap answer for engine.js instead (.cand, data-id = the number). */
+function chart(max,cls,{lo=1,tap=false,label}={}){
+  const C=44;let o='';
+  range(max-lo+1).forEach(i=>{
+    const v=lo+i,x=2+i%10*C,y=2+Math.floor(i/10)*C;
+    o+=`<g class="${tap==='cand'?`cand hc ${cls(v)||''}" data-id="${v}" tabindex="0" role="button" aria-label="${v}"`:`hc ${cls(v)||''}"${tap?` data-v="${v}"`:''}`}><rect x="${x}" y="${y}" width="${C}" height="${C}"/><text class="lbl s" x="${x+C/2}" y="${y+C/2}">${v}</text></g>`;
+  });
+  return svgWrap(10*C+4,Math.ceil((max-lo+1)/10)*C+4,o,label||`Numbers ${lo} to ${max}`);
+}
+/* 20 lockers in two rows of 10; open[v] is true when locker v is open. hi: lockers outlined in gold. sel: the locker picked (cyan). */
+function lockers(open,{hi=[],sel=null}={}){
+  const L=28,G=2,H=64;let o='';
+  range(20).forEach(i=>{
+    const v=i+1,x=2+i%10*(L+G),y=4+Math.floor(i/10)*(H+34);
+    o+=`<g data-v="${v}"><rect class="lk${open[v]?' open':''}${hi.includes(v)?' hi':''}${v===sel?' sel':''}" x="${x}" y="${y}" width="${L}" height="${H}" rx="2"/>`
+      +(open[v]?`<polygon class="door" points="${x},${y} ${x+9},${y+8} ${x+9},${y+H-8} ${x},${y+H}"/>`:`<path class="vent" d="M${x+7},${y+10}h14M${x+7},${y+15}h14M${x+7},${y+20}h14"/>`)
+      +`<text class="lbl s${v===sel?' cy':''}" x="${x+L/2}" y="${y+H+16}">${v}</text></g>`;
+  });
+  return svgWrap(10*(L+G)+2,2*(H+34),o,'20 lockers. Open: '+(range(20).filter(i=>open[i+1]).map(i=>i+1).join(', ')||'none'));
 }
