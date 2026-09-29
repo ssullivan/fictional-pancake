@@ -11,6 +11,7 @@ import {join, dirname, resolve} from 'node:path';
 import {createHash} from 'node:crypto';
 import {spawnSync} from 'node:child_process';
 import vm from 'node:vm';
+import {render, problems as listProblems} from './checklists.mjs';
 
 const ROOT = resolve(import.meta.dirname, '..');
 const fix = process.argv.includes('--fix');
@@ -60,13 +61,22 @@ for (const home of globSync('grade*/unit*/learn.html', {cwd: ROOT}).sort()) {
   const file = join(ROOT, home), dir = dirname(file), html = readFileSync(file, 'utf8');
   try {
     const {u} = run(file, scriptsOf(html), inlineOf(html));
-    const ids = u.chapters.map(c => c.id);
+    const ids = u.chapters.map(c => c.id), steps = {};
     for (const c of u.chapters) {
       const page = join(dir, 'learn', c.id + '.html');
       if (!existsSync(page)) { fail(`${home}: chapter ${c.id} has no page learn/${c.id}.html`); continue; }
       const ph = readFileSync(page, 'utf8'), got = run(page, scriptsOf(ph), inlineOf(ph));
       if (!got || got.id !== c.id) fail(`learn/${c.id}.html runs chapter ${got && got.id}, not ${c.id}`);
       else if (got.steps.length !== c.steps) fail(`${home}: chapter ${c.id} has ${got.steps.length} steps, but learn/chapters.js says ${c.steps}`);
+      if (got) steps[c.id] = got.steps;
+    }
+    // the unit's checklist (tools/checklists.mjs): every chapter and step, each with items that tests/checklists.spec.js runs
+    const list = join(dir, 'learn/CHECKLIST.md');
+    if (!existsSync(list)) console.log(`note: ${dirname(home)} has no learn/CHECKLIST.md yet`);
+    else if (Object.keys(steps).length === u.chapters.length) {
+      let text = readFileSync(list, 'utf8');
+      if (fix) { const want = render(u, steps, text); if (want !== text) { writeFileSync(list, want); text = want; console.log(`updated ${dirname(home)}/learn/CHECKLIST.md`); } }
+      for (const p of listProblems(u, steps, text)) fail(`${dirname(home)}/learn/CHECKLIST.md: ${p}`);
     }
     for (const f of globSync('learn/*.html', {cwd: dir})) if (!ids.includes(f.slice(6, -5))) fail(`${dirname(home)}/${f} is not in learn/chapters.js`);
   } catch (e) { fail(`${home}: ${e.message.split('\n')[0]}`); }

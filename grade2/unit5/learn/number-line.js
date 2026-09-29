@@ -6,10 +6,10 @@ function wLocate(el){
   const q=Q(el);let p=0;
   el.innerHTML=seg('Number',SPOT.map((n,i)=>[i,n]))+`<div class="fig" data-f></div><div class="fig" data-z></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const n=SPOT[p],lo=Math.floor(n/100)*100,t=(n-lo)/10;press(el,p);
+    const n=SPOT[p],lo=Math.floor(n/100)*100,t=Math.floor((n-lo)/10),o=(n-lo)%10;press(el,p);
     q('f').innerHTML=line(0,1000,100,100,{pts:[{v:n,t:n}],label:`A number line from 0 to 1,000 by hundreds with a dot at ${n}`});
     q('z').innerHTML=line(lo,lo+100,10,50,{pts:[{v:n,cls:'b',t:n}],label:`A number line from ${lo} to ${lo+100} by tens with a dot at ${n}`});
-    q('r').innerHTML=`<b>${n}</b> is between <b>${lo}</b> and <b>${lo+100}</b>.<br><span class="dimline">Zoom in: count by tens from ${lo}. ${range(t).map(i=>lo+10*(i+1)).join(', ')}. That’s ${t} tens past ${lo}.</span>`;
+    q('r').innerHTML=`<b>${n}</b> is between <b>${lo}</b> and <b>${lo+100}</b>.<br><span class="dimline">Zoom in: count by tens from ${lo}${t?`: ${range(t).map(i=>lo+10*(i+1)).join(', ')}`:''}. That’s ${t} ten${t===1?'':'s'}${o?` and ${o} one${o===1?'':'s'}`:''} past ${lo}.</span>`;
   };
   el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){p=+b.dataset.m;draw();}});
   draw();
