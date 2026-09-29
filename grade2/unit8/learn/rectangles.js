@@ -4,7 +4,7 @@ function tileFig(r,c,{gap=0,label}={}){
   const T=40,S=14,W=c*T+(c-1)*S,H=r*T+(r-1)*S,dx=(W-c*T-(c-1)*gap)/2,dy=(H-r*T-(r-1)*gap)/2;
   let o=range(r*c).map(n=>`<rect class="tile" x="${8+dx+n%c*(T+gap)}" y="${8+dy+Math.floor(n/c)*(T+gap)}" width="${T}" height="${T}"/>`).join('');
   if(!gap)o+=`<rect class="rim" x="${8+dx}" y="${8+dy}" width="${c*T}" height="${r*T}"/>`;
-  return svgWrap(W+16,H+16,o,label||(gap?`${r*c} square tiles in ${pl(r,'row')} of ${c}, with gaps`:`A rectangle made of ${r*c} squares: ${pl(r,'row')} of ${c}`));
+  return svgWrap(W+16,H+16,o,label||(gap?`${r*c} square tiles in ${pl(r,'row')} of ${c}, with gaps`:`A rectangle made of ${pl(r*c,'square')}: ${pl(r,'row')} of ${c}`));
 }
 /* A w × h rectangle cut into pieces: rects [[x, y, w, h]] in units of U pixels.
    on(i): color piece i in. num(i): a number to write in piece i. tap: pieces can be tapped (data-i). */
@@ -25,7 +25,7 @@ function wTiles(el){
     const {rows:r,cols:c}=st;q('rows').textContent=r;q('cols').textContent=c;
     q('go').textContent=push?'Pull them apart':'Push them together';
     q('f').innerHTML=tileFig(r,c,{gap:push?0:14});
-    q('r').innerHTML=push?`<span class="ok">A rectangle made of ${r*c} squares!</span><br><span class="dimline">No gaps and no overlaps. ${pl(r,'row')} of ${c}: ${addends(r,c)} = ${r*c}.</span>`
+    q('r').innerHTML=push?`<span class="ok">A rectangle made of ${pl(r*c,'square')}!</span><br><span class="dimline">No gaps and no overlaps. ${pl(r,'row')} of ${c}: ${addends(r,c)} = ${r*c}.</span>`
       :`<b>${pl(r*c,'tile')}</b> in ${pl(r,'row')} of ${c}.<br><span class="dimline">Tap Push them together.</span>`;
   };
   steppers(el,st,{rows:[1,5],cols:[1,5]},()=>{push=false;draw();});
