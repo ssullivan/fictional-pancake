@@ -1,0 +1,2 @@
+/* Grade 6 Unit 3 Learn pages: benchmark chips. Loaded by learn.html and every page in learn/. */
+.chips .chip[aria-pressed="true"]{background:var(--gold);color:#1a1300;border-color:var(--gold)}

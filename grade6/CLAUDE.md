@@ -8,8 +8,8 @@ General rules for games and Learn pages are in the root `CLAUDE.md`.
 |---|---|---|
 | `unit1/` | Blueprint Builders (7 zones + the Final Blueprint); Learn page with 8 chapters, including Polyhedra and Prisms, pyramids & nets (Lesson 13) | Grade 6 Unit 1 |
 | `unit2/` | Mix Masters; Learn page with 6 chapters (Lessons 1–16) | Grade 6 Unit 2 |
-| `unit3/` | Rate Racers | Grade 6 Unit 3 |
-| `unit5/` | Decimal Diner | Grade 6 Unit 5 |
+| `unit3/` | Rate Racers; Learn page with 6 chapters (Lessons 1–16) | Grade 6 Unit 3 |
+| `unit5/` | Decimal Diner; Learn page with 6 chapters (Lessons 1–14) | Grade 6 Unit 5 |
 
 ## Curriculum reference: IM Grade 6
 

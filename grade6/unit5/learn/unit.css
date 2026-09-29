@@ -1,0 +1,13 @@
+/* Grade 6 Unit 5 Learn pages: numbers in columns, base-ten pieces, and grids. Loaded by learn.html and every page in learn/. */
+pre.vert{font:700 26px/1.35 var(--mono);margin:0 auto;width:max-content;color:var(--chalk)}
+pre.vert .rev{color:var(--cyan)}
+.eq{margin:0 0 10px;font:700 28px var(--mono);text-align:center}
+.bt-t{fill:rgba(255,201,60,.55);stroke:var(--gold);stroke-width:1.5}
+.bt-h{fill:rgba(127,227,255,.45);stroke:var(--cyan);stroke-width:1.5}
+.bt-o{fill:rgba(95,224,168,.5);stroke:var(--good);stroke-width:1.5}
+.cell{fill:rgba(9,32,61,.6);stroke:rgba(243,246,251,.35);stroke-width:1}
+.shade{fill:rgba(255,201,60,.55);stroke:rgba(10,35,64,.6);stroke-width:1}
+.frame{fill:none;stroke:var(--chalk);stroke-width:2.5}
+.part-a{fill:rgba(255,201,60,.35);stroke:var(--gold);stroke-width:2}
+.part-b{fill:rgba(127,227,255,.3);stroke:var(--cyan);stroke-width:2}
+.wrow+.seg{margin-top:12px}

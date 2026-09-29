@@ -1,5 +1,5 @@
 /* SVG and table diagrams from class: double number lines, tables of equivalent ratios, rows of shapes, recipe batches,
-   paint colors, and tape diagrams. Styles are in figures.css.
+   paint colors, tape diagrams, coins, and percent tapes and number lines. Styles are in figures.css.
    Figures are functions of `show` (true once a hint is used or the problem is done) that return markup.
    Labels use the page's own fmt(n) unless you pass a formatter. */
 const svgWrap=(w,h,body,label='Diagram')=>`<svg viewBox="0 0 ${w} ${h}" style="max-width:${w}px" role="img" aria-label="${label}">${body}</svg>`;
@@ -93,4 +93,36 @@ function tapeFig(c,a,b,k,{qa,qb,qt,showA,showB,showT}){
     out+=`<text class="ftxt" x="${bx+32}" y="${my+30}">total</text>`;
     return svgWrap(bx+110,170,out,'Tape diagram');
   };
+}
+
+/* ---------- percents (Grade 6 Unit 3) ---------- */
+/* coins to count in cents (a percent of a dollar), drawn in a row by coinsFig(list) */
+const COIN_SET=[{v:25,r:24,n:'quarter'},{v:10,r:18,n:'dime'},{v:5,r:21,n:'nickel'},{v:1,r:19,n:'penny',cu:1}];
+function coinsFig(list){
+  let x=6,out='';list.forEach(c=>{out+=`<circle class="coin${c.cu?' cu':''}" cx="${x+c.r}" cy="34" r="${c.r}"/><text class="coin-t" x="${x+c.r}" y="35">${c.v}¢</text>`;x+=c.r*2+8;});
+  return ()=>svgWrap(x,68,out,'Coins');
+}
+/* A percent tape: the whole split into n equal boxes worth each, with m of them as the part, and a 0%–100% scale under it.
+   W and part are the amounts; qW, qP put a "?" on the one to find. Returns a figure: a function of show (the box values). */
+function pctTape(n,m,{W,part,qW,qP,each}){
+  return show=>{
+    const w=460,bw=w/n,x0=10;let out=`<text class="ftxt" x="${x0}" y="18">whole</text>`;
+    for(let i=0;i<n;i++){out+=`<rect class="tape b" x="${x0+i*bw}" y="26" width="${bw}" height="38"/>`;if(show)out+=`<text class="ftxt mid rev" x="${x0+i*bw+bw/2}" y="51">${fmt(each)}</text>`;}
+    out+=qW?qbox(x0+w+34,45):`<text class="ftxt big" x="${x0+w+12}" y="52">${fmt(W)}</text>`;
+    out+=`<text class="ftxt" x="${x0}" y="96">part</text>`;
+    for(let i=0;i<m;i++){out+=`<rect class="tape" x="${x0+i*bw}" y="104" width="${bw}" height="38"/>`;if(show)out+=`<text class="ftxt mid rev" x="${x0+i*bw+bw/2}" y="129">${fmt(each)}</text>`;}
+    out+=qP?qbox(x0+m*bw+34,123):`<text class="ftxt big" x="${x0+m*bw+12}" y="130">${fmt(part)}</text>`;
+    for(let i=0;i<=n;i++)out+=`<line class="tick" x1="${x0+i*bw}" y1="150" x2="${x0+i*bw}" y2="160"/><text class="ftxt mid" x="${x0+i*bw}" y="178">${fmt(100*i/n)}%</text>`;
+    out+=`<line class="nl" x1="${x0}" y1="155" x2="${x0+w}" y2="155"/>`;
+    return svgWrap(w+80,188,out,'Percent tape diagram');
+  };
+}
+/* A double number line for a percent problem: the amount on top and 0%–100% below. The whole W is 100%, and x is P%;
+   askA, askP, askW put a "?" on the amount, the percent, or the whole. Returns a figure: a function of show. */
+function pctLine(W,P,x,{askA,askP,askW}){
+  const top=Math.max(100,P),ticks=[];
+  for(let p=0;p<=top;p+=10){if(p===P)continue;ticks.push({t:W*p/100,b:p,st:p===100&&!askW?1:(p===10&&Math.abs(P-10)>=10?2:(p===0?1:0)),sb:p===0||p===100||(p===10&&Math.abs(P-10)>=10)?(p===10?2:1):0,q:p===100&&askW?'t':null});}
+  ticks.push({t:x,b:P,st:askA?0:1,sb:askP?0:1,q:askA?'t':askP?'b':null});
+  ticks.sort((a,b)=>a.t-b.t);
+  return dnl('amount','percent',ticks,{fb:v=>fmt(v)+'%'});
 }
