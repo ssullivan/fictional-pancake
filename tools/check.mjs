@@ -14,7 +14,7 @@ import vm from 'node:vm';
 
 const ROOT = resolve(import.meta.dirname, '..');
 const fix = process.argv.includes('--fix');
-const pages = globSync('**/*.html', {cwd: ROOT, exclude: ['node_modules/**', '.git/**']}).sort();
+const pages = globSync('**/*.html', {cwd: ROOT, exclude: ['node_modules/**', '.git/**', 'test-results/**', 'playwright-report/**']}).sort();
 const stamp = f => createHash('sha1').update(readFileSync(f)).digest('hex').slice(0, 8);
 let problems = 0;
 const fail = msg => { console.log('FAIL ' + msg); problems++; };

@@ -175,7 +175,22 @@ const Game=(()=>{
     cfg=c;save={stars:{},points:0};
     try{const s=JSON.parse(localStorage.getItem(cfg.saveKey)||'null');if(s&&typeof s==='object')save=Object.assign(save,s);}catch(e){}
     $('zones').addEventListener('click',e=>{const b=e.target.closest('.zone');if(b)start(b.dataset.z);});
-    const tap=e=>{const c=e.target.closest('.cand');if(c&&G&&!G.done&&G.p.kind==='tap'&&!c.classList.contains('wrong'))return submit(c.dataset.id),true;};
+    /* A tap answers with the .cand under it. Where tap areas overlap (a line's area is wider than the line), the one whose
+       line is nearest the pointer wins, not the one drawn last. Keyboard presses use the focused .cand. */
+    const lineDist=(c,x,y)=>{
+      const l=c.querySelector('line.seg,line');if(!l)return 0;
+      const M=l.getScreenCTM(),P=(a,b)=>{const p=new DOMPoint(+l.getAttribute(a),+l.getAttribute(b)).matrixTransform(M);return [p.x,p.y];};
+      const [ax,ay]=P('x1','y1'),[bx,by]=P('x2','y2'),dx=bx-ax,dy=by-ay,t=Math.max(0,Math.min(1,((x-ax)*dx+(y-ay)*dy)/(dx*dx+dy*dy||1)));
+      return Math.hypot(x-ax-t*dx,y-ay-t*dy);
+    };
+    const tap=e=>{
+      let c=e.target.closest('.cand');
+      if(e.type==='click'&&e.detail){
+        const all=[...new Set(document.elementsFromPoint(e.clientX,e.clientY).map(x=>x.closest('.cand')).filter(x=>x&&!x.classList.contains('wrong')))];
+        if(all.length)c=all.reduce((a,b)=>lineDist(b,e.clientX,e.clientY)<lineDist(a,e.clientX,e.clientY)?b:a);
+      }
+      if(c&&G&&!G.done&&G.p.kind==='tap'&&!c.classList.contains('wrong'))return submit(c.dataset.id),true;
+    };
     $('fig').addEventListener('click',tap);
     $('fig').addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&tap(e))e.preventDefault();});
     $('quit').addEventListener('click',()=>{hush();renderHome();show('home');});

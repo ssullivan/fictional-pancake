@@ -39,6 +39,8 @@
 .hgt{stroke:var(--cyan);stroke-width:3;stroke-dasharray:9 7}
 .ext{stroke:var(--dim);stroke-width:2.2;stroke-dasharray:3 7;stroke-linecap:round}
 .ra{fill:none;stroke:var(--cyan);stroke-width:2.5}
+/* labels and area numbers sit on top of the things to tap, so taps go through them */
+.lbl,.area-t{pointer-events:none}
 .lbl rect{fill:#0a2340;stroke:rgba(243,246,251,.45);stroke-width:1.5}
 .lbl text{fill:var(--chalk);font:700 22px var(--mono);text-anchor:middle;dominant-baseline:central}
 .lbl.h rect{stroke:var(--cyan)}.lbl.h text{fill:var(--cyan)}
@@ -127,7 +129,7 @@
 
 <script src="../../shared/util.js?v=f0c7159c"></script>
 <script src="../../shared/solids.js?v=78af5115"></script>
-<script src="../../shared/engine.js?v=fa60a417"></script>
+<script src="../../shared/engine.js?v=9aa6dac4"></script>
 <script src="stations.js?v=708a1eed"></script>
 <script>
 Game.init({

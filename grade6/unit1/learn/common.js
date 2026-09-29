@@ -51,6 +51,8 @@ function stage(el,T,dist){
     render(){if(S.before)S.before();renderer.render(scene,camera);lab.render(scene,camera);},
     frame(d){camera.position.copy(new THREE.Vector3(.45,.68,.62).normalize().multiplyScalar(d));controls.target.set(0,0,0);controls.minDistance=d*.35;controls.maxDistance=d*2.2;controls.update();S.render();},
     spin(dir){const off=camera.position.clone().sub(controls.target).applyAxisAngle(new THREE.Vector3(0,1,0),dir*Math.PI/8);camera.position.copy(controls.target).add(off);controls.update();S.render();},
+    /* look from higher up (dir -1) or lower down (dir 1), as far as under the shape */
+    tilt(dir){const off=camera.position.clone().sub(controls.target),sp=new THREE.Spherical().setFromVector3(off);sp.phi=Math.min(Math.PI-.15,Math.max(.15,sp.phi+dir*Math.PI/6));camera.position.copy(controls.target).add(off.setFromSpherical(sp));controls.update();S.render();},
     dispose(){ro.disconnect();controls.dispose();scene.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material)[].concat(o.material).forEach(m=>m.dispose());});renderer.dispose();renderer.forceContextLoss();}};
   controls.addEventListener('change',()=>S.render());
   const ro=new ResizeObserver(()=>{const w=view.clientWidth,h=view.clientHeight;if(!w||!h)return;renderer.setSize(w,h);lab.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix();S.render();});
@@ -213,7 +215,7 @@ const PLURAL={faces:'faces',edges:'edges',vertices:'vertices'},ONE={faces:'face'
    opts.bases: color the bases gold. opts.read(shape, api): the readout under the view.
    api.set(shape) swaps in another shape. Without WebGL it shows a drawing (solids.js) instead. */
 function polyView(el,shape,opts={}){
-  const api={counted:new Set(),disposed:false};let S=null,T=null,grp=null,hits=[],faceMeshes=[],paint=()=>{};
+  const api={counted:new Set(),disposed:false};el.polyView=api;let S=null,T=null,grp=null,hits=[],faceMeshes=[],paint=()=>{};
   el.innerHTML=`<div class="view3d" data-v><p class="loading">Loading 3D…</p></div><div class="wrow" data-ctl></div><p class="readout" data-r></p>`;
   const q=Q(el),k=opts.count;
   const total=()=>shape.curved?0:{faces:shape.F.length,edges:shape.E.length,vertices:shape.V.length}[k];
@@ -261,16 +263,16 @@ function polyView(el,shape,opts={}){
       shape.F.forEach((f,fi)=>{
         const P=f.map(i=>V[i]),tri=[];for(let i=1;i<P.length-1;i++)tri.push(P[0],P[i],P[i+1]);
         const g=new THREE.BufferGeometry().setFromPoints(tri);g.computeVertexNormals();
-        const mesh=new THREE.Mesh(g,mat(opts.bases&&shape.bases.includes(fi)?COLS[0]:COLS[1]));mesh.userData={kind:'faces',id:fi};grp.add(mesh);faceMeshes.push(mesh);
+        const mesh=new THREE.Mesh(g,mat(opts.bases&&shape.bases.includes(fi)?COLS[0]:COLS[1]));mesh.userData={kind:'faces',id:fi,c:P.reduce((s,p)=>s.add(p),new THREE.Vector3()).divideScalar(P.length)};grp.add(mesh);faceMeshes.push(mesh);
       });
       const clear=new THREE.MeshBasicMaterial({transparent:true,opacity:0,depthWrite:false});
       shape.E.forEach(([i,j],ei)=>{
         const e=rod(V[i],V[j],.035,white());grp.add(e);
-        if(k==='edges'){const h=rod(V[i],V[j],.16,clear);h.userData={kind:'edges',id:ei,show:e};grp.add(h);hits.push(h);}
+        if(k==='edges'){const h=rod(V[i],V[j],.16,clear);h.userData={kind:'edges',id:ei,show:e,r0:.16};grp.add(h);hits.push(h);}
       });
       V.forEach((v,vi)=>{
         const s=new THREE.Mesh(new THREE.SphereGeometry(.08,16,12),white());s.position.copy(v);grp.add(s);
-        if(k==='vertices'){const h=new THREE.Mesh(new THREE.SphereGeometry(.24,12,8),clear);h.position.copy(v);h.userData={kind:'vertices',id:vi,show:s};grp.add(h);hits.push(h);}
+        if(k==='vertices'){const h=new THREE.Mesh(new THREE.SphereGeometry(.24,12,8),clear);h.position.copy(v);h.userData={kind:'vertices',id:vi,show:s,r0:.24};grp.add(h);hits.push(h);}
       });
       if(opts.point){
         /* a side face, the edge along its top, and a vertex at the corner, each marked and named */
@@ -280,6 +282,16 @@ function polyView(el,shape,opts={}){
         grp.add(rod(V[e[0]],V[e[1]],.07,new THREE.MeshBasicMaterial({color:COLS[0]})));tag('edge',V[e[0]].clone().add(V[e[1]]).multiplyScalar(.5).multiplyScalar(1.12));
         const top=shape.kind==='pyramid'?V[V.length-1]:V[e[1]],dot=new THREE.Mesh(new THREE.SphereGeometry(.16,16,12),new THREE.MeshBasicMaterial({color:COLS[3]}));dot.position.copy(top);grp.add(dot);tag('vertex',top.clone().multiplyScalar(1.18));
       }
+    }
+    /* tap targets for edges and vertices: at least 45 pixels across on any screen, but less than half the shortest edge */
+    if(!shape.curved){
+      const cap=.4*Math.min(...shape.E.map(([i,j])=>new THREE.Vector3(...shape.V[i]).distanceTo(new THREE.Vector3(...shape.V[j]))));
+      const at=new THREE.Vector3();
+      S.before=()=>{
+        const k=S.view.clientHeight/(2*Math.tan(S.camera.fov*Math.PI/360));
+        grp.updateMatrixWorld(true);
+        hits.forEach(o=>{const r=Math.min(cap,Math.max(22.5*S.camera.position.distanceTo(o.getWorldPosition(at))/k,.16)),s=r/o.userData.r0;if(o.userData.kind==='vertices')o.scale.setScalar(s);else o.scale.set(s,1,s);});
+      };
     }
     /* a quarter turn's worth of yaw, so no side of a prism starts out edge-on */
     if(!shape.curved)grp.rotation.y=-.45;
@@ -295,21 +307,37 @@ function polyView(el,shape,opts={}){
   api.ready=load3D().then(t=>{
     if(api.disposed)return;T=t;api.mode='3d';S=stage(el,T,6);
     const {THREE}=T;build();
-    q('ctl').innerHTML=`<button type="button" class="ghost-btn" data-spin="-1" aria-label="Turn left">⟲</button><button type="button" class="ghost-btn" data-spin="1" aria-label="Turn right">⟳</button>`+(k?`<button type="button" class="ghost-btn" data-clr>Start over</button>`:'');
+    q('ctl').innerHTML=`<button type="button" class="ghost-btn" data-spin="-1" aria-label="Turn left">⟲</button><button type="button" class="ghost-btn" data-spin="1" aria-label="Turn right">⟳</button>`
+      +`<button type="button" class="ghost-btn" data-tilt="-1" aria-label="Tilt to see the top">⤒</button><button type="button" class="ghost-btn" data-tilt="1" aria-label="Tilt to see the bottom">⤓</button>`+(k?`<button type="button" class="ghost-btn" data-clr>Start over</button>`:'');
     q('ctl').querySelectorAll('[data-spin]').forEach(b=>b.onclick=()=>S.spin(+b.dataset.spin));
+    q('ctl').querySelectorAll('[data-tilt]').forEach(b=>b.onclick=()=>S.tilt(+b.dataset.tilt));
     if(k)q('clr').onclick=()=>{api.counted.clear();paint();};
     const hint=document.createElement('p');hint.className='hint3d';hint.textContent=k?`Drag to turn · tap each ${ONE[k]}`:'Drag to turn · pinch to zoom';S.view.appendChild(hint);
     /* a tap counts the face, edge, or vertex under it; an edge or vertex only counts if no face is in front of it */
     const ray=new THREE.Raycaster(),ptr=new THREE.Vector2(),cv=S.renderer.domElement;let down=null;
+    const under=(nx,ny)=>{
+      ptr.set(nx,ny);ray.setFromCamera(ptr,S.camera);
+      const got=ray.intersectObjects([...faceMeshes,...hits],false),face=got.find(h=>h.object.userData.kind==='faces'),want=got.find(h=>h.object.userData.kind===k);
+      return !want||(k!=='faces'&&face&&want.distance>face.distance+.25)?null:want.object.userData.id;
+    };
     cv.addEventListener('pointerdown',e=>{down=[e.clientX,e.clientY];});
     cv.addEventListener('pointerup',e=>{
       if(!k||!down||Math.hypot(e.clientX-down[0],e.clientY-down[1])>6)return;down=null;
-      const r=cv.getBoundingClientRect();ptr.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);
-      ray.setFromCamera(ptr,S.camera);
-      const got=ray.intersectObjects([...faceMeshes,...hits],false),face=got.find(h=>h.object.userData.kind==='faces'),want=got.find(h=>h.object.userData.kind===k);
-      if(!want||(k!=='faces'&&face&&want.distance>face.distance+.25))return;
-      const id=want.object.userData.id;api.counted.has(id)?api.counted.delete(id):api.counted.add(id);paint();
+      const r=cv.getBoundingClientRect(),id=under((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);
+      if(id===null)return;
+      api.counted.has(id)?api.counted.delete(id):api.counted.add(id);paint();
     });
+    /* For tests (tests/learn-3d.spec.js): each face, edge, or vertex to count, where it is on the page, how big a target it is
+       there (a radius in pixels, for edges and vertices), and whether a tap there counts it now. */
+    api.targets=()=>{
+      grp.updateMatrixWorld(true);
+      const r=cv.getBoundingClientRect(),perPx=d=>r.height/(2*d*Math.tan(S.camera.fov*Math.PI/360));
+      return (k==='faces'?faceMeshes:hits).map(o=>{
+        const p=k==='faces'?grp.localToWorld(o.userData.c.clone()):o.getWorldPosition(new THREE.Vector3()),v=p.clone().project(S.camera);
+        return {id:o.userData.id,x:r.left+(v.x+1)/2*r.width,y:r.top+(1-v.y)/2*r.height,r:k==='faces'?null:o.userData.r0*o.scale.x*perPx(S.camera.position.distanceTo(p)),
+          tappable:under(v.x,v.y)===o.userData.id,counted:api.counted.has(o.userData.id)};
+      });
+    };
   },()=>{if(!api.disposed){flat();read();}});
   read();
   api.dispose=()=>{api.disposed=true;if(S){grp&&grp.traverse(o=>{if(o.element)o.element.remove();});S.dispose();}};
