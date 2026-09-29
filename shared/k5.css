@@ -1,5 +1,5 @@
 /* Styles for shared/k5.js: ten-frames, cubes, base-ten blocks, tape diagrams, number lines, labels, shapes, clocks, money,
-   and factor pictures on K–5 pages.
+   factor pictures, fractions, line plots, and hundred grids on K–5 pages.
    Load after learn.css. */
 /* ten-frames and cubes */
 .cell{fill:rgba(9,32,61,.6);stroke:rgba(243,246,251,.55);stroke-width:1.5}
@@ -136,9 +136,22 @@ table.pv td.hi{outline:3px solid #fff;outline-offset:-3px}
 /* fractions: stacked (fr, frT), fraction strips, and fraction number lines */
 .fr{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;margin:0 .1em;font-size:.85em;line-height:1.1}
 .fr>span:first-child{border-bottom:.1em solid currentColor;padding:0 .15em}
+.eq .fr{font-size:.8em}
+.wrow+.eq{margin-top:14px}
+.chip:has(.fr){font-size:17px;padding:6px 16px}
 .frt line{stroke:var(--chalk);stroke-width:1.8}
 .frt.dk .lbl{fill:#0a2340}.frt.dk line{stroke:#0a2340}
 .frt.cy .lbl{fill:var(--cyan)}.frt.cy line{stroke:var(--cyan)}
 .fs{fill:rgba(170,205,255,.08);stroke:var(--chalk);stroke-width:2}
 .fs.on{fill:var(--gold)}.fs.on.b{fill:var(--cyan)}.fs.on.g{fill:var(--good)}
 .pt.g{fill:var(--good);stroke:#d8ffef}
+.fs.on.gone{fill:rgba(255,154,134,.25)}
+/* line plots */
+.xm{fill:var(--gold);font:700 22px var(--mono);text-anchor:middle;dominant-baseline:central}
+.xm.hi{fill:var(--cyan)}
+.colhi{fill:rgba(127,227,255,.12);stroke:var(--cyan);stroke-width:2}
+/* hundred grids */
+.hg{fill:rgba(170,205,255,.08);stroke:rgba(243,246,251,.35);stroke-width:1}
+.hg.a{fill:var(--gold)}.hg.b{fill:var(--cyan)}
+.hgt{stroke:var(--chalk);stroke-width:2}
+.hgw{fill:none;stroke:var(--chalk);stroke-width:2.5}

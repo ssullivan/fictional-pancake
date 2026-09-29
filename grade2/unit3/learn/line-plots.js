@@ -1,25 +1,4 @@
 /* Learn Measuring Length (Grade 2 Unit 3), chapter 5: Line plots. Its widgets and steps; loaded by line-plots.html. */
-/* A line plot: counts {length: how many} from lo to hi, one X for each. mark: highlight that length.
-   tap: lengths can be tapped (data-v). diff: [a, b] draws an arrow from a to b under the line. */
-function lineplot(counts,lo,hi,{mark=null,tap=false,diff=null,unit='inches',u=56,label}={}){
-  const top=Math.max(3,...Object.values(counts)),X=30,Y=16+top*26,x=v=>X+(v-lo)*u;
-  let o='',y=Y+44;
-  if(mark!==null)o+=`<rect class="colhi" x="${x(mark)-u/2+3}" y="4" width="${u-6}" height="${Y+30}" rx="8"/>`;
-  o+=`<line class="axis" x1="${X-18}" y1="${Y}" x2="${x(hi)+18}" y2="${Y}"/>`;
-  range(hi-lo+1).forEach(i=>{
-    const v=lo+i,h=v===mark;
-    o+=`<line class="tick" x1="${x(v)}" y1="${Y-6}" x2="${x(v)}" y2="${Y+6}"/><text class="lbl${h?' cy':''}" x="${x(v)}" y="${Y+22}">${v}</text>`;
-    range(counts[v]||0).forEach(j=>{o+=`<text class="xm${h?' hi':''}" x="${x(v)}" y="${Y-16-j*26}">X</text>`;});
-    if(tap)o+=`<rect class="hit" data-v="${v}" x="${x(v)-u/2}" y="0" width="${u}" height="${Y+34}"/>`;
-  });
-  if(diff){
-    const [a,b]=diff;
-    o+=`<line class="arr" x1="${x(a)+6}" y1="${y}" x2="${x(b)-6}" y2="${y}"/><polygon class="arrh" points="${x(a)},${y} ${x(a)+10},${y-6} ${x(a)+10},${y+6}"/><polygon class="arrh" points="${x(b)},${y} ${x(b)-10},${y-6} ${x(b)-10},${y+6}"/><text class="lbl s cy" x="${(x(a)+x(b))/2}" y="${y-10}">${b-a}</text>`;
-    y+=24;
-  }
-  o+=`<text class="lbl s" x="${(X+x(hi))/2}" y="${y}">${unit}</text>`;
-  return svgWrap(X*2+(hi-lo)*u,y+12,o,label||`Line plot of lengths in ${unit}: `+range(hi-lo+1).map(i=>`${counts[lo+i]||0} at ${lo+i}`).join(', '));
-}
 const PENCILS={3:1,4:2,5:2,6:4,7:3,8:1},CRAYONS={5:1,6:3,7:2,8:5,9:2},LEAVES=[5,7,4,5,6,5,7,3];
 function wReadPlot(el){
   const q=Q(el);let v=null;

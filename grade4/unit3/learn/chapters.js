@@ -1,0 +1,19 @@
+/* Learn Extending Operations to Fractions (Grade 4 Unit 3): the unit's chapters and their icons. Loaded by learn.html and every chapter page in learn/.
+   Each chapter is learn/<id>.html with its widgets and steps in learn/<id>.js; shared/learn.js has the format. */
+const ICON={
+  groups:'<g stroke="#0a2340" stroke-width="1.5"><rect x="6" y="24" width="13" height="18" fill="#ffc93c"/><rect x="19" y="24" width="13" height="18" fill="#7fe3ff"/><rect x="32" y="24" width="13" height="18" fill="#ffc93c"/><rect x="45" y="24" width="13" height="18" fill="rgba(243,246,251,.25)"/></g><text x="32" y="16" fill="#f3f6fb" font-size="12" font-weight="700" text-anchor="middle" font-family="monospace">3×¼</text>',
+  pairs:'<g stroke="#0a2340" stroke-width="1.5"><rect x="4" y="22" width="9.3" height="20" fill="#ffc93c"/><rect x="13.3" y="22" width="9.3" height="20" fill="#ffc93c"/><rect x="22.6" y="22" width="9.3" height="20" fill="#7fe3ff"/><rect x="31.9" y="22" width="9.3" height="20" fill="#7fe3ff"/><rect x="41.2" y="22" width="9.3" height="20" fill="#ffc93c"/><rect x="50.5" y="22" width="9.5" height="20" fill="#ffc93c"/></g>',
+  add:'<path d="M4,42H60" stroke="#f3f6fb" stroke-width="2.5"/><path d="M8,36V48M20,38V46M32,38V46M44,38V46M56,36V48" stroke="#f3f6fb" stroke-width="2"/><path d="M8,39Q14,26 20,39M20,39Q26,26 32,39" fill="none" stroke="#ffc93c" stroke-width="2.5"/><path d="M32,39Q38,26 44,39" fill="none" stroke="#7fe3ff" stroke-width="2.5"/><text x="32" y="18" fill="#ffc93c" font-size="16" font-weight="700" text-anchor="middle" font-family="monospace">+</text>',
+  take:'<g stroke="#0a2340" stroke-width="1.5"><rect x="6" y="22" width="13" height="20" fill="#ffc93c"/><rect x="19" y="22" width="13" height="20" fill="#ffc93c"/><rect x="32" y="22" width="13" height="20" fill="rgba(255,154,134,.35)"/><rect x="45" y="22" width="13" height="20" fill="rgba(243,246,251,.25)"/></g><path d="M34,40L43,24" stroke="#ff9a86" stroke-width="3" stroke-linecap="round"/>',
+  plot:'<path d="M4,46H60" stroke="#f3f6fb" stroke-width="2.5"/><g fill="#ffc93c" font-size="11" font-weight="700" text-anchor="middle" font-family="monospace"><text x="16" y="40">X</text><text x="30" y="40">X</text><text x="30" y="29">X</text><text x="30" y="18">X</text><text x="44" y="40">X</text><text x="44" y="29">X</text></g>',
+  grid:'<g stroke="#0a2340" stroke-width="1"><rect x="10" y="10" width="44" height="44" fill="rgba(243,246,251,.25)"/><rect x="10" y="10" width="13.2" height="44" fill="#ffc93c"/><rect x="23.2" y="10" width="4.4" height="22" fill="#7fe3ff"/></g><path d="M14.4,10V54M18.8,10V54M23.2,10V54M27.6,10V54M32,10V54M36.4,10V54M40.8,10V54M45.2,10V54M49.6,10V54" stroke="#0a2340" stroke-width="1"/>',
+};
+const UNIT={saveKey:'g4u3-learn',icons:ICON,
+  chapters:[
+  {id:'equal-groups',icon:'groups',title:'Equal groups of unit fractions',lessons:'Lessons 1–3',blurb:'Make equal groups of 1/4 or 1/5, and see the pattern when you multiply.',steps:2},
+  {id:'any-fraction',icon:'pairs',title:'Equal groups of any fraction',lessons:'Lessons 4–6',blurb:'Make equal groups of 2/3 or 3/4, and find different groups that make the same amount.',steps:2},
+  {id:'add',icon:'add',title:'Add fractions',lessons:'Lessons 7–8',blurb:'Break a fraction into parts, and add fractions with jumps on a number line.',steps:2},
+  {id:'subtract',icon:'take',title:'Subtract fractions',lessons:'Lessons 9–12',blurb:'Take parts away, and trade a whole for parts to subtract from a mixed number.',steps:2},
+  {id:'line-plots',icon:'plot',title:'Line plots with fractions',lessons:'Lessons 13–14',blurb:'Plot measurements in eighths of an inch, then add and subtract to answer questions.',steps:2},
+  {id:'tenths-hundredths',icon:'grid',title:'Tenths and hundredths',lessons:'Lessons 15–18',blurb:'See each tenth as 10 hundredths, and add tenths to hundredths.',steps:2}
+]};

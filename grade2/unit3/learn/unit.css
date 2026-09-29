@@ -21,9 +21,3 @@
 .mst{stroke:rgba(10,35,64,.8);stroke-width:1.5}
 .mst.a{fill:var(--gold)}.mst.b{fill:var(--cyan)}
 .lbl.dk{fill:#0a2340}
-/* line plots */
-.xm{fill:var(--gold);font:700 22px var(--mono);text-anchor:middle;dominant-baseline:central}
-.xm.hi{fill:var(--cyan)}
-.colhi{fill:rgba(127,227,255,.12);stroke:var(--cyan);stroke-width:2}
-.chip.cur{border-color:var(--gold);color:var(--gold)}
-.chip.done{background:rgba(95,224,168,.18);border-color:var(--good)}

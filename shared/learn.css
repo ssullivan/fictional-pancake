@@ -51,7 +51,8 @@ a{color:var(--cyan)}
 .note{margin:0 0 10px;color:var(--dim);font-size:14.5px}
 .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
 .chip{background:#0a2340;border:1.5px solid rgba(170,205,255,.4);border-radius:99px;padding:5px 11px;font:700 13px var(--mono)}
-.chip[aria-pressed="true"]{background:rgba(95,224,168,.18);border-color:var(--good)}
+.chip[aria-pressed="true"],.chip.found,.chip.done{background:rgba(95,224,168,.18);border-color:var(--good)}
+.chip.cur{border-color:var(--gold);color:var(--gold)}
 .thumbs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
 .thumb{background:#0a2340;border:2px solid rgba(170,205,255,.35);border-radius:10px;padding:6px 8px;display:grid;justify-items:center;gap:3px;font:700 11px var(--mono);min-width:76px}
 .thumb svg{width:64px;height:48px}
