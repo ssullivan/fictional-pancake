@@ -2,6 +2,8 @@
 /* one number as blocks, t tens and u ones (u can be more than 9 after breaking a ten) */
 const tu=(t,u,label=`${t} tens and ${u} ones`)=>bpic([{t,u}],label);
 const TRADES=[[42,17],[53,26],[71,35]];
+/* "1 ten" or "3 tens" */
+const tens=n=>`${n} ten${n===1?'':'s'}`;
 function wTrade(el){
   const q=Q(el);let p=0,broke=false,t=0,u=0;
   el.innerHTML=seg('Numbers',TRADES.map(([a,b],i)=>[i,`${a} − ${b}`]))+`<div class="fig" data-f></div><div class="wrow"><button type="button" class="btn" data-brk>Break a ten</button><button type="button" class="ghost-btn" data-bt>Take away 1 ten</button><button type="button" class="ghost-btn" data-bu>Take away 1 one</button><button type="button" class="ghost-btn" data-clr>Start over</button></div><p class="readout" data-r></p>`;
@@ -9,9 +11,9 @@ function wTrade(el){
     const [a,b]=TRADES[p],T=tensOf(a)-(broke?1:0),U=a%10+(broke?10:0),gone=10*t+u;press(el,p);
     q('f').innerHTML=bpic([{t:T,u:U,opt:{traded:broke?10:0,outT:t,outO:u}}],`${T} tens and ${U} ones, with ${t} tens and ${u} ones crossed out`);
     q('brk').disabled=broke;q('bt').disabled=t>=T;q('bu').disabled=u>=U;
-    q('r').innerHTML=gone===b?`<span class="ok">You took away ${b}. <b>${a} − ${b} = ${a-b}</b>.</span>`:gone>b||t>tensOf(b)||u>b%10?`That’s more than ${b}. <span class="dimline">Start over. ${b} is ${tensOf(b)} tens and ${b%10} ones.</span>`
+    q('r').innerHTML=gone===b?`<span class="ok">You took away ${b}. <b>${a} − ${b} = ${a-b}</b>.</span>`:gone>b||t>tensOf(b)||u>b%10?`That’s more than ${b}. <span class="dimline">Start over. ${b} is ${tens(tensOf(b))} and ${b%10} ones.</span>`
       :!broke&&u>=U?`<b>Only ${a%10} ones!</b> <span class="dimline">You need to take away ${b%10} ones. Break a ten into 10 ones.</span>`
-      :`Take away <b>${tensOf(b)} tens and ${b%10} ones</b>.<br><span class="dimline">${broke?`${a} is now ${T} tens and ${U} ones. The green ones came from the broken ten.`:`${a} has only ${a%10} ones. Will you need to break a ten?`}</span>`;
+      :`Take away <b>${tens(tensOf(b))} and ${b%10} ones</b>.<br><span class="dimline">${broke?`${a} is now ${tens(T)} and ${U} ones. The green ones came from the broken ten.`:`${a} has only ${a%10} ones. Will you need to break a ten?`}</span>`;
   };
   q('brk').onclick=()=>{broke=true;draw();};
   q('bt').onclick=()=>{t++;draw();};q('bu').onclick=()=>{u++;draw();};
@@ -27,7 +29,7 @@ function wShow(el){
     const n=SHOWS[p],T=tensOf(n)-k,U=n%10+10*k;press(el,p);
     q('f').innerHTML=bpic([{t:T,u:U,opt:{traded:10*k}}],`${T} tens and ${U} ones`);
     q('brk').disabled=T<1||k>=2;q('back').disabled=!k;
-    q('r').innerHTML=`<b>${T} tens and ${U} ones</b>: ${10*T} + ${U} = ${n}<br><span class="dimline">${k?'Still '+n+'! Breaking a ten changes how it looks, not how many.':'Break a ten to show it another way.'}</span>`;
+    q('r').innerHTML=`<b>${tens(T)} and ${U} ones</b>: ${10*T} + ${U} = ${n}<br><span class="dimline">${k?'Still '+n+'! Breaking a ten changes how it looks, not how many.':'Break a ten to show it another way.'}</span>`;
   };
   q('brk').onclick=()=>{k++;draw();};q('back').onclick=()=>{k--;draw();};
   el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){p=+b.dataset.m;k=0;draw();}});

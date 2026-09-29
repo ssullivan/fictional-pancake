@@ -8,7 +8,7 @@ function wMore(el){
     q('f').innerHTML=barGraph(rows,{diff:d,showDiff:show,title:'Dogs and cats at the pet shelter'});
     q('go').textContent=show?'Hide the difference':'Show how many more';
     q('go').hidden=!d;
-    q('r').innerHTML=!d?`<b>${a} dogs and ${b} cats</b>: the same number, so neither has more.`:show?`<span class="ok"><b>${big} − ${small} = ${big-small}</b>, or <b>${small} + ${big-small} = ${big}</b>.</span><br>There are ${big-small} more ${bigL} than ${smallL}.`:`How many more ${bigL} than ${smallL}? Look at how much taller the ${bigL} bar is.`;
+    q('r').innerHTML=!d?`<b>${a} dogs and ${b} cats</b>: the same number, so neither has more.`:show?`<span class="ok"><b>${big} − ${small} = ${big-small}</b>, or <b>${small} + ${big-small} = ${big}</b>.</span><br>There ${big-small===1?'is':'are'} ${big-small} more ${big-small===1?bigL.slice(0,-1):bigL} than ${smallL}.`:`How many more ${bigL} than ${smallL}? Look at how much taller the ${bigL} bar is.`;
   };
   steppers(el,st,{a:[1,10],b:[1,10]},draw);
   q('go').onclick=()=>{show=!show;draw();};
@@ -20,7 +20,7 @@ function wTape(el){
   const draw=()=>{
     const {a,b}=st;q('a').textContent=a;q('b').textContent=b;
     q('f').innerHTML=tapes([{label:'Priya',n:a,show:a},{label:'Kiran',n:b,show:b}],{diff:a===b?null:Math.abs(a-b)});
-    q('r').innerHTML=a===b?`Priya and Kiran each have <b>${a}</b> stickers. The tapes are the same length.`:`The dashed piece is the difference: <b>${Math.max(a,b)} − ${Math.min(a,b)} = ${Math.abs(a-b)}</b>.<br>${a>b?'Priya':'Kiran'} has ${Math.abs(a-b)} more stickers than ${a>b?'Kiran':'Priya'}.`;
+    q('r').innerHTML=a===b?`Priya and Kiran each have <b>${a}</b> stickers. The tapes are the same length.`:`The dashed piece is the difference: <b>${Math.max(a,b)} − ${Math.min(a,b)} = ${Math.abs(a-b)}</b>.<br>${a>b?'Priya':'Kiran'} has ${Math.abs(a-b)} more sticker${Math.abs(a-b)===1?'':'s'} than ${a>b?'Kiran':'Priya'}.`;
   };
   steppers(el,st,{a:[1,20],b:[1,20]},draw);draw();
 }
