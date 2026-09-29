@@ -1,0 +1,33 @@
+/* Grade 6 Unit 1 Learn pages: figures and widgets used by its chapters. Loaded by learn.html and every page in learn/. */
+/* figures */
+.gl{stroke:rgba(170,205,255,.16);stroke-width:1}
+.sh-a{fill:rgba(255,201,60,.35);stroke:var(--gold);stroke-width:2.5;stroke-linejoin:round}
+.sh-b{fill:rgba(127,227,255,.3);stroke:var(--cyan);stroke-width:2.5;stroke-linejoin:round}
+.sh-c{fill:rgba(255,138,196,.3);stroke:var(--pink);stroke-width:2.5;stroke-linejoin:round}
+.sh-c.cut{fill:rgba(255,138,196,.12);stroke-dasharray:6 4}
+.ghost{fill:none;stroke:rgba(243,246,251,.55);stroke-width:2;stroke-dasharray:6 5}
+.hgt{stroke:var(--chalk);stroke-width:2.5;stroke-dasharray:7 5}
+.ext{stroke:rgba(243,246,251,.6);stroke-width:2;stroke-dasharray:2 5}
+.rt{fill:none;stroke:var(--chalk);stroke-width:1.8}
+.edge{stroke:var(--chalk);stroke-width:3;stroke-linecap:round}
+.seg-a{stroke:var(--chalk);stroke-width:3;stroke-dasharray:7 5}
+.seg-b{stroke:var(--cyan);stroke-width:4}
+.seg-c{stroke:var(--pink);stroke-width:3.5}
+.hit{fill:rgba(255,255,255,.03);cursor:pointer}
+.hit:hover{fill:rgba(255,201,60,.18)}
+.tile{fill:rgba(255,201,60,.6);stroke:var(--gold);stroke-width:1.5;cursor:pointer}
+.nf{stroke:#f3f6fb;stroke-width:2;stroke-linejoin:round}
+.nf.tap{cursor:pointer}
+.lbl{fill:var(--chalk);font:700 15px var(--mono);text-anchor:middle;dominant-baseline:central}
+.lbl.s{font-size:13px}.lbl.cy{fill:var(--cyan)}.lbl.st{text-anchor:start}.lbl.en{text-anchor:end}
+.pt{fill:var(--chalk)}
+
+/* 3D */
+.view3d{position:relative;width:100%;height:min(66vw,440px);min-height:270px;border-radius:12px;overflow:hidden;border:1px solid rgba(170,205,255,.2);
+  background:radial-gradient(circle at 50% 35%,#1f558f,#0a2340 75%);touch-action:none}
+.view3d canvas{display:block;max-width:100%}
+.labels3d{position:absolute;top:0;left:0;pointer-events:none}
+.flabel{font:700 12px var(--mono);background:rgba(10,35,64,.85);color:#fff;border:1px solid rgba(170,205,255,.45);border-radius:6px;padding:1px 6px;white-space:nowrap}
+.flabel.on{background:var(--good);color:#06291b;border-color:var(--good)}
+.loading{position:absolute;inset:0;display:grid;place-items:center;margin:0;color:var(--dim);font:700 14px var(--mono)}
+.hint3d{position:absolute;left:10px;bottom:8px;margin:0;color:var(--dim);font:700 12px var(--mono);pointer-events:none}

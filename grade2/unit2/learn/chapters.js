@@ -1,0 +1,19 @@
+/* Learn Adding and Subtracting within 100 (Grade 2 Unit 2): the unit's chapters and their icons. Loaded by learn.html and every chapter page in learn/.
+   Each chapter is learn/<id>.html with its widgets and steps in learn/<id>.js; shared/learn.js has the format. */
+const ICON={
+  tape:'<rect x="4" y="14" width="56" height="14" rx="2" fill="rgba(255,201,60,.35)" stroke="#ffc93c" stroke-width="2"/><rect x="4" y="36" width="34" height="14" rx="2" fill="rgba(127,227,255,.3)" stroke="#7fe3ff" stroke-width="2"/><rect x="38" y="36" width="22" height="14" rx="2" fill="none" stroke="#7fe3ff" stroke-width="2" stroke-dasharray="3 3"/>',
+  take:'<g fill="#ffc93c" stroke="#0a2340" stroke-width="1"><rect x="8" y="8" width="8" height="48"/><rect x="20" y="8" width="8" height="48"/><rect x="32" y="8" width="8" height="48" opacity=".35"/><rect x="46" y="48" width="8" height="8"/><rect x="46" y="38" width="8" height="8" opacity=".35"/></g><g stroke="#ff7b7b" stroke-width="3" stroke-linecap="round"><path d="M29,58L43,6"/><path d="M43,50L57,34"/></g>',
+  trade:'<g fill="#ffc93c" stroke="#0a2340" stroke-width="1"><rect x="6" y="8" width="8" height="48"/><rect x="18" y="8" width="8" height="48"/></g><path d="M30,32h8m-3,-4l4,4l-4,4" stroke="#f3f6fb" stroke-width="2" fill="none"/><g fill="#5fe0a8" stroke="#0a2340" stroke-width="1"><rect x="44" y="8" width="7" height="7"/><rect x="44" y="18" width="7" height="7"/><rect x="44" y="28" width="7" height="7"/><rect x="44" y="38" width="7" height="7"/><rect x="44" y="48" width="7" height="7"/><rect x="54" y="8" width="7" height="7"/><rect x="54" y="18" width="7" height="7"/><rect x="54" y="28" width="7" height="7"/><rect x="54" y="38" width="7" height="7"/><rect x="54" y="48" width="7" height="7"/></g>',
+  newten:'<g fill="#ffc93c" stroke="#0a2340" stroke-width="1"><rect x="8" y="8" width="8" height="48"/><rect x="20" y="8" width="8" height="48"/></g><g fill="#7fe3ff" stroke="#0a2340" stroke-width="1"><rect x="32" y="8" width="8" height="48"/></g><rect x="44" y="8" width="8" height="48" fill="#5fe0a8" stroke="#fff" stroke-width="2"/><rect x="56" y="48" width="6" height="8" fill="#ffc93c"/>',
+  story:'<path d="M6,20 v-8 H58 v8" fill="none" stroke="#7fe3ff" stroke-width="2.5"/><rect x="6" y="26" width="30" height="18" rx="2" fill="rgba(255,201,60,.35)" stroke="#ffc93c" stroke-width="2"/><rect x="36" y="26" width="22" height="18" rx="2" fill="rgba(127,227,255,.3)" stroke="#7fe3ff" stroke-width="2"/><text x="47" y="40" fill="#7fe3ff" font-size="14" font-weight="700" text-anchor="middle" font-family="monospace">?</text>',
+};
+const UNIT={saveKey:'g2u2-learn',readAloud:true,icons:ICON,
+  /* the order of the chapters when the unit was one page (learn.html#c2s1), for progress saved then and old links */
+  legacy:['compare','subtract-your-way','break-a-ten','within-100','story-problems'],
+  chapters:[
+  {id:'compare',icon:'tape',title:'Add and subtract to compare',lessons:'Lessons 1–3',blurb:'Find how many more, count on to find a missing number, and decide whether a story adds or subtracts.',steps:3},
+  {id:'subtract-your-way',icon:'take',title:'Subtract your way',lessons:'Lessons 5–6',blurb:'Take away tens and ones, and find different ways to subtract when there aren’t enough ones.',steps:2},
+  {id:'break-a-ten',icon:'trade',title:'Break a ten',lessons:'Lessons 7–8',blurb:'Trade a ten for 10 ones so you can take away, and show one number in different ways.',steps:2},
+  {id:'within-100',icon:'newten',title:'Add and subtract within 100',lessons:'Lesson 9',blurb:'Make a new ten when you add, break a ten when you subtract, and know which one a problem needs.',steps:2},
+  {id:'story-problems',icon:'story',title:'Story problems',lessons:'Lessons 11–14',blurb:'Show stories with tape diagrams and equations, find the missing part, and solve two-step stories.',steps:3}
+]};

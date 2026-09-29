@@ -10,36 +10,7 @@
 <link rel="stylesheet" href="../../shared/theme.css?v=4796e910">
 <link rel="stylesheet" href="../../shared/learn.css?v=6a514fa1">
 <link rel="stylesheet" href="../../shared/k5.css?v=180c497b">
-<style>
-/* things to measure */
-.ob .body,.ob .er,.ob .cap{stroke:rgba(10,35,64,.8);stroke-width:1.5}
-.ob .body{fill:var(--gold)}
-.ob .er,.k-eraser .body,.eraser{fill:#ff9fb2}
-.eraser{stroke:rgba(10,35,64,.8);stroke-width:1.5}
-.ob .wood{fill:#f2d0a0}.ob .lead{fill:#2a2a2a}
-.ob .band{stroke:rgba(10,35,64,.55);stroke-width:2}
-.k-crayon .body{fill:#ff7b7b}
-.k-marker .body,.k-glue .body{fill:var(--chalk)}
-.ob .cap{fill:var(--cyan)}
-.k-book .body,.k-poster .body{fill:var(--cyan)}
-.k-rope .body{fill:var(--good)}
-.k-rug .body{fill:#c9a4ff}
-.k-box .body,.k-bench .body{fill:#d9a066}
-.clip rect{fill:none;stroke:#cfd8e3;stroke-width:2.5}
-/* rulers, meter sticks, and the 10 cm strip */
-.rul{fill:rgba(255,201,60,.14);stroke:var(--gold);stroke-width:2}
-.span{fill:rgba(127,227,255,.28)}
-.ref{fill:rgba(127,227,255,.3);stroke:var(--cyan);stroke-width:2}
-.mst{stroke:rgba(10,35,64,.8);stroke-width:1.5}
-.mst.a{fill:var(--gold)}.mst.b{fill:var(--cyan)}
-.lbl.dk{fill:#0a2340}
-/* line plots */
-.xm{fill:var(--gold);font:700 22px var(--mono);text-anchor:middle;dominant-baseline:central}
-.xm.hi{fill:var(--cyan)}
-.colhi{fill:rgba(127,227,255,.12);stroke:var(--cyan);stroke-width:2}
-.chip.cur{border-color:var(--gold);color:var(--gold)}
-.chip.done{background:rgba(95,224,168,.18);border-color:var(--good)}
-</style>
+<link rel="stylesheet" href="learn/unit.css?v=6db7d1b1">
 </head>
 <body class="young">
 
@@ -63,30 +34,16 @@
     </section>
   </section>
 
-  <section id="lesson" hidden>
-    <div class="bar">
-      <a class="ghost-btn" href="#">← Chapters</a>
-      <div class="bar-mid"><div class="zn" id="cname"></div><div class="dots" id="dots"></div></div>
-    </div>
-    <article class="card">
-      <p class="eyebrow" id="snum"></p>
-      <h2 id="stitle"></h2>
-      <div class="sbody" id="sbody"></div>
-      <div id="widget"></div>
-      <div id="check"></div>
-      <div class="nav"><a class="ghost-btn" id="prev" href="#">← Back</a><button type="button" class="btn" id="next">Next →</button><span class="gate" id="gate"></span></div>
-    </article>
-  </section>
 </div>
 
 <script src="../../shared/util.js?v=dfcc3c50"></script>
 <script src="../../shared/figures.js?v=90a5b6ae"></script>
 <script src="../../shared/k5.js?v=65bc1fcb"></script>
 <script src="../../shared/speak.js?v=b05e2ed3"></script>
-<script src="../../shared/learn.js?v=ce9dd4c5"></script>
-<script src="lessons.js?v=486735dc"></script>
+<script src="../../shared/learn.js?v=1d9dcb17"></script>
+<script src="learn/chapters.js?v=a4e1e68d"></script>
 <script>
-Learn.init({saveKey:'g2u3-learn',readAloud:true,icons:ICON,chapters:CH});
+Learn.home(UNIT);
 </script>
 </body>
 </html>

@@ -12,7 +12,7 @@ shared/                   used by every grade; each file's header comment docume
   theme.css               colors, fonts, page header, pills, buttons, feedback boxes: every page
   game.css, engine.js     game screens and the game engine (Game.init)
   figures.css, figures.js double number lines, ratio tables, diagram styles
-  learn.css, learn.js     Learn page screens and framework (Learn.init)
+  learn.css, learn.js     Learn pages: a unit's chapter list and its chapter pages (Learn.home, Learn.chapter)
   k5.css, k5.js           ten-frames, cubes, base-ten blocks, tape diagrams, number lines, shapes, clocks, coins, factor pictures, steppers: K–5 pages
   landing.css             grade cards (root page) and unit cards (grade pages)
   util.js                 R, pick, shuffle, miscOf, mcOf, gcd, lcm, $, Q, parseNum
@@ -24,8 +24,10 @@ grade6/
   unit3/index.html        game page: HTML, unit-only CSS, and Game.init({...})
   unit3/stations.js       the game's problem generators, ZONES, and ICON
   unit3/checks.js         the game's number limits and real-world checks for the fuzz test
-  unit1/learn.html        Learn page: HTML, unit-only CSS, and Learn.init({...})
-  unit1/lessons.js        the Learn page's widgets and chapters (CH, ICON)
+  unit1/learn.html        Learn page: the unit's list of chapters and its "For grown-ups" notes (Learn.home)
+  unit1/learn/chapters.js the unit's chapters (UNIT) and their icons, loaded by learn.html and every chapter page
+  unit1/learn/<id>.html   one page per chapter (Learn.chapter); its widgets and steps are in learn/<id>.js
+  unit1/learn/common.js   code more than one of the unit's chapters uses; learn/unit.css holds the unit's styles
 ```
 
 - Everything for a unit lives in `grade<N>/unit<M>/`. Pages load `shared/` with `../../shared/...`.
@@ -54,11 +56,13 @@ When building a game:
 
 ## Learn pages
 
-Interactive tutorials live next to each game as `grade<N>/unit<M>/learn.html` and get a Learn link on the unit's card on the grade page. They run on `shared/learn.js`; Grade 6 Unit 1 (`learn.html` + `lessons.js`) is the template.
+Interactive tutorials live next to each game. A unit's `grade<N>/unit<M>/learn.html` lists its chapters and gets the Learn link on the unit's card on the grade page; each chapter is a page of its own, `learn/<id>.html`, with its widgets and steps in `learn/<id>.js`. They run on `shared/learn.js` (its header documents `UNIT`); Grade 6 Unit 1 is the template.
+
+- To add a chapter: add it to `learn/chapters.js` in lesson order (with its step count), then copy a chapter page and script and rename them to the new id. Code two of the unit's chapters use goes in `learn/common.js`; code other units could use goes in `shared/`. `node tools/check.mjs` checks that every chapter has its page and the right number of steps.
 
 - Chapters follow the IM sections in lesson order. Each step has one idea, something to move (slider, tap, drag), and a quick check with named mistakes; `Next` unlocks after the check.
-- Routing is by hash (`#c2s1`, `#c2done`); progress is saved in `localStorage`. When the unit has a game, each chapter ends with a link to the matching game zone (`./#<zone id>` starts that zone); leave out `game` until it does.
-- For young readers (Grades K–2), use `<body class="young">` and `Learn.init({readAloud: true})`. Grade 2 Unit 1 (`grade2/unit1/`) is the template for those. K–5 pages load `shared/k5.css` and `k5.js` for their pictures and controls.
+- A chapter page routes by hash (`#s2`, `#done`); progress for the unit is saved in `localStorage` under chapter ids, so chapters can be added or moved without losing it. Units that used to be one page (`learn.html#c2s1`) keep a `legacy` list in `UNIT` so that progress and old links still find their chapter. When the unit has a game, each chapter ends with a link to the matching game zone (`../#<zone id>` starts that zone); leave out `game` until it does.
+- For young readers (Grades K–2), use `<body class="young">` on the unit's pages and `readAloud: true` in `UNIT`. Grade 2 Unit 1 (`grade2/unit1/`) is the template for those. K–5 pages load `shared/k5.css` and `k5.js` for their pictures and controls.
 - 3D uses three.js (pinned version, loaded through an import map from cdn.jsdelivr.net, only when a 3D step opens). Every 3D widget needs a flat SVG fallback for devices or networks without WebGL.
 - Nets are defined as flat faces hinged to a parent face; `buildNet(...).check()` confirms a net folds closed. Run it on every net (and confirm invalid cube nets fail) before shipping.
 

@@ -176,7 +176,7 @@ for (const width of WIDTHS) {
     await shot(`${tag}-link-${zones[0]}`); n++;
   }
 }
-// Learn pages: every step of every chapter, then a wrong and a right answer to its quick check.
+// Learn pages: every step of every chapter page, then a wrong answer (or the first choice) to its quick check.
 for (const width of WIDTHS) {
   for (const page of LEARN) {
     const tag = `${width}-${page.replace(/\W/g, '')}`;
@@ -184,10 +184,12 @@ for (const width of WIDTHS) {
     await ev('localStorage.clear()');
     await load(BASE + page, width);
     await shot(`${tag}-home`); n++;
-    const chapters = await ev(`document.querySelectorAll('#chapters .zone').length`);
-    for (let c = 1; c <= chapters; c++) {
+    // each chapter is its own page (learn/<id>.html), listed on the unit's Learn page
+    const chapters = await ev(`[...document.querySelectorAll('#chapters .zone')].map(a=>a.getAttribute('href').split('#')[0])`);
+    for (let c = 1; c <= chapters.length; c++) {
+      await load(BASE + page.replace(/learn\.html$/, '') + chapters[c - 1], width);
       for (let s = 1; ; s++) {
-        await ev(`location.hash='#c${c}s${s}'`);
+        await ev(`location.hash='#s${s}'`);
         await wait(700);  // 3D steps load three.js
         const [at, of] = await ev(`document.getElementById('snum').textContent.match(/\\d+/g).map(Number)`);
         if (at !== s) break;
@@ -202,10 +204,10 @@ for (const width of WIDTHS) {
         }
         if (at === of) break;
       }
-      await ev(`location.hash='#c${c}done'`); await wait(100);
+      await ev(`location.hash='#done'`); await wait(100);
       await shot(`${tag}-c${c}done`); n++;
     }
-    await ev(`location.hash=''`); await wait(100);
+    await load(BASE + page, width);
     await shot(`${tag}-home-after`); n++;
   }
 }

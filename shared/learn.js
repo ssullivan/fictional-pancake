@@ -1,23 +1,28 @@
-/* Learn page framework: a home screen of chapters, steps with a widget and a quick check, and hash routing
-   (#c2s1 = chapter 2 step 1, #c2done = end of chapter 2). Progress is saved in localStorage.
-   Needs util.js (and speak.js with readAloud). Screens and ids are in the page's HTML (#home, #lesson); styles are in learn.css.
+/* Learn pages. A unit's Learn page (learn.html) lists its chapters, and each chapter is a page of its own (learn/<id>.html) with
+   steps: one idea each, something to move, and a quick check (#s2 is step 2, #done the end of the chapter). Progress for the whole
+   unit is saved in localStorage. Needs util.js (and speak.js with readAloud). Styles are in learn.css.
 
-   Learn.init({
+   The unit is described once, in learn/chapters.js, which its Learn page and every chapter page load:
+   const UNIT={
      saveKey: 'g6u1-learn',       localStorage key; unique across the whole site
      game?: 'Blueprint Builders', the unit's game (index.html next to learn.html), if it has one
      readAloud?: true,            a "Read to me" button on each step and quick check (browser speech; for young readers)
      icons: {iconId: '<svg markup, 64×64 viewBox>'},
+     legacy?: ['area', …],        chapter ids in their order when the unit was one page (learn.html#c2s1), so progress saved
+                                  then, and old links, still find their chapter; leave it off for new units
      chapters: [{
-       icon, title, lessons, blurb,
-       game?: {zone, name},       the game zone to practice in at the end of the chapter (./#zone)
-       steps: [{
-         title, body,             body is HTML
-         widget?: el => cleanup?, draws into el; may return a function that runs when the step is left
-         check?: {kind: 'num', q, answer, unit?, misc?: [[wrong value, message]], explain, fig?}
-               | {kind: 'mc', q, answer, choices: [{id, label}], why: {id: message}, explain, fig?, stack?}
-       }]
+       id, icon, title, lessons, blurb,   id names the chapter's page: learn/<id>.html and its script learn/<id>.js
+       steps: 3,                  how many steps it has (tools/check.mjs checks this against the page)
+       game?: {zone, name},       the game zone to practice in at the end of the chapter (../#zone)
      }]
-   })
+   };
+   Learn.home(UNIT)                  on learn.html: fills #chapters with a card for each chapter and its progress
+   Learn.chapter(UNIT, id, steps)    on learn/<id>.html: draws the chapter, where steps are [{
+       title, body,             body is HTML
+       widget?: el => cleanup?, draws into el; may return a function that runs when the step is left
+       check?: {kind: 'num', q, answer, unit?, misc?: [[wrong value, message]], explain, fig?}
+             | {kind: 'mc', q, answer, choices: [{id, label}], why: {id: message}, explain, fig?, stack?}
+   }]
    Next unlocks once a step's quick check is answered (steps without a check unlock right away). */
 const Learn=(()=>{
   let cfg,CH,save,TOTAL,cleanupW=null;
@@ -64,61 +69,94 @@ const Learn=(()=>{
 
   /* ---------- save & pages ---------- */
   const persist=()=>{try{localStorage.setItem(cfg.saveKey,JSON.stringify(save));}catch(e){}};
-  const skey=(ci,si)=>`c${ci+1}s${si+1}`;
-  function show(id){['home','lesson'].forEach(s=>$(s).hidden=s!==id);window.scrollTo(0,0);}
+  const skey=(ci,si)=>`${CH[ci].id}/${si+1}`;
+  /* progress for the unit; steps saved by the old single page (c2s1) move to their chapter's id */
+  function load(u){
+    cfg=u;CH=u.chapters;save={steps:{}};
+    try{const s=JSON.parse(localStorage.getItem(cfg.saveKey)||'null');if(s&&s.steps)save=s;}catch(e){}
+    const old=Object.keys(save.steps).filter(k=>/^c\d+s\d+$/.test(k));
+    if(old.length){
+      old.forEach(k=>{const [,c,st]=k.match(/^c(\d+)s(\d+)$/),id=(cfg.legacy||[])[c-1];if(id&&save.steps[k])save.steps[`${id}/${st}`]=1;delete save.steps[k];});
+      persist();
+    }
+    TOTAL=CH.reduce((s,c)=>s+c.steps,0);
+  }
   function renderHome(){
     $('hdone').textContent=Object.keys(save.steps).filter(k=>save.steps[k]).length;$('htot').textContent=TOTAL;
     $('chapters').innerHTML=CH.map((c,ci)=>{
-      const d=c.steps.filter((_,si)=>save.steps[skey(ci,si)]).length,first=c.steps.findIndex((_,si)=>!save.steps[skey(ci,si)]);
-      return `<a class="zone" href="#c${ci+1}s${first<0?1:first+1}"><svg class="icon" viewBox="0 0 64 64" aria-hidden="true">${cfg.icons[c.icon]}</svg><p class="eyebrow">Chapter ${ci+1} · ${c.lessons}</p><h3>${c.title}</h3><p>${c.blurb}</p><span class="meta"><span class="prog${d===c.steps.length?' full':''}">${d===c.steps.length?'✓ Done':`${d}/${c.steps.length} steps`}</span><span class="go">${d?(d===c.steps.length?'Review →':'Continue →'):'Start →'}</span></span></a>`;
+      const S=Array.from({length:c.steps}),d=S.filter((_,si)=>save.steps[skey(ci,si)]).length,first=S.findIndex((_,si)=>!save.steps[skey(ci,si)]);
+      return `<a class="zone" href="learn/${c.id}.html#s${first<0?1:first+1}"><svg class="icon" viewBox="0 0 64 64" aria-hidden="true">${cfg.icons[c.icon]}</svg><p class="eyebrow">Chapter ${ci+1} · ${c.lessons}</p><h3>${c.title}</h3><p>${c.blurb}</p><span class="meta"><span class="prog${d===c.steps?' full':''}">${d===c.steps?'✓ Done':`${d}/${c.steps} steps`}</span><span class="go">${d?(d===c.steps?'Review →':'Continue →'):'Start →'}</span></span></a>`;
     }).join('');
   }
-  function dots(ci,si){
-    $('dots').innerHTML=CH[ci].steps.map((_,i)=>`<a href="#c${ci+1}s${i+1}" class="dot${i===si?' cur':''}${save.steps[skey(ci,i)]?' done':''}" aria-label="Step ${i+1}${save.steps[skey(ci,i)]?', done':''}"></a>`).join('');
+  function home(u){
+    load(u);
+    /* an old link to a step of the single page goes to that step's chapter page */
+    const m=location.hash.match(/^#c(\d+)(?:s(\d+)|done)$/),id=m&&(cfg.legacy||[])[m[1]-1];
+    if(id)return location.replace(`learn/${id}.html#${m[2]?'s'+m[2]:'done'}`);
+    renderHome();
   }
-  function renderStep(ci,si){
-    const ch=CH[ci],st=ch.steps[si],key=skey(ci,si),last=si+1===ch.steps.length;
-    $('cname').textContent=`${ci+1}. ${ch.title}`;dots(ci,si);
-    $('snum').textContent=`Step ${si+1} of ${ch.steps.length} · ${ch.lessons}`;
+
+  /* ---------- a chapter page ---------- */
+  let ci,STEPS;
+  function dots(si){
+    $('dots').innerHTML=STEPS.map((_,i)=>`<a href="#s${i+1}" class="dot${i===si?' cur':''}${save.steps[skey(ci,i)]?' done':''}" aria-label="Step ${i+1}${save.steps[skey(ci,i)]?', done':''}"></a>`).join('');
+  }
+  function renderStep(si){
+    const ch=CH[ci],st=STEPS[si],key=skey(ci,si),last=si+1===STEPS.length;
+    $('cname').textContent=`${ci+1}. ${ch.title}`;dots(si);
+    $('snum').textContent=`Step ${si+1} of ${STEPS.length} · ${ch.lessons}`;
     $('stitle').textContent=st.title;$('sbody').innerHTML=st.body;
     if(canSpeak())$('sbody').prepend(sayBtn('Read to me',()=>[$('stitle'),...$('sbody').querySelectorAll('p')]));
     /* a fresh, empty #widget each step, so listeners a widget added to it don't outlive its step */
     const old=$('widget'),w=old.cloneNode(false);old.replaceWith(w);w.hidden=!st.widget;
     if(st.widget)cleanupW=st.widget(w)||null;
     const next=$('next'),gate=$('gate');
-    const finish=()=>{save.steps[key]=1;persist();next.disabled=false;gate.textContent='';dots(ci,si);};
+    const finish=()=>{save.steps[key]=1;persist();next.disabled=false;gate.textContent='';dots(si);};
     $('check').hidden=!st.check;$('check').innerHTML='';
     if(st.check){renderCheck($('check'),st.check,finish);const ok=!!save.steps[key];next.disabled=!ok;gate.textContent=ok?'':'Answer the quick check to go on.';}
     else{next.disabled=false;gate.textContent='';}
-    $('prev').href=si?`#c${ci+1}s${si}`:'#';$('prev').textContent=si?'← Back':'← Chapters';
+    $('prev').href=si?`#s${si}`:'../learn.html';$('prev').textContent=si?'← Back':'← Chapters';
     next.textContent=last?'Finish chapter →':'Next →';
-    next.onclick=()=>{if(!st.check){save.steps[key]=1;persist();}location.hash=last?`#c${ci+1}done`:`#c${ci+1}s${si+2}`;};
+    next.onclick=()=>{if(!st.check){save.steps[key]=1;persist();}location.hash=last?'#done':`#s${si+2}`;};
   }
-  function renderDone(ci){
+  function renderDone(){
     const ch=CH[ci],nx=CH[ci+1];
-    $('cname').textContent=`${ci+1}. ${ch.title}`;dots(ci,-1);
+    $('cname').textContent=`${ci+1}. ${ch.title}`;dots(-1);
     $('snum').textContent=`Chapter ${ci+1} complete`;$('stitle').textContent='Nice work!';
-    $('sbody').innerHTML=`<p>You finished <b>${ch.title}</b>.</p>`+(ch.game&&cfg.game?`<div class="practice"><p class="eyebrow">Practice it</p><a class="btn" href="./#${ch.game.zone}">Play ${ch.game.name} →</a><p>in ${cfg.game}, the game for this unit.</p></div>`:'');
+    $('sbody').innerHTML=`<p>You finished <b>${ch.title}</b>.</p>`+(ch.game&&cfg.game?`<div class="practice"><p class="eyebrow">Practice it</p><a class="btn" href="../#${ch.game.zone}">Play ${ch.game.name} →</a><p>in ${cfg.game}, the game for this unit.</p></div>`:'');
     $('widget').hidden=true;$('check').hidden=true;$('gate').textContent='';
-    $('prev').href=`#c${ci+1}s${ch.steps.length}`;$('prev').textContent='← Back';
+    $('prev').href=`#s${STEPS.length}`;$('prev').textContent='← Back';
     const next=$('next');next.disabled=false;next.textContent=nx?`Next: ${nx.title} →`:'Back to chapters';
-    next.onclick=()=>{location.hash=nx?`#c${ci+2}s1`:'#';};
+    next.onclick=()=>{location.href=nx?`${nx.id}.html#s1`:'../learn.html';};
   }
   function route(){
     if(cleanupW){try{cleanupW();}catch(e){}cleanupW=null;}
     hush();
-    const m=location.hash.match(/^#c(\d+)(?:s(\d+)|(done))$/),ci=m?+m[1]-1:-1;
-    if(!CH[ci]){renderHome();show('home');return;}
-    if(m[3])renderDone(ci);else renderStep(ci,Math.min(Math.max(+m[2],1),CH[ci].steps.length)-1);
-    show('lesson');
+    const m=location.hash.match(/^#(?:s(\d+)|(done))$/);
+    if(m&&m[2])renderDone();else renderStep(Math.min(Math.max(m?+m[1]:1,1),STEPS.length)-1);
   }
-
-  function init(c){
-    cfg=c;CH=c.chapters;save={steps:{}};
-    try{const s=JSON.parse(localStorage.getItem(cfg.saveKey)||'null');if(s&&s.steps)save=s;}catch(e){}
-    TOTAL=CH.reduce((s,c)=>s+c.steps.length,0);
+  function chapter(u,id,steps){
+    load(u);ci=CH.findIndex(c=>c.id===id);STEPS=steps;
+    if(ci<0)throw new Error(`No chapter "${id}" in learn/chapters.js`);
+    if(CH[ci].steps!==steps.length)console.error(`Chapter "${id}" has ${steps.length} steps, but learn/chapters.js says ${CH[ci].steps}`);
+    document.body.insertAdjacentHTML('afterbegin',`<div class="app">
+  <section id="lesson">
+    <div class="bar">
+      <a class="ghost-btn" href="../learn.html">← Chapters</a>
+      <div class="bar-mid"><div class="zn" id="cname"></div><div class="dots" id="dots"></div></div>
+    </div>
+    <article class="card">
+      <p class="eyebrow" id="snum"></p>
+      <h2 id="stitle"></h2>
+      <div class="sbody" id="sbody"></div>
+      <div id="widget"></div>
+      <div id="check"></div>
+      <div class="nav"><a class="ghost-btn" id="prev" href="#">← Back</a><button type="button" class="btn" id="next">Next →</button><span class="gate" id="gate"></span></div>
+    </article>
+  </section>
+</div>`);
     addEventListener('hashchange',route);
     route();
   }
-  return {init};
+  return {home,chapter};
 })();

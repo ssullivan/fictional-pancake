@@ -10,22 +10,7 @@
 <link rel="stylesheet" href="../../shared/theme.css?v=4796e910">
 <link rel="stylesheet" href="../../shared/learn.css?v=6a514fa1">
 <link rel="stylesheet" href="../../shared/k5.css?v=180c497b">
-<style>
-/* sharing plates, pairs, array rows and columns, square tiles, extra cubes, and the 1–20 number buttons */
-.plate{fill:rgba(170,205,255,.08);stroke:var(--chalk);stroke-width:2.5}
-.pairbox{fill:none;stroke:rgba(170,205,255,.55);stroke-width:2}
-.band{fill:rgba(255,201,60,.14);stroke:var(--gold);stroke-width:2.5}
-.band.b{fill:rgba(127,227,255,.12);stroke:var(--cyan)}
-.tile{fill:var(--gold);stroke:#0a2340;stroke-width:1.5}
-.rim{fill:none;stroke:#fff;stroke-width:3}
-.cube.x{fill:var(--good)}
-.nums{display:grid;grid-template-columns:repeat(10,1fr);gap:6px;margin-bottom:12px}
-.nums button{min-height:52px;border-radius:10px;border:2px solid rgba(170,205,255,.4);background:#0a2340;color:var(--chalk);font:700 20px var(--mono)}
-.nums .ev{background:var(--gold);border-color:var(--gold);color:#1a1300}
-.nums .od{background:rgba(127,227,255,.25);border-color:var(--cyan)}
-.nums [aria-pressed="true"]{outline:3px solid #fff;outline-offset:2px}
-@media (max-width:560px){.nums{grid-template-columns:repeat(5,1fr)}}
-</style>
+<link rel="stylesheet" href="learn/unit.css?v=4da76a22">
 </head>
 <body class="young">
 
@@ -49,30 +34,16 @@
     </section>
   </section>
 
-  <section id="lesson" hidden>
-    <div class="bar">
-      <a class="ghost-btn" href="#">← Chapters</a>
-      <div class="bar-mid"><div class="zn" id="cname"></div><div class="dots" id="dots"></div></div>
-    </div>
-    <article class="card">
-      <p class="eyebrow" id="snum"></p>
-      <h2 id="stitle"></h2>
-      <div class="sbody" id="sbody"></div>
-      <div id="widget"></div>
-      <div id="check"></div>
-      <div class="nav"><a class="ghost-btn" id="prev" href="#">← Back</a><button type="button" class="btn" id="next">Next →</button><span class="gate" id="gate"></span></div>
-    </article>
-  </section>
 </div>
 
 <script src="../../shared/util.js?v=dfcc3c50"></script>
 <script src="../../shared/figures.js?v=90a5b6ae"></script>
 <script src="../../shared/k5.js?v=65bc1fcb"></script>
 <script src="../../shared/speak.js?v=b05e2ed3"></script>
-<script src="../../shared/learn.js?v=ce9dd4c5"></script>
-<script src="lessons.js?v=87f6d725"></script>
+<script src="../../shared/learn.js?v=1d9dcb17"></script>
+<script src="learn/chapters.js?v=f7eb4d94"></script>
 <script>
-Learn.init({saveKey:'g2u8-learn',readAloud:true,icons:ICON,chapters:CH});
+Learn.home(UNIT);
 </script>
 </body>
 </html>

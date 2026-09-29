@@ -1,0 +1,83 @@
+/* Learn Adding, Subtracting, and Working with Data (Grade 2 Unit 1), chapter 4: Bar graphs. Its widgets and steps; loaded by bar-graphs.html. */
+function wBuildBar(el){
+  const q=Q(el),h=SNACKS.map(()=>0);
+  el.innerHTML=`<table class="tally"><caption>Snacks our class chose</caption><tr><th>Snack</th><th>Students</th></tr>${SNACKS.map(s=>`<tr><td>${s.label}</td><td>${s.n}</td></tr>`).join('')}</table><div class="fig" data-f></div><p class="readout" data-r></p>`;
+  const draw=()=>{
+    q('f').innerHTML=barGraph(SNACKS.map((s,i)=>({...s,n:h[i]})),{edit:true,title:'Tap in each column to set its bar'});
+    const right=h.filter((v,i)=>v===SNACKS[i].n).length;
+    q('r').innerHTML=right===SNACKS.length?'<span class="ok">Your bar graph matches the table!</span>':`Bars that match the table: <b>${right}</b> of ${SNACKS.length}`;
+  };
+  q('f').addEventListener('click',e=>{const t=e.target.closest('[data-r]');if(t){const r=+t.dataset.r,v=+t.dataset.v;h[r]=h[r]===v?v-1:v;draw();}});
+  draw();
+}
+const BOOKS=[{label:'Mai',n:4,c:'green'},{label:'Diego',n:7,c:'blue'},{label:'Elena',n:5,c:'red'}];
+function wReadBar(el){
+  const q=Q(el);let hi=-1;
+  el.innerHTML=`<div class="fig" data-f></div><div class="wrow">${SNACKS.map((s,i)=>`<button type="button" class="ghost-btn" data-row="${i}">${s.label}</button>`).join('')}</div><p class="readout" data-r></p>`;
+  const draw=()=>{
+    q('f').innerHTML=barGraph(SNACKS,{hi,title:'Snacks our class chose'});
+    q('r').innerHTML=hi<0?'Tap a snack to read its bar.':`Follow the top of the ${SNACKS[hi].label.toLowerCase()} bar across to the numbers: <b>${SNACKS[hi].n} students</b> chose ${SNACKS[hi].label.toLowerCase()}.`;
+  };
+  el.addEventListener('click',e=>{const b=e.target.closest('[data-row]');if(b){hi=+b.dataset.row;draw();}});
+  draw();
+}
+const PETS=[{label:'Dogs',n:7,pic:'dot',c:'yellow'},{label:'Cats',n:5,pic:'dot',c:'blue'},{label:'Fish',n:3,pic:'dot',c:'green'}];
+function wTwoGraphs(el){
+  const q=Q(el);let m='pic';
+  el.innerHTML=seg('Graph',[['pic','Picture graph'],['bar','Bar graph']])+`<div class="fig" data-f></div><p class="readout" data-r></p>`;
+  const draw=()=>{
+    press(el,m);
+    q('f').innerHTML=m==='pic'?picGraph(PETS,{title:'Pets our class has',unit:'1 pet'}):barGraph(PETS,{max:8,title:'Pets our class has'});
+    q('r').innerHTML=`Both graphs show <b>7 dogs, 5 cats, and 3 fish</b>. ${m==='pic'?'Here you count the pictures.':'Here you read where each bar stops.'}`;
+  };
+  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){m=b.dataset.m;draw();}});
+  draw();
+}
+const ASK=[
+  {q:'How many students chose yogurt?',hi:2,a:'8 students. Read the top of the yogurt bar.'},
+  {q:'Which snack did the fewest students choose?',hi:1,a:'Crackers: the shortest bar, 3 students.'},
+  {q:'How many students chose apples or carrots?',hi:-1,a:'6 + 5 = 11 students. Add the two bars.'},
+  {q:'Which snack tastes the best?',hi:-1,a:'The graph can’t answer that. It only shows how many students chose each snack.'},
+];
+function wAsk(el){
+  const q=Q(el);let k=-1;
+  el.innerHTML=`<div class="fig" data-f></div><div class="chips">${ASK.map((a,i)=>`<button type="button" class="chip" data-a="${i}">${a.q}</button>`).join('')}</div><p class="readout" data-r></p>`;
+  const draw=()=>{
+    el.querySelectorAll('[data-a]').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.a===k));
+    q('f').innerHTML=barGraph(SNACKS,{hi:k<0?-1:ASK[k].hi,title:'Snacks our class chose'});
+    q('r').innerHTML=k<0?'Tap a question. Can the graph answer it?':ASK[k].a;
+  };
+  el.addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(b){k=+b.dataset.a;draw();}});
+  draw();
+}
+const petBars=ns=>barGraph(PETS.map((p,i)=>({...p,n:ns[i]})),{max:8});
+/* this chapter's quick-check figures (common.js has the shared ones) */
+Object.assign(F,{
+  books:barGraph(BOOKS,{title:'Books read this week'}),
+  petsPic:picGraph(PETS,{title:'Pets our class has',unit:'1 pet'})
+});
+const STEPS=[
+    {title:'Build a bar graph',widget:wBuildBar,
+      body:'<p>A <b>bar graph</b> shows each number as a bar. The numbers on the side tell how tall each bar is.</p><p>Tap in each column to make its bar match the table.</p>',
+      check:{kind:'mc',q:'Which snack did the most students choose?',fig:F.snacks,
+        choices:[{id:'apples',label:'Apples'},{id:'crackers',label:'Crackers'},{id:'yogurt',label:'Yogurt'},{id:'carrots',label:'Carrots'}],answer:'yogurt',
+        why:{apples:'Apples has a tall bar, 6, but yogurt’s bar is taller.',crackers:'Crackers has the shortest bar. That’s the fewest.',carrots:'Carrots has 5. Look for the tallest bar.'},
+        explain:'Yogurt has the tallest bar: 8 students.'}},
+    {title:'Read a bar graph',widget:wReadBar,
+      body:'<p>To read a bar, look at the top of the bar and follow the line across to the numbers.</p><p>Tap each snack to read its bar.</p>',
+      check:{kind:'num',unit:'books',answer:7,fig:F.books,q:'How many books did Diego read?',
+        misc:[[4,'That’s Mai’s bar. Find the bar labeled Diego.'],[5,'That’s Elena’s bar. Find the bar labeled Diego.'],[16,'That’s all three bars together. Read only Diego’s bar.']],
+        explain:'The top of Diego’s bar lines up with 7.'}},
+    {title:'Two graphs, same data',widget:wTwoGraphs,
+      body:'<p>A picture graph and a bar graph can show the same numbers.</p><p>Switch between the two graphs.</p>',
+      check:{kind:'mc',q:'Which bar graph shows the same data as this picture graph?',fig:F.petsPic,
+        choices:[{id:'a',label:petBars([5,7,3])},{id:'b',label:petBars([7,5,3])},{id:'c',label:petBars([7,5,4])}],answer:'b',
+        why:{a:'The dog and cat bars are switched. Dogs have 7 pictures.',c:'Count the fish again: 3 pictures, so the bar stops at 3.'},
+        explain:'7 dogs, 5 cats, and 3 fish: the bars stop at 7, 5, and 3.'}},
+    {title:'Ask the graph a question',widget:wAsk,
+      body:'<p>A graph can answer questions about its numbers: how many, which is most, how many in all.</p><p>Tap each question. Can the graph answer it?</p>',
+      check:{kind:'mc',stack:true,q:'Which question can this graph answer?',fig:F.snacks,
+        choices:[{id:'a',label:'What time is snack?'},{id:'b',label:'How many students chose apples?'},{id:'c',label:'How many apples are at the store?'}],answer:'b',
+        why:{a:'The graph shows which snacks students chose, not times.',c:'The graph counts students’ choices, not apples at a store.'},
+        explain:'The graph shows how many students chose each snack: 6 chose apples.'}}
+  ];

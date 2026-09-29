@@ -8,7 +8,7 @@ When a unit gets a game or Learn page, add a row here and turn its "Coming soon"
 
 | Folder | Game | Learn page | Unit |
 |---|---|---|---|
-| `unit1/` | Factor Factory (`index.html`, 5 stations + the Mega-Bot) | `learn.html` (5 chapters, Lessons 1–7) | Grade 4 Unit 1 |
+| `unit1/` | Factor Factory (`index.html`, 5 stations + the Mega-Bot) | `learn.html` + `learn/` (5 chapters, Lessons 1–7) | Grade 4 Unit 1 |
 
 ## Building for Grade 4
 

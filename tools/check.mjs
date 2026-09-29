@@ -1,6 +1,6 @@
 // Run before every commit:
 //
-//   node tools/check.mjs          check links, cache stamps, and generators (tools/fuzz.mjs)
+//   node tools/check.mjs          check links, cache stamps, Learn chapter pages, and generators (tools/fuzz.mjs)
 //   node tools/check.mjs --fix    also rewrite stale cache stamps
 //
 // Cache stamps: every local stylesheet and script a page loads is referenced as file.js?v=<hash of its contents>.
@@ -10,6 +10,7 @@ import {readFileSync, writeFileSync, existsSync, statSync, globSync} from 'node:
 import {join, dirname, resolve} from 'node:path';
 import {createHash} from 'node:crypto';
 import {spawnSync} from 'node:child_process';
+import vm from 'node:vm';
 
 const ROOT = resolve(import.meta.dirname, '..');
 const fix = process.argv.includes('--fix');
@@ -40,6 +41,35 @@ for (const page of pages) {
     return `${pre}${ref}?v=${want}${post}`;
   });
   if (changed) { writeFileSync(file, html); console.log(`stamped ${page}`); }
+}
+
+// Learn pages: every chapter in a unit's learn/chapters.js has its page (learn/<id>.html), the page runs its own chapter
+// with as many steps as the list says, and every page in learn/ is on the list. Each page's scripts run here as they would
+// in the browser, with Learn.chapter caught instead of drawing (and the few browser calls a script makes at load stubbed).
+const run = (page, srcs, inline) => {
+  let got = null;
+  const ctx = vm.createContext({console, matchMedia: () => ({matches: false}), speechSynthesis: undefined, window: {}});
+  for (const src of srcs) vm.runInContext(readFileSync(join(dirname(page), src), 'utf8').replace(/^const Learn=/m, 'var Learn='), ctx, {filename: src});
+  vm.runInContext('Learn={home:u=>{globalThis.__got={u}},chapter:(u,id,steps)=>{globalThis.__got={u,id,steps}}};' + inline, ctx);
+  got = ctx.__got;
+  return got;
+};
+const scriptsOf = html => [...html.matchAll(/<script src="([^"?]+)(?:\?[^"]*)?"><\/script>/g)].map(m => m[1]);
+const inlineOf = html => (html.match(/<script>\n([^]*?)<\/script>/) || [])[1] || '';
+for (const home of globSync('grade*/unit*/learn.html', {cwd: ROOT}).sort()) {
+  const file = join(ROOT, home), dir = dirname(file), html = readFileSync(file, 'utf8');
+  try {
+    const {u} = run(file, scriptsOf(html), inlineOf(html));
+    const ids = u.chapters.map(c => c.id);
+    for (const c of u.chapters) {
+      const page = join(dir, 'learn', c.id + '.html');
+      if (!existsSync(page)) { fail(`${home}: chapter ${c.id} has no page learn/${c.id}.html`); continue; }
+      const ph = readFileSync(page, 'utf8'), got = run(page, scriptsOf(ph), inlineOf(ph));
+      if (!got || got.id !== c.id) fail(`learn/${c.id}.html runs chapter ${got && got.id}, not ${c.id}`);
+      else if (got.steps.length !== c.steps) fail(`${home}: chapter ${c.id} has ${got.steps.length} steps, but learn/chapters.js says ${c.steps}`);
+    }
+    for (const f of globSync('learn/*.html', {cwd: dir})) if (!ids.includes(f.slice(6, -5))) fail(`${dirname(home)}/${f} is not in learn/chapters.js`);
+  } catch (e) { fail(`${home}: ${e.message.split('\n')[0]}`); }
 }
 
 const fuzz = spawnSync(process.execPath, [join(ROOT, 'tools/fuzz.mjs')], {stdio: 'inherit'});

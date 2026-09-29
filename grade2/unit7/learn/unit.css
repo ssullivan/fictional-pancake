@@ -1,0 +1,5 @@
+/* Grade 2 Unit 7 Learn pages: figures and widgets used by its chapters. Loaded by learn.html and every page in learn/. */
+/* column names on the place-value mat, and lines of an equation worked by place */
+.bp{padding:4px 8px}
+.bp .eq{font-size:22px}
+.bp .eq b{color:var(--gold)}

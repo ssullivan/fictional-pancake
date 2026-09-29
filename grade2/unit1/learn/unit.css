@@ -1,0 +1,20 @@
+/* Grade 2 Unit 1 Learn pages: figures and widgets used by its chapters. Loaded by learn.html and every page in learn/. */
+/* figures */
+.sticky{stroke:rgba(243,246,251,.6);stroke-width:1.5}
+.sticky.red{fill:#ff7b7b}.sticky.blue{fill:#6fa8ff}.sticky.green{fill:#5fe0a8}.sticky.yellow{fill:#ffc93c}
+.tapme{cursor:pointer}
+.p-sun circle{fill:var(--gold)}.p-sun line{stroke:var(--gold);stroke-width:2.5;stroke-linecap:round}
+.p-cloud circle,.p-cloud rect{fill:#dfe8f3}
+.p-rain{fill:#6fa8ff}
+.rowhi{fill:rgba(255,201,60,.14);stroke:var(--gold);stroke-width:1.5}
+.gl{stroke:rgba(170,205,255,.18);stroke-width:1}
+.bar{stroke:rgba(243,246,251,.7);stroke-width:1.5}
+.bar.red{fill:#ff7b7b}.bar.blue{fill:#6fa8ff}.bar.green{fill:#5fe0a8}.bar.yellow{fill:#ffc93c}
+.bar.hi{stroke:#fff;stroke-width:4}
+.match{stroke:#fff;stroke-width:2;stroke-dasharray:6 5}
+/* widgets */
+table.tally{border-collapse:collapse;margin:0 auto 12px;font:700 18px var(--mono)}
+table.tally caption{color:var(--dim);font:700 14px var(--mono);margin-bottom:6px}
+table.tally th,table.tally td{border:1.5px solid rgba(170,205,255,.4);padding:8px 14px;text-align:center}
+table.tally th{color:var(--dim);font-size:15px}
+.chip{font-size:15px;padding:9px 14px}

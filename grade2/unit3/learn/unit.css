@@ -1,0 +1,29 @@
+/* Grade 2 Unit 3 Learn pages: figures and widgets used by its chapters. Loaded by learn.html and every page in learn/. */
+/* things to measure */
+.ob .body,.ob .er,.ob .cap{stroke:rgba(10,35,64,.8);stroke-width:1.5}
+.ob .body{fill:var(--gold)}
+.ob .er,.k-eraser .body,.eraser{fill:#ff9fb2}
+.eraser{stroke:rgba(10,35,64,.8);stroke-width:1.5}
+.ob .wood{fill:#f2d0a0}.ob .lead{fill:#2a2a2a}
+.ob .band{stroke:rgba(10,35,64,.55);stroke-width:2}
+.k-crayon .body{fill:#ff7b7b}
+.k-marker .body,.k-glue .body{fill:var(--chalk)}
+.ob .cap{fill:var(--cyan)}
+.k-book .body,.k-poster .body{fill:var(--cyan)}
+.k-rope .body{fill:var(--good)}
+.k-rug .body{fill:#c9a4ff}
+.k-box .body,.k-bench .body{fill:#d9a066}
+.clip rect{fill:none;stroke:#cfd8e3;stroke-width:2.5}
+/* rulers, meter sticks, and the 10 cm strip */
+.rul{fill:rgba(255,201,60,.14);stroke:var(--gold);stroke-width:2}
+.span{fill:rgba(127,227,255,.28)}
+.ref{fill:rgba(127,227,255,.3);stroke:var(--cyan);stroke-width:2}
+.mst{stroke:rgba(10,35,64,.8);stroke-width:1.5}
+.mst.a{fill:var(--gold)}.mst.b{fill:var(--cyan)}
+.lbl.dk{fill:#0a2340}
+/* line plots */
+.xm{fill:var(--gold);font:700 22px var(--mono);text-anchor:middle;dominant-baseline:central}
+.xm.hi{fill:var(--cyan)}
+.colhi{fill:rgba(127,227,255,.12);stroke:var(--cyan);stroke-width:2}
+.chip.cur{border-color:var(--gold);color:var(--gold)}
+.chip.done{background:rgba(95,224,168,.18);border-color:var(--good)}
