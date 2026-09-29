@@ -3,36 +3,12 @@ const fmt=n=>(Math.round(n*100)/100).toLocaleString('en-US');
 const money=n=>'$'+n.toFixed(2);
 const pl=(w,n)=>`${fmt(n)} ${w[n===1?0:1]}`;
 
-/* ---------- shapes for diagrams ---------- */
-const STAR=[[12,2],[15,9],[22.5,9.3],[16.6,14],[18.7,21.5],[12,17.2],[5.3,21.5],[7.4,14],[1.5,9.3],[9,9]];
-const SHAPES=[
-  {one:'circle',many:'circles',d:(x,y,s)=>`<circle class="ic-a" cx="${x+s/2}" cy="${y+s/2}" r="${s/2-2}"/>`},
-  {one:'square',many:'squares',d:(x,y,s)=>`<rect class="ic-b" x="${x+2}" y="${y+2}" width="${s-4}" height="${s-4}" rx="3"/>`},
-  {one:'triangle',many:'triangles',d:(x,y,s)=>`<polygon class="ic-c" points="${x+s/2},${y+2} ${x+s-2},${y+s-2} ${x+2},${y+s-2}"/>`},
-  {one:'star',many:'stars',d:(x,y,s)=>`<polygon class="ic-d" points="${STAR.map(p=>`${x+p[0]*s/24},${y+p[1]*s/24}`).join(' ')}"/>`}
-];
+/* shape names: nm(MARKS[0], 3) is 'circles' (MARKS and the diagrams are in shared/figures.js) */
 const nm=(sh,n)=>n===1?sh.one:sh.many;
-/* Two rows of shapes. With groups=k, each row is split into k equal groups boxed together. */
-function rowsDiagram(rows,{groups=0,s=30,label='Diagram of shapes'}={}){
-  const g=s+6,P=10;let out='',w;
-  if(groups){
-    const per=rows.map(r=>r.n/groups),gw=Math.max(...per)*g+10;
-    w=P*2+groups*gw+(groups-1)*14;
-    for(let j=0;j<groups;j++){
-      const x0=P+j*(gw+14);
-      out+=`<rect class="grp" x="${x0}" y="${P-4}" width="${gw}" height="${rows.length*g+8}" rx="8"/>`;
-      rows.forEach((r,i)=>{for(let q=0;q<per[i];q++)out+=r.sh.d(x0+5+q*g,P+i*g,s);});
-    }
-  }else{
-    w=P*2+Math.max(...rows.map(r=>r.n))*g;
-    rows.forEach((r,i)=>{for(let q=0;q<r.n;q++)out+=r.sh.d(P+q*g,P+i*g,s);});
-  }
-  return svgWrap(w,P*2+rows.length*g,out,label);
-}
 
 /* ---------- Station 1: ratio language ---------- */
 function genLang(){
-  const [A,B]=shuffle(SHAPES).slice(0,2);
+  const [A,B]=shuffle(MARKS).slice(0,2);
   const type=pick(['write','write','sentence','sentence','pick','total']);
   if(type==='write'){
     let nA=R(2,9),nB=R(2,9);while(nB===nA)nB=R(2,9);
@@ -87,22 +63,6 @@ const RECIPES=[
   {dish:'fruit punch',x:['cup of mango juice','cups of mango juice'],y:['cup of orange juice','cups of orange juice']},
   {dish:'granola',x:['cup of oats','cups of oats'],y:['spoonful of honey','spoonfuls of honey']}
 ];
-function batchDiagram(a,b,n,rec,A=SHAPES[0],B=SHAPES[1]){
-  const s=26,g=32,L=88,rowH=40;let out='';
-  const w=L+(a+b)*g+30,h=n*rowH+64;
-  for(let i=0;i<n;i++){
-    const y=12+i*rowH;
-    out+=`<text class="ftxt${i?' rev':''}" x="6" y="${y+19}">Batch ${i+1}</text>`;
-    for(let q=0;q<a;q++)out+=A.d(L+q*g,y,s);
-    for(let q=0;q<b;q++)out+=B.d(L+a*g+18+q*g,y,s);
-  }
-  if(n>1)out+=`<rect class="grp new" x="2" y="${12+rowH-6}" width="${w-4}" height="${(n-1)*rowH+2}" rx="8"/>`;
-  const ly=n*rowH+30;
-  out+=A.d(6,ly-4,20)+`<text class="ftxt" x="32" y="${ly+11}">= 1 ${rec.x[0]}</text>`;
-  out+=B.d(6,ly+20,20)+`<text class="ftxt" x="32" y="${ly+35}">= 1 ${rec.y[0]}</text>`;
-  return svgWrap(Math.max(w,300),h+22,out,`${n} batches of ${rec.dish}`);
-}
-const mixColor=(bl,ye)=>{const t=ye/(bl+ye);return `hsl(${Math.round(225-t*170)} 72% ${Math.round(42+t*16)}%)`;};
 function genEquiv(){
   const type=pick(['batch','scale','scale','color','color','yesno','missing']);
   if(type==='batch'||type==='scale'){
@@ -246,25 +206,6 @@ const PCTX=[
   {A:'dogs',B:'cats',all:'animals at the shelter'},
   {A:'chocolate chip cookies',B:'oatmeal cookies',all:'cookies'}
 ];
-function tapeFig(c,a,b,k,{qa,qb,qt,showA,showB,showT}){
-  return show=>{
-    const bw=46,x0=10,y1=34,y2=112,n=Math.max(a,b),xr=x0+n*bw;let out='';
-    const row=(y,m,cls,label,val,q)=>{
-      let s=`<text class="ftxt" x="${x0}" y="${y-10}">${label}</text>`;
-      for(let i=0;i<m;i++){s+=`<rect class="tape ${cls}" x="${x0+i*bw}" y="${y}" width="${bw}" height="38"/>`;if(show)s+=`<text class="ftxt big mid rev" x="${x0+i*bw+bw/2}" y="${y+26}">${k}</text>`;}
-      const ex=x0+m*bw+26;
-      if(q)s+=qbox(ex+8,y+19);else if(val!=null)s+=`<text class="ftxt big" x="${ex-10}" y="${y+26}">${val}</text>`;
-      return s;
-    };
-    out+=row(y1,a,'',c.A,showA?k*a:null,qa)+row(y2,b,'b',c.B,showB?k*b:null,qb);
-    const bx=xr+90;
-    out+=`<path class="brace" d="M${bx},${y1} q14,0 14,14 v${(y2+38-y1)/2-24} q0,10 10,10 q-10,0 -10,10 v${(y2+38-y1)/2-24} q0,14 -14,14"/>`;
-    const my=(y1+y2+38)/2;
-    if(qt)out+=qbox(bx+52,my);else if(showT)out+=`<text class="ftxt big" x="${bx+32}" y="${my+7}">${k*(a+b)}</text>`;
-    out+=`<text class="ftxt" x="${bx+32}" y="${my+30}">total</text>`;
-    return svgWrap(bx+110,170,out,'Tape diagram');
-  };
-}
 function genPpw(){
   const c=pick(PCTX);let a=R(1,5),b=R(1,5);while(b===a)b=R(1,5);const k=R(2,12),T=k*(a+b);
   const type=pick(['part','part','total','other','diff']);

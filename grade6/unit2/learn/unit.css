@@ -1,0 +1,8 @@
+/* Grade 6 Unit 2 Learn pages: paint swatches and small readout tables. Loaded by learn.html and every page in learn/. */
+.swatches{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin-top:12px}
+.swatch-card{display:grid;gap:6px;justify-items:center;font:700 13px var(--mono);color:var(--dim)}
+.swatch-card span{display:block;width:92px;height:64px;border-radius:12px;border:2px solid rgba(243,246,251,.6)}
+.fig table.rt{margin:0 auto}
+.dnl2{display:grid;gap:6px}
+.mixbar{display:flex;width:92px;height:12px;border-radius:6px;overflow:hidden;border:1.5px solid rgba(243,246,251,.6)}
+.mixbar .bl{background:#3d7bff}.mixbar .ye{background:#ffd23c}

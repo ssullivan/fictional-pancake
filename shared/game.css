@@ -2,6 +2,7 @@
    Load after theme.css. */
 
 /* HOME */
+.hero p.lede a{color:var(--cyan)}
 .zones{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:16px}
 .zone{
   text-align:left;display:grid;grid-template-columns:64px 1fr;gap:6px 14px;align-items:start;
