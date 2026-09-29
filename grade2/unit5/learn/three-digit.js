@@ -5,7 +5,7 @@ function wBuild(el){
   const draw=()=>{
     const {h,t,o}=st,n=h*100+t*10+o;['h','t','o'].forEach(k=>{q(k).textContent=st[k];});
     q('f').innerHTML=numBlocks(n);
-    q('r').innerHTML=`${h} hundreds, ${t} tens, ${o} ones<br><span class="ok"><b>${n}</b>: ${numWords(n)}</span>`+(h&&(!t||!o)?`<br><span class="dimline">${!t&&!o?'No tens and no ones: write 0 in both places.':!t?'No tens: write 0 in the tens place.':'No ones: write 0 in the ones place.'}</span>`:'');
+    q('r').innerHTML=`${h} hundred${h===1?'':'s'}, ${t} ten${t===1?'':'s'}, ${o} one${o===1?'':'s'}<br><span class="ok"><b>${n}</b>: ${numWords(n)}</span>`+(h&&(!t||!o)?`<br><span class="dimline">${!t&&!o?'No tens and no ones: write 0 in both places.':!t?'No tens: write 0 in the tens place.':'No ones: write 0 in the ones place.'}</span>`:'');
   };
   steppers(el,st,{h:[1,9],t:[0,9],o:[0,9]},draw);
   draw();

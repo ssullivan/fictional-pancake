@@ -20,7 +20,7 @@ function wTrade(el){
     q('f').innerHTML=htoFig(h,t,2,{cls:{t:'b',o:'c'},tr:10*b},`${h} hundreds, ${t} tens, and 2 ones`);
     q('go').disabled=b>=2;q('clr').disabled=!b;
     q('go').textContent='Break a hundred into 10 tens';
-    q('r').innerHTML=`<b>${h} hundreds, ${t} tens, 2 ones</b><br><span class="ok">${h*100} + ${t*10} + 2 = 342</span>`+(b?`<br><span class="dimline">The green tens came from a hundred. Same number, different blocks!</span>`:'');
+    q('r').innerHTML=`<b>${h} hundred${h===1?'':'s'}, ${t} tens, 2 ones</b><br><span class="ok">${h*100} + ${t*10} + 2 = 342</span>`+(b?`<br><span class="dimline">The green tens came from a hundred. Same number, different blocks!</span>`:'');
   };
   q('go').onclick=()=>{b++;draw();};
   q('clr').onclick=()=>{b=0;draw();};
