@@ -253,6 +253,118 @@ function genNet(){
     hint:'Find the area of each of the 6 rectangles and add them. Matching colors are matching faces.'};
 }
 
+/* ---------- Zone: polyhedra (Lesson 13) ---------- */
+/* Prisms and pyramids, their drawings, curved shapes, and nets come from shared/solids.js. */
+const NAMES=['Tyler','Priya','Diego','Mai','Han','Lin','Noah','Elena'];
+const SOLID_N=[3,4,5,6,8];
+const an=w=>/^[aeiou]/.test(w)?'an':'a';
+const up=w=>w[0].toUpperCase()+w.slice(1);
+/* a prism or pyramid on a regular base; a prism is never as tall as it is wide, so it is never a cube */
+const someSolid=(kind=pick(['prism','pyramid']),n=pick(SOLID_N))=>solidOf(kind,n,{a:n>6?1.3:2,h:kind==='prism'?pick([2.6,3.2]):2.8});
+/* the game's figure: a drawing that, with the hint, colors the bases gold and dots every vertex */
+const solidPic=s=>({svg:show=>solidSvg(s,{W:300,dots:show,bases:show})});
+const HINT_PIC='Gold faces are the bases. Dots mark every vertex (hollow ones are at the back), and dashed lines are edges at the back.';
+/* how a prism's or pyramid's faces, edges, or vertices add up */
+function howMany(kind,n,what){
+  const P=POLYGON[n]||`${n}-sided`,c=countsOf(kind,n);
+  if(kind==='prism')return {faces:`2 ${P} bases + ${n} rectangles = ${c.faces} faces`,edges:`${n} edges around each base, and ${n} going up the sides: ${n} + ${n} + ${n} = ${c.edges} edges`,vertices:`${n} vertices on each base: ${n} + ${n} = ${c.vertices} vertices`}[what];
+  return {faces:`1 ${P} base + ${n} triangles = ${c.faces} faces`,edges:`${n} edges around the base, and ${n} going up to the top: ${n} + ${n} = ${c.edges} edges`,vertices:`${n} vertices around the base, and 1 at the top: ${n} + 1 = ${c.vertices} vertices`}[what];
+}
+const MIX={faces:'That’s the number of faces',edges:'That’s the number of edges',vertices:'That’s the number of vertices'};
+function genSolid(){
+  const t=pick(['count','count','count','name','name','rule','not','why','net','tyler']);
+  if(t==='count'){
+    /* count the faces, edges, or vertices in a drawing */
+    const s=someSolid(),{kind,n}=s,what=pick(['faces','edges','vertices']),c=countsOf(kind,n),seen=seenOf(s);
+    const others=Object.keys(c).filter(w=>w!==what).map(w=>[c[w],`${MIX[w]}. Count the ${what}.`]);
+    const miss={
+      faces:[[seen.faces,'That’s the faces you can see. Count the ones at the back and on the bottom too.'],[n,kind==='prism'?'Those are the rectangles around the side. Add the 2 bases.':'Those are the triangles. Add the base.']],
+      edges:[[seen.edges,'Count the dashed edges at the back too.'],kind==='prism'?[2*n,`Don’t forget the ${n} edges going up the sides.`]:[n,`That’s just the edges around the base. Add the ${n} going up to the top.`]],
+      vertices:[[seen.vertices,'Count the hidden vertices at the back too.'],kind==='prism'?[n,`That’s one base. The other base has ${n} vertices too.`]:[n,'Don’t forget the vertex at the top.']],
+    }[what];
+    return {kind:'num',unit:what,fig:solidPic(s),answer:c[what],solid:s,
+      prompt:`How many ${what} does this ${s.name} have?`,
+      misc:miscOf(c[what],[...miss,...others]),
+      hint:HINT_PIC+(what==='faces'?' Count the bases, then the faces around the side.':' Count around one base first.'),
+      explain:`A ${s.name} has ${howMany(kind,n,what)}.`};
+  }
+  if(t==='name'){
+    /* name it by its base: never "rectangular prism" for a square prism, or "triangular pyramid" for one that is */
+    const s=someSolid(),{kind,n}=s,other=kind==='prism'?'pyramid':'prism',near=SOLID_N.filter(m=>m!==n&&Math.abs(m-n)<=2);
+    const list=[[s.name,null],[`${BASE_NAME[n]} ${other}`,kind==='prism'?`A pyramid has one base, and triangles that meet at a point. This one has 2 bases joined by rectangles.`:`A prism has 2 matching bases joined by rectangles. This one has 1 base, and triangles that meet at a point.`],
+      [`${BASE_NAME[pick(near)]} ${kind}`,`Count the sides of the gold base: ${n}. It’s ${an(POLYGON[n])} ${POLYGON[n]}.`]];
+    if(kind==='pyramid'&&n!==3)list.push(['triangular pyramid',`The triangles are its sides. A pyramid is named for its base, and the base is ${an(POLYGON[n])} ${POLYGON[n]}.`]);
+    if(kind==='prism'&&n!==4)list.push(['rectangular prism',`The rectangles are its sides. A prism is named for its bases, and the bases are ${POLYGON[n]}s.`]);
+    return {...mcOf(list.filter(([l],i)=>list.findIndex(([m])=>m===l)===i).slice(0,4).map(([l,w])=>[up(l),w])),fig:{svg:()=>solidSvg(s,{W:300,bases:true})},solid:s,
+      prompt:'What is this polyhedron called? The gold faces are its bases.',
+      hint:`How many bases does it have: 1 or 2? And how many sides does a base have?`,
+      explain:kind==='prism'?`2 matching ${POLYGON[n]} bases joined by ${n} rectangles: it’s ${an(s.name)} ${s.name}.`:`1 ${POLYGON[n]} base, and ${n} triangles that meet at a point: it’s ${an(s.name)} ${s.name}.`};
+  }
+  if(t==='rule'){
+    /* bases with more sides than can be drawn nicely: find the pattern */
+    const kind=pick(['prism','pyramid']),n=R(7,12),what=pick(['faces','edges','vertices']),c=countsOf(kind,n);
+    const say=kind==='prism'?`A prism has two bases, and each base has ${n} sides.`:`A pyramid has a base with ${n} sides.`;
+    const miss={
+      faces:kind==='prism'?[[n,'Those are the rectangles around the side. Add the 2 bases.'],[n+1,'A prism has 2 bases, not 1.']]:[[n,'Those are the triangles. Add the base.'],[n+2,'A pyramid has only 1 base.']],
+      edges:kind==='prism'?[[2*n,`That’s the edges around the 2 bases. Add the ${n} going up the sides.`],[n,'That’s one base. There are more edges.']]:[[n,`That’s the edges around the base. Add the ${n} going up to the top.`],[3*n,'That’s a prism. A pyramid has one base and edges up to one point.']],
+      vertices:kind==='prism'?[[n,`That’s one base. The other base has ${n} too.`],[n+1,'That’s a pyramid. A prism has 2 bases and no top point.']]:[[n,'Don’t forget the vertex at the top.'],[2*n,'That’s a prism. A pyramid has one base and a single top vertex.']],
+    }[what];
+    return {kind:'num',unit:what,fig:null,answer:c[what],
+      prompt:`${say} How many ${what} does it have?`,
+      misc:miscOf(c[what],[...miss,...Object.keys(c).filter(w=>w!==what).map(w=>[c[w],`${MIX[w]}. Count the ${what}.`])]),
+      hint:kind==='prism'?'Picture a pentagonal prism: 2 pentagons joined by 5 rectangles. Now use this base instead.':'Picture a pentagonal pyramid: 1 pentagon, and 5 triangles meeting at the top. Now use this base instead.',
+      explain:`It has ${howMany(kind,n,what)}.`};
+  }
+  if(t==='not'){
+    /* pictures: one shape that isn't a polyhedron among polyhedra, or the other way around */
+    const odd=Math.random()<.5,curvedKinds=shuffle(['cylinder','cone','sphere','open']),pic=(html,w)=>html.replace(/style="max-width:[\d.]+px"/,`style="max-width:${w}px"`);
+    const solids=shuffle(SOLID_N.flatMap(n=>['prism','pyramid'].map(k=>[k,n]))).slice(0,3).map(([k,n])=>someSolid(k,n));
+    const polyChoice=s=>[pic(solidSvg(s,{W:150}),120),`That’s ${an(s.name)} ${s.name}: it’s closed, and every face is a polygon.`];
+    const curvedChoice=k=>[pic(curvedSvg(k,{W:150}),110),`That’s ${an(CURVED[k].name)} ${CURVED[k].name}. ${CURVED[k].why}`];
+    if(odd){
+      const k=curvedKinds[0];
+      return {...mcOf([[curvedChoice(k)[0],null],...solids.map(polyChoice)]),fig:null,
+        prompt:'Which shape is <b>not</b> a polyhedron?',
+        hint:'A polyhedron is closed, and every face is a polygon: flat, with straight sides. Look for a curved surface or a missing face.',
+        explain:`The ${CURVED[k].name} isn’t a polyhedron. ${CURVED[k].why}`};
+    }
+    const s=solids[0];
+    return {...mcOf([[polyChoice(s)[0],null],...curvedKinds.slice(0,3).map(curvedChoice)]),fig:null,
+      prompt:'Which shape <b>is</b> a polyhedron?',
+      hint:'A polyhedron is closed, and every face is a polygon: flat, with straight sides.',
+      explain:`The ${s.name} is a polyhedron: it’s closed, and all ${s.F.length} of its faces are polygons.`};
+  }
+  if(t==='why'){
+    const k=pick(['cylinder','cone','sphere','open']),C=CURVED[k];
+    const list=k==='open'
+      ?[[C.why,null],['Its faces are curved.','Its faces are flat rectangles. The problem is the missing lid.'],['It has too few faces.','Some polyhedra have only 4 faces. What matters is that it’s closed and every face is a polygon.']]
+      :[[C.why,null],['It isn’t closed.',`A ${C.name} is closed: it has no gaps or missing faces. The problem is that it’s curved.`],['It has too few faces.','Some polyhedra have only 4 faces. What matters is that every face is a flat polygon.']];
+    return {...mcOf(list,{stack:true}),fig:{svg:()=>curvedSvg(k,{W:200})},
+      prompt:`Why isn’t ${an(C.name)} ${C.name} a polyhedron?`,
+      hint:'A polyhedron is closed, and every face is a polygon: flat, with straight sides.',
+      explain:`${C.why} A polyhedron has to be closed, with every face a polygon.`};
+  }
+  if(t==='net'){
+    /* which polyhedron a net folds into */
+    const kind=pick(['prism','pyramid']),n=pick(SOLID_N),s=someSolid(kind,n),other=kind==='prism'?'pyramid':'prism',m=pick(SOLID_N.filter(v=>v!==n&&Math.abs(v-n)<=2));
+    const net=netOf(kind,n,{a:n>6?1:1.4,h:kind==='prism'?2:1.8,top:R(0,n-1),bottom:R(0,n-1)});
+    const shapes=kind==='prism'?`2 ${POLYGON[n]}s and ${n} rectangles`:`1 ${POLYGON[n]} and ${n} triangles`;
+    return {...mcOf([[`${up(an(s.name))} ${s.name}`,null],[`${up(an(BASE_NAME[n]))} ${BASE_NAME[n]} ${other}`,kind==='prism'?'A pyramid’s net has 1 base and triangles. This one has 2 bases and rectangles.':'A prism’s net has 2 bases and rectangles. This one has 1 base and triangles.'],
+      [`${up(an(BASE_NAME[m]))} ${BASE_NAME[m]} ${kind}`,`Count the ${kind==='prism'?'rectangles':'triangles'}: ${n}, one for each side of the base. So the base is ${an(POLYGON[n])} ${POLYGON[n]}.`]]),
+      fig:{svg:()=>netFig(net,{W:320})},solid:s,prompt:'What polyhedron does this net fold into?',
+      hint:'Count the bases (the gold faces) and the shapes around them. A prism’s net has 2 bases and rectangles; a pyramid’s has 1 base and triangles.',
+      explain:`The net has ${shapes}, so it folds into ${an(s.name)} ${s.name}.`};
+  }
+  /* Tyler's question: a prism's side faces don't have to match its bases */
+  const n=pick([3,4,5,6]),P=POLYGON[n],B=BASE_NAME[n],who=pick(NAMES),net=netOf('prism',n,{a:1,h:pick([1.8,2.2,2.6]),top:R(0,n-1),bottom:R(0,n-1)});
+  return {...mcOf([[`No. Only the 2 bases have to be ${P}s. The faces around the side are rectangles.`,null],[`Yes. Every face of ${an(B)} ${B} prism is ${an(P)} ${P}.`,`Only the 2 bases are ${P}s. A prism’s side faces are rectangles${n===4?', and only in a cube are they squares too':''}.`],
+    [`Yes. It has rectangles, so it’s a rectangular prism.`,n===4?'It is a rectangular prism too, since a square is a rectangle. But its bases are squares, so it’s also a square prism.':`A rectangular prism has rectangle bases. This one’s bases are ${P}s.`]],{stack:true}),
+    fig:{svg:()=>netFig(net,{W:300})},
+    prompt:`${who} says this net can’t fold into ${an(B)} ${B} prism, because not all its faces are ${P}s. Do you agree?`,
+    hint:`Which faces are the bases? A prism is named for its bases. What shape are the faces around the side?`,
+    explain:`The 2 gold ${P}s are the bases, and ${n} rectangles wrap around the side. It folds into ${an(B)} ${B} prism, so ${who} is wrong.`};
+}
+
 /* ---------- Zone 5: squares & cubes ---------- */
 const UNIT_Q=[['the length of a fence around a garden','ft',1],['the carpet covering a bedroom floor','ft',2],['the sand that fills a sandbox','ft',3],
   ['the wrapping paper covering a gift box','in',2],['the space inside a cereal box','in',3],['the height of a bookshelf','in',1],
@@ -460,6 +572,7 @@ const ICON={
   tri:'<polygon points="6,52 40,52 54,10" fill="rgba(255,201,60,.18)" stroke="#ffc93c" stroke-width="3"/><line x1="40" y1="52" x2="54" y2="52" stroke="#a9c4e4" stroke-width="2" stroke-dasharray="2 4"/><line x1="54" y1="10" x2="54" y2="52" stroke="#7fe3ff" stroke-width="2.5" stroke-dasharray="5 4"/>',
   poly:'<polygon points="4,50 60,50 44,16 18,16" fill="rgba(255,201,60,.18)" stroke="#ffc93c" stroke-width="3"/><line x1="18" y1="16" x2="18" y2="50" stroke="#7fe3ff" stroke-width="2.5" stroke-dasharray="5 4"/>',
   net:'<g fill="rgba(255,201,60,.18)" stroke="#ffc93c" stroke-width="2.5"><rect x="22" y="4" width="14" height="14"/><rect x="8" y="18" width="14" height="14"/><rect x="22" y="18" width="14" height="14"/><rect x="36" y="18" width="14" height="14"/><rect x="22" y="32" width="14" height="14"/><rect x="22" y="46" width="14" height="14"/></g>',
+  solid:'<g stroke="#ffc93c" stroke-width="2.5" stroke-linejoin="round"><polygon points="8,24 22,12 44,12 30,24" fill="rgba(255,201,60,.4)"/><polygon points="8,24 30,24 30,54 8,54" fill="rgba(255,201,60,.18)"/><polygon points="30,24 44,12 44,42 30,54" fill="rgba(255,201,60,.08)"/></g><path d="M50,28L60,56H40Z" fill="rgba(127,227,255,.3)" stroke="#7fe3ff" stroke-width="2.5" stroke-linejoin="round"/>',
   cube:'<g stroke="#ffc93c" stroke-width="3" stroke-linejoin="round"><polygon points="10,22 38,22 52,10 24,10" fill="rgba(255,201,60,.35)"/><polygon points="38,22 52,10 52,40 38,52" fill="rgba(255,201,60,.08)"/><rect x="10" y="22" width="28" height="30" fill="rgba(255,201,60,.18)"/></g>',
   frame:'<rect x="5" y="12" width="54" height="40" fill="none" stroke="#f3f6fb" stroke-width="2.5"/><polygon points="5,52 30,12 59,26" fill="rgba(255,201,60,.5)" stroke="#ffc93c" stroke-width="3" stroke-linejoin="round"/>',
   boss:'<rect x="6" y="6" width="52" height="52" rx="4" fill="none" stroke="#7fe3ff" stroke-width="2" stroke-dasharray="5 4"/><polygon points="32,12 38,26 53,27 41,37 45,52 32,43 19,52 23,37 11,27 26,26" fill="#ffc93c"/>'
@@ -468,8 +581,9 @@ const ZONES=[
   {id:'para',name:'Parallelogram Plaza',lessons:'Lessons 4–6',blurb:'Base, height, and why the slanted side doesn’t count.',gen:genPara},
   {id:'tri',name:'Triangle Tower',lessons:'Lessons 7–10',blurb:'Half of a parallelogram, including heights that land outside.',gen:genTri},
   {id:'poly',name:'Polygon Park',lessons:'Lessons 2–3, 11',blurb:'Trapezoids, L-shapes, and pentagons. Decompose and rearrange.',gen:genPoly},
+  {id:'solid',name:'Polyhedron Yard',lessons:'Lesson 13',blurb:'Count faces, edges, and vertices, name prisms and pyramids, and spot shapes that aren’t polyhedra.',gen:genSolid},
   {id:'net',name:'Net Factory',lessons:'Lessons 12–16',blurb:'Fold nets, spot cube nets, and add up every face.',gen:genNet},
   {id:'cube',name:'Squares & Cubes Lab',lessons:'Lessons 16–18',blurb:'Exponents, cube surface area, and area vs. volume units.',gen:genCube},
   {id:'frame',name:'Frame & Subtract',lessons:'Lessons 3, 10–12',blurb:'Shapes inside a rectangle. Find the rectangle, subtract the pieces around the shape.',gen:genFrame},
-  {id:'boss',name:'Final Blueprint',lessons:'Whole unit · 10 problems',blurb:'A mixed review from every zone. Aim for 3 stars.',gen:()=>pick([genPara,genTri,genPoly,genNet,genCube,genFrame])()}
+  {id:'boss',name:'Final Blueprint',lessons:'Whole unit · 10 problems',blurb:'A mixed review from every zone. Aim for 3 stars.',gen:()=>pick([genPara,genTri,genPoly,genSolid,genNet,genCube,genFrame])()}
 ];

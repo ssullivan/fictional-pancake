@@ -1,0 +1,12 @@
+/* Styles for shared/solids.js: prisms, pyramids, curved solids, and nets drawn flat. */
+.sd-face{fill:rgba(127,227,255,.2);stroke:none}
+.sd-face.sd-base{fill:rgba(255,201,60,.5)}
+/* a box with no lid: a dark, hollow inside behind solid outside walls */
+.sd-face.sd-in{fill:#0b2140}
+.sd-face.sd-out{fill:#3b7bb0}
+.sd-edge{stroke:var(--chalk);stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;fill:none}
+.sd-edge.sd-hid{stroke:rgba(243,246,251,.6);stroke-width:2;stroke-dasharray:6 5}
+.sd-vert{fill:var(--gold);stroke:#0a2340;stroke-width:1.5}
+.sd-vert.sd-hid{fill:#0a2340;stroke:var(--gold);stroke-width:2}
+.sd-net{fill:rgba(127,227,255,.25);stroke:var(--chalk);stroke-width:2;stroke-linejoin:round}
+.sd-net.sd-base{fill:rgba(255,201,60,.62)}

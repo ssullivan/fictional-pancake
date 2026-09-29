@@ -14,8 +14,9 @@ shared/                   used by every grade; each file's header comment docume
   figures.css, figures.js double number lines, ratio tables, diagram styles
   learn.css, learn.js     Learn pages: a unit's chapter list and its chapter pages (Learn.home, Learn.chapter)
   k5.css, k5.js           ten-frames, cubes, base-ten blocks, tape diagrams, number lines, shapes, clocks, coins, factor pictures, steppers: K–5 pages
+  solids.css, solids.js   prisms and pyramids (faces, edges, vertices, names), their drawings, curved solids, and nets: Grade 6
   landing.css             grade cards (root page) and unit cards (grade pages)
-  util.js                 R, pick, shuffle, miscOf, mcOf, gcd, lcm, $, Q, parseNum
+  util.js                 R, pick, shuffle, miscOf, mcOf, gcd, lcm, $, Q, parseNum, and Learn controls (seg, press, stepper)
   speak.js                Read to me buttons for K–2 Learn pages and games (readAloud)
 tools/                    check.mjs, fuzz.mjs, snap.mjs (see Checking a change)
 grade6/
@@ -63,7 +64,7 @@ Interactive tutorials live next to each game. A unit's `grade<N>/unit<M>/learn.h
 - Chapters follow the IM sections in lesson order. Each step has one idea, something to move (slider, tap, drag), and a quick check with named mistakes; `Next` unlocks after the check.
 - A chapter page routes by hash (`#s2`, `#done`); progress for the unit is saved in `localStorage` under chapter ids, so chapters can be added or moved without losing it. Units that used to be one page (`learn.html#c2s1`) keep a `legacy` list in `UNIT` so that progress and old links still find their chapter. When the unit has a game, each chapter ends with a link to the matching game zone (`../#<zone id>` starts that zone); leave out `game` until it does.
 - For young readers (Grades K–2), use `<body class="young">` on the unit's pages and `readAloud: true` in `UNIT`. Grade 2 Unit 1 (`grade2/unit1/`) is the template for those. K–5 pages load `shared/k5.css` and `k5.js` for their pictures and controls.
-- 3D uses three.js (pinned version, loaded through an import map from cdn.jsdelivr.net, only when a 3D step opens). Every 3D widget needs a flat SVG fallback for devices or networks without WebGL.
+- 3D uses three.js (pinned version, loaded through an import map from cdn.jsdelivr.net, only when a 3D step opens). Every 3D widget needs a flat SVG fallback for devices or networks without WebGL. Grade 6 Unit 1's `learn/common.js` has the viewers: `solid3D` folds a net, and `polyView` turns a polyhedron (from `shared/solids.js`) so students can tap its faces, edges, or vertices; its fallback is `solidSvg`.
 - Nets are defined as flat faces hinged to a parent face; `buildNet(...).check()` confirms a net folds closed. Run it on every net (and confirm invalid cube nets fail) before shipping.
 
 ## Checking a change

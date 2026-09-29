@@ -1,5 +1,5 @@
 /* Pictures and controls for K–5 pages: ten-frames, cubes, base-ten blocks, tape diagrams, number lines, shapes, clocks, money,
-   factor pictures, and − n + steppers.
+   and factor pictures.
    Styles are in k5.css. Needs util.js and figures.js (svgWrap).
 
    range(n)                          [0, 1, …, n-1]
@@ -17,8 +17,6 @@
    hto(x, y, h, t, o, {cls, tr}), htoFig(h, t, o, opt, label)   small base-ten diagrams with hundreds; numBlocks(n) draws n
    digits(n), numWords(n)            [hundreds, tens, ones] of n, and its name ("four hundred six")
    pvChart(rows, hi)                 a hundreds-tens-ones chart (html table)
-   stepper(k, label), steppers(el, st, lim, draw)          − n + buttons
-   seg(label, opts), press(el, m)    a row of choice buttons
    SHAPES[sides], SHAPE_NAME[sides], QUADS    flat shapes in a 100 × 100 box; shapeAt(pts, x, y, s, {…}) (markup), shapeFig(pts, {…}, label)
    picRow(n, w, h, draw, {letters, tap}), shapeRow(list, {…}), shareRow(shape, list, {…})   pictures side by side, lettered or to tap
    SOLIDS, solidFig(kind, {back})    cubes, boxes, pyramids, and prisms drawn at an angle, with the back edges dashed
@@ -203,14 +201,6 @@ const numWords=(()=>{
 /* a place-value chart: rows [[label, n]]; hi: the column to outline in every row (0 hundreds, 1 tens, 2 ones) */
 const pvChart=(rows,hi=-1)=>`<table class="pv"><tr><th></th><th>Hundreds</th><th>Tens</th><th>Ones</th></tr>${rows.map(([l,n])=>`<tr><th>${l}</th>${digits(n).map((d,i)=>`<td class="p${i}${i===hi?' hi':''}">${d}</td>`).join('')}</tr>`).join('')}</table>`;
 
-/* − n + buttons. Markup for one number k; wire them all with steppers(). */
-const stepper=(k,label)=>`<span class="stepper"><span>${label}</span><button type="button" class="ghost-btn" data-k="${k}" data-d="-1" aria-label="${label}: one less">−</button><b data-${k}></b><button type="button" class="ghost-btn" data-k="${k}" data-d="1" aria-label="${label}: one more">+</button></span>`;
-function steppers(el,st,lim,draw){
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-d]');if(!b)return;const k=b.dataset.k,v=st[k]+ +b.dataset.d;if(v<lim[k][0]||v>lim[k][1])return;st[k]=v;draw();});
-}
-/* a row of choice buttons (data-m); the pressed one gets aria-pressed */
-const seg=(label,opts)=>`<div class="seg" role="group" aria-label="${label}">${opts.map(([id,t])=>`<button type="button" data-m="${id}">${t}</button>`).join('')}</div>`;
-const press=(el,m)=>el.querySelectorAll('[data-m]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.m===String(m)));
 
 /* ---------- flat shapes, solid shapes, equal parts, pattern blocks, clocks, and money ---------- */
 /* Flat shapes in a 100 × 100 box, by number of sides. Some are tilted, stretched, or bent in, so the name comes from counting sides. */

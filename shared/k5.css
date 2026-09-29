@@ -1,4 +1,4 @@
-/* Styles for shared/k5.js: ten-frames, cubes, base-ten blocks, tape diagrams, number lines, labels, steppers, shapes, clocks, money,
+/* Styles for shared/k5.js: ten-frames, cubes, base-ten blocks, tape diagrams, number lines, labels, shapes, clocks, money,
    and factor pictures on K–5 pages.
    Load after learn.css. */
 /* ten-frames and cubes */
@@ -70,9 +70,6 @@ table.pv td{border:1.5px solid rgba(170,205,255,.4);padding:8px 18px;text-align:
 table.pv td.p0{color:var(--gold)}table.pv td.p1{color:var(--cyan)}table.pv td.p2{color:var(--good)}
 table.pv td.hi{outline:3px solid #fff;outline-offset:-3px}
 /* controls, equations, and stories */
-.stepper{display:inline-flex;align-items:center;gap:8px;font:700 16px var(--mono);color:var(--dim);margin-right:12px}
-.stepper .ghost-btn{min-width:48px;min-height:48px;font-size:24px;padding:0}
-.stepper b{color:var(--gold);min-width:1.4em;text-align:center;font-size:24px}
 .eq{margin:0 0 10px;font:700 24px var(--mono)}
 .eq .q{background:var(--gold);color:#1a1300;border-radius:6px;padding:0 8px}
 .story{margin:0 0 10px;font-size:19px}

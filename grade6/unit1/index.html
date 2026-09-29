@@ -9,6 +9,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=JetBrains+Mono:wght@500;700&display=swap">
 <link rel="stylesheet" href="../../shared/theme.css?v=4796e910">
 <link rel="stylesheet" href="../../shared/game.css?v=d555ddc9">
+<link rel="stylesheet" href="../../shared/solids.css?v=845625d7">
 <style>
 /* HOME */
 
@@ -78,19 +79,19 @@
     <header class="hero">
       <p class="eyebrow">Illustrative Mathematics · Grade 6 · Unit 1 · Area &amp; Surface Area</p>
       <h1>Blueprint <span>Builders</span></h1>
-      <p class="lede">Every building starts on graph paper. Measure the shapes, find their areas, and fold up the nets. Each zone matches lessons from class. <a href="learn.html">New to this? Learn it first →</a></p>
+      <p class="lede">Every building starts on graph paper. Measure the shapes, find their areas, count the faces of polyhedra, and fold up the nets. Each zone matches lessons from class. <a href="learn.html">New to this? Learn it first →</a></p>
       <div class="stats">
         <span class="pill">Points <b id="hp">0</b></span>
-        <span class="pill">Stars <b id="hs">0</b>/<span id="hsMax">21</span></span>
+        <span class="pill">Stars <b id="hs">0</b>/<span id="hsMax">24</span></span>
       </div>
     </header>
     <div class="zones" id="zones"></div>
     <section class="grownups">
       <h2>For grown-ups</h2>
       <div><h4>How a round works</h4><p>Each zone deals 8 fresh problems (the Final Blueprint deals 10). A right answer on the first try earns 10 points. After a wrong answer, the game names the likely mistake and gives one more try for 5 points.</p></div>
-      <div><h4>The "Show me" hint</h4><p>Hints use the same moves as class: cut and slide a parallelogram into a rectangle, double a triangle into a parallelogram, split a shape into rectangles. A used hint caps that problem at 5 points.</p></div>
+      <div><h4>The "Show me" hint</h4><p>Hints use the same moves as class: cut and slide a parallelogram into a rectangle, double a triangle into a parallelogram, split a shape into rectangles, color a polyhedron’s bases and dot its hidden vertices. A used hint caps that problem at 5 points.</p></div>
       <div><h4>Frame &amp; Subtract</h4><p>Shapes drawn inside a rectangle, solved like the class worksheets: rectangle area minus the unshaded pieces. A wrong first answer switches to Build it, which checks each piece one at a time. Dented shapes unlock after 2 stars in that zone.</p></div>
-      <div><h4>Mistakes it catches</h4><p>Using the slanted side instead of the height, forgetting to halve a triangle, counting only 3 faces of a prism, and mixing up surface area with volume.</p></div>
+      <div><h4>Mistakes it catches</h4><p>Using the slanted side instead of the height, forgetting to halve a triangle, counting only 3 faces of a prism, counting only the faces or edges you can see, naming a pyramid by its triangles instead of its base, and mixing up surface area with volume.</p></div>
     </section>
   </section>
 
@@ -124,9 +125,10 @@
   </section>
 </div>
 
-<script src="../../shared/util.js?v=dfcc3c50"></script>
+<script src="../../shared/util.js?v=f0c7159c"></script>
+<script src="../../shared/solids.js?v=78af5115"></script>
 <script src="../../shared/engine.js?v=fa60a417"></script>
-<script src="stations.js?v=f048475c"></script>
+<script src="stations.js?v=708a1eed"></script>
 <script>
 Game.init({
   saveKey:'bb-save',

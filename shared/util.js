@@ -23,3 +23,12 @@ function parseNum(s){
   const m=s.match(/^(-?\d*\.?\d+)\s*\/\s*(\d*\.?\d+)/);if(m)return +m[1]/+m[2];
   const n=s.match(/-?\d*\.?\d+/);return n?+n[0]:NaN;
 }
+/* For Learn widgets: seg makes a row of choice buttons (data-m, with the ids and labels in opts: [[id, label], …]);
+   press(el, m) marks the one with id m pressed (aria-pressed). */
+const seg=(label,opts)=>`<div class="seg" role="group" aria-label="${label}">${opts.map(([id,t])=>`<button type="button" data-m="${id}">${t}</button>`).join('')}</div>`;
+const press=(el,m)=>el.querySelectorAll('[data-m]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.m===String(m)));
+/* − n + buttons. Markup for one number k; wire them all with steppers(). */
+const stepper=(k,label)=>`<span class="stepper"><span>${label}</span><button type="button" class="ghost-btn" data-k="${k}" data-d="-1" aria-label="${label}: one less">−</button><b data-${k}></b><button type="button" class="ghost-btn" data-k="${k}" data-d="1" aria-label="${label}: one more">+</button></span>`;
+function steppers(el,st,lim,draw){
+  el.addEventListener('click',e=>{const b=e.target.closest('[data-d]');if(!b)return;const k=b.dataset.k,v=st[k]+ +b.dataset.d;if(v<lim[k][0]||v>lim[k][1])return;st[k]=v;draw();});
+}
