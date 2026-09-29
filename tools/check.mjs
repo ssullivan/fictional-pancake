@@ -72,7 +72,7 @@ for (const home of globSync('grade*/unit*/learn.html', {cwd: ROOT}).sort()) {
     }
     // the unit's checklist (tools/checklists.mjs): every chapter and step, each with items that tests/checklists.spec.js runs
     const list = join(dir, 'learn/CHECKLIST.md');
-    if (!existsSync(list)) console.log(`note: ${dirname(home)} has no learn/CHECKLIST.md yet`);
+    if (!existsSync(list)) fail(`${dirname(home)} has no learn/CHECKLIST.md: start one with another unit's opening lines, then --fix adds its chapters and steps`);
     else if (Object.keys(steps).length === u.chapters.length) {
       let text = readFileSync(list, 'utf8');
       if (fix) { const want = render(u, steps, text); if (want !== text) { writeFileSync(list, want); text = want; console.log(`updated ${dirname(home)}/learn/CHECKLIST.md`); } }

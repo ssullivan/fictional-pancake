@@ -3,7 +3,7 @@ function wCubes(el){
   const q=Q(el);let s=3,mode='faces',S=null,grp=null,disposed=false;
   el.innerHTML=`<div class="view3d" data-v><p class="loading">Loading 3D…</p></div><div class="wrow"><label class="slider">Edge length <input type="range" min="1" max="6" value="3" data-s><b data-sv>3</b></label><div class="seg" style="margin:0" role="group" aria-label="Show"><button type="button" data-m="faces">Faces</button><button type="button" data-m="cubes">Cubes</button></div><span data-sp></span></div><p class="readout" data-r></p>`;
   const read=()=>{q('sv').textContent=s;
-    q('r').innerHTML=`<span class="${mode==='faces'?'':'dimline'}">One face: ${s} × ${s} = ${s}² = ${s*s} square units<br>Surface area: 6 × ${s*s} = <b>${6*s*s}</b> square units</span><br><span class="${mode==='cubes'?'':'dimline'}">Volume: ${s} × ${s} × ${s} = ${s}³ = <b>${s**3}</b> cubic units</span>`;
+    q('r').innerHTML=`<span class="${mode==='faces'?'':'dimline'}">One face: ${s} × ${s} = ${s}² = ${s*s} square unit${s===1?'':'s'}<br>Surface area: 6 × ${s*s} = <b>${6*s*s}</b> square units</span><br><span class="${mode==='cubes'?'':'dimline'}">Volume: ${s} × ${s} × ${s} = ${s}³ = <b>${s**3}</b> cubic unit${s===1?'':'s'}</span>`;
     el.querySelectorAll('[data-m]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.m===mode));};
   const flat=()=>{const P=plane({xmax:s,ymax:s,u:Math.min(44,300/s)});q('v').outerHTML=`<div data-v><p class="note">The 3D view can’t load on this device. Here is one face of the cube.</p><div class="fig">${P.svg(P.poly(Rect(0,0,s,s),'sh-a')+P.grid(),'One face of the cube')}</div></div>`;};
   const build=()=>{

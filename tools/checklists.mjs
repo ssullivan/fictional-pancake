@@ -18,6 +18,9 @@
 //   enabled NAME, disabled NAME   that button can (or can't) be pressed
 //   count SELECTOR = N   the widget has N elements like that
 //   spec FILE: TITLE     another test covers it: tests/FILE has a test with that title
+//   read TEXT            the step's text (above the widget) says it
+//   answer V             answer the quick check: type V, or pick the choice with id V
+//   feedback TEXT        the quick check's reply says it ("Nice!" when the answer was right)
 export const plain = s => String(s).replace(/<svg[^]*?<\/svg>/g, '(picture)').replace(/<[^>]*>/g, '').replace(/&amp;/g, '&').replace(/\s+/g, ' ').trim();
 
 // the quick-check line for a step

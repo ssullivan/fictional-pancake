@@ -6,7 +6,7 @@ function wBuild(el){
   const make=()=>solidOf(kind,st.n,{a:st.n>6?1.4:2,h:kind==='prism'?2.4:2.6});
   const read=s=>{
     const n=s.n,P=POLYGON[n],c=countsOf(kind,n);
-    return `A <b>${s.name}</b>. `+(kind==='prism'
+    return `${/^[aeiou]/.test(s.name)?'An':'A'} <b>${s.name}</b>. `+(kind==='prism'
       ?`Faces: 2 ${P}s + ${n} rectangles = <b>${c.faces}</b>. Edges: ${n} + ${n} + ${n} = <b>${c.edges}</b>. Vertices: ${n} + ${n} = <b>${c.vertices}</b>.`
       :`Faces: 1 ${P} + ${n} triangles = <b>${c.faces}</b>. Edges: ${n} + ${n} = <b>${c.edges}</b>. Vertices: ${n} + 1 = <b>${c.vertices}</b>.`);
   };

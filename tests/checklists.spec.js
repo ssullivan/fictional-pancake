@@ -42,7 +42,14 @@ for (const file of globSync('grade*/unit*/learn/CHECKLIST.md', {cwd: ROOT}).sort
           else if (verb === 'enabled') await expect(await button(arg), cmd).toBeEnabled();
           else if (verb === 'disabled') await expect(await button(arg), cmd).toBeDisabled();
           else if (verb === 'count') { const [sel, k] = arg.split(/\s+=\s+/); await expect(w.locator(sel), cmd).toHaveCount(+k); }
-          else if (verb === 'spec') { const [f, title] = arg.split(/:\s+/); expect(readFileSync(`${__dirname}/${f}`, 'utf8'), cmd).toContain(title); }
+          else if (verb === 'read') await expect(page.locator('#sbody'), cmd).toContainText(pattern(arg));
+          else if (verb === 'answer') {
+            const input = page.locator('#cin');
+            if (await input.count()) { await input.fill(arg); await input.press('Enter'); }
+            else await press(page.locator(`#check .choice[data-c="${arg}"]`));
+          }
+          else if (verb === 'feedback') await expect(page.locator('#check [data-fb]'), cmd).toContainText(pattern(arg));
+          else if (verb === 'spec') { const [, f, title] = arg.match(/^(\S+):\s+(.*)$/); expect(readFileSync(`${__dirname}/${f}`, 'utf8'), cmd).toContain(title); }
           else throw new Error(`unknown checklist command: ${cmd}`);
         }
       });
