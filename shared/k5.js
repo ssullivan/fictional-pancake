@@ -28,7 +28,10 @@
    hopLine(n, max, k, {mark, cls, nums})   a number line with k hops of n from 0 (svg)
    tiles(rows, n), allRects(n)       n tiles in equal rows (any left over in red), and every rectangle n tiles make (svg)
    chart(max, cls, {lo, tap})        a number chart, 10 to a row, with each square colored by cls(v) (svg)
-   lockers(open, {hi, sel})          the Locker Problem's 20 lockers, open or closed (svg) */
+   lockers(open, {hi, sel})          the Locker Problem's 20 lockers, open or closed (svg)
+   fr(n, d), frT(x, y, n, d, cls)    a fraction written stacked (html), and the same in a picture (markup)
+   strips(rows, {wholes, W})         fraction strips: wholes cut into d equal parts, k of them shaded (svg)
+   fracLine(rows, {wholes, …})       number lines from 0 marked in fractions, one under another, with points and tappable ticks (svg) */
 const range=n=>[...Array(n).keys()];
 const cellsOf=(...groups)=>groups.flatMap(([n,c])=>Array(n).fill(c));
 
@@ -269,7 +272,7 @@ function solidFig(kind,{back=false,s=110,label}={}){
 }
 
 /* Equal parts. PART[n]: the name of 1 part and of more than 1. partName(3, 2) is "2 thirds". */
-const PART={2:['half','halves'],3:['third','thirds'],4:['fourth','fourths']};
+const PART={2:['half','halves'],3:['third','thirds'],4:['fourth','fourths'],5:['fifth','fifths'],6:['sixth','sixths'],8:['eighth','eighths'],10:['tenth','tenths'],12:['twelfth','twelfths'],100:['hundredth','hundredths']};
 const partName=(n,k=1)=>`${k} ${PART[n][k===1?0:1]}`;
 /* The parts of a shape cut n ways, as path data, in a box s tall from x, y. shape: 'circle', 'square', or 'rect' (twice as wide as tall).
    how: 'v' strips side by side, 'h' strips on top of each other, 'grid' 2 × 2, 'diag' corner to corner (2 or 4 parts),
@@ -432,4 +435,54 @@ function lockers(open,{hi=[],sel=null}={}){
       +`<text class="lbl s${v===sel?' cy':''}" x="${x+L/2}" y="${y+H+16}">${v}</text></g>`;
   });
   return svgWrap(10*(L+G)+2,2*(H+34),o,'20 lockers. Open: '+(range(20).filter(i=>open[i+1]).map(i=>i+1).join(', ')||'none'));
+}
+
+/* ---------- fractions ---------- */
+/* n/d written stacked. The slash is kept for screen readers and copied text, hidden on screen. */
+const fr=(n,d)=>`<span class="fr"><span>${n}</span><span class="sr">/</span><span>${d}</span></span>`;
+/* the same in a picture, centered on x, y */
+const frT=(x,y,n,d,cls='')=>{const w=5+4.5*Math.max(String(n).length,String(d).length);return `<g class="frt ${cls}"><text class="lbl s" x="${x}" y="${y-10}">${n}</text><line x1="${x-w}" y1="${y}" x2="${x+w}" y2="${y}"/><text class="lbl s" x="${x}" y="${y+11}">${d}</text></g>`;};
+/* Fraction strips, one row under another, every whole the same width so rows line up.
+   rows: [{d, k, cls, lab, parts}]: each whole cut into d equal parts and the first k shaded (cls 'b' blue, 'g' green; gold by default);
+   k more than d draws more wholes. lab: [n, d] written to the left of the row. parts: false leaves 1/d out of the parts.
+   wholes: how many wholes each row has room for (default: as many as the rows need), so the strips keep their size as k grows.
+   stack: a row's wholes go one under another, each as wide as the picture, instead of side by side. */
+function strips(rows,{wholes=0,stack=false,W=560,label}={}){
+  const nW=r=>Math.max(1,Math.ceil(r.k/r.d)),M=Math.max(wholes,...rows.map(nW)),L=rows.some(r=>r.lab)?54:4,G=M>1&&!stack?14:0,
+    U=stack?W-L-4:(W-L-4-G*(M-1))/M,H=50,RG=12,lines=stack?M:1;
+  let o='';
+  rows.forEach((r,ri)=>{
+    const y0=4+ri*lines*(H+RG),p=U/r.d;
+    if(r.lab)o+=frT(L/2-2,y0+H/2,...r.lab);
+    range(nW(r)).forEach(w=>range(r.d).forEach(i=>{
+      const x=L+(stack?0:w*(U+G))+i*p,y=y0+(stack?w*(H+RG):0),on=w*r.d+i<r.k;
+      o+=`<rect class="fs${on?' on '+(r.cls||''):''}" x="${x}" y="${y}" width="${p}" height="${H}"/>`;
+      if(r.parts!==false&&p>=30)o+=frT(x+p/2,y+H/2,1,r.d,on?'dk':'');
+    }));
+  });
+  return svgWrap(W,8+rows.length*lines*(H+RG)-RG,o,label||'Fraction strips: '+rows.map(r=>`${r.k} ${PART[r.d][r.k===1?0:1]}`).join(', '));
+}
+/* Number lines from 0 to `wholes`, one under another, lined up. rows: [{d, pts, hops, tap, labs}]: a tick every 1/d (tall at whole
+   numbers, which get their number); labs: every tick gets its fraction; pts: [{k, cls}] dots at k/d ('b' blue, 'g' green);
+   hops: that many jumps of 1/d from 0;
+   tap: each tick can be tapped (data-v = its k, data-r = the row).
+   marks: [{v, t}] a dashed line through every row at v (in wholes), with t ([n, d] or text) above it. */
+function fracLine(rows,{wholes=1,W=480,marks=[],label}={}){
+  const X=26,U=(W-2*X)/wholes,top=marks.length?44:rows[0].hops?34:18,RH=rows.some(r=>r.labs)?84:64,x=v=>X+v*U,Y=i=>top+18+i*RH;
+  let o='';
+  marks.forEach(({v,t})=>{o+=`<line class="guide" x1="${x(v)}" y1="${top-4}" x2="${x(v)}" y2="${Y(rows.length-1)+14}"/>`+(Array.isArray(t)?frT(x(v),top-22,...t,'cy'):`<text class="lbl s cy" x="${x(v)}" y="${top-16}">${t}</text>`);});
+  rows.forEach((r,ri)=>{
+    const y=Y(ri),n=r.d*wholes;
+    o+=`<line class="axis" x1="${x(0)-6}" y1="${y}" x2="${x(wholes)+6}" y2="${y}"/>`;
+    range(n+1).forEach(k=>{
+      const whole=k%r.d===0,tx=x(k/r.d);
+      o+=`<line class="tick" x1="${tx}" y1="${y-(whole?11:7)}" x2="${tx}" y2="${y+(whole?11:7)}"/>`;
+      if(r.labs&&k)o+=frT(tx,y+32,k,r.d);
+      else if(whole)o+=`<text class="lbl" x="${tx}" y="${y+26}">${k/r.d}</text>`;
+    });
+    range(r.hops||0).forEach(i=>{const a=x(i/r.d),b=x((i+1)/r.d);o+=`<path class="hop" d="M${a},${y-3}Q${(a+b)/2},${y-3-Math.min(40,(b-a)*.8)} ${b},${y-3}"/>`;});
+    (r.pts||[]).forEach(({k,cls=''})=>{o+=`<circle class="pt ${cls}" cx="${x(k/r.d)}" cy="${y}" r="8"/>`;});
+    if(r.tap)range(n+1).forEach(k=>{const w=U/r.d;o+=`<rect class="hit" data-r="${ri}" data-v="${k}" x="${x(k/r.d)-w/2}" y="${y-24}" width="${w}" height="48"/>`;});
+  });
+  return svgWrap(W,Y(rows.length-1)+RH-26,o,label||`Number line${rows.length>1?'s':''} from 0 to ${wholes}`);
 }

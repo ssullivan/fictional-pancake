@@ -1,0 +1,5 @@
+/* Grade 4 Unit 2 Learn pages: styles used by its chapters. Loaded by learn.html and every page in learn/. */
+.chip.found{background:rgba(95,224,168,.18);border-color:var(--good)}
+.eq .fr{font-size:.8em}
+.wrow+.eq{margin-top:14px}
+.chip:has(.fr){font-size:17px;padding:6px 16px}

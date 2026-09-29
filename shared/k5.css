@@ -133,3 +133,12 @@ table.pv td.hi{outline:3px solid #fff;outline-offset:-3px}
 .lk.sel{stroke:#fff;stroke-width:3}
 .door{fill:rgba(127,227,255,.6);stroke:var(--cyan);stroke-width:1}
 .vent{stroke:rgba(10,35,64,.6);stroke-width:2}
+/* fractions: stacked (fr, frT), fraction strips, and fraction number lines */
+.fr{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;margin:0 .1em;font-size:.85em;line-height:1.1}
+.fr>span:first-child{border-bottom:.1em solid currentColor;padding:0 .15em}
+.frt line{stroke:var(--chalk);stroke-width:1.8}
+.frt.dk .lbl{fill:#0a2340}.frt.dk line{stroke:#0a2340}
+.frt.cy .lbl{fill:var(--cyan)}.frt.cy line{stroke:var(--cyan)}
+.fs{fill:rgba(170,205,255,.08);stroke:var(--chalk);stroke-width:2}
+.fs.on{fill:var(--gold)}.fs.on.b{fill:var(--cyan)}.fs.on.g{fill:var(--good)}
+.pt.g{fill:var(--good);stroke:#d8ffef}
