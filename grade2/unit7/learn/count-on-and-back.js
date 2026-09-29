@@ -27,7 +27,7 @@ function wMore(el){
     q('c').innerHTML=pvChart([['',n]],ch);q('f').innerHTML=numBlocks(n);
     el.querySelectorAll('[data-add]').forEach(b=>{const m=+b.dataset.add;b.disabled=m===100?h>=9:m===-100?h<=1:m===10?t>=9:t<=0;});
     q('r').innerHTML=!d?'Tap a button. Which digit changes?'
-      :`<b>${Math.abs(d)} ${d>0?'more':'less'} than ${prev} is ${n}.</b><br><span class="dimline">Only the ${PL[ch]} digit changed: ${digits(prev)[ch]} ${PL[ch]} to ${digits(n)[ch]} ${PL[ch]}.</span>`;
+      :`<b>${Math.abs(d)} ${d>0?'more':'less'} than ${prev} is ${n}.</b><br><span class="dimline">Only the ${PL[ch]} digit changed: ${cnt(digits(prev)[ch],ch)} to ${cnt(digits(n)[ch],ch)}.</span>`;
   };
   el.addEventListener('click',e=>{const b=e.target.closest('[data-add]');if(b&&!b.disabled){d=+b.dataset.add;prev=n;n+=d;draw();}});
   draw();

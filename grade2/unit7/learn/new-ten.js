@@ -7,9 +7,9 @@ function wTradeUp(el){
   el.innerHTML=`<div class="fig" data-f></div><div class="wrow"><button type="button" class="ghost-btn" data-po>+ 1 one</button><button type="button" class="ghost-btn" data-pt>+ 1 ten</button><button type="button" class="btn" data-mt>Trade 10 ones for a ten</button><button type="button" class="btn" data-mh>Trade 10 tens for a hundred</button><button type="button" class="ghost-btn" data-clr>Start over</button></div><p class="readout" data-r></p>`;
   const draw=()=>{
     const H=h.length,T=t.length,O=o.length,n=100*H+10*T+O;
-    q('f').innerHTML=mat([{h,t,o}],`${H} hundreds, ${T} tens, and ${O} ones`,{h:5,t:10,o:10});
+    q('f').innerHTML=mat([{h,t,o}],`${cnt(H,0)}, ${cnt(T,1)}, and ${cnt(O,2)}`,{h:5,t:10,o:10});
     q('po').disabled=O>=10||n>=999;q('pt').disabled=T>=10||n+10>999;q('mt').disabled=O<10;q('mh').disabled=T<10;
-    q('r').innerHTML=`<b>${H} hundreds, ${T} tens, and ${O} ones</b> is ${H*100} + ${T*10} + ${O} = <b>${n}</b>.<br>`
+    q('r').innerHTML=`<b>${cnt(H,0)}, ${cnt(T,1)}, and ${cnt(O,2)}</b> is ${H*100} + ${T*10} + ${O} = <b>${n}</b>.<br>`
       +(O>=10?'<span class="dimline">10 ones! Trade them for 1 ten.</span>':T>=10?'<span class="dimline">10 tens! Trade them for 1 hundred.</span>':said?`<span class="ok">${said}</span>`:'<span class="dimline">Add ones or tens until you have 10.</span>');
   };
   q('po').onclick=()=>{o=[...o,'a'];said='';draw();};

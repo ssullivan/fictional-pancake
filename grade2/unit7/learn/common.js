@@ -1,5 +1,7 @@
 /* Learn Adding and Subtracting within 1,000 (Grade 2 Unit 7): code used by more than one chapter. Loaded by the chapter pages in learn/, after chapters.js. */
 const PL=['hundreds','tens','ones'];
+/* "1 ten", "3 tens": n of place i (0 hundreds, 1 tens, 2 ones) */
+const cnt=(n,i)=>`${n} ${n===1?PL[i].slice(0,-1):PL[i]}`;
 /* A place-value mat: a row of blocks for each number, with hundreds, tens, and ones in lined-up columns.
    rows: [{lab, h, t, o}]; h, t, o give a class for each block (build them with cellsOf): 'a' gold, 'b' blue,
    'new' a new ten or hundred, 'tr' from a broken ten or hundred, plus ' gone' to cross it out.
@@ -27,7 +29,7 @@ const apart=(a,b)=>mat([bl(a,'a',a),bl(b,'b',`+ ${b}`)],`${a} and ${b} in base-t
 const byPlace=lines=>`<div class="bp">${lines.map(l=>`<p class="eq">${l}</p>`).join('')}</div>`;
 /* "1 hundred, 3 tens, and 2 ones", leaving out places with 0 */
 function partsOf(n){
-  const p=digits(n).map((d,i)=>d?`${d} ${d===1?PL[i].slice(0,-1):PL[i]}`:'').filter(Boolean);
+  const p=digits(n).map((d,i)=>d?cnt(d,i):'').filter(Boolean);
   return p.length>1?p.slice(0,-1).join(', ')+(p.length>2?',':'')+' and '+p[p.length-1]:p[0];
 }
 /* The blocks for a + b, one stage at a time: apart, together, then a new ten and a new hundred when the ones or tens make 10. */
@@ -42,7 +44,7 @@ function addStages(a,b){
 /* the mat for stage s of addStages, with room in each column for every stage */
 function stageFig(a,b,S,s){
   const fit={};['h','t','o'].forEach(k=>{fit[k]=Math.max(...S.slice(1).map(x=>x[k].length));});
-  return s.rows?mat(s.rows,`${a} and ${b} in base-ten blocks`,fit):mat([s],`${s.h.length} hundreds, ${s.t.length} tens, and ${s.o.length} ones`,fit);
+  return s.rows?mat(s.rows,`${a} and ${b} in base-ten blocks`,fit):mat([s],`${cnt(s.h.length,0)}, ${cnt(s.t.length,1)}, and ${cnt(s.o.length,2)}`,fit);
 }
 /* Widget: pick a + b, then put the blocks together and make each new ten or hundred. */
 const addW=PROBS=>el=>{
@@ -52,12 +54,12 @@ const addW=PROBS=>el=>{
     const [a,b]=PROBS[p],[ha,ta,oa]=digits(a),[hb,tb,ob]=digits(b),S=addStages(a,b),s=S[k],nx=S[k+1];press(el,p);
     q('f').innerHTML=stageFig(a,b,S,s);
     q('go').textContent=!nx?'Start over':!k?'Put them together':nx.made==='ten'?'Make a new ten':'Make a new hundred';
-    const next=!nx?`<br><span class="ok"><b>${a} + ${b} = ${a+b}</b></span><br><span class="dimline">${s.h.length} hundreds, ${s.t.length} tens, ${s.o.length} ones: ${s.h.length*100} + ${s.t.length*10} + ${s.o.length}</span>`
+    const next=!nx?`<br><span class="ok"><b>${a} + ${b} = ${a+b}</b></span><br><span class="dimline">${cnt(s.h.length,0)}, ${cnt(s.t.length,1)}, ${cnt(s.o.length,2)}: ${s.h.length*100} + ${s.t.length*10} + ${s.o.length}</span>`
       :nx.made==='ten'?`<br><span class="dimline">${s.o.length} ones! Trade 10 ones for a new ten.</span>`:nx.made==='hundred'?`<br><span class="dimline">${s.t.length} tens! Trade 10 tens for a new hundred.</span>`:'';
     q('r').innerHTML=!k?`<b>${a} + ${b}</b><br><span class="dimline">Big squares are hundreds, sticks are tens, and small squares are ones.</span>`
       :k===1?`Hundreds: <b>${ha} + ${hb} = ${ha+hb}</b>. Tens: <b>${ta} + ${tb} = ${ta+tb}</b>. Ones: <b>${oa} + ${ob} = ${oa+ob}</b>.`+next
-      :s.made==='ten'?`10 ones make <b>a new ten</b>. Now there are ${s.t.length} tens and ${s.o.length} ones.`+next
-      :`10 tens make <b>a new hundred</b>. Now there are ${s.h.length} hundreds and ${s.t.length} tens.`+next;
+      :s.made==='ten'?`10 ones make <b>a new ten</b>. Now there are ${cnt(s.t.length,1)} and ${cnt(s.o.length,2)}.`+next
+      :`10 tens make <b>a new hundred</b>. Now there are ${cnt(s.h.length,0)} and ${cnt(s.t.length,1)}.`+next;
   };
   el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){p=+b.dataset.m;k=0;draw();}});
   q('go').onclick=()=>{k=k+1<addStages(...PROBS[p]).length?k+1:0;draw();};
@@ -76,20 +78,20 @@ const subW=(PROBS,brk='')=>el=>{
   const draw=()=>{
     const [a,b]=PROBS[p],[hb,tb,ob]=digits(b),{H,g,tr,T,oa,O}=now(),all=s.h&&s.t&&s.o;press(el,p);
     q('f').innerHTML=mat([{h:cross(cellsOf([H,'a']),hb,s.h),t:cross(cellsOf([g,'a'],[tr,'tr']),tb,s.t),o:cross(cellsOf([oa,'a'],[10*s.bt,'tr']),ob,s.o)}],
-      `${H} hundreds, ${T} tens, and ${O} ones`+(s.h||s.t||s.o?', with some crossed out':''),{h:digits(a)[0],t:digits(a)[1]+(brk.includes('h')?10:0),o:digits(a)[2]+(brk.includes('t')?10:0)});
+      `${cnt(H,0)}, ${cnt(T,1)}, and ${cnt(O,2)}`+(s.h||s.t||s.o?', with some crossed out':''),{h:digits(a)[0],t:digits(a)[1]+(brk.includes('h')?10:0),o:digits(a)[2]+(brk.includes('t')?10:0)});
     if(q('bh'))q('bh').disabled=!!(s.bh||s.t);
     if(q('bt'))q('bt').disabled=!!(s.bt||s.o);
     q('to').disabled=!!s.o;q('tt').disabled=!!s.t;q('th').disabled=!!s.h;
     const green=s.bh&&s.bt?'The green tens came from a broken hundred, and the green ones from a broken ten.':s.bh?'The green tens came from a broken hundred.':s.bt?'The green ones came from a broken ten.':'';
-    q('r').innerHTML=all?`<span class="ok">You took away ${b}. <b>${a} − ${b} = ${a-b}</b>.</span><br><span class="dimline">${H-hb} hundreds, ${T-tb} tens, and ${O-ob} ones are left.</span>`
+    q('r').innerHTML=all?`<span class="ok">You took away ${b}. <b>${a} − ${b} = ${a-b}</b>.</span><br><span class="dimline">${cnt(H-hb,0)}, ${cnt(T-tb,1)}, and ${cnt(O-ob,2)} are left.</span>`
       :(s.msg?`<span class="no">${s.msg}</span>`:`Take away <b>${b}</b>: ${partsOf(b)}.`)
-      +`<br><span class="dimline">${green?`${a} is now ${H} hundreds, ${T} tens, and ${O} ones. ${green}`:brk==='t'?'Are there enough ones to take away?':brk==='h'?'Are there enough tens to take away?':brk?'Check the ones first, then the tens.':'Take away each place.'}</span>`;
+      +`<br><span class="dimline">${green?`${a} is now ${cnt(H,0)}, ${cnt(T,1)}, and ${cnt(O,2)}. ${green}`:brk==='t'?'Are there enough ones to take away?':brk==='h'?'Are there enough tens to take away?':brk?'Check the ones first, then the tens.':'Take away each place.'}</span>`;
   };
   const act=f=>()=>{s.msg=f()||'';draw();};
   if(q('bh'))q('bh').onclick=act(()=>{const {H}=now();if(H-(s.h?digits(PROBS[p][1])[0]:0)<1)return 'There are no hundreds left to break.';s.bh=1;});
   if(q('bt'))q('bt').onclick=act(()=>{const {T}=now();if(T-(s.t?digits(PROBS[p][1])[1]:0)<1)return 'There are no tens to break. Break a hundred first.';s.bt=1;});
-  q('to').onclick=act(()=>{const {T,O}=now(),ob=digits(PROBS[p][1])[2];if(O<ob)return `Only ${O} ones, and you need to take away ${ob}. `+(!brk?'':T?'Break a ten first.':'There are no tens to break. Break a hundred first.');s.o=1;});
-  q('tt').onclick=act(()=>{const {T}=now(),tb=digits(PROBS[p][1])[1];if(T<tb)return `Only ${T} tens, and you need to take away ${tb}. Break a hundred first.`;s.t=1;});
+  q('to').onclick=act(()=>{const {T,O}=now(),ob=digits(PROBS[p][1])[2];if(O<ob)return `Only ${cnt(O,2)}, and you need to take away ${ob}. `+(!brk?'':T?'Break a ten first.':'There are no tens to break. Break a hundred first.');s.o=1;});
+  q('tt').onclick=act(()=>{const {T}=now(),tb=digits(PROBS[p][1])[1];if(T<tb)return `Only ${cnt(T,1)}, and you need to take away ${tb}. Break a hundred first.`;s.t=1;});
   q('th').onclick=act(()=>{s.h=1;});
   q('clr').onclick=()=>{reset();draw();};
   el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){p=+b.dataset.m;reset();draw();}});
