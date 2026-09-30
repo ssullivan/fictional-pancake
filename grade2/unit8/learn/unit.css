@@ -1,6 +1,5 @@
 /* Grade 2 Unit 8 Learn pages: figures and widgets used by its chapters. Loaded by learn.html and every page in learn/. */
-/* sharing plates, pairs, square tiles, extra cubes, and the 1–20 number buttons */
-.plate{fill:rgba(170,205,255,.08);stroke:var(--chalk);stroke-width:2.5}
+/* pairs, square tiles, extra cubes, and the 1–20 number buttons */
 .pairbox{fill:none;stroke:rgba(170,205,255,.55);stroke-width:2}
 .tile{fill:var(--gold);stroke:#0a2340;stroke-width:1.5}
 .rim{fill:none;stroke:#fff;stroke-width:3}

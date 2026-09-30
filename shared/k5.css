@@ -183,6 +183,7 @@ rect.bar{stroke:rgba(243,246,251,.7);stroke-width:1.5}
 rect.bar.red{fill:#ff7b7b}rect.bar.blue{fill:#6fa8ff}rect.bar.green{fill:#5fe0a8}rect.bar.yellow{fill:#ffc93c}
 rect.bar.hi{stroke:#fff;stroke-width:4}
 .match{stroke:#fff;stroke-width:2;stroke-dasharray:6 5}
-/* arrays (arrayFig): rows and columns outlined */
+/* equal groups (groupsFig) and arrays (arrayFig): a group's circle, and rows and columns outlined */
+.plate{fill:rgba(170,205,255,.08);stroke:var(--chalk);stroke-width:2.5}
 rect.band{fill:rgba(255,201,60,.14);stroke:var(--gold);stroke-width:2.5}
 rect.band.b{fill:rgba(127,227,255,.12);stroke:var(--cyan)}
