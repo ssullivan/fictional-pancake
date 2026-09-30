@@ -3,6 +3,10 @@
 const SIDES = {triangular: 3, square: 4, pentagonal: 5, hexagonal: 6, heptagonal: 7, octagonal: 8};
 const counts = (kind, n) => kind === 'prism' ? {faces: n + 2, edges: 3 * n, vertices: 2 * n} : {faces: n + 1, edges: 2 * n, vertices: n + 1};
 const plain = t => String(t).replace(/<[^>]*>/g, '');
+const area = P => Math.abs(P.reduce((s, [x1, y1], i) => { const [x2, y2] = P[(i + 1) % P.length]; return s + x1 * y2 - x2 * y1; }, 0)) / 2;
+// distance from a point inside a convex polygon to its nearest side (negative when outside)
+const inset = (P, [x, y]) => Math.min(...P.map(([x1, y1], i) => { const [x2, y2] = P[(i + 1) % P.length], L = Math.hypot(x2 - x1, y2 - y1);
+  return ((x2 - x1) * (y - y1) - (y2 - y1) * (x - x1)) / L * Math.sign(P.reduce((s, [a, b], j) => { const [c, d] = P[(j + 1) % P.length]; return s + a * d - c * b; }, 0)); }));
 module.exports = {
   limits: {
     para:  {dp: 0, nz: 2, max: 70},
@@ -16,6 +20,14 @@ module.exports = {
   // Polyhedron Yard: every count, name, and picture has to be right
   check(p) {
     const bad = [], prompt = plain(p.prompt);
+    // Frame & Subtract holes: the hole sits inside the shape (it may rest on a side), its top corners well clear of the sides
+    if (p.cut) {
+      const {outer, hole} = p.cut, d = hole.map(v => inset(outer, v));
+      if (d.some(x => x < -1e-9)) bad.push('the hole pokes out of the shape');
+      if (d.filter(x => x > 1e-9).some(x => x < .5)) bad.push(`a corner of the hole nearly touches a side (${Math.min(...d.filter(x => x > 1e-9)).toFixed(2)})`);
+      if (!d.some(x => x > 1e-9)) bad.push('the hole has no corner inside the shape');
+      if (Math.abs(area(outer) - area(hole) - p.answer) > 1e-9) bad.push(`answer ${p.answer}, but the shape minus the hole is ${area(outer) - area(hole)}`);
+    }
     const right = p.kind === 'mc' ? p.choices.find(c => c.id === p.answer).label : null;
     let m;
     if (p.solid) {

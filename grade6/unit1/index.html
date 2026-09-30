@@ -91,7 +91,7 @@
       <h2>For grown-ups</h2>
       <div><h4>How a round works</h4><p>Each zone deals 8 fresh problems (the Final Blueprint deals 10). A right answer on the first try earns 10 points. After a wrong answer, the game names the likely mistake and gives one more try for 5 points.</p></div>
       <div><h4>The "Show me" hint</h4><p>Hints use the same moves as class: cut and slide a parallelogram into a rectangle, double a triangle into a parallelogram, split a shape into rectangles, color a polyhedron’s bases and dot its hidden vertices. A used hint caps that problem at 5 points.</p></div>
-      <div><h4>Frame &amp; Subtract</h4><p>Shapes drawn inside a rectangle, solved like the class worksheets: rectangle area minus the unshaded pieces. A wrong first answer switches to Build it, which checks each piece one at a time. Dented shapes unlock after 2 stars in that zone.</p></div>
+      <div><h4>Frame &amp; Subtract</h4><p>Shapes drawn inside a rectangle, solved like the class worksheets: rectangle area minus the unshaded pieces. A wrong first answer switches to Build it, which checks each piece one at a time. Dented shapes unlock after 2 stars in that zone. The zone also has shapes with a hole cut out, like the unit’s practice problems: find the whole shape (adding up lengths that come in pieces, such as a height of 3 + 2), then subtract the hole.</p></div>
       <div><h4>Mistakes it catches</h4><p>Using the slanted side instead of the height, forgetting to halve a triangle, counting only 3 faces of a prism, counting only the faces or edges you can see, naming a pyramid by its triangles instead of its base, and mixing up surface area with volume.</p></div>
     </section>
   </section>
@@ -129,7 +129,7 @@
 <script src="../../shared/util.js?v=054c0f08"></script>
 <script src="../../shared/solids.js?v=78af5115"></script>
 <script src="../../shared/engine.js?v=cc6c3e7a"></script>
-<script src="stations.js?v=708a1eed"></script>
+<script src="stations.js?v=361ce0fc"></script>
 <script>
 Game.init({
   saveKey:'bb-save',
@@ -152,13 +152,13 @@ Game.init({
 });
 
 /* Build it: step-by-step mode for frame problems, turned on after a wrong first answer */
-function buildRows(){const b=Game.state.p.build;return [{k:'R',label:'Rectangle around the shape',area:b.R,kind:'frame'},...b.pieces.map(q=>({k:q.k,label:`Piece ${q.k} (${q.kind==='rect'?'rectangle':'triangle'})`,area:q.area,kind:q.kind}))];}
+function buildRows(){const b=Game.state.p.build;return [{k:'R',label:b.label||'Rectangle around the shape',area:b.R,kind:b.kind||'frame'},...b.pieces.map(q=>({k:q.k,label:q.label||`Piece ${q.k} (${q.kind==='rect'?'rectangle':'triangle'})`,area:q.area,kind:q.kind}))];}
 function enterBuild(msg){
   Game.state.build=true;Game.drawFig();
   $('hint').hidden=true;
   $('feedback').innerHTML=`<div class="fb bad"><h4>Not yet</h4><p>${msg}</p><p>Let’s build it one piece at a time.</p></div>`;
   $('answer').innerHTML=`<form class="build" id="bf" autocomplete="off">
-    <p class="intro">Find the area of the rectangle and of each lettered piece. Tap a piece on the grid to jump to its box.</p>
+    <p class="intro">${Game.state.p.build.intro||'Find the area of the rectangle and of each lettered piece.'} Tap a piece on the grid to jump to its box.</p>
     ${buildRows().map(r=>`<div class="brow" id="row-${r.k}"><label for="b-${r.k}">${r.label}</label><input id="b-${r.k}" inputmode="decimal" placeholder="?"><span class="unit">sq units</span><span class="bmark"></span></div>`).join('')}
     <div class="tools"><button class="btn" id="buildCheck">Check my pieces</button><button type="button" class="link-btn" id="giveUp">Show the answer</button></div></form>`;
   $('bf').addEventListener('submit',e=>{e.preventDefault();if(Game.state.done)return Game.advance();checkBuild();});
@@ -169,6 +169,8 @@ function rowMsg(r,v){
   if(r.kind==='frame')return 'Multiply the rectangle’s width by its height.';
   if(r.kind==='rect')return 'Multiply its width by its height.';
   if(Math.abs(v-2*r.area)<.011)return 'Halve it. A triangle is half of the rectangle around it.';
+  if(r.kind==='wtri')return 'Its base is all the lengths along the bottom added up, and its height goes from the base to the very top. Then halve.';
+  if(r.kind==='hole')return 'Multiply its base by its height (the dashed line), then halve.';
   if(r.kind==='base')return 'Its base is the rectangle’s edge. Use base × height to the dent ÷ 2.';
   return 'Count its two straight sides along the grid lines, multiply, then halve.';
 }

@@ -21,6 +21,14 @@
 .lbl{fill:var(--chalk);font:700 15px var(--mono);text-anchor:middle;dominant-baseline:central}
 .lbl.s{font-size:13px}.lbl.cy{fill:var(--cyan)}.lbl.st{text-anchor:start}.lbl.en{text-anchor:end}
 .pt{fill:var(--chalk)}
+/* Polygons: the hole to drag (its hit area is bigger than the hole, for fingers) */
+.holeg{cursor:grab;touch-action:none;outline:none}
+.holeg.drag{cursor:grabbing}
+.hole-hit{fill:transparent}
+.hole{fill:rgba(255,138,196,.1);stroke:var(--pink);stroke-width:2.5;stroke-dasharray:6 4}
+.holeg:hover .hole,.holeg:focus-visible .hole,.holeg.drag .hole{fill:rgba(255,138,196,.25);stroke-width:3.5}
+.arrows{display:inline-flex;gap:6px}
+.arrows .ghost-btn{min-width:44px;min-height:44px;font-size:20px;padding:0}
 
 /* 3D */
 .view3d{position:relative;width:100%;height:min(66vw,440px);min-height:270px;border-radius:12px;overflow:hidden;border:1px solid rgba(170,205,255,.2);

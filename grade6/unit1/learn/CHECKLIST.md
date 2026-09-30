@@ -88,6 +88,16 @@ Not covered: Lesson 19 (Designing a Tent) is an open-ended project, so it works 
 - [ ] Edge: a circle is named: `answer circ; feedback A circle is curved.`
 - Quick check: Which one is a polygon? Answer: “(picture)”. Mistakes it names: “(picture)”, “(picture)”, “(picture)”.
 
+### Step 3: Shapes with holes
+- [ ] It starts on the base, with the lengths in pieces like the worksheets: `see Base: 5 + 2 + 5 = 12. Height: 4 + 2 = 6.; see Shaded: 36 − 4 = 32 square units.; see Drag the hole anywhere inside the triangle.`
+- [ ] Moving the hole keeps the area: `click Move the hole up; see The hole moved, but the shaded area is still 32.; see Shaded: 36 − 4 = 32; nosee Base: 5`
+- [ ] Dragging it with a finger or a mouse moves it, and the page doesn’t scroll: `spec learn-drag.spec.js: Polygons: drag the hole`
+- [ ] Only its size changes the area: `click Hole size: one more; see Hole: 3 × 3 = 9.; see Shaded: 36 − 9 = 27 square units.; click Hole size: one less ×2; see Hole: 1 × 1 = 1.; see Shaded: 36 − 1 = 35`
+- [ ] Edge: the size stops at 1 and 3: `click Hole size: one more ×3; see Hole: 3 × 3 = 9.; click Hole size: one less ×4; see Hole: 1 × 1 = 1.`
+- [ ] Edge: the arrows stop at the triangle’s sides: `click Move the hole right ×2; disabled Move the hole right; disabled Move the hole up; disabled Move the hole down; enabled Move the hole left`
+- [ ] Edge: a bigger hole that wouldn’t fit moves back inside: `click Move the hole right ×2; click Hole size: one more; see Base: 5 + 3 + 4 = 12.; see Shaded: 36 − 9 = 27`
+- Quick check: Find the area of the shaded region. The square is cut out of the triangle. Answer: 26 square units. Mistakes it names: 30, 34, 56, 16, 20, 28.
+
 ## Chapter 5: Polyhedra · `learn/polyhedra.html` · Lesson 13
 
 ### Step 1: What is a polyhedron?

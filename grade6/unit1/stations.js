@@ -15,6 +15,7 @@ class Fig{
   lbl(x,y,t,cls=''){t=String(t);const w=t.length*13.5+18;this.ext(x,y);this.L.push(`<g class="lbl ${cls}"><rect x="${x*U-w/2}" y="${y*U-17}" width="${w}" height="34" rx="8"/><text x="${x*U}" y="${y*U+1}">${t}</text></g>`);return this;}
   txt(x,y,t){this.L.push(`<text class="area-t" x="${x*U}" y="${y*U}">${t}</text>`);return this;}
   ra(x,y,ux,uy,vx,vy,s=.42){const q=[[x+ux*s,y+uy*s],[x+(ux+vx)*s,y+(uy+vy)*s],[x+vx*s,y+vy*s]];this.L.push(`<polyline class="ra" points="${q.map(p=>p[0]*U+','+p[1]*U).join(' ')}"/>`);return this;}
+  rings(rs,cls){this.L.push(`<path class="${cls}" fill-rule="evenodd" d="${rs.map(r=>'M'+this.P(r).replace(/ /g,'L')+'Z').join('')}"/>`);return this;}
   cand(id,x1,y1,x2,y2){this.ext(x1,y1);this.ext(x2,y2);const a=`x1="${x1*U}" y1="${y1*U}" x2="${x2*U}" y2="${y2*U}"`;this.L.push(`<g class="cand" data-id="${id}" tabindex="0" role="button" aria-label="Segment ${id}"><line class="hit" ${a}/><line class="seg" ${a}/></g>`);return this;}
   svg(withHint,extra=[]){
     const pad=1.3,[a,b,c,d]=this.bb;
@@ -531,8 +532,56 @@ function makeReverse(){
     misc:[[base,'That’s the parallelogram’s base. The rectangle is wider: add the corner triangle’s width.'],[A-p,'Area ÷ height gives the base. Then add the corner triangle’s width.'],[base-p,'Add the corner triangle’s width to the base, don’t subtract it.']],
     explain:`Parallelogram: base × ${H} = ${A}, so base = ${A} ÷ ${H} = ${base}.<br>Rectangle width: ${base} + ${p} = ${W} units.`};
 }
+/* a shape with a hole cut out (like the Lesson 3 practice problems): the whole shape minus the hole. Lengths come in
+   pieces along the sides, so students add them up first. p.cut is for checks.js. */
+function holeMisc(ans,m){const seen=new Set([ans]);return m.filter(([v])=>v>0&&!seen.has(v)&&seen.add(v));}
+function holeBuild(f,hole,whole,wholeLabel,wholeKind,q){
+  f.on('build');f.poly(hole,'pc fb2','data-k="A"');f.lbl(...cen(hole),'A','letter');
+  return {R:whole,label:wholeLabel,kind:wholeKind,intro:'Find the area of the whole shape, as if nothing were cut out, and of the hole (A).',pieces:[{k:'A',P:hole,...q}]};
+}
+function makeTriHole(){
+  const a=R(2,5),b=R(2,5),w=R(2,4),h=Math.random()<.5?w:R(2,3),t=R(2,4),W=a+w+b,H=h+t,px=R(a+1,a+w-1);
+  if((W*H)%2)return null;
+  const gap=x=>Math.min((H*x-px*h)/Math.hypot(H,px),(H*(W-x)-(W-px)*h)/Math.hypot(H,W-px));  // top corner to the slanted sides
+  if(gap(a)<.5||gap(a+w)<.5)return null;
+  const T=W*H/2,S=w*h,ans=T-S,sq=w===h?'square':'rectangle',f=new Fig();
+  const outer=[[0,H],[W,H],[px,0]],hole=[[a,H],[a+w,H],[a+w,H-h],[a,H-h]];
+  f.rings([outer,hole],'shape solid');
+  f.lbl(a/2,H+.8,a);f.lbl(a+w/2,H+.8,w);f.lbl(a+w+b/2,H+.8,b);f.lbl(a-.85,H-h/2,h);
+  f.line(px,0,px,H-h,'hgt');f.ra(px,H-h,0,-1,1,0);f.lbl(px+.85,(H-h)/2,t,'h');
+  const build=holeBuild(f,hole,T,'Whole triangle, hole and all','wtri',{kind:'rect',area:S,label:`Hole A (${sq})`});
+  f.onHint();f.line(px,H-h,px,H,'hgt');f.lbl(W/2,H+1.9,`${a} + ${w} + ${b} = ${W}`,'h');f.lbl(px,-.9,`${t} + ${h} = ${H}`,'h');
+  return {kind:'num',unit:SQ,fig:f,answer:ans,build,cut:{outer,hole},
+    prompt:`Find the area of the shaded region. The ${sq} is cut out of the triangle.`,
+    hint:`Find the whole triangle first, as if nothing were cut out. Its base is all three lengths along the bottom, and its height is the dashed line plus the ${sq}’s side. Then subtract the ${sq}.`,
+    misc:holeMisc(ans,[[T,`That’s the whole triangle, hole and all. Now subtract the ${sq}.`],[T+S,`The ${sq} is a hole, so subtract its area. Don’t add it.`],
+      [W*H-S,'The big shape is a triangle, so its area is half of base × height.'],
+      [W*t/2-S,`The triangle’s height goes from the base all the way to the top: ${t} + ${h}.`],[t*W-S,`The triangle’s height goes from the base all the way to the top: ${t} + ${h}, and a triangle needs ÷ 2.`],
+      [(a+b)*H/2-S,'The triangle’s base runs all the way across the bottom, under the hole too.'],
+      [T-S/2,`The hole is a ${sq}, not a triangle, so don’t halve it.`]]),
+    explain:`Base: ${a} + ${w} + ${b} = ${W}. Height: ${t} + ${h} = ${H}.<br>Whole triangle: ${W} × ${H} ÷ 2 = ${T}.<br>Hole: ${w} × ${h} = ${S}.<br>Shaded: ${T} − ${S} = ${fmt(ans)} square units.`};
+}
+function makeRectHole(){
+  const a=R(1,4),b=R(3,6),c=R(1,4),W=a+b+c,H=R(5,7),h=R(3,H-2),x=a+R(1,b-1),A=W*H,T=b*h/2,ans=A-T;
+  if(A>80||(b*h)%2)return null;
+  const outer=[[0,0],[W,0],[W,H],[0,H]],hole=[[a,H],[a+b,H],[x,H-h]],f=new Fig();
+  f.rings([outer,hole],'shape solid');
+  f.lbl(a/2,H+.8,a);f.lbl(a+b/2,H+.8,b);f.lbl(a+b+c/2,H+.8,c);f.lbl(-.85,H/2,H);
+  f.line(x,H-h,x,H,'hgt');f.ra(x,H,0,-1,1,0);f.lbl(cen(hole)[0]<x?x+.85:x-.85,H-h/2,h,'h');  // on the side of the dashed line away from the letter A
+  const build=holeBuild(f,hole,A,'Whole rectangle, hole and all','frame',{kind:'hole',area:T,label:'Hole A (triangle)'});
+  f.onHint();f.lbl(W/2,-.8,`${a} + ${b} + ${c} = ${W}`,'h');
+  return {kind:'num',unit:SQ,fig:f,answer:ans,build,cut:{outer,hole},
+    prompt:'Find the area of the shaded region. The triangle is cut out of the rectangle.',
+    hint:'Find the whole rectangle first, as if nothing were cut out. Its width is all three lengths along the bottom. Then subtract the triangle: half of its base × its height (the dashed line).',
+    misc:holeMisc(ans,[[A,'That’s the whole rectangle, hole and all. Now subtract the triangle.'],[A+T,'The triangle is a hole, so subtract its area. Don’t add it.'],
+      [A-b*h,'The hole is a triangle, so its area is half of base × height.'],[T,'That’s the hole. Subtract it from the whole rectangle.'],
+      [(a+c)*H-T,'The rectangle’s width runs all the way across the bottom, under the hole too.']]),
+    explain:`Width: ${a} + ${b} + ${c} = ${W}.<br>Whole rectangle: ${W} × ${H} = ${A}.<br>Hole: ${b} × ${h} ÷ 2 = ${T}.<br>Shaded: ${A} − ${T} = ${fmt(ans)} square units.`};
+}
 function makeFrame(t){
   if(t==='reverse')return makeReverse();
+  if(t==='trihole')return makeTriHole();
+  if(t==='recthole')return makeRectHole();
   const s=shapeOf(t==='spot'?pick(['corner','edge','quad']):t);if(!s)return null;
   const fr=frameFig(s);if(!fr)return null;
   const work=frameWork(s,fr);
@@ -559,7 +608,7 @@ function makeFrame(t){
 }
 const dentsOpen=()=>Game.stars('frame')>=2;
 function genFrame(){
-  const pool=['corner','corner','edge','quad','quad','para','psym','spot','spot','reverse'];
+  const pool=['corner','corner','edge','quad','quad','para','psym','spot','spot','reverse','trihole','trihole','recthole'];
   if(dentsOpen())pool.push('dent','dent','dent','dent');
   const t=pick(pool);
   for(let i=0;i<60;i++){const p=makeFrame(t);if(p)return p;}
@@ -584,6 +633,6 @@ const ZONES=[
   {id:'solid',name:'Polyhedron Yard',lessons:'Lesson 13',blurb:'Count faces, edges, and vertices, name prisms and pyramids, and spot shapes that aren’t polyhedra.',gen:genSolid},
   {id:'net',name:'Net Factory',lessons:'Lessons 12–16',blurb:'Fold nets, spot cube nets, and add up every face.',gen:genNet},
   {id:'cube',name:'Squares & Cubes Lab',lessons:'Lessons 16–18',blurb:'Exponents, cube surface area, and area vs. volume units.',gen:genCube},
-  {id:'frame',name:'Frame & Subtract',lessons:'Lessons 3, 10–12',blurb:'Shapes inside a rectangle. Find the rectangle, subtract the pieces around the shape.',gen:genFrame},
+  {id:'frame',name:'Frame & Subtract',lessons:'Lessons 3, 10–12',blurb:'Shapes inside a rectangle, and shapes with holes. Find the whole, subtract what isn’t shaded.',gen:genFrame},
   {id:'boss',name:'Final Blueprint',lessons:'Whole unit · 10 problems',blurb:'A mixed review from every zone. Aim for 3 stars.',gen:()=>pick([genPara,genTri,genPoly,genSolid,genNet,genCube,genFrame])()}
 ];
