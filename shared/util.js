@@ -27,8 +27,12 @@ function parseNum(s){
    press(el, m) marks the one with id m pressed (aria-pressed). */
 const seg=(label,opts)=>`<div class="seg" role="group" aria-label="${label}">${opts.map(([id,t])=>`<button type="button" data-m="${id}">${t}</button>`).join('')}</div>`;
 const press=(el,m)=>el.querySelectorAll('[data-m]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.m===String(m)));
-/* − n + buttons. Markup for one number k; wire them all with steppers(). */
-const stepper=(k,label)=>`<span class="stepper"><span>${label}</span><button type="button" class="ghost-btn" data-k="${k}" data-d="-1" aria-label="${label}: one less">−</button><b data-${k}></b><button type="button" class="ghost-btn" data-k="${k}" data-d="1" aria-label="${label}: one more">+</button></span>`;
+/* For widgets with two rows of choice buttons, each in its own box (<div data-top>${seg(…)}</div>): which row a click was in.
+   Returns [row, id] or null. */
+const segHit=(e,rows)=>{const b=e.target.closest('[data-m]');if(!b)return null;const r=rows.find(k=>b.closest(`[data-${k}]`));return r?[r,b.dataset.m]:null;};
+/* − n + buttons. Markup for one number k; wire them all with steppers(). The number is shown in <b data-(k)>, which Q(el)(k)
+   finds; the buttons are marked data-sk, so they never match it. */
+const stepper=(k,label)=>`<span class="stepper"><span>${label}</span><button type="button" class="ghost-btn" data-sk="${k}" data-d="-1" aria-label="${label}: one less">−</button><b data-${k}></b><button type="button" class="ghost-btn" data-sk="${k}" data-d="1" aria-label="${label}: one more">+</button></span>`;
 function steppers(el,st,lim,draw){
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-d]');if(!b)return;const k=b.dataset.k,v=st[k]+ +b.dataset.d;if(v<lim[k][0]||v>lim[k][1])return;st[k]=v;draw();});
+  el.addEventListener('click',e=>{const b=e.target.closest('[data-d]');if(!b)return;const k=b.dataset.sk,v=st[k]+ +b.dataset.d;if(v<lim[k][0]||v>lim[k][1])return;st[k]=v;draw();});
 }

@@ -69,6 +69,15 @@ table.pv th{color:var(--dim);font-size:14px;padding:6px 10px}
 table.pv td{border:1.5px solid rgba(170,205,255,.4);padding:8px 18px;text-align:center}
 table.pv td.p0{color:var(--gold)}table.pv td.p1{color:var(--cyan)}table.pv td.p2{color:var(--good)}
 table.pv td.hi{outline:3px solid #fff;outline-offset:-3px}
+table.pv.big td{padding:8px 10px}
+table.pv.big th{padding:4px 6px}
+table.pv th.per{border-bottom:1.5px solid rgba(170,205,255,.4)}
+table.pv .pb{border-left:4px solid var(--chalk)}
+table.pv td.dp{position:relative}
+table.pv td.dp::after{content:'.';position:absolute;right:-5px;bottom:4px;color:var(--chalk)}
+.pvb{all:unset;cursor:pointer;display:block;min-width:1ch;border-radius:6px;padding:0 4px}
+.pvb:hover,.pvb:focus-visible{background:rgba(255,201,60,.2)}
+.pvb[aria-pressed="true"]{background:#fff;color:#0a2340}
 /* controls, equations, and stories */
 .eq{margin:0 0 10px;font:700 24px var(--mono)}
 .eq .q{background:var(--gold);color:#1a1300;border-radius:6px;padding:0 8px}
@@ -155,3 +164,10 @@ table.pv td.hi{outline:3px solid #fff;outline-offset:-3px}
 .hg.a{fill:var(--gold)}.hg.b{fill:var(--cyan)}
 .hgt{stroke:var(--chalk);stroke-width:2}
 .hgw{fill:none;stroke:var(--chalk);stroke-width:2.5}
+/* the standard algorithm (algFig) */
+.adg{fill:var(--chalk);font:700 26px var(--mono);text-anchor:middle;dominant-baseline:central}
+.adg.ares{fill:var(--gold)}
+.amk{fill:var(--cyan);font:700 17px var(--mono);text-anchor:middle;dominant-baseline:central}
+.axd{stroke:var(--cyan);stroke-width:2.5;stroke-linecap:round}
+.aline{stroke:var(--chalk);stroke-width:2.5}
+.acur{fill:rgba(255,201,60,.1);stroke:var(--gold);stroke-width:2}

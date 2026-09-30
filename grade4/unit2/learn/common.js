@@ -28,5 +28,3 @@ function cmpWhy(a,b){
   if(lo[1]-lo[0]===1&&hi[1]-hi[0]===1)return {s,how:'Compare to 1',why:`Each is 1 part away from 1 whole. ${frA(lo)} is ${fr(1,lo[1])} away and ${frA(hi)} is ${fr(1,hi[1])} away. ${cap(aPart(hi[1]))} is smaller, so ${frA(hi)} is closer to 1. ${st}.`};
   return {s,how:'Common denominator',why:`Write both in ${PART[D][1]}: ${inD(a)} and ${inD(b)}. ${st}.`};
 }
-/* which row of choice buttons a click was in, for widgets with two rows: <div data-top>${seg(…)}</div>; returns [row, id] or null */
-const segHit=(e,rows)=>{const b=e.target.closest('[data-m]');if(!b)return null;const r=rows.find(k=>b.closest(`[data-${k}]`));return r?[r,b.dataset.m]:null;};

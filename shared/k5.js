@@ -15,8 +15,9 @@
    numLine(lo, hi, {…})              a number line with arrows, jumps, dots, and tappable ticks (svg)
    jumps(start, moves, shown, ask)   an open number line: counting on or back in jumps, not drawn to scale (svg)
    hto(x, y, h, t, o, {cls, tr}), htoFig(h, t, o, opt, label)   small base-ten diagrams with hundreds; numBlocks(n) draws n
-   digits(n), numWords(n)            [hundreds, tens, ones] of n, and its name ("four hundred six")
-   pvChart(rows, hi)                 a hundreds-tens-ones chart (html table)
+   digits(n), numWords(n)            [hundreds, tens, ones] of n, and its name up to 999,999 ("four hundred six")
+   pvChart(rows, hi, {places, tap}), PLACE, digitAt(n, e), commas(n)   a place-value chart (html table), hundredths to hundred-thousands; "305,020"
+   algSteps(a, b, op), algFig(a, b, op, done)   the standard algorithm to add or subtract, column by column (svg)
    SHAPES[sides], SHAPE_NAME[sides], QUADS    flat shapes in a 100 × 100 box; shapeAt(pts, x, y, s, {…}) (markup), shapeFig(pts, {…}, label)
    picRow(n, w, h, draw, {letters, tap}), shapeRow(list, {…}), shareRow(shape, list, {…})   pictures side by side, lettered or to tap
    SOLIDS, solidFig(kind, {back})    cubes, boxes, pyramids, and prisms drawn at an angle, with the back edges dashed
@@ -130,19 +131,20 @@ function partWhole(parts,total,label='Tape diagram'){
 }
 
 /* A number line from lo to hi, with a tick every `step` (taller every `big`). lab(v): which ticks get a number (default: the tall ones).
-   u: pixels per 1. ls: label class ('s' small, '' normal). end: an arrowhead on the right, since the line keeps going.
+   u: pixels per 1. ls: label class ('s' small, '' normal). fmt(v): how a tick's number is written (like v => commas(v*1000)).
+   pad: room left and right of the line, for long numbers at its ends. end: an arrowhead on the right, since the line keeps going.
    arrows: [{a, b, lv, q}] straight arrows above the line from a to b at level lv (0 is lowest), labelled with their length,
      or ? when q and not shown.
    hops: [{a, b, t, q}] curved jumps from a to b labelled t (q: blue).  pts: [{v, cls, t}] dots on the line (cls 'b': blue);
      t is written under the dot, and tick numbers too close to it are left off.  tap: every tick can be tapped (data-v);
    tap 'cand' makes each tick a tap answer for engine.js instead (.cand, data-id = the number).  Returns the svg. */
-function numLine(lo,hi,{u=Math.min(18,380/(hi-lo)),step=1,big=5,lab=v=>v%big===0,ls='s',end=false,arrows=[],shown=false,hops=[],pts=[],tap=false,label='Number line'}={}){
-  const X=16,top=Math.max(0,...arrows.map(r=>r.lv||0)),Y=40+top*38+(hops.length?32:0),x=v=>X+(v-lo)*u,L='lbl'+(ls?' '+ls:''),near=pts.filter(p=>p.t!=null).map(p=>p.v);
+function numLine(lo,hi,{u=Math.min(18,380/(hi-lo)),step=1,big=5,lab=v=>v%big===0,fmt=v=>v,pad=16,ls='s',end=false,arrows=[],shown=false,hops=[],pts=[],tap=false,label='Number line'}={}){
+  const X=pad,top=Math.max(0,...arrows.map(r=>r.lv||0)),Y=40+top*38+(hops.length?32:0),x=v=>X+(v-lo)*u,L='lbl'+(ls?' '+ls:''),near=pts.filter(p=>p.t!=null).map(p=>p.v);
   let o=`<line class="axis" x1="${X}" y1="${Y}" x2="${x(hi)+(end?14:0)}" y2="${Y}"/>`;
   if(end)o+=`<polygon class="arrh ax" points="${x(hi)+24},${Y} ${x(hi)+12},${Y-7} ${x(hi)+12},${Y+7}"/>`;
   range(Math.round((hi-lo)/step)+1).forEach(i=>{
     const v=lo+i*step,b=v%big===0;
-    o+=`<line class="tick" x1="${x(v)}" y1="${Y-(b?8:4)}" x2="${x(v)}" y2="${Y+(b?8:4)}"/>`+(lab(v)&&near.every(w=>Math.abs(w-v)*u>=30)?`<text class="${L}" x="${x(v)}" y="${Y+22}">${v}</text>`:'');
+    o+=`<line class="tick" x1="${x(v)}" y1="${Y-(b?8:4)}" x2="${x(v)}" y2="${Y+(b?8:4)}"/>`+(lab(v)&&near.every(w=>Math.abs(w-v)*u>=30)?`<text class="${L}" x="${x(v)}" y="${Y+22}">${fmt(v)}</text>`:'');
   });
   arrows.forEach(({a,b,lv=0,q})=>{
     const y=Y-18-lv*38,d=b>a?1:-1,t=q&&!shown?'?':Math.abs(b-a);
@@ -194,17 +196,33 @@ const htoFig=(h,t,o,opt={},label)=>{const [m,w,ht]=hto(8,8,h,t,o,opt);return svg
 const digits=n=>[Math.floor(n/100),Math.floor(n/10)%10,n%10];
 /* n in blocks: hundreds gold, tens blue, ones green */
 const numBlocks=(n,label)=>{const [h,t,o]=digits(n);return htoFig(h,t,o,{cls:{t:'b',o:'c'}},label||`${n} in base-ten blocks`);};
-/* the name of a whole number up to 999: numWords(406) is "four hundred six" */
+/* the name of a whole number up to 999,999: numWords(406) is "four hundred six", numWords(35020) "thirty-five thousand twenty" */
 const numWords=(()=>{
   const ONES=['zero','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen'],
     TENS=['','','twenty','thirty','forty','fifty','sixty','seventy','eighty','ninety'];
-  return n=>{
+  const w=n=>{
     const h=Math.floor(n/100),r=n%100,rw=r<20?ONES[r]:TENS[Math.floor(r/10)]+(r%10?'-'+ONES[r%10]:'');
     return h?`${ONES[h]} hundred${r?' '+rw:''}`:rw;
   };
+  return n=>n<1000?w(n):`${w(Math.floor(n/1000))} thousand${n%1000?' '+w(n%1000):''}`;
 })();
-/* a place-value chart: rows [[label, n]]; hi: the column to outline in every row (0 hundreds, 1 tens, 2 ones) */
-const pvChart=(rows,hi=-1)=>`<table class="pv"><tr><th></th><th>Hundreds</th><th>Tens</th><th>Ones</th></tr>${rows.map(([l,n])=>`<tr><th>${l}</th>${digits(n).map((d,i)=>`<td class="p${i}${i===hi?' hi':''}">${d}</td>`).join('')}</tr>`).join('')}</table>`;
+/* A place-value chart: rows [[label, n]]; hi: the column to outline in every row (0 is the first: hundreds by default).
+   places: the columns, as powers of 10 (5 hundred-thousands … 0 ones, -1 tenths, -2 hundredths); default hundreds, tens, ones.
+   Charts past hundreds group the columns into thousands and ones, headed H, T, O, and leave zeros before a number blank.
+   tap: each digit is a button (data-row = its row, data-e = its place). */
+const PLACE={5:'Hundred-thousands',4:'Ten-thousands',3:'Thousands',2:'Hundreds',1:'Tens',0:'Ones','-1':'Tenths','-2':'Hundredths'};
+const digitAt=(n,e)=>Math.floor(Math.round(n*100)/10**(e+2))%10;
+function pvChart(rows,hi=-1,{places=[2,1,0],tap=false}={}){
+  const big=places[0]>2,col=e=>`p${((2-e)%3+3)%3}`,th=places.filter(e=>e>2).length;
+  const head=big?`<tr><th></th><th class="per" colspan="${th}">Thousands</th><th class="per pb" colspan="${places.length-th}">Ones</th></tr><tr><th></th>${places.map(e=>`<th class="${e===2?'pb':''}" title="${PLACE[e]}">${'OTH'[(e%3+3)%3]}</th>`).join('')}</tr>`
+    :`<tr><th></th>${places.map(e=>`<th>${PLACE[e]}</th>`).join('')}</tr>`;
+  return `<table class="pv${big?' big':''}">${head}${rows.map(([l,n],r)=>`<tr><th>${l}</th>${places.map((e,i)=>{
+    const d=big&&e>0&&n<10**e?'':digitAt(n,e),c=`${col(e)}${i===hi?' hi':''}${big&&e===2?' pb':''}${e===0&&places.includes(-1)?' dp':''}`;
+    return `<td class="${c}">${tap&&d!==''?`<button type="button" class="pvb" data-row="${r}" data-e="${e}" aria-label="${d}, ${PLACE[e].toLowerCase()} place">${d}</button>`:d}</td>`;
+  }).join('')}</tr>`).join('')}</table>`;
+}
+/* 305020 → "305,020" */
+const commas=n=>n.toLocaleString('en-US');
 
 
 /* ---------- flat shapes, solid shapes, equal parts, pattern blocks, clocks, and money ---------- */
@@ -522,4 +540,44 @@ function hundredGrid(cells,{label}={}){
   range(100).forEach(i=>{const c=cells[i];o+=`<rect class="hg${c?' '+c:''}" x="${X+Math.floor(i/10)*C}" y="${X+i%10*C}" width="${C}" height="${C}"/>`;});
   o+=range(9).map(i=>`<line class="hgt" x1="${X+(i+1)*C}" y1="${X}" x2="${X+(i+1)*C}" y2="${X+10*C}"/>`).join('')+`<rect class="hgw" x="${X}" y="${X}" width="${10*C}" height="${10*C}"/>`;
   return svgWrap(10*C+2*X,10*C+2*X,o,label||`A hundred grid with ${cells.filter(Boolean).length} of 100 squares shaded`);
+}
+/* ---------- the standard algorithm ---------- */
+/* a + b or a − b (a ≥ b), one column at a time from the ones (column 0). Each step: {i, top, bot, cin, val, digit, carry, from, marks}:
+   top and bot are the column's digits (top after any regrouping), cin the 1 carried in, val what the column makes (top + bot + cin,
+   or top − bot), digit what's written under it (the last column of a sum writes all of val), carry 1 when a sum makes a new ten.
+   For −: from is the column a ten was taken from when top was too small (null if none), and marks are the digits rewritten above
+   the top number, [{i, v}], zeros in between becoming 9; blank: a zero in front of the difference, not written. */
+function algSteps(a,b,op){
+  const A=[...String(a)].reverse().map(Number),B=[...String(b)].reverse().map(Number),N=A.length,T=A.slice(),out=[];let c=0;
+  for(let i=0;i<Math.max(N,B.length);i++){
+    const u=B[i]||0;
+    if(op==='+'){const t=T[i]||0,v=t+u+c,last=i===Math.max(N,B.length)-1;out.push({i,top:t,bot:u,cin:c,val:v,digit:last?v:v%10,carry:!last&&v>=10?1:0,from:null,marks:[]});c=v>=10?1:0;continue;}
+    let from=null;const marks=[];
+    if(T[i]<u){
+      let j=i+1;while(T[j]===0)j++;
+      from=j;T[j]--;marks.push({i:j,v:T[j]});
+      for(let k=j-1;k>i;k--){T[k]=9;marks.push({i:k,v:9});}
+      T[i]+=10;marks.push({i,v:T[i]});
+    }
+    out.push({i,top:T[i],bot:u,cin:0,val:T[i]-u,digit:T[i]-u,carry:0,from,marks});
+  }
+  /* zeros in front of a difference aren't written */
+  if(op==='−')out.forEach(st=>{if(st.i>=String(a-b).length)st.blank=true;});
+  return out;
+}
+/* The algorithm drawn in columns, with the first `done` columns worked: carried 1s (+) or rewritten digits (−) above, and the
+   answer's digits below. The next column to work is outlined. A comma sits between the thousands and the hundreds. */
+function algFig(a,b,op,done=0,label){
+  const S=algSteps(a,b,op),N=Math.max(String(a).length,String(b).length),W=N+(op==='+'&&String(a+b).length>N?1:0),CW=30,G=12,X=40,
+    x=i=>X+(W-1-i)*CW+(W>3&&i<3?G:0)+CW/2,Y={mk:22,a:56,b:96,r:150},A=[...String(a)].reverse(),B=[...String(b)].reverse();
+  let o='';
+  if(done<S.length){const i=S[done].i;o+=`<rect class="acur" x="${x(i)-CW/2+1}" y="4" width="${CW-2}" height="${Y.r+18}" rx="6"/>`;}
+  const row=(ds,y,cls='')=>ds.map((d,i)=>`<text class="adg${cls}" x="${x(i)}" y="${y}">${d}</text>`).join('')+(ds.length>3?`<text class="adg${cls}" x="${x(3)+CW/2+G/2}" y="${y+6}">,</text>`:'');
+  /* rewritten digits: the latest value in each column, and the original crossed out */
+  const mk={};S.slice(0,done).forEach(st=>{st.marks.forEach(m=>{mk[m.i]=m.v;});if(st.carry)mk[st.i+1]=1;});
+  o+=row(A,Y.a)+row(B,Y.b)+`<text class="adg" x="${X-18}" y="${Y.b}">${op}</text><line class="aline" x1="${X-30}" y1="${Y.b+22}" x2="${x(0)+CW/2+4}" y2="${Y.b+22}"/>`;
+  Object.entries(mk).forEach(([i,v])=>{i=+i;o+=op==='+'?`<text class="amk" x="${x(i)}" y="${Y.mk}">1</text>`:`<line class="axd" x1="${x(i)-10}" y1="${Y.a+10}" x2="${x(i)+10}" y2="${Y.a-12}"/><text class="amk" x="${x(i)}" y="${Y.mk}">${v}</text>`;});
+  const R=[];S.slice(0,done).forEach(st=>{if(st.blank)return;const ds=[...String(st.digit)].reverse();ds.forEach((d,k)=>{R[st.i+k]=d;});});
+  o+=R.map((d,i)=>d==null?'':`<text class="adg ares" x="${x(i)}" y="${Y.r}">${d}</text>`).join('')+(R.length>3&&R[3]!=null?`<text class="adg ares" x="${x(3)+CW/2+G/2}" y="${Y.r+6}">,</text>`:'');
+  return svgWrap(X+W*CW+(W>3?G:0)+12,Y.r+26,o,label||`${commas(a)} ${op==='+'?'plus':'minus'} ${commas(b)} in columns`+(done?`, ${done} column${done>1?'s':''} worked`:''));
 }

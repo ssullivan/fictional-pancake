@@ -13,10 +13,10 @@ shared/                   used by every grade; each file's header comment docume
   game.css, engine.js     game screens and the game engine (Game.init)
   figures.css, figures.js double number lines, ratio tables, diagram styles
   learn.css, learn.js     Learn pages: a unit's chapter list and its chapter pages (Learn.home, Learn.chapter)
-  k5.css, k5.js           ten-frames, cubes, base-ten blocks, tape diagrams, number lines, shapes, clocks, coins, factor pictures, steppers: K–5 pages
+  k5.css, k5.js           ten-frames, cubes, base-ten blocks, place-value charts, tape diagrams, number lines, shapes, clocks, coins, factor pictures, fraction strips, line plots, hundred grids, the standard algorithm: K–5 pages
   solids.css, solids.js   prisms and pyramids (faces, edges, vertices, names), their drawings, curved solids, and nets: Grade 6
   landing.css             grade cards (root page) and unit cards (grade pages)
-  util.js                 R, pick, shuffle, miscOf, mcOf, gcd, lcm, $, Q, parseNum, and Learn controls (seg, press, stepper)
+  util.js                 R, pick, shuffle, miscOf, mcOf, gcd, lcm, $, Q, parseNum, and Learn controls (seg, press, segHit, stepper)
   speak.js                Read to me buttons for K–2 Learn pages and games (readAloud)
 tools/                    check.mjs, fuzz.mjs, snap.mjs (see Checking a change)
 grade6/

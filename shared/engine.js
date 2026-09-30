@@ -94,7 +94,8 @@ const Game=(()=>{
         :`<span class="pairlab"><input id="inp" class="sm" inputmode="decimal" placeholder="?" aria-label="Number of ${p.labels[0]}"><small>${p.labels[0]}</small></span><span class="colon">:</span><span class="pairlab"><input id="inp2" class="sm" inputmode="decimal" placeholder="?" aria-label="Number of ${p.labels[1]}"><small>${p.labels[1]}</small></span>`;
       $('answer').innerHTML=`<form class="ans" id="af" autocomplete="off">${fields}<button class="btn" id="checkBtn">Check</button></form><div class="tools" style="margin-top:12px">${hintBtn}</div>`;
       $('af').addEventListener('submit',e=>{e.preventDefault();if(G.done)return advance();submit(p.kind==='num'?$('inp').value:[$('inp').value,$('inp2').value]);});
-      setTimeout(()=>{const i=$('inp');if(i&&window.matchMedia('(pointer:fine)').matches)i.focus();},30);
+      /* focus the first box for a mouse and keyboard, unless the player is already in one */
+      setTimeout(()=>{const i=$('inp'),f=$('af');if(i&&!(f&&f.contains(document.activeElement))&&window.matchMedia('(pointer:fine)').matches)i.focus();},30);
     }else if(p.kind==='mc'){
       $('answer').innerHTML=`<div class="choices${p.stack?' stack':''}">${p.choices.map(c=>`<button type="button" class="choice" data-c="${c.id}">${c.label}</button>`).join('')}</div><div class="tools" style="margin-top:12px">${hintBtn}</div>`;
       $('answer').querySelectorAll('.choice').forEach(b=>b.addEventListener('click',()=>{if(!G.done&&!b.disabled)submit(b.dataset.c);}));
