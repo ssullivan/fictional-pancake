@@ -1,5 +1,5 @@
 /* Pictures and controls for K–5 pages: ten-frames, cubes, base-ten blocks, tape diagrams, number lines, shapes, clocks, money,
-   and factor pictures.
+   factor pictures, fractions, data graphs, and arrays.
    Styles are in k5.css. Needs util.js and figures.js (svgWrap).
 
    range(n)                          [0, 1, …, n-1]
@@ -34,7 +34,10 @@
    strips(rows, {wholes, W})         fraction strips: wholes cut into d equal parts, k of them shaded, in groups or taken away (svg)
    fracLine(rows, {wholes, …})       number lines from 0 marked in fractions, one under another, with points and tappable ticks (svg)
    lineplot(counts, lo, hi, {d, …})  a line plot: an X for each measurement, in whole numbers or fractions (svg)
-   hundredGrid(cells)                1 whole as 10 tenths of 10 hundredths, with squares shaded (svg) */
+   hundredGrid(cells)                1 whole as 10 tenths of 10 hundredths, with squares shaded (svg)
+   PIC, picGraph(rows, {scale, …})   picture graphs, where each picture shows 1 or a scale like 2, 5, or 10 (half pictures too) (svg)
+   barGraph(rows, {max, scale, …})   bar graphs with a line every 1, 2, 5, or 10; bars to read, set by tapping, or compare (svg)
+   ctr(x, y, cls), arrayFig(r, c, {band, …}), ARRAY   a counter (markup), and an array of counters in rows and columns (svg) */
 const range=n=>[...Array(n).keys()];
 const cellsOf=(...groups)=>groups.flatMap(([n,c])=>Array(n).fill(c));
 
@@ -580,4 +583,77 @@ function algFig(a,b,op,done=0,label){
   const R=[];S.slice(0,done).forEach(st=>{if(st.blank)return;const ds=[...String(st.digit)].reverse();ds.forEach((d,k)=>{R[st.i+k]=d;});});
   o+=R.map((d,i)=>d==null?'':`<text class="adg ares" x="${x(i)}" y="${Y.r}">${d}</text>`).join('')+(R.length>3&&R[3]!=null?`<text class="adg ares" x="${x(3)+CW/2+G/2}" y="${Y.r+6}">,</text>`:'');
   return svgWrap(X+W*CW+(W>3?G:0)+12,Y.r+26,o,label||`${commas(a)} ${op==='+'?'plus':'minus'} ${commas(b)} in columns`+(done?`, ${done} column${done>1?'s':''} worked`:''));
+}
+
+/* ---------- data graphs ---------- */
+/* pictures for picture graphs, centered at x, y */
+const PIC={
+  note:(x,y,c)=>`<rect class="sticky ${c}" x="${x-13}" y="${y-13}" width="26" height="26" rx="4"/>`,
+  sun:(x,y)=>`<g class="p-sun"><circle cx="${x}" cy="${y}" r="8"/>${range(8).map(i=>{const a=i*Math.PI/4,c=Math.cos(a),s=Math.sin(a);return `<line x1="${x+c*11}" y1="${y+s*11}" x2="${x+c*15}" y2="${y+s*15}"/>`;}).join('')}</g>`,
+  cloud:(x,y)=>`<g class="p-cloud"><circle cx="${x-6}" cy="${y+2}" r="7"/><circle cx="${x+2}" cy="${y-3}" r="9"/><circle cx="${x+8}" cy="${y+3}" r="6"/><rect x="${x-13}" y="${y+2}" width="21" height="7" rx="3"/></g>`,
+  rain:(x,y)=>`<path class="p-rain" d="M${x},${y-13} C${x+4},${y-5} ${x+10},${y} ${x+10},${y+5} A10,10 0 0 1 ${x-10},${y+5} C${x-10},${y} ${x-4},${y-5} ${x},${y-13}Z"/>`,
+  dot:(x,y,c)=>`<circle class="sticky ${c}" cx="${x}" cy="${y}" r="12"/>`,
+};
+let picClip=0;
+/* Picture graph: rows [{label, n, pic, c}] (pic names a PIC drawing, c its color). Each picture shows `scale`; half the scale left
+   over is drawn as half a picture. max: the most any row could have (sets the width). unit: what the key says each picture
+   shows ("2 votes"). hi: index of a row to highlight. tap 'cand': each row is a tap answer for engine.js (.cand, data-id = its index). */
+function picGraph(rows,{hi=-1,max=Math.max(...rows.map(r=>r.n)),title='',scale=1,unit=String(scale),tap=false,label}={}){
+  const L=92,P=34,T=title?30:6,W=Math.max(L+Math.ceil(max/scale)*P+16,title.length*10+16),H=T+rows.length*P+34;
+  let o=title?`<text class="lbl st" x="4" y="16">${title}</text>`:'';
+  rows.forEach((r,i)=>{
+    const y=T+i*P,whole=Math.floor(r.n/scale),half=r.n%scale>0;
+    if(i===hi)o+=`<rect class="rowhi" x="2" y="${y}" width="${W-4}" height="${P}" rx="6"/>`;
+    o+=`<text class="lbl en" x="${L-10}" y="${y+P/2}">${r.label}</text><line class="axis" x1="${L}" y1="${y}" x2="${L}" y2="${y+P}"/>`;
+    range(whole).forEach(k=>o+=PIC[r.pic](L+P/2+k*P,y+P/2,r.c));
+    if(half){const id=`pich${++picClip}`,x=L+whole*P;o+=`<clipPath id="${id}"><rect x="${x}" y="${y}" width="${P/2}" height="${P}"/></clipPath><g clip-path="url(#${id})">${PIC[r.pic](x+P/2,y+P/2,r.c)}</g>`;}
+    if(tap==='cand')o+=`<rect class="cand hit" data-id="${i}" tabindex="0" role="button" aria-label="${r.label}" x="2" y="${y}" width="${W-4}" height="${P}" rx="6"/>`;
+  });
+  o+=`<text class="lbl s st" x="4" y="${H-10}">Each picture shows ${unit}.</text>`;
+  return svgWrap(W,H,o,label||'Picture graph: '+rows.map(r=>`${r.label} ${r.n}`).join(', '));
+}
+/* Bar graph: rows [{label, n, c}], with a line every `scale` up to max (a multiple of scale), each line numbered. A bar can end
+   between two lines. edit: each column can be tapped in steps of `step` (data-r, data-v). hi: index of a bar to highlight.
+   diff: [small, big] row indexes, shows how much taller the big bar is (with its size if showDiff).
+   tap 'cand': each bar is a tap answer for engine.js (.cand, data-id = its index). */
+function barGraph(rows,{max=10,scale=1,step=scale,edit=false,hi=-1,diff=null,showDiff=false,title='',tap=false,label}={}){
+  const BW=58,GAP=32,UH=24,L=max>=100?44:36,T=title?44:12,N=max/scale,W=Math.max(L+rows.length*(BW+GAP)+GAP,title.length*10+16),H=T+N*UH+36,
+    Y=v=>T+(max-v)/scale*UH,X=i=>L+GAP+i*(BW+GAP);
+  let o=title?`<text class="lbl st" x="4" y="18">${title}</text>`:'';
+  range(N+1).forEach(k=>{const v=k*scale;o+=`<line class="gl" x1="${L}" y1="${Y(v)}" x2="${W-6}" y2="${Y(v)}"/><text class="lbl s en" x="${L-8}" y="${Y(v)}">${v}</text>`;});
+  o+=`<line class="axis" x1="${L}" y1="${Y(0)}" x2="${W-6}" y2="${Y(0)}"/><line class="axis" x1="${L}" y1="${Y(max)}" x2="${L}" y2="${Y(0)}"/>`;
+  rows.forEach((r,i)=>{
+    if(r.n)o+=`<rect class="bar ${r.c}${i===hi?' hi':''}" x="${X(i)}" y="${Y(r.n)}" width="${BW}" height="${r.n/scale*UH}"/>`;
+    o+=`<text class="lbl s" x="${X(i)+BW/2}" y="${Y(0)+18}">${r.label}</text>`;
+    if(edit)range(max/step).forEach(k=>o+=`<rect class="hit" data-r="${i}" data-v="${(k+1)*step}" x="${X(i)}" y="${Y((k+1)*step)}" width="${BW}" height="${step/scale*UH}"/>`);
+    if(tap==='cand')o+=`<rect class="cand hit" data-id="${i}" tabindex="0" role="button" aria-label="${r.label}" x="${X(i)-6}" y="${T}" width="${BW+12}" height="${N*UH+30}" rx="6"/>`;
+  });
+  if(diff){
+    const [s,b]=diff,ys=Y(rows[s].n),yb=Y(rows[b].n),xb=X(b)+BW+6;
+    o+=`<line class="match" x1="${X(s)}" y1="${ys}" x2="${X(b)+BW}" y2="${ys}"/><path class="brace" d="M${xb},${yb} h6 V${ys} h-6"/>`;
+    o+=`<text class="lbl cy st" x="${xb+10}" y="${(ys+yb)/2}">${showDiff?rows[b].n-rows[s].n:'?'}</text>`;
+  }
+  return svgWrap(W+(diff?18:0),H,o,label||'Bar graph: '+rows.map(r=>`${r.label} ${r.n}`).join(', '));
+}
+
+/* ---------- counters and arrays ---------- */
+/* a counter at x, y (cls 'a' gold, 'b' blue, plus 'moved' for a white ring) */
+const ctr=(x,y,cls='a',r=14)=>`<g class="ctr ${cls}"><circle cx="${x}" cy="${y}" r="${r}"/></g>`;
+/* An array of r rows and c columns of counters, ARRAY.g apart with ARRAY.pad around them.
+   band: 'r' outlines the rows (gold) or 'c' the columns (blue), the first k of them (all if k < 0), writing how many are in each,
+     or the running total when sum.  hi: [row, column] of a tapped counter; its row and column are outlined.
+   tap: every counter can be tapped (data-i = row × c + column). */
+const ARRAY={g:46,pad:10};
+function arrayFig(r,c,{band=null,k=-1,sum=false,hi=null,tap=false,label}={}){
+  const G=ARRAY.g,AP=ARRAY.pad,cx=j=>AP+G/2+j*G,cy=i=>AP+G/2+i*G,rowB=(i,cls='')=>`<rect class="band ${cls}" x="${AP+3}" y="${AP+i*G+3}" width="${c*G-6}" height="${G-6}" rx="${(G-6)/2}"/>`,
+    colB=(j,cls='b')=>`<rect class="band ${cls}" x="${AP+j*G+3}" y="${AP+3}" width="${G-6}" height="${r*G-6}" rx="${(G-6)/2}"/>`;
+  let o='';
+  if(band==='r')range(k<0?r:k).forEach(i=>{o+=rowB(i)+`<text class="lbl gd" x="${AP+c*G+22}" y="${cy(i)}">${sum?c*(i+1):c}</text>`;});
+  if(band==='c')range(k<0?c:k).forEach(j=>{o+=colB(j)+`<text class="lbl cy" x="${cx(j)}" y="${AP+r*G+14}">${sum?r*(j+1):r}</text>`;});
+  if(hi)o+=rowB(hi[0])+colB(hi[1]);
+  range(r*c).forEach(n=>{
+    const i=Math.floor(n/c),j=n%c,sel=hi&&hi[0]===i&&hi[1]===j;
+    o+=tap?`<g data-i="${n}">${ctr(cx(j),cy(i),sel?'a moved':'a',16)}<rect class="hit" x="${AP+j*G}" y="${AP+i*G}" width="${G}" height="${G}" rx="8"/></g>`:ctr(cx(j),cy(i),'a',16);
+  });
+  return svgWrap(2*AP+c*G+(band==='r'?44:0),2*AP+r*G+(band==='c'?26:0),o,label||`An array: ${r} row${r===1?'':'s'} with ${c} in each row`);
 }

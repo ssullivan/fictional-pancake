@@ -6,7 +6,7 @@ const eqW=modes=>el=>{
   const draw=()=>{
     const {rows:r,cols:c}=st,n=m==='r'?r:c,each=m==='r'?c:r,w=m==='r'?'row':'column';seen.add(m);
     q('rows').textContent=r;q('cols').textContent=c;if(modes.length>1)press(el,m);
-    q('f').innerHTML=arr(r,c,{band:m});
+    q('f').innerHTML=arrayFig(r,c,{band:m});
     q('r').innerHTML=`<b>${addends(n,each)} = ${r*c}</b><br><span class="dimline">${pl(n,w)} of ${each}. Each ${w} is one addend.</span>`
       +(seen.size>1?`<br><span class="ok">By rows or by columns, it’s ${r*c} in all.</span>`:'');
   };
@@ -22,7 +22,7 @@ function wBuild(el){
   const draw=()=>{
     const [a,n]=BUILD[p],{rows:r,cols:c}=st,eq=`${addends(n,a)} = ${a*n}`,byR=r===n&&c===a,byC=c===n&&r===a;
     q('rows').textContent=r;q('cols').textContent=c;press(el,p);
-    q('f').innerHTML=arr(r,c,{band:byC&&!byR?'c':'r'});
+    q('f').innerHTML=arrayFig(r,c,{band:byC&&!byR?'c':'r'});
     q('r').innerHTML=byR?`<span class="ok">Yes! ${pl(n,'row')} of ${a}: <b>${eq}</b>.</span>`
       :byC?`<span class="ok">Yes! ${pl(n,'column')} of ${a}: <b>${eq}</b>.</span><br><span class="dimline">Columns work too.</span>`
       :`Your array: ${pl(r,'row')} of ${c}. Make one that shows <b>${addends(n,a)}</b>.<br><span class="dimline">Each ${a} is one row. How many ${a}s are there?</span>`;
@@ -33,9 +33,9 @@ function wBuild(el){
 }
 /* the quick checks' figures */
 const F={
-  a35:arr(3,5,{band:'r'}),
-  a24:arr(2,4),
-  chairs:arr(4,5,{label:'4 rows of chairs with 5 in each row'})
+  a35:arrayFig(3,5,{band:'r'}),
+  a24:arrayFig(2,4),
+  chairs:arrayFig(4,5,{label:'4 rows of chairs with 5 in each row'})
 };
 const STEPS=[
     {title:'Add the rows',widget:eqW(['r']),

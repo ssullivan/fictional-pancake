@@ -2,6 +2,7 @@
 /* counters at [column, row] spots (fractions allowed), for pictures that aren't arrays */
 function spots(pts,label){
   const W=Math.max(...pts.map(p=>p[0]))+1,H=Math.max(...pts.map(p=>p[1]))+1;
+  const G=ARRAY.g,AP=ARRAY.pad;
   return svgWrap(2*AP+W*G,2*AP+H*G,pts.map(([x,y])=>ctr(AP+G/2+x*G,AP+G/2+y*G,'a',16)).join(''),label);
 }
 function wArray(el){
@@ -9,7 +10,7 @@ function wArray(el){
   el.innerHTML=`<div class="fig" data-f></div><div class="wrow">${stepper('rows','Rows')}${stepper('cols','Columns')}</div><p class="readout" data-r></p>`;
   const draw=()=>{
     const {rows:r,cols:c}=st;q('rows').textContent=r;q('cols').textContent=c;
-    q('f').innerHTML=arr(r,c);
+    q('f').innerHTML=arrayFig(r,c);
     q('r').innerHTML=`<b>${pl(r,'row')} of ${c}</b>: ${c} in each row.<br><span class="dimline">${pl(c,'column')} of ${r}: ${r} in each column. ${r*c} in all.</span>`;
   };
   steppers(el,st,{rows:[1,5],cols:[1,5]},draw);draw();
@@ -21,7 +22,7 @@ function wRowsCols(el){
   el.innerHTML=seg('Array',RC.map(([r,c],i)=>[i,`${r} rows of ${c}`]))+`<div class="fig" data-f></div><p class="readout" data-r></p>`;
   const draw=()=>{
     const [r,c]=RC[p];press(el,p);
-    q('f').innerHTML=arr(r,c,{hi,tap:true,label:`An array: ${r} rows with ${c} in each row. Tap a counter.`});
+    q('f').innerHTML=arrayFig(r,c,{hi,tap:true,label:`An array: ${r} rows with ${c} in each row. Tap a counter.`});
     q('r').innerHTML=!hi?`${r} rows of ${c}. Tap any counter.`
       :`This counter is in <b>row ${hi[0]+1}</b> and <b>column ${hi[1]+1}</b>.<br><span class="dimline">Its row goes across and has ${c}. Its column goes up and down and has ${r}.</span>`;
   };
@@ -39,7 +40,7 @@ function wCount(el){
   el.innerHTML=seg('Array',CNT.map(([r,c],i)=>[i,`${r} rows of ${c}`]))+`<div class="fig" data-f></div><div class="wrow"><button type="button" class="btn" data-br>Count a row</button><button type="button" class="btn" data-bc>Count a column</button></div><p class="readout" data-r></p>`;
   const draw=()=>{
     const [r,c]=CNT[p],n=mode==='r'?r:c,each=mode==='r'?c:r,w=mode==='r'?'row':'column';press(el,p);
-    q('f').innerHTML=arr(r,c,mode?{band:mode,k,sum:true}:{});
+    q('f').innerHTML=arrayFig(r,c,mode?{band:mode,k,sum:true}:{});
     q('r').innerHTML=!mode?`${r} rows of ${c}. Count them by rows or by columns.`
       :`Count by ${w}s: <b>${range(k).map(i=>each*(i+1)).join(', ')}</b>`
         +(k===n?`<br><span class="ok">${r*c} in all: ${pl(n,w)} of ${each}.</span>`:`<br><span class="dimline">Each ${w} has ${each}. Tap Count a ${w} again.</span>`);
@@ -52,10 +53,10 @@ function wCount(el){
 /* the quick checks' figures */
 const F={
   notRows:spots([[0,0],[1,0],[2,0],[3,0],[0,1],[1,1],[2,1],[0,2],[1,2],[2,2],[3,2]],'Picture A'),
-  rows34:arr(3,4,{label:'Picture B'}),
+  rows34:arrayFig(3,4,{label:'Picture B'}),
   mixed:spots([[.2,.1],[1.4,.3],[2.1,0],[3.2,.4],[.6,1.1],[1.9,1.2],[2.7,1.1],[.1,2],[1.2,1.9],[2.3,2.2],[3.4,1.6],[3,2.6]],'Picture C'),
-  a43:arr(4,3),
-  a25:arr(2,5)
+  a43:arrayFig(4,3),
+  a25:arrayFig(2,5)
 };
 const STEPS=[
     {title:'What is an array?',widget:wArray,
