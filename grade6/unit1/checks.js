@@ -20,6 +20,36 @@ module.exports = {
   // Polyhedron Yard: every count, name, and picture has to be right
   check(p) {
     const bad = [], prompt = plain(p.prompt);
+    // Figure A, Figure B, both, or neither: work out each figure's answer from its kind and base
+    if (p.ab) {
+      const {solids, st} = p.ab, SHAPE = {3: 'triangle', 4: 'square', 5: 'pentagon', 6: 'hexagon'};
+      const holds = ({kind, n}) => {
+        const c = counts(kind, n);
+        return {poly: true, tri: kind === 'pyramid' || n === 3, rect: kind === 'prism', moreV: c.vertices > c.edges, pyr: kind === 'pyramid', prism: kind === 'prism',
+          one: kind === 'pyramid' && n !== 3, triBase: n === 3, two: kind === 'prism', count: c[st.what] === st.k, face: n === st.m}[st.id];
+      };
+      const t = solids.map(holds), want = t[0] && t[1] ? 'both' : t[0] ? 'A' : t[1] ? 'B' : 'neither';
+      if (p.answer !== want) bad.push(`${st.id} about a ${solids.map(x => x.n + '-sided ' + x.kind).join(' and ')}: answer ${p.answer}, should be ${want}`);
+      if (st.id === 'rect' && solids.some(x => x.kind === 'pyramid' && x.n === 4)) bad.push('rectangular faces asked about a square pyramid (a square is a rectangle)');
+      if (st.id === 'face' && !SHAPE[st.m]) bad.push(`a face with ${st.m} sides`);
+    }
+    // two nets, the same prism?: does each net fold closed (a base on each end, a rectangle on every side), and do the sizes match the answer?
+    if (p.nets) {
+      const {c, bad: which, flat} = p.nets, mid = P => P.reduce((a, q) => [a[0] + q[0] / P.length, a[1] + q[1] / P.length], [0, 0]);
+      const folds = net => {
+        const {h, a} = net, ends = net.faces.filter(f => f.col === 0).map(f => mid(f.poly)[1]);
+        if (net.type === 'strip') return ends.filter(y => y < 0).length === 1 && ends.filter(y => y > h).length === 1;
+        const wings = net.faces.filter(f => f.col === 2).map(f => mid(f.poly)), top = wings.find(w => w[1] < 0), bot = wings.find(w => w[1] > h);
+        return !!top && !!bot && (top[0] - a / 2) * (bot[0] - a / 2) < 0;
+      };
+      const ok = flat.map(folds), sameA = flat[0].a === flat[1].a, sameH = flat[0].h === flat[1].h;
+      const want = !ok[0] || !ok[1] ? 'fold' : !sameA ? 'a' : !sameH ? 'h' : 'yes';
+      if (c !== want) bad.push(`two nets: dealt as ${c}, but they're ${want} (folds ${ok}, a ${flat.map(n => n.a)}, h ${flat.map(n => n.h)})`);
+      if (want === 'fold' && ok.filter(x => !x).length !== 1) bad.push('two nets: both are broken');
+      if (want === 'fold' && ok['AB'.indexOf(which)]) bad.push(`two nets: says net ${which} is the broken one`);
+      const areas = net => net.faces.map(f => Math.round(area(f.poly) * 100)).sort((x, y) => x - y).join();
+      if (want === 'yes' && areas(flat[0]) !== areas(flat[1])) bad.push('two nets: same prism, but different faces');
+    }
     // Frame & Subtract holes: the hole sits inside the shape (it may rest on a side), its top corners well clear of the sides
     if (p.cut) {
       const {outer, hole} = p.cut, d = hole.map(v => inset(outer, v));

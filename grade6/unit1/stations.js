@@ -199,8 +199,62 @@ const CUBE_BAD=[
   {c:[[0,0],[1,0],[0,1],[1,1],[2,1],[3,1]],why:'It has a 2×2 block. Four squares can’t all fold around one corner of a cube, so faces overlap.'},
   {c:[[1,0],[0,1],[1,1],[2,1],[3,1],[4,1]],why:'A row of 5 wraps past the start, so two faces land in the same spot.'},
   {c:[[0,0],[0,1],[1,1],[2,1],[3,1],[4,1]],why:'A row of 5 wraps past the start, so two faces land in the same spot.'}];
+/* two nets, the same prism? (like the Lesson 14 practice problems). Both are drawn at the same scale, so sizes can be compared. */
+const S3=Math.sqrt(3)/2;
+/* a triangular prism's net: one side rectangle with a triangle on each end, and the other two rectangles hinged to the triangles'
+   slanted edges ('l' or 'r'). It folds only when they're on opposite edges: the same edge twice covers one side twice. */
+function fanNet(a,h,top,bot){
+  const T=[[0,0],[a,0],[a/2,-a*S3]],D=[[0,h],[a,h],[a/2,h+a*S3]];
+  const wing=(p,q,far)=>{const L=Math.hypot(q[0]-p[0],q[1]-p[1]);let nx=(p[1]-q[1])/L,ny=(q[0]-p[0])/L;
+    if((far[0]-(p[0]+q[0])/2)*nx+(far[1]-(p[1]+q[1])/2)*ny>0){nx=-nx;ny=-ny;}
+    return [p,q,[q[0]+nx*h,q[1]+ny*h],[p[0]+nx*h,p[1]+ny*h]];};
+  return {type:'fan',a,h,faces:[{poly:[[0,0],[a,0],[a,h],[0,h]],col:1},{poly:T,col:0},{poly:D,col:0},
+    {poly:top==='r'?wing(T[1],T[2],T[0]):wing(T[0],T[2],T[1]),col:2,wing:top},{poly:bot==='r'?wing(D[1],D[2],D[0]):wing(D[0],D[2],D[1]),col:2,wing:bot}]};
+}
+/* a row of side rectangles with a base on each end (shared/solids.js netOf). ok: false puts both bases along the top edge */
+function stripNet(n,a,h,ok){
+  const k=R(0,n-1),j=ok?R(0,n-1):pick([...Array(n).keys()].filter(i=>i!==k)),net=netOf('prism',n,{a,h,top:k,bottom:j});
+  return {type:'strip',a,h,faces:net.faces.map(f=>({poly:ok||f.id!=='bottom'?f.poly:f.poly.map(([x,y])=>[x,h-y]),col:f.col}))};
+}
+const turnNet=(net,q)=>({...net,faces:net.faces.map(f=>({...f,poly:f.poly.map(p=>{for(let i=0;i<q;i++)p=[-p[1],p[0]];return p;})}))});
+function netPairSvg(nets){
+  const bb=nets.map(n=>{const P=n.faces.flatMap(f=>f.poly),xs=P.map(p=>p[0]),ys=P.map(p=>p[1]);return [Math.min(...xs),Math.min(...ys),Math.max(...xs),Math.max(...ys)];});
+  const gap=.9,Wu=bb.reduce((t,b)=>t+b[2]-b[0],0)+gap,Hu=Math.max(...bb.map(b=>b[3]-b[1])),k=Math.min(520/Wu,300/Hu),top=36;
+  let x=10,o='';
+  nets.forEach((n,i)=>{
+    const b=bb[i],ox=x,oy=top+(Hu-(b[3]-b[1]))*k/2;
+    o+=`<text class="np-lbl" x="${r1d(ox+(b[2]-b[0])*k/2)}" y="20">${'AB'[i]}</text>`;
+    o+=n.faces.map(f=>`<polygon class="sd-net${f.col?'':' sd-base'}" points="${f.poly.map(([px,py])=>`${r1d(ox+(px-b[0])*k)},${r1d(oy+(py-b[1])*k)}`).join(' ')}"/>`).join('');
+    x+=(b[2]-b[0]+gap)*k;
+  });
+  return svgOf(r1d(x-gap*k+10),r1d(top+Hu*k+10),o,'Two nets, A and B, drawn at the same scale');
+}
+function makeSameNets(){
+  const n=pick([3,3,3,4]),P=POLYGON[n],B=BASE_NAME[n],who=pick(NAMES),c=pick(['yes','yes','yes','fold','fold','h','a']);
+  const a=pick([1.2,1.5]),h=pick([1.8,2.4]),a2=c==='a'?(a===1.2?1.8:1):a,h2=c==='h'?(h===1.8?3:1.2):h,bad=c==='fold'?pick(['A','B']):null;
+  const make=(aa,hh,ok)=>n===3&&Math.random()<.5?(ok?(t=>fanNet(aa,hh,t,t==='r'?'l':'r'))(pick(['l','r'])):(t=>fanNet(aa,hh,t,t))(pick(['l','r']))):stripNet(n,aa,hh,ok);
+  const flat=[make(a,h,bad!=='A'),make(a2,h2,bad!=='B')];
+  if(JSON.stringify(flat[0].faces)===JSON.stringify(flat[1].faces))return makeSameNets();  // net B is never a copy of net A
+  const nets=[flat[0],turnNet(flat[1],R(0,3))];
+  const why=bad&&(flat[bad==='A'?0:1].type==='fan'
+    ?`In net ${bad}, both loose rectangles land on the same side of the prism when it folds, so one side would be left open.`
+    :`In net ${bad}, both bases sit along the same edge of the rectangles, so they’d fold onto the same end. The other end would be left open.`);
+  const L={
+    yes:['Yes. They have the same faces, and both fold into the same prism.',{h:'Compare the rectangles: they’re the same length in both nets.',a:'Compare the gold bases: they’re the same size in both nets.',fold:`Both nets fold up: each has a base for each end, and one rectangle for each side of the base.`}],
+    h:['No. The rectangles are different lengths, so one prism would be taller.',{yes:'Compare the rectangles. In one net they’re longer, so that prism is taller.',a:'The gold bases are the same size. Compare the rectangles.',fold:'Both nets fold up. They just fold into different prisms.'}],
+    a:['No. The bases are different sizes.',{yes:'Compare the gold bases. One net’s bases are bigger.',h:'The rectangles are the same length. Compare the gold bases.',fold:'Both nets fold up. They just fold into different prisms.'}],
+    fold:['No. One of the nets won’t fold into a closed prism.',{yes:why,h:why,a:why}]};
+  return {...mcOf(Object.keys(L).map(k=>[L[k][0],k===c?null:L[c][1][k]]),{stack:true}),
+    fig:{svg:()=>netPairSvg(nets)},nets:{c,bad,flat},
+    prompt:`${who} says both nets fold into the same ${B} prism. Do you agree?`,
+    hint:`Check each net: a ${B} prism needs a ${P} base on each end, and one rectangle for each side. Then compare the sizes of the pieces.`,
+    explain:{yes:`Both nets have 2 matching ${P}s and ${n} matching rectangles, and each folds with one base on each end and a rectangle on every side. They fold into the same prism.`,
+      h:`Both nets fold into ${an(B)} ${B} prism, but the rectangles in one are longer, so that prism is taller. Not the same prism.`,
+      a:`Both nets fold into ${an(B)} ${B} prism, but one net’s bases (and the rectangles around them) are bigger. Not the same prism.`,fold:why}[c]};
+}
 function genNet(){
-  const t=pick(['box','rnet','rnet','cube','tri']);
+  const t=pick(['box','rnet','rnet','cube','tri','same','same']);
+  if(t==='same')return makeSameNets();
   const f=new Fig();
   if(t==='cube'){
     const good=Math.random()<.5,src=good?pick(CUBE_OK):pick(CUBE_BAD);
@@ -272,8 +326,49 @@ function howMany(kind,n,what){
   return {faces:`1 ${P} base + ${n} triangles = ${c.faces} faces`,edges:`${n} edges around the base, and ${n} going up to the top: ${n} + ${n} = ${c.edges} edges`,vertices:`${n} vertices around the base, and 1 at the top: ${n} + 1 = ${c.vertices} vertices`}[what];
 }
 const MIX={faces:'That’s the number of faces',edges:'That’s the number of edges',vertices:'That’s the number of vertices'};
+/* Figure A, Figure B, both, or neither (like the Lesson 13 practice problems): one statement about two polyhedra */
+const facesOf=s=>s.kind==='prism'?`${POLYGON[s.n]}s and rectangles`:s.n===3?'all triangles':`triangles and ${an(POLYGON[s.n])} ${POLYGON[s.n]}`;
+function statementsFor(A,B){
+  const both=[A,B],cnt=s=>countsOf(s.kind,s.n),kindWhy=s=>s.kind==='pyramid'?'it has 1 base, and triangles that meet at a point':'it has 2 matching bases joined by rectangles';
+  const L=[
+    {id:'poly',w:1,text:'This figure is a polyhedron.',test:()=>true,why:()=>'it’s closed, and every face is a polygon'},
+    {id:'tri',w:3,text:'This figure has triangular faces.',test:s=>s.kind==='pyramid'||s.n===3,why:s=>`its faces are ${facesOf(s)}`},
+    {id:'moreV',w:1,text:'There are more vertices than edges in this figure.',test:s=>cnt(s).vertices>cnt(s).edges,why:s=>`it has ${cnt(s).vertices} vertices and ${cnt(s).edges} edges`},
+    {id:'pyr',w:2,text:'This figure is a pyramid.',test:s=>s.kind==='pyramid',why:kindWhy},
+    {id:'prism',w:2,text:'This figure is a prism.',test:s=>s.kind==='prism',why:kindWhy},
+    {id:'one',w:3,text:'There is exactly one face that can be the base for this figure.',test:s=>s.kind==='pyramid'&&s.n>3,
+      why:s=>s.kind==='prism'?'it has 2 bases, one at each end':s.n===3?'every face is a triangle, so any face can be the base':`only the ${POLYGON[s.n]} can be the base`},
+    {id:'triBase',w:2,text:'The base of this figure is a triangle.',test:s=>s.n===3,why:s=>s.kind==='prism'?`its 2 bases are ${POLYGON[s.n]}s`:`its base is ${an(POLYGON[s.n])} ${POLYGON[s.n]}`},
+    {id:'two',w:3,text:'This figure has two identical and parallel faces that can be the base.',test:s=>s.kind==='prism',
+      why:s=>s.kind==='prism'?`its 2 ${POLYGON[s.n]} bases are identical and parallel`:'it has only 1 base, and its top is a point'},
+  ];
+  /* a square is a rectangle, so skip rectangles when there's a square pyramid */
+  if(!both.some(s=>s.kind==='pyramid'&&s.n===4))L.push({id:'rect',w:3,text:'This figure has rectangular faces.',test:s=>s.kind==='prism',why:s=>`its faces are ${facesOf(s)}`});
+  const what=pick(['faces','edges','vertices']),k=cnt(pick(both))[what];
+  L.push({id:'count',what,k,w:3,text:`This figure has ${k} ${what}.`,test:s=>cnt(s)[what]===k,why:s=>`it has ${cnt(s)[what]} ${what}`});
+  const m=both.map(s=>s.n).filter(v=>v>3);
+  if(m.length){const v=pick(m);L.push({id:'face',m:v,w:2,text:`This figure has ${an(POLYGON[v])} ${POLYGON[v]} face.`,test:s=>s.n===v,why:s=>`its faces are ${facesOf(s)}`});}
+  return L;
+}
+function makeAB(){
+  const all=SOLID_N.filter(n=>n<=6).flatMap(n=>['prism','pyramid'].map(k=>[k,n])),first=pick(all);
+  const second=Math.random()<.4?[first[0]==='prism'?'pyramid':'prism',first[1]]:pick(all.filter(([k,n])=>k!==first[0]||n!==first[1]));
+  const [A,B]=shuffle([first,second]).map(([k,n])=>someSolid(k,n)),L=statementsFor(A,B);
+  const st=L.flatMap(x=>Array(x.w).fill(x))[R(0,L.reduce((t,x)=>t+x.w,0)-1)],truth=[A,B].map(st.test);
+  const ans=truth[0]&&truth[1]?'both':truth[0]?'A':truth[1]?'B':'neither';
+  const says={A:[1,0],B:[0,1],both:[1,1],neither:[0,0]},fig=[A,B];
+  const line=(i,yes)=>`Figure ${'AB'[i]} is ${an(fig[i].name)} ${fig[i].name}: ${yes?'yes':'no'}, ${st.why(fig[i])}.`;
+  const why={};Object.keys(says).forEach(c=>{if(c!==ans)why[c]=[0,1].filter(i=>!!says[c][i]!==truth[i]).map(i=>line(i,truth[i])).join(' ');});
+  return {kind:'mc',answer:ans,why,choices:[{id:'A',label:'Figure A only'},{id:'B',label:'Figure B only'},{id:'both',label:'Both'},{id:'neither',label:'Neither'}],
+    fig:{svg:show=>`<div class="pair">${fig.map((s,i)=>`<figure>${solidSvg(s,{W:200,dots:show,bases:show})}<figcaption>${'AB'[i]}</figcaption></figure>`).join('')}</div>`},
+    ab:{solids:fig.map(s=>({kind:s.kind,n:s.n})),st:{id:st.id,k:st.k,what:st.what,m:st.m}},
+    prompt:`Does this describe Figure A, Figure B, both, or neither?<br><b>“${st.text}”</b>`,
+    hint:HINT_PIC+' Decide for each figure on its own: is it a prism or a pyramid, and what shape is its base?',
+    explain:`${line(0,truth[0])} ${line(1,truth[1])}`};
+}
 function genSolid(){
-  const t=pick(['count','count','count','name','name','rule','not','why','net','tyler']);
+  const t=pick(['count','count','count','name','name','rule','not','why','net','tyler','ab','ab','ab']);
+  if(t==='ab')return makeAB();
   if(t==='count'){
     /* count the faces, edges, or vertices in a drawing */
     const s=someSolid(),{kind,n}=s,what=pick(['faces','edges','vertices']),c=countsOf(kind,n),seen=seenOf(s);
@@ -630,8 +725,8 @@ const ZONES=[
   {id:'para',name:'Parallelogram Plaza',lessons:'Lessons 4–6',blurb:'Base, height, and why the slanted side doesn’t count.',gen:genPara},
   {id:'tri',name:'Triangle Tower',lessons:'Lessons 7–10',blurb:'Half of a parallelogram, including heights that land outside.',gen:genTri},
   {id:'poly',name:'Polygon Park',lessons:'Lessons 2–3, 11',blurb:'Trapezoids, L-shapes, and pentagons. Decompose and rearrange.',gen:genPoly},
-  {id:'solid',name:'Polyhedron Yard',lessons:'Lesson 13',blurb:'Count faces, edges, and vertices, name prisms and pyramids, and spot shapes that aren’t polyhedra.',gen:genSolid},
-  {id:'net',name:'Net Factory',lessons:'Lessons 12–16',blurb:'Fold nets, spot cube nets, and add up every face.',gen:genNet},
+  {id:'solid',name:'Polyhedron Yard',lessons:'Lesson 13',blurb:'Count faces, edges, and vertices, name prisms and pyramids, compare two figures, and spot shapes that aren’t polyhedra.',gen:genSolid},
+  {id:'net',name:'Net Factory',lessons:'Lessons 12–16',blurb:'Fold nets, spot cube nets, decide if two nets make the same prism, and add up every face.',gen:genNet},
   {id:'cube',name:'Squares & Cubes Lab',lessons:'Lessons 16–18',blurb:'Exponents, cube surface area, and area vs. volume units.',gen:genCube},
   {id:'frame',name:'Frame & Subtract',lessons:'Lessons 3, 10–12',blurb:'Shapes inside a rectangle, and shapes with holes. Find the whole, subtract what isn’t shaded.',gen:genFrame},
   {id:'boss',name:'Final Blueprint',lessons:'Whole unit · 10 problems',blurb:'A mixed review from every zone. Aim for 3 stars.',gen:()=>pick([genPara,genTri,genPoly,genSolid,genNet,genCube,genFrame])()}
