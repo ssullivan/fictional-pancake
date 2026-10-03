@@ -1,40 +1,47 @@
 /* Learn Area & Surface Area (Grade 6 Unit 1), chapter 6: Squares & cubes. Its widgets and steps; loaded by cubes.html. */
+/* A cube with edge length s (1 to 6): its faces gridded into unit squares (surface area), or built from unit cubes (volume).
+   world: the 3D stage; group: the cube's meshes. Returns a cleanup function. */
 function wCubes(el){
-  const q=Q(el);let s=3,mode='faces',S=null,grp=null,disposed=false;
+  const q=Q(el);let s=3,mode='faces',world=null,group=null,disposed=false;
   el.innerHTML=`<div class="view3d" data-v><p class="loading">Loading 3D…</p></div><div class="wrow"><label class="slider">Edge length <input type="range" min="1" max="6" value="3" data-s><b data-sv>3</b></label><div class="seg" style="margin:0" role="group" aria-label="Show"><button type="button" data-m="faces">Faces</button><button type="button" data-m="cubes">Cubes</button></div><span data-sp></span></div><p class="readout" data-r></p>`;
+  /* the readout: the face and surface area, and the volume (the one not shown is dimmed) */
   const read=()=>{q('sv').textContent=s;
     q('r').innerHTML=`<span class="${mode==='faces'?'':'dimline'}">One face: ${s} × ${s} = ${s}² = ${s*s} square unit${s===1?'':'s'}<br>Surface area: 6 × ${s*s} = <b>${6*s*s}</b> square units</span><br><span class="${mode==='cubes'?'':'dimline'}">Volume: ${s} × ${s} × ${s} = ${s}³ = <b>${s**3}</b> cubic unit${s===1?'':'s'}</span>`;
     el.querySelectorAll('[data-m]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.m===mode));};
+  /* without WebGL: one face, gridded */
   const flat=()=>{const P=plane({xmax:s,ymax:s,u:Math.min(44,300/s)});q('v').outerHTML=`<div data-v><p class="note">The 3D view can’t load on this device. Here is one face of the cube.</p><div class="fig">${P.svg(P.poly(Rect(0,0,s,s),'sh-a')+P.grid(),'One face of the cube')}</div></div>`;};
+  /* (re)build the cube for s and mode */
   const build=()=>{
-    if(!S)return flat();
-    const THREE=S.THREE;
-    if(grp){S.scene.remove(grp);grp.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material)[].concat(o.material).forEach(m=>m.dispose());});}
-    grp=new THREE.Group();const h=s/2;
+    if(!world)return flat();
+    const THREE=world.THREE;
+    if(group){world.scene.remove(group);group.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material)[].concat(o.material).forEach(m=>m.dispose());});}
+    group=new THREE.Group();const half=s/2;
     if(mode==='faces'){
-      const mats=[0,0,1,1,2,2].map(c=>new THREE.MeshStandardMaterial({color:COLS[c],roughness:.75,polygonOffset:true,polygonOffsetFactor:1,polygonOffsetUnits:1}));
-      grp.add(new THREE.Mesh(new THREE.BoxGeometry(s,s,s),mats));
-      const L=[],e=h+.004;
-      for(let i=0;i<=s;i++){const v=-h+i;
-        for(const sg of [-1,1]){
-          L.push(sg*e,-h,v, sg*e,h,v, sg*e,v,-h, sg*e,v,h);
-          L.push(-h,sg*e,v, h,sg*e,v, v,sg*e,-h, v,sg*e,h);
-          L.push(-h,v,sg*e, h,v,sg*e, v,-h,sg*e, v,h,sg*e);
+      const materials=[0,0,1,1,2,2].map(color=>new THREE.MeshStandardMaterial({color:COLS[color],roughness:.75,polygonOffset:true,polygonOffsetFactor:1,polygonOffsetUnits:1}));
+      group.add(new THREE.Mesh(new THREE.BoxGeometry(s,s,s),materials));
+      /* grid lines on every face, a hair outside it: for each side ±, lines across each pair of axes */
+      const lines=[],out=half+.004;
+      for(let i=0;i<=s;i++){const v=-half+i;
+        for(const side of [-1,1]){
+          lines.push(side*out,-half,v, side*out,half,v, side*out,v,-half, side*out,v,half);
+          lines.push(-half,side*out,v, half,side*out,v, v,side*out,-half, v,side*out,half);
+          lines.push(-half,v,side*out, half,v,side*out, v,-half,side*out, v,half,side*out);
         }}
-      const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(L,3));
-      grp.add(new THREE.LineSegments(g,new THREE.LineBasicMaterial({color:0x0d2a4e})));
+      const grid=new THREE.BufferGeometry();grid.setAttribute('position',new THREE.Float32BufferAttribute(lines,3));
+      group.add(new THREE.LineSegments(grid,new THREE.LineBasicMaterial({color:0x0d2a4e})));
     }else{
-      const m=new THREE.InstancedMesh(new THREE.BoxGeometry(.86,.86,.86),new THREE.MeshStandardMaterial({roughness:.7}),s**3),M=new THREE.Matrix4(),c=new THREE.Color();let i=0;
-      for(let x=0;x<s;x++)for(let y=0;y<s;y++)for(let z=0;z<s;z++){M.makeTranslation(x-h+.5,y-h+.5,z-h+.5);m.setMatrixAt(i,M);m.setColorAt(i,c.set(COLS[(x+y+z)%2]));i++;}
-      grp.add(m);
+      /* s³ unit cubes, a little apart, in a checkerboard of two colors */
+      const cubes=new THREE.InstancedMesh(new THREE.BoxGeometry(.86,.86,.86),new THREE.MeshStandardMaterial({roughness:.7}),s**3),place=new THREE.Matrix4(),color=new THREE.Color();let i=0;
+      for(let x=0;x<s;x++)for(let y=0;y<s;y++)for(let z=0;z<s;z++){place.makeTranslation(x-half+.5,y-half+.5,z-half+.5);cubes.setMatrixAt(i,place);cubes.setColorAt(i,color.set(COLS[(x+y+z)%2]));i++;}
+      group.add(cubes);
     }
-    S.scene.add(grp);S.frame(s*2.9+2.5);
+    world.scene.add(group);world.frame(s*2.9+2.5);
   };
   q('s').addEventListener('input',e=>{s=+e.target.value;read();build();});
   el.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{mode=b.dataset.m;read();build();});
   read();
-  load3D().then(T=>{if(disposed)return;S=stage(el,T,s*2.9+2.5);q('sp').innerHTML=`<button type="button" class="ghost-btn" data-spin="-1" aria-label="Turn left">⟲</button> <button type="button" class="ghost-btn" data-spin="1" aria-label="Turn right">⟳</button>`;q('sp').querySelectorAll('[data-spin]').forEach(b=>b.onclick=()=>S.spin(+b.dataset.spin));build();},()=>{if(!disposed)flat();});
-  return ()=>{disposed=true;if(S)S.dispose();};
+  load3D().then(three=>{if(disposed)return;world=stage(el,three,s*2.9+2.5);q('sp').innerHTML=`<button type="button" class="ghost-btn" data-spin="-1" aria-label="Turn left">⟲</button> <button type="button" class="ghost-btn" data-spin="1" aria-label="Turn right">⟳</button>`;q('sp').querySelectorAll('[data-spin]').forEach(b=>b.onclick=()=>world.spin(+b.dataset.spin));build();},()=>{if(!disposed)flat();});
+  return ()=>{disposed=true;if(world)world.dispose();};
 }
 const STEPS=[
     {title:'Squared and cubed',widget:wCubes,

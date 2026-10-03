@@ -1,24 +1,28 @@
 /* Learn Area & Surface Area (Grade 6 Unit 1), chapter 5: Polyhedra. Its widgets and steps; loaded by polyhedra.html. */
-/* the shapes to pick from, as [label, kind, sides on the base] */
+/* the shapes to pick from, as [label, kind, sides on the base, solidOf options] */
 const MEET=[['Cube','prism',4,{a:2,h:2}],['Triangular prism','prism',3],['Square pyramid','pyramid',4],['Pentagonal prism','prism',5],['Hexagonal pyramid','pyramid',6]];
-const shapeOf=([,kind,n,o])=>solidOf(kind,n,o||{a:2,h:kind==='prism'?2.4:2.6});
+/* the solid for a MEET-style entry */
+const shapeOf=([,kind,n,options])=>solidOf(kind,n,options||{a:2,h:kind==='prism'?2.4:2.6});
 /* a row of shape buttons over a polyhedron view; list: MEET-style entries */
 const pickSolid=(list,opts)=>el=>{
   const q=Q(el);let at=0,api=null;
-  el.innerHTML=seg('Shape',list.map(([l],i)=>[i,l]))+'<div data-st></div>';
+  el.innerHTML=seg('Shape',list.map(([label],i)=>[i,label]))+'<div data-st></div>';
   api=polyView(q('st'),shapeOf(list[0]),opts);press(el,0);
   el.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{if(+b.dataset.m!==at){at=+b.dataset.m;press(el,at);api.set(shapeOf(list[at]));}});
   return ()=>api.dispose();
 };
-const allThree=s=>{const c=countsOf(s.kind,s.n);return `A ${s.name} has <b>${c.faces} faces</b>, <b>${c.edges} edges</b>, and <b>${c.vertices} vertices</b>.`;};
+/* a readout of a solid's faces, edges, and vertices */
+const allThree=s=>{const counts=countsOf(s.kind,s.n);return `A ${s.name} has <b>${counts.faces} faces</b>, <b>${counts.edges} edges</b>, and <b>${counts.vertices} vertices</b>.`;};
 
 /* not polyhedra, and one that is */
 const NOT=[['Cylinder',{curved:'cylinder'}],['Cone',{curved:'cone'}],['Sphere',{curved:'sphere'}],['Box with no lid',{curved:'open'}],['Flat hexagon',{curved:'flat'}],['Hexagonal prism',null]];
-const NOT_WHY={...Object.fromEntries(Object.entries(CURVED).map(([k,v])=>[k,v.why])),flat:'It’s flat: a polygon, not a 3D shape. It has no space inside.'};
+/* why each isn't a polyhedron */
+const NOT_WHY={...Object.fromEntries(Object.entries(CURVED).map(([id,curved])=>[id,curved.why])),flat:'It’s flat: a polygon, not a 3D shape. It has no space inside.'};
+/* tap through shapes that aren't polyhedra (and one that is), each saying why */
 function wNot(el){
   const q=Q(el);let at=0,api=null;
   const shape=i=>NOT[i][1]||solidOf('prism',6,{a:1.2,h:2.2});
-  el.innerHTML=seg('Shape',NOT.map(([l],i)=>[i,l]))+'<div data-st></div>';
+  el.innerHTML=seg('Shape',NOT.map(([label],i)=>[i,label]))+'<div data-st></div>';
   api=polyView(q('st'),shape(0),{read:s=>s.curved?`<span class="no">Not a polyhedron.</span> ${NOT_WHY[s.curved]}`
     :`<span class="ok">A polyhedron!</span> It’s closed, and all 8 faces are polygons: 2 hexagons and 6 rectangles.`});
   press(el,0);

@@ -1,28 +1,33 @@
 /* Learn Area & Surface Area (Grade 6 Unit 1), chapter 3: Triangles. Its widgets and steps; loaded by triangles.html. */
+/* turn a copy of a triangle half a turn about the middle of its slanted side: the two make a parallelogram.
+   SETS: [base, height, the top corner's x] */
 function wTriCopy(el){
-  const q=Q(el),SETS=[[6,4,2],[6,3,5],[4,4,1],[5,4,-1]];let k=0;
+  const q=Q(el),SETS=[[6,4,2],[6,3,5],[4,4,1],[5,4,-1]];let setIndex=0;
   el.innerHTML=`<div class="fig" data-f></div><div class="wrow"><label class="slider">Turn the copy <input type="range" min="0" max="100" value="0" data-s></label><button type="button" class="ghost-btn" data-n>New triangle</button></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const [b,h,c]=SETS[k],t=q('s').value/100,M=[(b+c)/2,h/2],r=Math.max(Math.hypot(...M),Math.hypot(b-M[0],M[1]));
+    /* M: the slanted side's middle, the turn's center; r: how far the triangle reaches from it, so the plane fits every turn */
+    const [b,h,c]=SETS[setIndex],progress=q('s').value/100,M=[(b+c)/2,h/2],r=Math.max(Math.hypot(...M),Math.hypot(b-M[0],M[1]));
     const xmin=Math.floor(Math.min(0,c,M[0]-r)),xmax=Math.ceil(Math.max(b,c,M[0]+r)),ymin=Math.floor(M[1]-r),ymax=Math.ceil(Math.max(h,M[1]+r));
-    const P=plane({xmin,xmax,ymin,ymax,u:Math.min(34,440/(xmax-xmin))}),th=Math.PI*t;
-    const rot=([x,y])=>{const dx=x-M[0],dy=y-M[1];return [M[0]+dx*Math.cos(th)-dy*Math.sin(th),M[1]+dx*Math.sin(th)+dy*Math.cos(th)];};
-    const T=[[0,0],[b,0],[c,h]];
-    const g=P.grid()+P.poly(T.map(rot),'sh-b')+P.poly(T,'sh-a')+heightMark(P,c,h,0,b)+`<circle class="pt" cx="${P.X(M[0])}" cy="${P.Y(M[1])}" r="4"/>`+P.text(b/2,0,`${b}`,'lbl',0,16)+(c<(b+c)/3?P.text(c,h/2,`${h}`,'lbl en',-8):P.text(c,h/2,`${h}`,'lbl st',8));
-    q('f').innerHTML=P.svg(g,`Triangle with base ${b} and height ${h}, and a turning copy`);
-    q('r').innerHTML=t===1?`<span class="ok">Two copies make a parallelogram: ${b} × ${h} = ${b*h}. One triangle is half of that: <b>${b*h/2}</b> square units.</span>`:`Turn the blue copy around the dot in the middle of the slanted side.`;
+    const P=plane({xmin,xmax,ymin,ymax,u:Math.min(34,440/(xmax-xmin))}),angle=Math.PI*progress;
+    /* a point turned by angle about M */
+    const rot=([x,y])=>{const dx=x-M[0],dy=y-M[1];return [M[0]+dx*Math.cos(angle)-dy*Math.sin(angle),M[1]+dx*Math.sin(angle)+dy*Math.cos(angle)];};
+    const triangle=[[0,0],[b,0],[c,h]];
+    const markup=P.grid()+P.poly(triangle.map(rot),'sh-b')+P.poly(triangle,'sh-a')+heightMark(P,c,h,0,b)+`<circle class="pt" cx="${P.X(M[0])}" cy="${P.Y(M[1])}" r="4"/>`+P.text(b/2,0,`${b}`,'lbl',0,16)+(c<(b+c)/3?P.text(c,h/2,`${h}`,'lbl en',-8):P.text(c,h/2,`${h}`,'lbl st',8));
+    q('f').innerHTML=P.svg(markup,`Triangle with base ${b} and height ${h}, and a turning copy`);
+    q('r').innerHTML=progress===1?`<span class="ok">Two copies make a parallelogram: ${b} × ${h} = ${b*h}. One triangle is half of that: <b>${b*h/2}</b> square units.</span>`:`Turn the blue copy around the dot in the middle of the slanted side.`;
   };
   q('s').addEventListener('input',draw);
-  q('n').onclick=()=>{k=(k+1)%SETS.length;q('s').value=0;draw();};
+  q('n').onclick=()=>{setIndex=(setIndex+1)%SETS.length;q('s').value=0;draw();};
   draw();
 }
+/* slide the top corner along a line: base and height stay 6 and 4, so the area stays 12 */
 function wTriApex(el){
   const q=Q(el),P=plane({xmin:-3,xmax:9,ymax:4,u:34});
   el.innerHTML=`<div class="fig" data-f></div><div class="wrow"><label class="slider">Slide the top corner <input type="range" min="-3" max="9" step="0.5" value="2" data-s></label></div><p class="readout" data-r></p>`;
   const draw=()=>{
     const c=+q('s').value,out=c<0||c>6;
-    const g=P.grid()+P.line([-3,4],[9,4],'ext')+P.poly([[0,0],[6,0],[c,4]],'sh-a')+heightMark(P,c,4,0,6)+P.text(3,0,'6','lbl',0,16)+(c<(6+c)/3?P.text(c,2,'4','lbl en',-8):P.text(c,2,'4','lbl st',8));
-    q('f').innerHTML=P.svg(g,'Triangle with base 6 and height 4');
+    const markup=P.grid()+P.line([-3,4],[9,4],'ext')+P.poly([[0,0],[6,0],[c,4]],'sh-a')+heightMark(P,c,4,0,6)+P.text(3,0,'6','lbl',0,16)+(c<(6+c)/3?P.text(c,2,'4','lbl en',-8):P.text(c,2,'4','lbl st',8));
+    q('f').innerHTML=P.svg(markup,'Triangle with base 6 and height 4');
     q('r').innerHTML=`Base <b>6</b> · Height <b>4</b> · Area = ½ × 6 × 4 = <b>12</b> square units${out?'<br><span class="dimline">The height lands outside the triangle, so the base is extended with a dotted line.</span>':''}`;
   };
   q('s').addEventListener('input',draw);draw();

@@ -1,27 +1,31 @@
 /* Learn Area & Surface Area (Grade 6 Unit 1), chapter 2: Parallelograms. Its widgets and steps; loaded by parallelograms.html. */
+/* a number to one decimal place, with commas */
 const fmt=n=>(Math.round(n*10)/10).toLocaleString('en-US');
+/* cut the triangle off a parallelogram and slide it across to make a rectangle. SETS: [base, height, how far the top leans] */
 function wParaCut(el){
-  const q=Q(el),SETS=[[6,4,2],[5,3,2],[7,3,3],[4,5,1],[6,3,3]];let k=0;
+  const q=Q(el),SETS=[[6,4,2],[5,3,2],[7,3,3],[4,5,1],[6,3,3]];let setIndex=0;
   el.innerHTML=`<div class="fig" data-f></div><div class="wrow"><label class="slider">Slide the triangle <input type="range" min="0" max="100" value="0" data-s></label><button type="button" class="ghost-btn" data-n>New parallelogram</button></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const [b,h,o]=SETS[k],t=q('s').value/100,P=plane({xmax:b+o,ymax:h,u:40});
-    const tri=[[0,0],[o,0],[o,h]].map(([x,y])=>[x+t*b,y]),rest=[[o,0],[b,0],[b+o,h],[o,h]];
-    const g=P.grid()+P.poly(rest,'sh-a')+P.poly(tri,'sh-b')+P.line([o,0],[o,h],'hgt')+P.rt(o,0)+P.text(o,h/2,`${h}`,'lbl st',8)+P.text(b/2+t*o,0,`${b}`,'lbl',0,16);
-    q('f').innerHTML=P.svg(g,`Parallelogram with base ${b} and height ${h}`);
-    q('r').innerHTML=t===1?`<span class="ok">It’s a ${b} × ${h} rectangle now: ${b} × ${h} = <b>${b*h}</b> square units.</span> The parallelogram had the same area: base × height.`:`Base ${b}, height ${h}. Slide the blue triangle all the way to the other end.`;
+    const [b,h,lean]=SETS[setIndex],progress=q('s').value/100,P=plane({xmax:b+lean,ymax:h,u:40});
+    const tri=[[0,0],[lean,0],[lean,h]].map(([x,y])=>[x+progress*b,y]),rest=[[lean,0],[b,0],[b+lean,h],[lean,h]];
+    const markup=P.grid()+P.poly(rest,'sh-a')+P.poly(tri,'sh-b')+P.line([lean,0],[lean,h],'hgt')+P.rt(lean,0)+P.text(lean,h/2,`${h}`,'lbl st',8)+P.text(b/2+progress*lean,0,`${b}`,'lbl',0,16);
+    q('f').innerHTML=P.svg(markup,`Parallelogram with base ${b} and height ${h}`);
+    q('r').innerHTML=progress===1?`<span class="ok">It’s a ${b} × ${h} rectangle now: ${b} × ${h} = <b>${b*h}</b> square units.</span> The parallelogram had the same area: base × height.`:`Base ${b}, height ${h}. Slide the blue triangle all the way to the other end.`;
   };
   q('s').addEventListener('input',draw);
-  q('n').onclick=()=>{k=(k+1)%SETS.length;q('s').value=0;draw();};
+  q('n').onclick=()=>{setIndex=(setIndex+1)%SETS.length;q('s').value=0;draw();};
   draw();
 }
+/* slide the top edge to lean the parallelogram: base and height stay 5 and 4, so the area stays 20 */
 function wParaLean(el){
   const q=Q(el),P=plane({xmin:-3,xmax:11,ymax:4,u:32});
   el.innerHTML=`<div class="fig" data-f></div><div class="wrow"><label class="slider">Slide the top edge <input type="range" min="-3" max="6" step="0.5" value="2" data-s></label></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const o=+q('s').value,out=o<0||o>5;
-    const g=P.grid()+P.poly([[0,0],[5,0],[5+o,4],[o,4]],'sh-a')+heightMark(P,o,4,0,5)+P.text(2.5,0,'5','lbl',0,16)+(o<2.5+o/2?P.text(o,2,'4','lbl en',-8):P.text(o,2,'4','lbl st',8))+P.text(5+o/2,2,fmt(Math.hypot(o,4)),'lbl s cy st',10);
-    q('f').innerHTML=P.svg(g,'Parallelogram with base 5 and height 4');
-    q('r').innerHTML=`Base <b>5</b> · Height <b>4</b> · Slanted side <b>${fmt(Math.hypot(o,4))}</b><br>Area = 5 × 4 = <b>20</b> square units, however far it leans.${out?'<br><span class="dimline">The height is outside the shape now, so the base is extended with a dotted line.</span>':''}`;
+    const lean=+q('s').value,out=lean<0||lean>5;
+    /* the height's label goes on whichever side of the height line has more room */
+    const markup=P.grid()+P.poly([[0,0],[5,0],[5+lean,4],[lean,4]],'sh-a')+heightMark(P,lean,4,0,5)+P.text(2.5,0,'5','lbl',0,16)+(lean<2.5+lean/2?P.text(lean,2,'4','lbl en',-8):P.text(lean,2,'4','lbl st',8))+P.text(5+lean/2,2,fmt(Math.hypot(lean,4)),'lbl s cy st',10);
+    q('f').innerHTML=P.svg(markup,'Parallelogram with base 5 and height 4');
+    q('r').innerHTML=`Base <b>5</b> · Height <b>4</b> · Slanted side <b>${fmt(Math.hypot(lean,4))}</b><br>Area = 5 × 4 = <b>20</b> square units, however far it leans.${out?'<br><span class="dimline">The height is outside the shape now, so the base is extended with a dotted line.</span>':''}`;
   };
   q('s').addEventListener('input',draw);draw();
 }

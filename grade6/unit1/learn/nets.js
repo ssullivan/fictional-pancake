@@ -1,4 +1,5 @@
 /* Learn Area & Surface Area (Grade 6 Unit 1), chapter 5: Nets & surface area. Its widgets and steps; loaded by nets.html. */
+/* the net of an l by w by h box: the bottom, with the front, back, left, and right around it, and the top off the front */
 function rectNet(l,w,h){
   const x0=h,y0=h;
   return {faces:[
@@ -12,6 +13,7 @@ function rectNet(l,w,h){
 }
 /* right-triangle prism: legs 3 and 4, long side 5, length 6 */
 function triPrismNet(){
+  /* the 5 rectangle folds past 90° to meet the 3 rectangle: angle a is the triangle's corner opposite the 3 side */
   const L=6,a=Math.atan2(3,4);
   return {faces:[
     {id:'r4',name:'Rectangle',poly:Rect(3,3,7,3+L),col:2,dims:'4 × 6',area:24},
@@ -23,7 +25,8 @@ function triPrismNet(){
 }
 /* square pyramid: base b, triangle faces with height s */
 function pyramidNet(b,s){
-  const x0=s,y0=s,m=b/2,ang=Math.PI-Math.acos(m/s),T=(poly,hinge,id)=>({id,name:'Triangle',poly,parent:'base',hinge,angle:ang,col:1,dims:`½ × ${b} × ${s}`,area:b*s/2});
+  /* each triangle folds up until its apex meets the others over the middle: the angle comes from half the base over the slant height s */
+  const x0=s,y0=s,m=b/2,angle=Math.PI-Math.acos(m/s),T=(poly,hinge,id)=>({id,name:'Triangle',poly,parent:'base',hinge,angle,col:1,dims:`½ × ${b} × ${s}`,area:b*s/2});
   return {faces:[
     {id:'base',name:'Base',poly:Rect(x0,y0,x0+b,y0+b),col:0,dims:`${b} × ${b}`,area:b*b},
     T([[x0,y0],[x0+b,y0],[x0+m,y0-s]],[[x0,y0],[x0+b,y0]],'t1'),
@@ -34,20 +37,22 @@ function pyramidNet(b,s){
 }
 /* six unit squares; each folds 90° up from its neighbor, starting at the square with the most neighbors */
 function cubeNet(cells,valid){
-  const K=(c,r)=>c+','+r,has=new Set(cells.map(c=>K(...c)));
-  const nb=([c,r])=>[[c+1,r],[c-1,r],[c,r+1],[c,r-1]].filter(p=>has.has(K(...p)));
-  const root=cells.reduce((a,b)=>nb(b).length>nb(a).length?b:a),sq=(c,r)=>Rect(c,r,c+1,r+1);
-  const faces=[{id:K(...root),name:'Square',poly:sq(...root),col:0,dims:'1 × 1',area:1}],seen=new Set([K(...root)]),todo=[root];
+  const key=(c,r)=>c+','+r,has=new Set(cells.map(c=>key(...c)));
+  const neighbors=([c,r])=>[[c+1,r],[c-1,r],[c,r+1],[c,r-1]].filter(p=>has.has(key(...p)));
+  const root=cells.reduce((a,b)=>neighbors(b).length>neighbors(a).length?b:a),sq=(c,r)=>Rect(c,r,c+1,r+1);
+  const faces=[{id:key(...root),name:'Square',poly:sq(...root),col:0,dims:'1 × 1',area:1}],seen=new Set([key(...root)]),todo=[root];
+  /* breadth first from the root: each new square hinges on the side it shares with the square it was reached from */
   while(todo.length){
-    const p=todo.shift(),[c,r]=p;
-    for(const n of nb(p)){
-      const k=K(...n);if(seen.has(k))continue;seen.add(k);todo.push(n);
-      const [c2,r2]=n,hinge=c2>c?[[c+1,r],[c+1,r+1]]:c2<c?[[c,r],[c,r+1]]:r2>r?[[c,r+1],[c+1,r+1]]:[[c,r],[c+1,r]];
-      faces.push({id:k,name:'Square',poly:sq(...n),parent:K(...p),hinge,col:faces.length,dims:'1 × 1',area:1});
+    const cell=todo.shift(),[c,r]=cell;
+    for(const next of neighbors(cell)){
+      const k=key(...next);if(seen.has(k))continue;seen.add(k);todo.push(next);
+      const [c2,r2]=next,hinge=c2>c?[[c+1,r],[c+1,r+1]]:c2<c?[[c,r],[c,r+1]]:r2>r?[[c,r+1],[c+1,r+1]]:[[c,r],[c+1,r]];
+      faces.push({id:k,name:'Square',poly:sq(...next),parent:key(...cell),hinge,col:faces.length,dims:'1 × 1',area:1});
     }
   }
   return {faces,valid};
 }
+/* the nets to try, and whether each folds into a cube */
 const CUBE_NETS=[
   {cells:[[1,0],[0,1],[1,1],[2,1],[3,1],[1,2]],valid:true},
   {cells:[[0,0],[1,0],[2,0],[0,1],[1,1],[2,1]],valid:false},
@@ -56,32 +61,38 @@ const CUBE_NETS=[
   {cells:[[0,0],[0,1],[1,1],[2,1],[3,1],[3,2]],valid:true},
   {cells:[[0,0],[1,0],[2,0],[2,1],[3,1],[4,1]],valid:true}
 ];
-const thumbSvg=cells=>{const s=10,xs=cells.map(c=>c[0]),ys=cells.map(c=>c[1]),w=(Math.max(...xs)+1)*s,h=(Math.max(...ys)+1)*s;
-  return `<svg viewBox="-2 -2 ${w+4} ${h+4}" aria-hidden="true">${cells.map(([c,r])=>`<rect x="${c*s}" y="${r*s}" width="${s}" height="${s}" fill="rgba(127,227,255,.35)" stroke="#7fe3ff" stroke-width="1.2"/>`).join('')}</svg>`;};
+/* a small picture of a cube net, 10 pixels a square */
+const thumbSvg=cells=>{const size=10,xs=cells.map(c=>c[0]),ys=cells.map(c=>c[1]),w=(Math.max(...xs)+1)*size,h=(Math.max(...ys)+1)*size;
+  return `<svg viewBox="-2 -2 ${w+4} ${h+4}" aria-hidden="true">${cells.map(([c,r])=>`<rect x="${c*size}" y="${r*size}" width="${size}" height="${size}" fill="rgba(127,227,255,.35)" stroke="#7fe3ff" stroke-width="1.2"/>`).join('')}</svg>`;};
+/* fold a triangular prism's or a square pyramid's net and tap its faces to add up the surface area */
 function wPick(el){
-  const q=Q(el),SOL={tri:{label:'Triangular prism',net:triPrismNet},pyr:{label:'Square pyramid',net:()=>pyramidNet(4,3)}};let m='tri',api=null;
-  el.innerHTML=`<div class="seg" role="group" aria-label="Shape">${Object.entries(SOL).map(([k,v])=>`<button type="button" data-m="${k}">${v.label}</button>`).join('')}</div><div data-st></div>`;
-  const go=()=>{if(api)api.dispose();api=solid3D(q('st'),SOL[m].net(),{fold:0,slider:true,count:true});el.querySelectorAll('[data-m]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.m===m));};
-  el.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{if(m!==b.dataset.m){m=b.dataset.m;go();}});
+  const q=Q(el),SOL={tri:{label:'Triangular prism',net:triPrismNet},pyr:{label:'Square pyramid',net:()=>pyramidNet(4,3)}};let solid='tri',api=null;
+  el.innerHTML=`<div class="seg" role="group" aria-label="Shape">${Object.entries(SOL).map(([id,choice])=>`<button type="button" data-m="${id}">${choice.label}</button>`).join('')}</div><div data-st></div>`;
+  const go=()=>{if(api)api.dispose();api=solid3D(q('st'),SOL[solid].net(),{fold:0,slider:true,count:true});el.querySelectorAll('[data-m]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.m===solid));};
+  el.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{if(solid!==b.dataset.m){solid=b.dataset.m;go();}});
   go();
   return ()=>api&&api.dispose();
 }
+/* Predict whether a net folds into a cube, then fold it. tried: each net's result ('yes' or 'no'); current: the net shown;
+   prediction: 'yes', 'no', or null before one is made (folding is locked until then) */
 function wCubeNets(el){
-  const q=Q(el),tried={};let cur=-1,api=null,pred=null;
+  const q=Q(el),tried={};let current=-1,api=null,prediction=null;
   el.innerHTML=`<div class="thumbs" data-th role="group" aria-label="Pick a net"></div><div data-st></div><div class="wrow" data-pr></div><p class="readout" data-res></p>`;
-  const thumbs=()=>{q('th').innerHTML=CUBE_NETS.map((n,i)=>`<button type="button" class="thumb${i===cur?' cur':''}" data-i="${i}" aria-label="Net ${i+1}${tried[i]?(tried[i]==='yes'?', folds into a cube':', does not fold into a cube'):''}">${thumbSvg(n.cells)}<span class="${tried[i]||''}">${tried[i]==='yes'?'✓ cube':tried[i]==='no'?'✗ not':'Net '+(i+1)}</span></button>`).join('');};
+  const thumbs=()=>{q('th').innerHTML=CUBE_NETS.map((net,i)=>`<button type="button" class="thumb${i===current?' cur':''}" data-i="${i}" aria-label="Net ${i+1}${tried[i]?(tried[i]==='yes'?', folds into a cube':', does not fold into a cube'):''}">${thumbSvg(net.cells)}<span class="${tried[i]||''}">${tried[i]==='yes'?'✓ cube':tried[i]==='no'?'✗ not':'Net '+(i+1)}</span></button>`).join('');};
+  /* once it's folded: was the prediction right? A net that won't fold shows its overlapping faces in red */
   const reveal=()=>{
-    if(!pred||!api)return;
-    const r=api.check(),ok=r.closed,right=(pred==='yes')===ok;
-    tried[cur]=ok?'yes':'no';thumbs();
-    if(!ok&&api.markBad)api.markBad(r.overlaps.flat());
+    if(!prediction||!api)return;
+    const result=api.check(),ok=result.closed,right=(prediction==='yes')===ok;
+    tried[current]=ok?'yes':'no';thumbs();
+    if(!ok&&api.markBad)api.markBad(result.overlaps.flat());
     q('res').innerHTML=`${right?'<span class="ok">You predicted it!</span>':'<span class="no">Surprise!</span>'} ${ok?'It folds into a cube: all 6 faces land in different places and close it up.':'It doesn’t fold into a cube. Two faces land on the same spot (shown in red), so one side of the cube is left open.'}${Object.keys(tried).length<CUBE_NETS.length?' Try another net.':' You tried them all!'}`;
   };
+  /* show net i, unfolded and locked, and ask for a prediction */
   const choose=i=>{
-    if(api)api.dispose();cur=i;pred=null;thumbs();
+    if(api)api.dispose();current=i;prediction=null;thumbs();
     api=solid3D(q('st'),cubeNet(CUBE_NETS[i].cells,CUBE_NETS[i].valid),{fold:0,slider:true,labels:false,locked:true,onFolded:reveal});
     q('pr').innerHTML=`<span class="note" style="margin:0">Will it fold into a cube?</span><button type="button" class="ghost-btn" data-p="yes">Yes, a cube</button><button type="button" class="ghost-btn" data-p="no">No</button>`;
-    q('pr').querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{pred=b.dataset.p;q('pr').querySelectorAll('[data-p]').forEach(x=>{x.disabled=true;x.style.borderColor=x===b?'var(--gold)':'';});api.setLocked(false);q('res').innerHTML='Now fold it: tap <b>Fold it</b> or use the slider.';});
+    q('pr').querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{prediction=b.dataset.p;q('pr').querySelectorAll('[data-p]').forEach(other=>{other.disabled=true;other.style.borderColor=other===b?'var(--gold)':'';});api.setLocked(false);q('res').innerHTML='Now fold it: tap <b>Fold it</b> or use the slider.';});
     q('res').innerHTML='Make a prediction first.';
   };
   q('th').addEventListener('click',e=>{const b=e.target.closest('[data-i]');if(b)choose(+b.dataset.i);});

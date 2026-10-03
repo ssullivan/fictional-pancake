@@ -1,200 +1,241 @@
-/* Blueprint Builders (Grade 6 Unit 1): the problem generators, station list, and icons. Loaded by index.html and by tools/fuzz.mjs. */
+/* Blueprint Builders (Grade 6 Unit 1): the problem generators, station list, and icons. Loaded by index.html and by tools/fuzz.mjs.
+   Figures are drawn on grid paper in grid units (Fig below). Each generator deals one of a few kinds of problem (type or t),
+   each with a comment saying what it asks. b and h are a base and a height; A, B, C are corners. */
+/* pixels per grid unit */
 const U=40;
+/* a number to 2 decimal places, with commas */
 const fmt=n=>(Math.round(n*100)/100).toLocaleString('en-US');
+/* n to 1 decimal place */
 const r1=n=>Math.round(n*10)/10;
 
 /* ---------- figure builder (grid units → SVG) ---------- */
+/* A figure on grid paper, built in layers: base (always drawn), hint (drawn with the hint, highlighted), and build (drawn in
+   Build it mode). Each method draws into the current layer and returns the figure, so calls chain; svg() draws it all on a
+   grid that fits the figure. */
 class Fig{
-  constructor(){this.bb=[Infinity,Infinity,-Infinity,-Infinity];this.ly={base:[],hint:[],build:[]};this.L=this.ly.base;}
-  onHint(){this.L=this.ly.hint;return this;}
-  on(n){this.L=this.ly[n];return this;}
-  ext(x,y){const b=this.bb;if(x<b[0])b[0]=x;if(y<b[1])b[1]=y;if(x>b[2])b[2]=x;if(y>b[3])b[3]=y;}
-  P(p){p.forEach(q=>this.ext(q[0],q[1]));return p.map(q=>`${q[0]*U},${q[1]*U}`).join(' ');}
-  poly(p,cls='shape',attr=''){this.L.push(`<polygon class="${cls}" points="${this.P(p)}" ${attr}/>`);return this;}
-  line(x1,y1,x2,y2,cls='edge'){this.ext(x1,y1);this.ext(x2,y2);this.L.push(`<line class="${cls}" x1="${x1*U}" y1="${y1*U}" x2="${x2*U}" y2="${y2*U}"/>`);return this;}
-  lbl(x,y,t,cls=''){t=String(t);const w=t.length*13.5+18;this.ext(x,y);this.L.push(`<g class="lbl ${cls}"><rect x="${x*U-w/2}" y="${y*U-17}" width="${w}" height="34" rx="8"/><text x="${x*U}" y="${y*U+1}">${t}</text></g>`);return this;}
-  txt(x,y,t){this.L.push(`<text class="area-t" x="${x*U}" y="${y*U}">${t}</text>`);return this;}
-  ra(x,y,ux,uy,vx,vy,s=.42){const q=[[x+ux*s,y+uy*s],[x+(ux+vx)*s,y+(uy+vy)*s],[x+vx*s,y+vy*s]];this.L.push(`<polyline class="ra" points="${q.map(p=>p[0]*U+','+p[1]*U).join(' ')}"/>`);return this;}
-  rings(rs,cls){this.L.push(`<path class="${cls}" fill-rule="evenodd" d="${rs.map(r=>'M'+this.P(r).replace(/ /g,'L')+'Z').join('')}"/>`);return this;}
-  cand(id,x1,y1,x2,y2){this.ext(x1,y1);this.ext(x2,y2);const a=`x1="${x1*U}" y1="${y1*U}" x2="${x2*U}" y2="${y2*U}"`;this.L.push(`<g class="cand" data-id="${id}" tabindex="0" role="button" aria-label="Segment ${id}"><line class="hit" ${a}/><line class="seg" ${a}/></g>`);return this;}
+  constructor(){this.bounds=[Infinity,Infinity,-Infinity,-Infinity];this.layers={base:[],hint:[],build:[]};this.current=this.layers.base;}
+  /* draw into the hint layer, or into a named layer */
+  onHint(){this.current=this.layers.hint;return this;}
+  on(name){this.current=this.layers[name];return this;}
+  /* grow the bounds [minX, minY, maxX, maxY] to take in x, y */
+  ext(x,y){const box=this.bounds;if(x<box[0])box[0]=x;if(y<box[1])box[1]=y;if(x>box[2])box[2]=x;if(y>box[3])box[3]=y;}
+  /* points as an SVG points list in pixels (growing the bounds) */
+  P(points){points.forEach(point=>this.ext(point[0],point[1]));return points.map(point=>`${point[0]*U},${point[1]*U}`).join(' ');}
+  poly(points,cls='shape',attr=''){this.current.push(`<polygon class="${cls}" points="${this.P(points)}" ${attr}/>`);return this;}
+  line(x1,y1,x2,y2,cls='edge'){this.ext(x1,y1);this.ext(x2,y2);this.current.push(`<line class="${cls}" x1="${x1*U}" y1="${y1*U}" x2="${x2*U}" y2="${y2*U}"/>`);return this;}
+  /* a label in a rounded box centered on x, y, about 13.5 pixels a character */
+  lbl(x,y,text,cls=''){text=String(text);const width=text.length*13.5+18;this.ext(x,y);this.current.push(`<g class="lbl ${cls}"><rect x="${x*U-width/2}" y="${y*U-17}" width="${width}" height="34" rx="8"/><text x="${x*U}" y="${y*U+1}">${text}</text></g>`);return this;}
+  /* a number written inside a shape (an area) */
+  txt(x,y,text){this.current.push(`<text class="area-t" x="${x*U}" y="${y*U}">${text}</text>`);return this;}
+  /* a right-angle mark at x, y between the directions (ux, uy) and (vx, vy), size units on a side */
+  ra(x,y,ux,uy,vx,vy,size=.42){const corner=[[x+ux*size,y+uy*size],[x+(ux+vx)*size,y+(uy+vy)*size],[x+vx*size,y+vy*size]];this.current.push(`<polyline class="ra" points="${corner.map(p=>p[0]*U+','+p[1]*U).join(' ')}"/>`);return this;}
+  /* polygons as one path, so inner rings are holes (evenodd) */
+  rings(rings,cls){this.current.push(`<path class="${cls}" fill-rule="evenodd" d="${rings.map(ring=>'M'+this.P(ring).replace(/ /g,'L')+'Z').join('')}"/>`);return this;}
+  /* a segment to tap as an answer (id), with a wide invisible hit line */
+  cand(id,x1,y1,x2,y2){this.ext(x1,y1);this.ext(x2,y2);const ends=`x1="${x1*U}" y1="${y1*U}" x2="${x2*U}" y2="${y2*U}"`;this.current.push(`<g class="cand" data-id="${id}" tabindex="0" role="button" aria-label="Segment ${id}"><line class="hit" ${ends}/><line class="seg" ${ends}/></g>`);return this;}
+  /* the figure on a grid with 1.3 units of room around it; withHint adds the hint layer, extra adds other layers (['build']) */
   svg(withHint,extra=[]){
-    const pad=1.3,[a,b,c,d]=this.bb;
-    const x0=Math.floor(a-pad),y0=Math.floor(b-pad),x1=Math.ceil(c+pad),y1=Math.ceil(d+pad);
-    let g='';
-    for(let x=x0;x<=x1;x++)g+=`<line x1="${x*U}" y1="${y0*U}" x2="${x*U}" y2="${y1*U}"/>`;
-    for(let y=y0;y<=y1;y++)g+=`<line x1="${x0*U}" y1="${y*U}" x2="${x1*U}" y2="${y*U}"/>`;
-    return `<svg viewBox="${x0*U} ${y0*U} ${(x1-x0)*U} ${(y1-y0)*U}" role="img" aria-label="Figure drawn on grid paper"><g class="grid">${g}</g>${this.ly.base.join('')}${extra.map(n=>this.ly[n].join('')).join('')}${withHint?`<g class="hl">${this.ly.hint.join('')}</g>`:''}</svg>`;
+    const pad=1.3,[minX,minY,maxX,maxY]=this.bounds;
+    const x0=Math.floor(minX-pad),y0=Math.floor(minY-pad),x1=Math.ceil(maxX+pad),y1=Math.ceil(maxY+pad);
+    let grid='';
+    for(let x=x0;x<=x1;x++)grid+=`<line x1="${x*U}" y1="${y0*U}" x2="${x*U}" y2="${y1*U}"/>`;
+    for(let y=y0;y<=y1;y++)grid+=`<line x1="${x0*U}" y1="${y*U}" x2="${x1*U}" y2="${y*U}"/>`;
+    return `<svg viewBox="${x0*U} ${y0*U} ${(x1-x0)*U} ${(y1-y0)*U}" role="img" aria-label="Figure drawn on grid paper"><g class="grid">${grid}</g>${this.layers.base.join('')}${extra.map(name=>this.layers[name].join('')).join('')}${withHint?`<g class="hl">${this.layers.hint.join('')}</g>`:''}</svg>`;
   }
 }
+/* where to put a label for side p1–p2 of the polygon pts: d units out from the side's middle, away from the polygon's center */
 function outward(p1,p2,pts,d=.85){
   const cx=pts.reduce((s,p)=>s+p[0],0)/pts.length,cy=pts.reduce((s,p)=>s+p[1],0)/pts.length;
-  const mx=(p1[0]+p2[0])/2,my=(p1[1]+p2[1])/2;let vx=mx-cx,vy=my-cy;const L=Math.hypot(vx,vy)||1;
-  return [mx+vx/L*d,my+vy/L*d];
+  const mx=(p1[0]+p2[0])/2,my=(p1[1]+p2[1])/2;let vx=mx-cx,vy=my-cy;const length=Math.hypot(vx,vy)||1;
+  return [mx+vx/length*d,my+vy/length*d];
 }
+/* A box l by w by h drawn at an angle into f: the top, right side, and front. lab: [l, w, h] labels (null to leave one off).
+   Returns the depth (how far up and right the back is). */
 function box(f,l,w,h,lab){
-  const d=w*.5;
-  f.poly([[0,d],[l,d],[l+d,0],[d,0]],'shape top');
-  f.poly([[l,d],[l+d,0],[l+d,h],[l,d+h]],'shape side');
-  f.poly([[0,d],[l,d],[l,d+h],[0,d+h]],'shape');
-  if(lab[0]!=null)f.lbl(l/2,d+h+.8,lab[0]);
-  if(lab[1]!=null)f.lbl(l+d/2+.85,h+d/2+.35,lab[1]);
-  if(lab[2]!=null)f.lbl(-.85,d+h/2,lab[2]);
-  return d;
+  const depth=w*.5;
+  f.poly([[0,depth],[l,depth],[l+depth,0],[depth,0]],'shape top');
+  f.poly([[l,depth],[l+depth,0],[l+depth,h],[l,depth+h]],'shape side');
+  f.poly([[0,depth],[l,depth],[l,depth+h],[0,depth+h]],'shape');
+  if(lab[0]!=null)f.lbl(l/2,depth+h+.8,lab[0]);
+  if(lab[1]!=null)f.lbl(l+depth/2+.85,h+depth/2+.35,lab[1]);
+  if(lab[2]!=null)f.lbl(-.85,depth+h/2,lab[2]);
+  return depth;
 }
 const SQ='square units';
 
 /* ---------- Zone 1: parallelograms ---------- */
 function genPara(){
+  /* base b, height h, and the top shifted `shift` across, so the slanted side is `slant` long */
   /* not a perimeter that equals the area (base 5, height 4, slanted side 5) */
-  let b,h,s,sl;
-  do{b=R(4,9);h=R(3,7);s=R(1,Math.min(3,b-2));sl=r1(Math.hypot(s,h));}while(Math.abs(2*b+2*sl-b*h)<.011);
-  const m=pick([1,-1]),W=b+s;
-  const X=x=>m>0?x:W-x;
+  let b,h,shift,slant;
+  do{b=R(4,9);h=R(3,7);shift=R(1,Math.min(3,b-2));slant=r1(Math.hypot(shift,h));}while(Math.abs(2*b+2*slant-b*h)<.011);
+  /* mirror: 1 leans right, −1 leans left (X mirrors an x across the figure) */
+  const mirror=pick([1,-1]),width=b+shift;
+  const X=x=>mirror>0?x:width-x;
   const type=pick(['area','area','tap','missing']);
   const f=new Fig();
-  f.poly([[X(0),h],[X(b),h],[X(W),0],[X(s),0]]);
+  f.poly([[X(0),h],[X(b),h],[X(width),0],[X(shift),0]]);
   if(type==='tap'){
+    /* tap the height: the other choices are a side and a leaning segment */
     f.lbl(X(b/2),h+.8,'base');
-    const xc=(s+b)/2;
-    const c=shuffle([
-      {ok:1,p:[X(xc),0,X(xc),h],lp:[X(xc+.6),h*.3]},
-      {why:'That is a side of the parallelogram. It leans, so it does not meet the base at a right angle.',p:[X(0),h,X(s),0],lp:[X(s/2-.7),h/2]},
-      {why:'This segment leans. A height has to meet the base at a right angle, like the corner of a sheet of paper.',p:[X(W-.4),0,X(b-.3),h],lp:[X((W+b-.7)/2+.7),h*.62]}
+    const midX=(shift+b)/2;
+    const segments=shuffle([
+      {ok:1,p:[X(midX),0,X(midX),h],lp:[X(midX+.6),h*.3]},
+      {why:'That is a side of the parallelogram. It leans, so it does not meet the base at a right angle.',p:[X(0),h,X(shift),0],lp:[X(shift/2-.7),h/2]},
+      {why:'This segment leans. A height has to meet the base at a right angle, like the corner of a sheet of paper.',p:[X(width-.4),0,X(b-.3),h],lp:[X((width+b-.7)/2+.7),h*.62]}
     ]);
-    const why={};let ans;
-    c.forEach((k,i)=>{const id='ABC'[i];f.cand(id,...k.p);if(k.ok)ans=id;else why[id]=k.why;});
-    c.forEach((k,i)=>f.lbl(...k.lp,'ABC'[i],'letter'));
-    f.onHint();f.ra(X(xc),h,0,-1,m,0);
-    return {kind:'tap',fig:f,answer:ans,why,
+    const why={};let answer;
+    segments.forEach((segment,i)=>{const id='ABC'[i];f.cand(id,...segment.p);if(segment.ok)answer=id;else why[id]=segment.why;});
+    segments.forEach((segment,i)=>f.lbl(...segment.lp,'ABC'[i],'letter'));
+    f.onHint();f.ra(X(midX),h,0,-1,mirror,0);
+    return {kind:'tap',fig:f,answer,why,
       prompt:'Tap the segment that is a <b>height</b> for this base.',
       hint:'Look for the segment that makes a square corner with the base. Follow the grid lines.',
       explain:'A height meets the base at a right angle. It can sit anywhere between the base and the opposite side, even inside the shape.'};
   }
-  f.line(X(s),0,X(s),h,'hgt');f.ra(X(s),h,0,-1,m,0);
+  f.line(X(shift),0,X(shift),h,'hgt');f.ra(X(shift),h,0,-1,mirror,0);
   f.lbl(X(b/2),h+.8,b);
-  f.lbl(X(s+.85),h/2,type==='missing'?'?':h,type==='missing'?'q':'h');
-  f.lbl(X(s/2-.85),h/2-.2,sl,'dim');
+  f.lbl(X(shift+.85),h/2,type==='missing'?'?':h,type==='missing'?'q':'h');
+  f.lbl(X(shift/2-.85),h/2-.2,slant,'dim');
+  /* the hint cuts off the triangle on one end and slides it to the other, making a rectangle */
   f.onHint();
-  f.poly([[X(s),0],[X(W),0],[X(W),h],[X(s),h]],'ghost');
-  f.poly([[X(0),h],[X(s),0],[X(s),h]],'piece slide',`style="--dx:${m*b*U}px"`);
+  f.poly([[X(shift),0],[X(width),0],[X(width),h],[X(shift),h]],'ghost');
+  f.poly([[X(0),h],[X(shift),0],[X(shift),h]],'piece slide',`style="--dx:${mirror*b*U}px"`);
   const hint='Cut off the triangle on one end and slide it to the other end. The parallelogram turns into a rectangle with the same base and height.';
   if(type==='missing'){
-    const A=b*h;
+    /* the height, from the area and the base */
+    const area=b*h;
     return {kind:'num',unit:'units',fig:f,answer:h,hint,
-      prompt:`This parallelogram has an area of ${A} square units and a base of ${b} units. How tall is its height?`,
-      misc:[[A-b,'Area comes from multiplying, so undo it by dividing: area ÷ base.'],[A/2,'Halving is for triangles. Here, height = area ÷ base.'],[sl,'That is the slanted side. The height is the dashed segment.']],
-      explain:`Area = base × height, so height = ${A} ÷ ${b} = ${h} units.`};
+      prompt:`This parallelogram has an area of ${area} square units and a base of ${b} units. How tall is its height?`,
+      misc:[[area-b,'Area comes from multiplying, so undo it by dividing: area ÷ base.'],[area/2,'Halving is for triangles. Here, height = area ÷ base.'],[slant,'That is the slanted side. The height is the dashed segment.']],
+      explain:`Area = base × height, so height = ${area} ÷ ${b} = ${h} units.`};
   }
+  /* area */
   return {kind:'num',unit:SQ,fig:f,answer:b*h,hint,
     prompt:'Find the area of this parallelogram.',
-    misc:[[b*sl,'You multiplied by the slanted side. Use the height: the dashed segment that meets the base at a right angle.'],
+    misc:[[b*slant,'You multiplied by the slanted side. Use the height: the dashed segment that meets the base at a right angle.'],
           [b*h/2,'Halving is for triangles. A parallelogram is base × height with no halving.'],
-          [2*b+2*sl,'That is the distance around the shape (perimeter). Area measures the space inside.'],
+          [2*b+2*slant,'That is the distance around the shape (perimeter). Area measures the space inside.'],
           [b+h,'Area multiplies the base and height. It does not add them.']],
-    explain:`Area = base × height = ${b} × ${h} = ${b*h} square units. The slanted side (${sl}) isn't needed.`};
+    explain:`Area = base × height = ${b} × ${h} = ${b*h} square units. The slanted side (${slant}) isn't needed.`};
 }
 
 /* ---------- Zone 2: triangles ---------- */
 function genTri(){
   const b=R(3,9);let h=R(2,7);
+  /* apexX: where the top corner is above the base line; outside the base for an obtuse triangle, at an end for a right one */
   const shape=pick(['acute','acute','right','obtuse','obtuse']);
-  const ax=shape==='right'?pick([0,b]):shape==='acute'?R(1,b-1):pick([b+R(1,3),-R(1,3)]);
+  const apexX=shape==='right'?pick([0,b]):shape==='acute'?R(1,b-1):pick([b+R(1,3),-R(1,3)]);
   let type=pick(['area','area','tap','missing']);
   if(shape==='right'&&type==='tap')type='area';
   if(type==='missing'&&(b*h)%2)h++;
-  const A=[0,h],B=[b,h],C=[ax,0],area=b*h/2,out=ax>b||ax<0;
+  /* outside: the height lands past the base, so the base is extended */
+  const A=[0,h],B=[b,h],C=[apexX,0],area=b*h/2,outside=apexX>b||apexX<0;
   const f=new Fig();f.poly([A,B,C]);
-  if(out)f.line(ax>b?b:ax,h,ax>b?ax:0,h,'ext');
-  const vx=ax>=b?-1:1;
+  if(outside)f.line(apexX>b?b:apexX,h,apexX>b?apexX:0,h,'ext');
+  /* markDir: which way the right-angle mark opens along the base */
+  const markDir=apexX>=b?-1:1;
   if(type==='tap'){
+    /* tap the height: the other choices are a side and a leaning segment (leanX: where it meets the base) */
     f.lbl(b/2,h+.8,'base');
-    const sideEnd=out?(ax>b?B:A):(ax>b/2?A:B);
-    let p=out?b/2:(ax>b/2?ax-2:ax+2);p=Math.min(b-.5,Math.max(.5,p));
-    if(!out&&Math.abs(p-sideEnd[0])<.6)p=(p+ax)/2;
-    const segs=shuffle([
-      {ok:1,p:[ax,0,ax,h]},
-      {why:'That is a side of the triangle. It does not meet the base at a right angle.',p:[ax,0,sideEnd[0],h]},
-      {why:out?'This segment leans. For this triangle the height falls outside: extend the base and drop a straight-down segment to it.':'This segment leans. A height makes a right angle with the base.',p:[ax,0,p,h]}
+    const sideEnd=outside?(apexX>b?B:A):(apexX>b/2?A:B);
+    let leanX=outside?b/2:(apexX>b/2?apexX-2:apexX+2);leanX=Math.min(b-.5,Math.max(.5,leanX));
+    if(!outside&&Math.abs(leanX-sideEnd[0])<.6)leanX=(leanX+apexX)/2;
+    const segments=shuffle([
+      {ok:1,p:[apexX,0,apexX,h]},
+      {why:'That is a side of the triangle. It does not meet the base at a right angle.',p:[apexX,0,sideEnd[0],h]},
+      {why:outside?'This segment leans. For this triangle the height falls outside: extend the base and drop a straight-down segment to it.':'This segment leans. A height makes a right angle with the base.',p:[apexX,0,leanX,h]}
     ]);
-    const why={};let ans;
-    segs.forEach((k,i)=>{const id='ABC'[i];f.cand(id,...k.p);if(k.ok)ans=id;else why[id]=k.why;});
-    segs.forEach((k,i)=>{const [x1,y1,x2,y2]=k.p;const t=.62;f.lbl(x1+(x2-x1)*t+.55,y1+(y2-y1)*t,'ABC'[i],'letter');});
-    f.onHint();f.ra(ax,h,0,-1,vx,0);
-    return {kind:'tap',fig:f,answer:ans,why,
+    const why={};let answer;
+    segments.forEach((segment,i)=>{const id='ABC'[i];f.cand(id,...segment.p);if(segment.ok)answer=id;else why[id]=segment.why;});
+    /* each letter 62% of the way down its segment, a little to the right */
+    segments.forEach((segment,i)=>{const [x1,y1,x2,y2]=segment.p;const along=.62;f.lbl(x1+(x2-x1)*along+.55,y1+(y2-y1)*along,'ABC'[i],'letter');});
+    f.onHint();f.ra(apexX,h,0,-1,markDir,0);
+    return {kind:'tap',fig:f,answer,why,
       prompt:'Tap the segment that is the <b>height</b> for this base.',
-      hint:out?'The height can be outside the triangle. Look for a straight-down segment that meets the dotted extension of the base at a square corner.':'Look for the segment that makes a square corner with the base.',
-      explain:out?'For this obtuse triangle, the height lands outside. We extend the base (dotted) and measure straight down to it.':'The height goes from the top vertex straight down to the base, making a right angle.'};
+      hint:outside?'The height can be outside the triangle. Look for a straight-down segment that meets the dotted extension of the base at a square corner.':'Look for the segment that makes a square corner with the base.',
+      explain:outside?'For this obtuse triangle, the height lands outside. We extend the base (dotted) and measure straight down to it.':'The height goes from the top vertex straight down to the base, making a right angle.'};
   }
-  const hx=ax===0?-.85:ax===b?b+.85:ax>b?ax+.85:ax<0?ax-.85:(ax<=b/2?ax+.85:ax-.85);
-  if(ax!==0&&ax!==b)f.line(ax,0,ax,h,'hgt');
-  f.ra(ax,h,0,-1,vx,0);
+  /* the height's label goes beside the dashed line, on the side away from the triangle */
+  const heightLabelX=apexX===0?-.85:apexX===b?b+.85:apexX>b?apexX+.85:apexX<0?apexX-.85:(apexX<=b/2?apexX+.85:apexX-.85);
+  if(apexX!==0&&apexX!==b)f.line(apexX,0,apexX,h,'hgt');
+  f.ra(apexX,h,0,-1,markDir,0);
   f.lbl(b/2,h+.8,b);
-  f.lbl(hx,h/2,type==='missing'?'?':h,type==='missing'?'q':'h');
+  f.lbl(heightLabelX,h/2,type==='missing'?'?':h,type==='missing'?'q':'h');
+  /* the longest slanted side gets its length (a mistake to use) */
   const sides=[[C,A],[C,B]].filter(([p,q])=>p[0]!==q[0]).sort((u,v)=>Math.hypot(v[0][0]-v[1][0],h)-Math.hypot(u[0][0]-u[1][0],h));
-  const sd=sides[0],sl=r1(Math.hypot(sd[0][0]-sd[1][0],h));
-  f.lbl(...outward(sd[0],sd[1],[A,B,C]),sl,'dim');
-  f.onHint();f.poly([B,[b+ax,0],C],'ghost');
+  const slantSide=sides[0],slant=r1(Math.hypot(slantSide[0][0]-slantSide[1][0],h));
+  f.lbl(...outward(slantSide[0],slantSide[1],[A,B,C]),slant,'dim');
+  /* the hint adds a turned copy, making a parallelogram */
+  f.onHint();f.poly([B,[b+apexX,0],C],'ghost');
   const hint='Two copies of any triangle fit together into a parallelogram with the same base and height. The triangle is half of that parallelogram.';
   if(type==='missing'){
+    /* the height, from the area and the base */
     return {kind:'num',unit:'units',fig:f,answer:h,hint,
       prompt:`This triangle has an area of ${fmt(area)} square units and a base of ${b} units. What is its height?`,
       misc:[[area/b,'The triangle is half of base × height. Double the area first, then divide by the base.'],[area*2,'That is base × height. Now divide by the base.']],
       explain:`½ × ${b} × height = ${fmt(area)}, so ${b} × height = ${b*h}, and height = ${h} units.`};
   }
+  /* area */
   return {kind:'num',unit:SQ,fig:f,answer:area,hint,
     prompt:'Find the area of this triangle.',
     misc:[[b*h,'That is the area of the whole parallelogram. A triangle is half of it, so divide by 2.'],
-          [b*sl/2,'You used the slanted side. Use the height: the dashed segment at a right angle to the base.'],
-          [b*sl,'You used the slanted side and forgot to halve. Use base × height ÷ 2.']],
-    explain:`Area = ½ × base × height = ½ × ${b} × ${h} = ${fmt(area)} square units.${out?' The height lands outside this triangle, so the base is extended with a dotted line.':''}`};
+          [b*slant/2,'You used the slanted side. Use the height: the dashed segment at a right angle to the base.'],
+          [b*slant,'You used the slanted side and forgot to halve. Use base × height ÷ 2.']],
+    explain:`Area = ½ × base × height = ½ × ${b} × ${h} = ${fmt(area)} square units.${outside?' The height lands outside this triangle, so the base is extended with a dotted line.':''}`};
 }
 
 /* ---------- Zone 3: trapezoids & other polygons ---------- */
 function genPoly(){
-  const t=pick(['trap','trap','L','house']);
+  const type=pick(['trap','trap','L','house']);
   const f=new Fig();
-  if(t==='trap'){
+  if(type==='trap'){
+    /* a trapezoid with bottom a, top c (starting `offset` across), and height h; the hint adds a turned copy */
     const a=R(6,10),c=R(2,a-2);let h=R(2,6);if(((a+c)*h)%2)h++;
-    const o=R(0,a-c),area=(a+c)*h/2;
-    f.poly([[0,h],[a,h],[o+c,0],[o,0]]);
-    f.lbl(a/2,h+.8,a);f.lbl(o+c/2,-.8,c);
-    if(o===0){f.ra(0,h,0,-1,1,0);f.lbl(-.85,h/2,h,'h');}
-    else{f.line(o,0,o,h,'hgt');f.ra(o,h,0,-1,1,0);f.lbl(o+.85,h/2,h,'h');}
-    f.onHint();f.poly([[a,h],[a+c,h],[a+o+c,0],[o+c,0]],'ghost');f.lbl(a+c/2,h+.8,c,'h');
+    const offset=R(0,a-c),area=(a+c)*h/2;
+    f.poly([[0,h],[a,h],[offset+c,0],[offset,0]]);
+    f.lbl(a/2,h+.8,a);f.lbl(offset+c/2,-.8,c);
+    if(offset===0){f.ra(0,h,0,-1,1,0);f.lbl(-.85,h/2,h,'h');}
+    else{f.line(offset,0,offset,h,'hgt');f.ra(offset,h,0,-1,1,0);f.lbl(offset+.85,h/2,h,'h');}
+    f.onHint();f.poly([[a,h],[a+c,h],[a+offset+c,0],[offset+c,0]],'ghost');f.lbl(a+c/2,h+.8,c,'h');
     return {kind:'num',unit:SQ,fig:f,answer:area,
       prompt:'Find the area of this trapezoid.',
       hint:`Rotate a copy of the trapezoid and fit it on the end. Together they make a parallelogram with base ${a} + ${c} and height ${h}. The trapezoid is half.`,
       misc:[[(a+c)*h,'Close! That is the parallelogram made from two copies. One trapezoid is half of it.'],[a*h,'You used only the bottom side. Both parallel sides count.'],[c*h,'You used only the top side. Both parallel sides count.']],
       explain:`Two copies make a parallelogram: (${a} + ${c}) × ${h} = ${(a+c)*h}. Half of that is ${fmt(area)} square units.`};
   }
-  if(t==='L'){
-    const W=R(6,9),H=R(5,8),w=R(2,W-3),hh=R(2,H-3),area=W*H-w*hh,lw=W-w;
-    f.poly([[0,0],[lw,0],[lw,hh],[W,hh],[W,H],[0,H]]);
-    f.lbl(W/2,H+.8,W);f.lbl(-.85,H/2,H);f.lbl(lw/2,-.8,lw);f.lbl(W+.85,hh+(H-hh)/2,H-hh);
-    f.onHint();f.line(lw,hh,lw,H,'hgt');f.txt(lw/2,H/2,lw*H);f.txt(lw+w/2,hh+(H-hh)/2,w*(H-hh));f.lbl(lw+w/2,hh-.8,w,'h');
+  if(type==='L'){
+    /* a W by H rectangle with a cutW by cutH corner cut out (bottom right), leaving the left part leftW wide */
+    const W=R(6,9),H=R(5,8),cutW=R(2,W-3),cutH=R(2,H-3),area=W*H-cutW*cutH,leftW=W-cutW;
+    f.poly([[0,0],[leftW,0],[leftW,cutH],[W,cutH],[W,H],[0,H]]);
+    f.lbl(W/2,H+.8,W);f.lbl(-.85,H/2,H);f.lbl(leftW/2,-.8,leftW);f.lbl(W+.85,cutH+(H-cutH)/2,H-cutH);
+    f.onHint();f.line(leftW,cutH,leftW,H,'hgt');f.txt(leftW/2,H/2,leftW*H);f.txt(leftW+cutW/2,cutH+(H-cutH)/2,cutW*(H-cutH));f.lbl(leftW+cutW/2,cutH-.8,cutW,'h');
     return {kind:'num',unit:SQ,fig:f,answer:area,
       prompt:'Find the area of this shape.',
-      hint:`Split it into two rectangles. The missing width on the right is ${W} − ${lw} = ${w}.`,
-      misc:[[W*H,'That counts the missing corner too. Subtract the cut-out, or split the shape into two rectangles.'],[2*W+2*H,'That is the perimeter. Area counts the squares inside.'],[lw*H+W*(H-hh),'Your two rectangles overlap. Split the shape so no part is counted twice.']],
-      explain:`${lw} × ${H} = ${lw*H}, plus ${w} × ${H-hh} = ${w*(H-hh)}. Total: ${area} square units.`};
+      hint:`Split it into two rectangles. The missing width on the right is ${W} − ${leftW} = ${cutW}.`,
+      misc:[[W*H,'That counts the missing corner too. Subtract the cut-out, or split the shape into two rectangles.'],[2*W+2*H,'That is the perimeter. Area counts the squares inside.'],[leftW*H+W*(H-cutH),'Your two rectangles overlap. Split the shape so no part is counted twice.']],
+      explain:`${leftW} × ${H} = ${leftW*H}, plus ${cutW} × ${H-cutH} = ${cutW*(H-cutH)}. Total: ${area} square units.`};
   }
-  const W=R(4,9),H=R(2,5);let r=R(2,4);if((W*r)%2)r++;
-  const p=W/2,area=W*H+W*r/2;
-  f.poly([[0,r],[p,0],[W,r],[W,r+H],[0,r+H]]);
-  f.lbl(W/2,r+H+.8,W);f.lbl(-.85,r+H/2,H);
-  f.line(p,0,p,r,'hgt');f.ra(p,r,0,-1,1,0);f.lbl(p+.9,r*.55,r,'h');
-  f.onHint();f.line(0,r,W,r,'hgt');f.txt(W/2,r+H/2,W*H);f.txt(p-.9,r*.62,W*r/2);
+  /* house: a W by H rectangle with a triangle roof `roof` tall, peaking at the middle */
+  const W=R(4,9),H=R(2,5);let roof=R(2,4);if((W*roof)%2)roof++;
+  const peakX=W/2,area=W*H+W*roof/2;
+  f.poly([[0,roof],[peakX,0],[W,roof],[W,roof+H],[0,roof+H]]);
+  f.lbl(W/2,roof+H+.8,W);f.lbl(-.85,roof+H/2,H);
+  f.line(peakX,0,peakX,roof,'hgt');f.ra(peakX,roof,0,-1,1,0);f.lbl(peakX+.9,roof*.55,roof,'h');
+  f.onHint();f.line(0,roof,W,roof,'hgt');f.txt(W/2,roof+H/2,W*H);f.txt(peakX-.9,roof*.62,W*roof/2);
   return {kind:'num',unit:SQ,fig:f,answer:area,
     prompt:'Find the area of this house-shaped pentagon.',
     hint:'Split it into a rectangle (the walls) and a triangle (the roof). Find each area and add.',
-    misc:[[W*H+W*r,'The roof is a triangle, so its area is half of base × height.'],[W*H,'Don’t forget the triangle roof on top.'],[W*r/2,'That is only the roof. Add the rectangle underneath.']],
-    explain:`Rectangle: ${W} × ${H} = ${W*H}. Roof: ½ × ${W} × ${r} = ${W*r/2}. Total: ${area} square units.`};
+    misc:[[W*H+W*roof,'The roof is a triangle, so its area is half of base × height.'],[W*H,'Don’t forget the triangle roof on top.'],[W*roof/2,'That is only the roof. Add the rectangle underneath.']],
+    explain:`Rectangle: ${W} × ${H} = ${W*H}. Roof: ½ × ${W} × ${roof} = ${W*roof/2}. Total: ${area} square units.`};
 }
 
 /* ---------- Zone 4: nets & surface area ---------- */
+/* the 11 cube nets, as [column, row] cells: a row of 4 with one square above and one below (16 ways), and the rest */
 const CUBE_OK=(()=>{const v=[];for(let a=0;a<4;a++)for(let b=0;b<4;b++)v.push([[a,0],[0,1],[1,1],[2,1],[3,1],[b,2]]);
   [1,2,3].forEach(x=>v.push([[0,0],[1,0],[1,1],[2,1],[3,1],[x,2]]));
   v.push([[0,0],[1,0],[1,1],[2,1],[2,2],[3,2]],[[0,0],[1,0],[2,0],[2,1],[3,1],[4,1]]);return v;})();
+/* nets that don't fold into a cube, and why */
 const CUBE_BAD=[
   {c:[[0,0],[1,0],[2,0],[3,0],[4,0],[5,0]],why:'Six in a row wraps all the way around, so the last squares overlap the first ones.'},
   {c:[[0,0],[1,0],[2,0],[0,1],[1,1],[2,1]],why:'It has a 2×2 block. Four squares can’t all fold around one corner of a cube, so faces overlap.'},
@@ -202,109 +243,127 @@ const CUBE_BAD=[
   {c:[[1,0],[0,1],[1,1],[2,1],[3,1],[4,1]],why:'A row of 5 wraps past the start, so two faces land in the same spot.'},
   {c:[[0,0],[0,1],[1,1],[2,1],[3,1],[4,1]],why:'A row of 5 wraps past the start, so two faces land in the same spot.'}];
 /* two nets, the same prism? (like the Lesson 14 practice problems). Both are drawn at the same scale, so sizes can be compared. */
+/* the height of an equilateral triangle with sides 1 */
 const S3=Math.sqrt(3)/2;
 /* a triangular prism's net: one side rectangle with a triangle on each end, and the other two rectangles hinged to the triangles'
    slanted edges ('l' or 'r'). It folds only when they're on opposite edges: the same edge twice covers one side twice. */
 function fanNet(a,h,top,bot){
-  const T=[[0,0],[a,0],[a/2,-a*S3]],D=[[0,h],[a,h],[a/2,h+a*S3]];
-  const wing=(p,q,far)=>{const L=Math.hypot(q[0]-p[0],q[1]-p[1]);let nx=(p[1]-q[1])/L,ny=(q[0]-p[0])/L;
+  /* the triangles above and below the a by h rectangle */
+  const upper=[[0,0],[a,0],[a/2,-a*S3]],lower=[[0,h],[a,h],[a/2,h+a*S3]];
+  /* an h-long rectangle hinged on edge p–q, on the side away from the triangle's third corner `far`: (nx, ny) is the edge's
+     unit normal, flipped if it points toward `far` */
+  const wing=(p,q,far)=>{const length=Math.hypot(q[0]-p[0],q[1]-p[1]);let nx=(p[1]-q[1])/length,ny=(q[0]-p[0])/length;
     if((far[0]-(p[0]+q[0])/2)*nx+(far[1]-(p[1]+q[1])/2)*ny>0){nx=-nx;ny=-ny;}
     return [p,q,[q[0]+nx*h,q[1]+ny*h],[p[0]+nx*h,p[1]+ny*h]];};
-  return {type:'fan',a,h,faces:[{poly:[[0,0],[a,0],[a,h],[0,h]],col:1},{poly:T,col:0},{poly:D,col:0},
-    {poly:top==='r'?wing(T[1],T[2],T[0]):wing(T[0],T[2],T[1]),col:2,wing:top},{poly:bot==='r'?wing(D[1],D[2],D[0]):wing(D[0],D[2],D[1]),col:2,wing:bot}]};
+  return {type:'fan',a,h,faces:[{poly:[[0,0],[a,0],[a,h],[0,h]],col:1},{poly:upper,col:0},{poly:lower,col:0},
+    {poly:top==='r'?wing(upper[1],upper[2],upper[0]):wing(upper[0],upper[2],upper[1]),col:2,wing:top},{poly:bot==='r'?wing(lower[1],lower[2],lower[0]):wing(lower[0],lower[2],lower[1]),col:2,wing:bot}]};
 }
 /* a row of side rectangles with a base on each end (shared/solids.js netOf). ok: false puts both bases along the top edge */
 function stripNet(n,a,h,ok){
-  const k=R(0,n-1),j=ok?R(0,n-1):pick([...Array(n).keys()].filter(i=>i!==k)),net=netOf('prism',n,{a,h,top:k,bottom:j});
+  /* topSide and bottomSide: which rectangles the bases hang from (a bad net's bottom one is flipped onto the top edge) */
+  const topSide=R(0,n-1),bottomSide=ok?R(0,n-1):pick([...Array(n).keys()].filter(i=>i!==topSide)),net=netOf('prism',n,{a,h,top:topSide,bottom:bottomSide});
   return {type:'strip',a,h,faces:net.faces.map(f=>({poly:ok||f.id!=='bottom'?f.poly:f.poly.map(([x,y])=>[x,h-y]),col:f.col}))};
 }
-const turnNet=(net,q)=>({...net,faces:net.faces.map(f=>({...f,poly:f.poly.map(p=>{for(let i=0;i<q;i++)p=[-p[1],p[0]];return p;})}))});
+/* a net turned a quarter turn `quarters` times */
+const turnNet=(net,quarters)=>({...net,faces:net.faces.map(f=>({...f,poly:f.poly.map(p=>{for(let i=0;i<quarters;i++)p=[-p[1],p[0]];return p;})}))});
+/* two nets side by side, labeled A and B, at one scale that fits both in 520 by 300 */
 function netPairSvg(nets){
-  const bb=nets.map(n=>{const P=n.faces.flatMap(f=>f.poly),xs=P.map(p=>p[0]),ys=P.map(p=>p[1]);return [Math.min(...xs),Math.min(...ys),Math.max(...xs),Math.max(...ys)];});
-  const gap=.9,Wu=bb.reduce((t,b)=>t+b[2]-b[0],0)+gap,Hu=Math.max(...bb.map(b=>b[3]-b[1])),k=Math.min(520/Wu,300/Hu),top=36;
-  let x=10,o='';
-  nets.forEach((n,i)=>{
-    const b=bb[i],ox=x,oy=top+(Hu-(b[3]-b[1]))*k/2;
-    o+=`<text class="np-lbl" x="${r1d(ox+(b[2]-b[0])*k/2)}" y="20">${'AB'[i]}</text>`;
-    o+=n.faces.map(f=>`<polygon class="sd-net${f.col?'':' sd-base'}" points="${f.poly.map(([px,py])=>`${r1d(ox+(px-b[0])*k)},${r1d(oy+(py-b[1])*k)}`).join(' ')}"/>`).join('');
-    x+=(b[2]-b[0]+gap)*k;
+  /* each net's bounds [minX, minY, maxX, maxY]; together they're widthUnits by heightUnits with a gap between */
+  const bounds=nets.map(net=>{const points=net.faces.flatMap(f=>f.poly),xs=points.map(p=>p[0]),ys=points.map(p=>p[1]);return [Math.min(...xs),Math.min(...ys),Math.max(...xs),Math.max(...ys)];});
+  const gap=.9,widthUnits=bounds.reduce((total,box)=>total+box[2]-box[0],0)+gap,heightUnits=Math.max(...bounds.map(box=>box[3]-box[1])),scale=Math.min(520/widthUnits,300/heightUnits),top=36;
+  let x=10,markup='';
+  nets.forEach((net,i)=>{
+    /* each net is centered top to bottom */
+    const box=bounds[i],left=x,netTop=top+(heightUnits-(box[3]-box[1]))*scale/2;
+    markup+=`<text class="np-lbl" x="${r1d(left+(box[2]-box[0])*scale/2)}" y="20">${'AB'[i]}</text>`;
+    markup+=net.faces.map(f=>`<polygon class="sd-net${f.col?'':' sd-base'}" points="${f.poly.map(([px,py])=>`${r1d(left+(px-box[0])*scale)},${r1d(netTop+(py-box[1])*scale)}`).join(' ')}"/>`).join('');
+    x+=(box[2]-box[0]+gap)*scale;
   });
-  return svgOf(r1d(x-gap*k+10),r1d(top+Hu*k+10),o,'Two nets, A and B, drawn at the same scale');
+  return svgOf(r1d(x-gap*scale+10),r1d(top+heightUnits*scale+10),markup,'Two nets, A and B, drawn at the same scale');
 }
+/* Do two nets fold into the same prism? The answer (truth): yes, no because one won't fold (fold), or no because their heights
+   (h) or bases (a) differ. P and B: the base's shape and name; a, h and a2, h2: the two nets' base sides and heights */
 function makeSameNets(){
-  const n=pick([3,3,3,4]),P=POLYGON[n],B=BASE_NAME[n],who=pick(NAMES),c=pick(['yes','yes','yes','fold','fold','h','a']);
-  const a=pick([1.2,1.5]),h=pick([1.8,2.4]),a2=c==='a'?(a===1.2?1.8:1):a,h2=c==='h'?(h===1.8?3:1.2):h,bad=c==='fold'?pick(['A','B']):null;
+  const n=pick([3,3,3,4]),P=POLYGON[n],B=BASE_NAME[n],who=pick(NAMES),truth=pick(['yes','yes','yes','fold','fold','h','a']);
+  const a=pick([1.2,1.5]),h=pick([1.8,2.4]),a2=truth==='a'?(a===1.2?1.8:1):a,h2=truth==='h'?(h===1.8?3:1.2):h,bad=truth==='fold'?pick(['A','B']):null;
+  /* a net that folds (ok) or doesn't: a triangular prism's is a fan or a strip, a square prism's a strip */
   const make=(aa,hh,ok)=>n===3&&Math.random()<.5?(ok?(t=>fanNet(aa,hh,t,t==='r'?'l':'r'))(pick(['l','r'])):(t=>fanNet(aa,hh,t,t))(pick(['l','r']))):stripNet(n,aa,hh,ok);
   const flat=[make(a,h,bad!=='A'),make(a2,h2,bad!=='B')];
+  /* net B is turned a random number of quarter turns */
   if(JSON.stringify(flat[0].faces)===JSON.stringify(flat[1].faces))return makeSameNets();  // net B is never a copy of net A
   const nets=[flat[0],turnNet(flat[1],R(0,3))];
+  /* why a net that won't fold is wrong; choices: each answer, and why it's wrong when another is right */
   const why=bad&&(flat[bad==='A'?0:1].type==='fan'
     ?`In net ${bad}, both loose rectangles land on the same side of the prism when it folds, so one side would be left open.`
     :`In net ${bad}, both bases sit along the same edge of the rectangles, so they’d fold onto the same end. The other end would be left open.`);
-  const L={
+  const choices={
     yes:['Yes. They have the same faces, and both fold into the same prism.',{h:'Compare the rectangles: they’re the same length in both nets.',a:'Compare the gold bases: they’re the same size in both nets.',fold:`Both nets fold up: each has a base for each end, and one rectangle for each side of the base.`}],
     h:['No. The rectangles are different lengths, so one prism would be taller.',{yes:'Compare the rectangles. In one net they’re longer, so that prism is taller.',a:'The gold bases are the same size. Compare the rectangles.',fold:'Both nets fold up. They just fold into different prisms.'}],
     a:['No. The bases are different sizes.',{yes:'Compare the gold bases. One net’s bases are bigger.',h:'The rectangles are the same length. Compare the gold bases.',fold:'Both nets fold up. They just fold into different prisms.'}],
     fold:['No. One of the nets won’t fold into a closed prism.',{yes:why,h:why,a:why}]};
-  return {...mcOf(Object.keys(L).map(k=>[L[k][0],k===c?null:L[c][1][k]]),{stack:true}),
-    fig:{svg:()=>netPairSvg(nets)},nets:{c,bad,flat},
+  return {...mcOf(Object.keys(choices).map(id=>[choices[id][0],id===truth?null:choices[truth][1][id]]),{stack:true}),
+    fig:{svg:()=>netPairSvg(nets)},nets:{c:truth,bad,flat},
     prompt:`${who} says both nets fold into the same ${B} prism. Do you agree?`,
     hint:`Check each net: a ${B} prism needs a ${P} base on each end, and one rectangle for each side. Then compare the sizes of the pieces.`,
     explain:{yes:`Both nets have 2 matching ${P}s and ${n} matching rectangles, and each folds with one base on each end and a rectangle on every side. They fold into the same prism.`,
       h:`Both nets fold into ${an(B)} ${B} prism, but the rectangles in one are longer, so that prism is taller. Not the same prism.`,
-      a:`Both nets fold into ${an(B)} ${B} prism, but one net’s bases (and the rectangles around them) are bigger. Not the same prism.`,fold:why}[c]};
+      a:`Both nets fold into ${an(B)} ${B} prism, but one net’s bases (and the rectangles around them) are bigger. Not the same prism.`,fold:why}[truth]};
 }
 function genNet(){
-  const t=pick(['box','rnet','rnet','cube','tri','same','same']);
-  if(t==='same')return makeSameNets();
+  const type=pick(['box','rnet','rnet','cube','tri','same','same']);
+  if(type==='same')return makeSameNets();
   const f=new Fig();
-  if(t==='cube'){
-    const good=Math.random()<.5,src=good?pick(CUBE_OK):pick(CUBE_BAD);
-    let cells=(good?src:src.c).map(p=>p.slice());
-    const k=R(0,3);for(let i=0;i<k;i++)cells=cells.map(([x,y])=>[y,-x]);
+  if(type==='cube'){
+    /* will it fold into a cube: a good or bad net, turned and maybe flipped */
+    const good=Math.random()<.5,source=good?pick(CUBE_OK):pick(CUBE_BAD);
+    let cells=(good?source:source.c).map(p=>p.slice());
+    const turns=R(0,3);for(let i=0;i<turns;i++)cells=cells.map(([x,y])=>[y,-x]);
     if(Math.random()<.5)cells=cells.map(([x,y])=>[-x,y]);
-    const mx=Math.min(...cells.map(p=>p[0])),my=Math.min(...cells.map(p=>p[1]));
-    cells.forEach(([x,y])=>{x-=mx;y-=my;f.poly([[x,y],[x+1,y],[x+1,y+1],[x,y+1]]);});
+    const minX=Math.min(...cells.map(p=>p[0])),minY=Math.min(...cells.map(p=>p[1]));
+    cells.forEach(([x,y])=>{x-=minX;y-=minY;f.poly([[x,y],[x+1,y],[x+1,y+1],[x,y+1]]);});
     return {kind:'mc',fig:f,answer:good?'yes':'no',
       choices:[{id:'yes',label:'Yes, it folds into a cube'},{id:'no',label:'No, faces would overlap'}],
-      why:good?{no:'Try it: pick one square as the bottom and fold its neighbors up as walls. Every square finds its own face.'}:{yes:src.why},
+      why:good?{no:'Try it: pick one square as the bottom and fold its neighbors up as walls. Every square finds its own face.'}:{yes:source.why},
       prompt:'Will this net fold up into a cube?',
       hint:'Pick one square to be the bottom. Fold the squares next to it up as walls. Watch for two squares that would land on the same face.',
-      explain:good?'Yes. When it folds, each of the 6 squares covers a different face of the cube.':src.why};
+      explain:good?'Yes. When it folds, each of the 6 squares covers a different face of the cube.':source.why};
   }
-  if(t==='tri'){
-    const L=R(3,8),SA=12+12*L;
-    f.poly([[0,3],[3,3],[3,3+L],[0,3+L]]);f.poly([[3,3],[7,3],[7,3+L],[3,3+L]]);f.poly([[7,3],[12,3],[12,3+L],[7,3+L]]);
-    f.poly([[3,3],[7,3],[3,0]]);f.poly([[3,3+L],[7,3+L],[3,6+L]]);
-    f.ra(3,3,0,-1,1,0);f.ra(3,3+L,0,1,1,0);
-    f.lbl(1.5,3+L+.8,3);f.lbl(5,3.75,4);f.lbl(9.5,2.2,5);f.lbl(2.15,1.5,3);f.lbl(5.75,1.1,5);f.lbl(-.85,3+L/2,L);
+  if(type==='tri'){
+    /* the surface area of a 3-4-5 right triangular prism `length` long, from its net */
+    const length=R(3,8),SA=12+12*length;
+    f.poly([[0,3],[3,3],[3,3+length],[0,3+length]]);f.poly([[3,3],[7,3],[7,3+length],[3,3+length]]);f.poly([[7,3],[12,3],[12,3+length],[7,3+length]]);
+    f.poly([[3,3],[7,3],[3,0]]);f.poly([[3,3+length],[7,3+length],[3,6+length]]);
+    f.ra(3,3,0,-1,1,0);f.ra(3,3+length,0,1,1,0);
+    f.lbl(1.5,3+length+.8,3);f.lbl(5,3.75,4);f.lbl(9.5,2.2,5);f.lbl(2.15,1.5,3);f.lbl(5.75,1.1,5);f.lbl(-.85,3+length/2,length);
     f.onHint();
-    f.poly([[0,3],[3,3],[3,3+L],[0,3+L]],'fb2');f.poly([[3,3],[7,3],[7,3+L],[3,3+L]],'fb2');f.poly([[7,3],[12,3],[12,3+L],[7,3+L]],'fb2');
-    f.poly([[3,3],[7,3],[3,0]],'fa');f.poly([[3,3+L],[7,3+L],[3,6+L]],'fa');
-    f.txt(1.5,3+L/2,3*L);f.txt(5,3+L/2,4*L);f.txt(9.5,3+L/2,5*L);f.txt(4.2,2.1,6);f.txt(4.2,3.9+L,6);
+    f.poly([[0,3],[3,3],[3,3+length],[0,3+length]],'fb2');f.poly([[3,3],[7,3],[7,3+length],[3,3+length]],'fb2');f.poly([[7,3],[12,3],[12,3+length],[7,3+length]],'fb2');
+    f.poly([[3,3],[7,3],[3,0]],'fa');f.poly([[3,3+length],[7,3+length],[3,6+length]],'fa');
+    f.txt(1.5,3+length/2,3*length);f.txt(5,3+length/2,4*length);f.txt(9.5,3+length/2,5*length);f.txt(4.2,2.1,6);f.txt(4.2,3.9+length,6);
     return {kind:'num',unit:SQ,fig:f,answer:SA,
       prompt:'This net folds into a triangular prism. The triangles are right triangles. What is its surface area?',
       hint:'Find the area of all 5 pieces and add them: 3 rectangles plus 2 triangles. Each triangle is ½ × 4 × 3.',
-      misc:[[6+12*L,'There are two triangles, one at each end.'],[12*L,'Don’t forget the two triangle faces.'],[24+12*L,'Each triangle is ½ × 4 × 3 = 6, not 12.']],
-      explain:`Rectangles: ${3*L} + ${4*L} + ${5*L} = ${12*L}. Triangles: 6 + 6 = 12. Surface area = ${SA} square units.`};
+      misc:[[6+12*length,'There are two triangles, one at each end.'],[12*length,'Don’t forget the two triangle faces.'],[24+12*length,'Each triangle is ½ × 4 × 3 = 6, not 12.']],
+      explain:`Rectangles: ${3*length} + ${4*length} + ${5*length} = ${12*length}. Triangles: 6 + 6 = 12. Surface area = ${SA} square units.`};
   }
+  /* box or rnet: a rectangular prism's surface area, from a drawing or a net */
   const l=R(2,6),w=R(2,4),h=R(2,5),SA=2*(l*w+l*h+w*h);
   const misc=[[l*w+l*h+w*h,'That covers only 3 faces. A prism has 6: every face has a twin on the opposite side.'],[l*w*h,'That is the volume (cubes that fill it). Surface area covers the outside.']];
   const explain=`Faces come in pairs: 2×(${l}×${w}) + 2×(${l}×${h}) + 2×(${w}×${h}) = ${2*l*w} + ${2*l*h} + ${2*w*h} = ${SA} square units.`;
-  if(t==='box'){
-    const d=box(f,l,w,h,[l,w,h]);
-    f.onHint();f.txt(l/2,d+h/2,l*h);f.txt((l+d)/2,d/2,l*w);f.txt(l+d/2,d/2+h/2,w*h);
+  if(type==='box'){
+    const depth=box(f,l,w,h,[l,w,h]);
+    f.onHint();f.txt(l/2,depth+h/2,l*h);f.txt((l+depth)/2,depth/2,l*w);f.txt(l+depth/2,depth/2+h/2,w*h);
     return {kind:'num',unit:SQ,fig:f,answer:SA,misc,explain,
       prompt:'Find the surface area of this rectangular prism.',
       hint:'Each face you can see has a matching face hidden on the opposite side. Find these 3 areas, then double them.'};
   }
+  /* the net's faces: rectangles [x, y, width, height], their colors (matching faces match), and areas */
   const faces=[
     {r:[w,0,l,w],c:'fa',a:l*w},{r:[w,w,l,h],c:'fb2',a:l*h},{r:[w,w+h,l,w],c:'fa',a:l*w},{r:[w,2*w+h,l,h],c:'fb2',a:l*h},
     {r:[0,w,w,h],c:'fc',a:w*h},{r:[w+l,w,w,h],c:'fc',a:w*h}];
   const rect=([x,y,rw,rh])=>[[x,y],[x+rw,y],[x+rw,y+rh],[x,y+rh]];
-  faces.forEach(q=>f.poly(rect(q.r)));
+  faces.forEach(face=>f.poly(rect(face.r)));
   f.lbl(w+l/2,-.8,l);f.lbl(w-.85,w/2,w);f.lbl(-.85,w+h/2,h);
-  f.onHint();faces.forEach(q=>{f.poly(rect(q.r),q.c);f.txt(q.r[0]+q.r[2]/2,q.r[1]+q.r[3]/2,q.a);});
+  f.onHint();faces.forEach(face=>{f.poly(rect(face.r),face.c);f.txt(face.r[0]+face.r[2]/2,face.r[1]+face.r[3]/2,face.a);});
   return {kind:'num',unit:SQ,fig:f,answer:SA,misc,explain,
     prompt:'This net folds into a rectangular prism. What is its surface area?',
     hint:'Find the area of each of the 6 rectangles and add them. Matching colors are matching faces.'};
@@ -314,8 +373,9 @@ function genNet(){
 /* Prisms and pyramids, their drawings, curved shapes, and nets come from shared/solids.js. */
 const NAMES=['Tyler','Priya','Diego','Mai','Han','Lin','Noah','Elena'];
 const SOLID_N=[3,4,5,6,8];
-const an=w=>/^[aeiou]/.test(w)?'an':'a';
-const up=w=>w[0].toUpperCase()+w.slice(1);
+/* "a" or "an" for a word; the word capitalized */
+const an=word=>/^[aeiou]/.test(word)?'an':'a';
+const up=word=>word[0].toUpperCase()+word.slice(1);
 /* a prism or pyramid on a regular base; a prism is never as tall as it is wide, so it is never a cube */
 const someSolid=(kind=pick(['prism','pyramid']),n=pick(SOLID_N))=>solidOf(kind,n,{a:n>6?1.3:2,h:kind==='prism'?pick([2.6,3.2]):2.8});
 /* the game's figure: a drawing that, with the hint, colors the bases gold and dots every vertex */
@@ -323,15 +383,17 @@ const solidPic=s=>({svg:show=>solidSvg(s,{W:300,dots:show,bases:show})});
 const HINT_PIC='Gold faces are the bases. Dots mark every vertex (hollow ones are at the back), and dashed lines are edges at the back.';
 /* how a prism's or pyramid's faces, edges, or vertices add up */
 function howMany(kind,n,what){
-  const P=POLYGON[n]||`${n}-sided`,c=countsOf(kind,n);
-  if(kind==='prism')return {faces:`2 ${P} bases + ${n} rectangles = ${c.faces} faces`,edges:`${n} edges around each base, and ${n} going up the sides: ${n} + ${n} + ${n} = ${c.edges} edges`,vertices:`${n} vertices on each base: ${n} + ${n} = ${c.vertices} vertices`}[what];
-  return {faces:`1 ${P} base + ${n} triangles = ${c.faces} faces`,edges:`${n} edges around the base, and ${n} going up to the top: ${n} + ${n} = ${c.edges} edges`,vertices:`${n} vertices around the base, and 1 at the top: ${n} + 1 = ${c.vertices} vertices`}[what];
+  const P=POLYGON[n]||`${n}-sided`,counts=countsOf(kind,n);
+  if(kind==='prism')return {faces:`2 ${P} bases + ${n} rectangles = ${counts.faces} faces`,edges:`${n} edges around each base, and ${n} going up the sides: ${n} + ${n} + ${n} = ${counts.edges} edges`,vertices:`${n} vertices on each base: ${n} + ${n} = ${counts.vertices} vertices`}[what];
+  return {faces:`1 ${P} base + ${n} triangles = ${counts.faces} faces`,edges:`${n} edges around the base, and ${n} going up to the top: ${n} + ${n} = ${counts.edges} edges`,vertices:`${n} vertices around the base, and 1 at the top: ${n} + 1 = ${counts.vertices} vertices`}[what];
 }
 const MIX={faces:'That’s the number of faces',edges:'That’s the number of edges',vertices:'That’s the number of vertices'};
 /* the other two counts, as mistakes (leaving out one that is the answer too: a pyramid has as many faces as vertices) */
-const mixUps=(c,what)=>Object.keys(c).filter(w=>w!==what&&c[w]!==c[what]).map(w=>[c[w],`${MIX[w]}. Count the ${what}.`]);
+const mixUps=(counts,what)=>Object.keys(counts).filter(other=>other!==what&&counts[other]!==counts[what]).map(other=>[counts[other],`${MIX[other]}. Count the ${what}.`]);
 /* Figure A, Figure B, both, or neither (like the Lesson 13 practice problems): one statement about two polyhedra */
+/* what a solid's faces are, in words */
 const facesOf=s=>s.kind==='prism'?`${POLYGON[s.n]}s and rectangles`:s.n===3?'all triangles':`triangles and ${an(POLYGON[s.n])} ${POLYGON[s.n]}`;
+/* the statements to choose from for solids A and B: id, weight (how often it's picked), text, test(solid), and why(solid) */
 function statementsFor(A,B){
   const both=[A,B],cnt=s=>countsOf(s.kind,s.n),kindWhy=s=>s.kind==='pyramid'?'it has 1 base, and triangles that meet at a point':'it has 2 matching bases joined by rectangles';
   const L=[
@@ -348,75 +410,78 @@ function statementsFor(A,B){
   ];
   /* a square is a rectangle, so skip rectangles when there's a square pyramid */
   if(!both.some(s=>s.kind==='pyramid'&&s.n===4))L.push({id:'rect',w:3,text:'This figure has rectangular faces.',test:s=>s.kind==='prism',why:s=>`its faces are ${facesOf(s)}`});
+  /* a count that's right for one of them; a face shape one of them has (more than 3 sides) */
   const what=pick(['faces','edges','vertices']),k=cnt(pick(both))[what];
   L.push({id:'count',what,k,w:3,text:`This figure has ${k} ${what}.`,test:s=>cnt(s)[what]===k,why:s=>`it has ${cnt(s)[what]} ${what}`});
   const m=both.map(s=>s.n).filter(v=>v>3);
   if(m.length){const v=pick(m);L.push({id:'face',m:v,w:2,text:`This figure has ${an(POLYGON[v])} ${POLYGON[v]} face.`,test:s=>s.n===v,why:s=>`its faces are ${facesOf(s)}`});}
   return L;
 }
+/* Figure A, Figure B, both, or neither: two solids (the same base, or not) and one statement, picked by weight */
 function makeAB(){
   const all=SOLID_N.filter(n=>n<=6).flatMap(n=>['prism','pyramid'].map(k=>[k,n])),first=pick(all);
   const second=Math.random()<.4?[first[0]==='prism'?'pyramid':'prism',first[1]]:pick(all.filter(([k,n])=>k!==first[0]||n!==first[1]));
   const [A,B]=shuffle([first,second]).map(([k,n])=>someSolid(k,n)),L=statementsFor(A,B);
-  const st=L.flatMap(x=>Array(x.w).fill(x))[R(0,L.reduce((t,x)=>t+x.w,0)-1)],truth=[A,B].map(st.test);
-  const ans=truth[0]&&truth[1]?'both':truth[0]?'A':truth[1]?'B':'neither';
+  /* each statement appears its weight's number of times, so the pick favors the higher weights */
+  const statement=L.flatMap(x=>Array(x.w).fill(x))[R(0,L.reduce((t,x)=>t+x.w,0)-1)],truth=[A,B].map(statement.test);
+  const answer=truth[0]&&truth[1]?'both':truth[0]?'A':truth[1]?'B':'neither';
   const says={A:[1,0],B:[0,1],both:[1,1],neither:[0,0]},fig=[A,B];
-  const line=(i,yes)=>`Figure ${'AB'[i]} is ${an(fig[i].name)} ${fig[i].name}: ${yes?'yes':'no'}, ${st.why(fig[i])}.`;
-  const why={};Object.keys(says).forEach(c=>{if(c!==ans)why[c]=[0,1].filter(i=>!!says[c][i]!==truth[i]).map(i=>line(i,truth[i])).join(' ');});
-  return {kind:'mc',answer:ans,why,choices:[{id:'A',label:'Figure A only'},{id:'B',label:'Figure B only'},{id:'both',label:'Both'},{id:'neither',label:'Neither'}],
+  const line=(i,yes)=>`Figure ${'AB'[i]} is ${an(fig[i].name)} ${fig[i].name}: ${yes?'yes':'no'}, ${statement.why(fig[i])}.`;
+  const why={};Object.keys(says).forEach(c=>{if(c!==answer)why[c]=[0,1].filter(i=>!!says[c][i]!==truth[i]).map(i=>line(i,truth[i])).join(' ');});
+  return {kind:'mc',answer,why,choices:[{id:'A',label:'Figure A only'},{id:'B',label:'Figure B only'},{id:'both',label:'Both'},{id:'neither',label:'Neither'}],
     fig:{svg:show=>`<div class="pair">${fig.map((s,i)=>`<figure>${solidSvg(s,{W:200,dots:show,bases:show})}<figcaption>${'AB'[i]}</figcaption></figure>`).join('')}</div>`},
-    ab:{solids:fig.map(s=>({kind:s.kind,n:s.n})),st:{id:st.id,k:st.k,what:st.what,m:st.m}},
-    prompt:`Does this describe Figure A, Figure B, both, or neither?<br><b>“${st.text}”</b>`,
+    ab:{solids:fig.map(s=>({kind:s.kind,n:s.n})),st:{id:statement.id,k:statement.k,what:statement.what,m:statement.m}},
+    prompt:`Does this describe Figure A, Figure B, both, or neither?<br><b>“${statement.text}”</b>`,
     hint:HINT_PIC+' Decide for each figure on its own: is it a prism or a pyramid, and what shape is its base?',
     explain:`${line(0,truth[0])} ${line(1,truth[1])}`};
 }
 function genSolid(){
-  const t=pick(['count','count','count','name','name','rule','not','why','net','tyler','ab','ab','ab']);
-  if(t==='ab')return makeAB();
-  if(t==='count'){
+  const type=pick(['count','count','count','name','name','rule','not','why','net','tyler','ab','ab','ab']);
+  if(type==='ab')return makeAB();
+  if(type==='count'){
     /* count the faces, edges, or vertices in a drawing */
-    const s=someSolid(),{kind,n}=s,what=pick(['faces','edges','vertices']),c=countsOf(kind,n),seen=seenOf(s);
+    const s=someSolid(),{kind,n}=s,what=pick(['faces','edges','vertices']),counts=countsOf(kind,n),seen=seenOf(s);
     /* a drawing may show every vertex: leave out the hidden-vertex mistake then */
-    const others=mixUps(c,what);
+    const others=mixUps(counts,what);
     const miss={
       faces:[[seen.faces,'That’s the faces you can see. Count the ones at the back and on the bottom too.'],[n,kind==='prism'?'Those are the rectangles around the side. Add the 2 bases.':'Those are the triangles. Add the base.']],
       edges:[[seen.edges,'Count the dashed edges at the back too.'],kind==='prism'?[2*n,`Don’t forget the ${n} edges going up the sides.`]:[n,`That’s just the edges around the base. Add the ${n} going up to the top.`]],
-      vertices:[...(seen.vertices!==c.vertices?[[seen.vertices,'Count the hidden vertices at the back too.']]:[]),kind==='prism'?[n,`That’s one base. The other base has ${n} vertices too.`]:[n,'Don’t forget the vertex at the top.']],
+      vertices:[...(seen.vertices!==counts.vertices?[[seen.vertices,'Count the hidden vertices at the back too.']]:[]),kind==='prism'?[n,`That’s one base. The other base has ${n} vertices too.`]:[n,'Don’t forget the vertex at the top.']],
     }[what];
-    return {kind:'num',unit:what,fig:solidPic(s),answer:c[what],solid:s,
+    return {kind:'num',unit:what,fig:solidPic(s),answer:counts[what],solid:s,
       prompt:`How many ${what} does this ${s.name} have?`,
-      misc:miscOf(c[what],[...miss,...others]),
+      misc:miscOf(counts[what],[...miss,...others]),
       hint:HINT_PIC+(what==='faces'?' Count the bases, then the faces around the side.':' Count around one base first.'),
       explain:`A ${s.name} has ${howMany(kind,n,what)}.`};
   }
-  if(t==='name'){
+  if(type==='name'){
     /* name it by its base: never "rectangular prism" for a square prism, or "triangular pyramid" for one that is */
-    const s=someSolid(),{kind,n}=s,other=kind==='prism'?'pyramid':'prism',near=SOLID_N.filter(m=>m!==n&&Math.abs(m-n)<=2);
+    const s=someSolid(),{kind,n}=s,other=kind==='prism'?'pyramid':'prism',nearby=SOLID_N.filter(m=>m!==n&&Math.abs(m-n)<=2);
     const list=[[s.name,null],[`${BASE_NAME[n]} ${other}`,kind==='prism'?`A pyramid has one base, and triangles that meet at a point. This one has 2 bases joined by rectangles.`:`A prism has 2 matching bases joined by rectangles. This one has 1 base, and triangles that meet at a point.`],
-      [`${BASE_NAME[pick(near)]} ${kind}`,`Count the sides of the gold base: ${n}. It’s ${an(POLYGON[n])} ${POLYGON[n]}.`]];
+      [`${BASE_NAME[pick(nearby)]} ${kind}`,`Count the sides of the gold base: ${n}. It’s ${an(POLYGON[n])} ${POLYGON[n]}.`]];
     if(kind==='pyramid'&&n!==3)list.push(['triangular pyramid',`The triangles are its sides. A pyramid is named for its base, and the base is ${an(POLYGON[n])} ${POLYGON[n]}.`]);
     if(kind==='prism'&&n!==4)list.push(['rectangular prism',`The rectangles are its sides. A prism is named for its bases, and the bases are ${POLYGON[n]}s.`]);
-    return {...mcOf(list.filter(([l],i)=>list.findIndex(([m])=>m===l)===i).slice(0,4).map(([l,w])=>[up(l),w])),fig:{svg:()=>solidSvg(s,{W:300,bases:true})},solid:s,
+    return {...mcOf(list.filter(([label],i)=>list.findIndex(([other])=>other===label)===i).slice(0,4).map(([label,why])=>[up(label),why])),fig:{svg:()=>solidSvg(s,{W:300,bases:true})},solid:s,
       prompt:'What is this polyhedron called? The gold faces are its bases.',
       hint:`How many bases does it have: 1 or 2? And how many sides does a base have?`,
       explain:kind==='prism'?`2 matching ${POLYGON[n]} bases joined by ${n} rectangles: it’s ${an(s.name)} ${s.name}.`:`1 ${POLYGON[n]} base, and ${n} triangles that meet at a point: it’s ${an(s.name)} ${s.name}.`};
   }
-  if(t==='rule'){
+  if(type==='rule'){
     /* bases with more sides than can be drawn nicely: find the pattern */
-    const kind=pick(['prism','pyramid']),n=R(7,12),what=pick(['faces','edges','vertices']),c=countsOf(kind,n);
+    const kind=pick(['prism','pyramid']),n=R(7,12),what=pick(['faces','edges','vertices']),counts=countsOf(kind,n);
     const say=kind==='prism'?`A prism has two bases, and each base has ${n} sides.`:`A pyramid has a base with ${n} sides.`;
     const miss={
       faces:kind==='prism'?[[n,'Those are the rectangles around the side. Add the 2 bases.'],[n+1,'A prism has 2 bases, not 1.']]:[[n,'Those are the triangles. Add the base.'],[n+2,'A pyramid has only 1 base.']],
       edges:kind==='prism'?[[2*n,`That’s the edges around the 2 bases. Add the ${n} going up the sides.`],[n,'That’s one base. There are more edges.']]:[[n,`That’s the edges around the base. Add the ${n} going up to the top.`],[3*n,'That’s a prism. A pyramid has one base and edges up to one point.']],
       vertices:kind==='prism'?[[n,`That’s one base. The other base has ${n} too.`],[n+1,'That’s a pyramid. A prism has 2 bases and no top point.']]:[[n,'Don’t forget the vertex at the top.'],[2*n,'That’s a prism. A pyramid has one base and a single top vertex.']],
     }[what];
-    return {kind:'num',unit:what,fig:null,answer:c[what],
+    return {kind:'num',unit:what,fig:null,answer:counts[what],
       prompt:`${say} How many ${what} does it have?`,
-      misc:miscOf(c[what],[...miss,...mixUps(c,what)]),
+      misc:miscOf(counts[what],[...miss,...mixUps(counts,what)]),
       hint:kind==='prism'?'Picture a pentagonal prism: 2 pentagons joined by 5 rectangles. Now use this base instead.':'Picture a pentagonal pyramid: 1 pentagon, and 5 triangles meeting at the top. Now use this base instead.',
       explain:`It has ${howMany(kind,n,what)}.`};
   }
-  if(t==='not'){
+  if(type==='not'){
     /* pictures: one shape that isn't a polyhedron among polyhedra, or the other way around */
     const odd=Math.random()<.5,curvedKinds=shuffle(['cylinder','cone','sphere','open']),pic=(html,w)=>html.replace(/style="max-width:[\d.]+px"/,`style="max-width:${w}px"`);
     const solids=shuffle(SOLID_N.flatMap(n=>['prism','pyramid'].map(k=>[k,n]))).slice(0,3).map(([k,n])=>someSolid(k,n));
@@ -435,7 +500,8 @@ function genSolid(){
       hint:'A polyhedron is closed, and every face is a polygon: flat, with straight sides.',
       explain:`The ${s.name} is a polyhedron: it’s closed, and all ${s.F.length} of its faces are polygons.`};
   }
-  if(t==='why'){
+  if(type==='why'){
+    /* why a curved or open shape isn't a polyhedron */
     const k=pick(['cylinder','cone','sphere','open']),C=CURVED[k];
     const list=k==='open'
       ?[[C.why,null],['Its faces are curved.','Its faces are flat rectangles. The problem is the missing lid.'],['It has too few faces.','Some polyhedra have only 4 faces. What matters is that it’s closed and every face is a polygon.']]
@@ -445,7 +511,7 @@ function genSolid(){
       hint:'A polyhedron is closed, and every face is a polygon: flat, with straight sides.',
       explain:`${C.why} A polyhedron has to be closed, with every face a polygon.`};
   }
-  if(t==='net'){
+  if(type==='net'){
     /* which polyhedron a net folds into */
     const kind=pick(['prism','pyramid']),n=pick(SOLID_N),s=someSolid(kind,n),other=kind==='prism'?'pyramid':'prism',m=pick(SOLID_N.filter(v=>v!==n&&Math.abs(v-n)<=2));
     const net=netOf(kind,n,{a:n>6?1:1.4,h:kind==='prism'?2:1.8,top:R(0,n-1),bottom:R(0,n-1)});
@@ -467,18 +533,20 @@ function genSolid(){
 }
 
 /* ---------- Zone 5: squares & cubes ---------- */
+/* things to measure: [what, unit, dimensions (1 length, 2 area, 3 volume)] */
 const UNIT_Q=[['the length of a fence around a garden','ft',1],['the carpet covering a bedroom floor','ft',2],['the sand that fills a sandbox','ft',3],
   ['the wrapping paper covering a gift box','in',2],['the space inside a cereal box','in',3],['the height of a bookshelf','in',1],
   ['the paint covering a wall','m',2],['the water filling a swimming pool','m',3]];
 const DIM_MSG={1:'That measures length: a distance in one direction.',2:'Square units measure area: a flat surface to cover.',3:'Cubic units measure volume: space that gets filled.'};
 function genCube(){
-  const t=pick(['sq','cu','sqroot','cubeSA','cubeSA','cuberoot','units','expr']);
+  const type=pick(['sq','cu','sqroot','cubeSA','cubeSA','cuberoot','units','expr']);
   const f=new Fig();
-  if(t==='sq'||t==='sqroot'){
+  if(type==='sq'||type==='sqroot'){
+    /* n squared, or the side of a square from its area */
     /* not 2 squared (2 × 2 = 2 + 2 = 4) or the side of 16 (16 ÷ 4 = 4) */
-    let n;do n=t==='sq'?R(2,12):R(3,11);while(n===(t==='sq'?2:4));
-    f.poly([[0,0],[n,0],[n,n],[0,n]]);f.lbl(n/2,n+.8,t==='sq'?n:'?',t==='sq'?'':'q');
-    if(t==='sq')return {kind:'num',unit:'',fig:f,answer:n*n,
+    let n;do n=type==='sq'?R(2,12):R(3,11);while(n===(type==='sq'?2:4));
+    f.poly([[0,0],[n,0],[n,n],[0,n]]);f.lbl(n/2,n+.8,type==='sq'?n:'?',type==='sq'?'':'q');
+    if(type==='sq')return {kind:'num',unit:'',fig:f,answer:n*n,
       prompt:`What is ${n}<sup>2</sup>?`,
       hint:`${n}<sup>2</sup> is the area of a square with side ${n}. Count the grid squares, or multiply ${n} × ${n}.`,
       misc:[[2*n,`${n}<sup>2</sup> means ${n} × ${n}, not ${n} × 2.`],[n+2,`The small 2 means multiply ${n} by itself.`]],
@@ -489,10 +557,11 @@ function genCube(){
       misc:[[n*n/2,`Area is side × side. Find the number that times itself makes ${n*n}.`],[n*n/4,'Dividing by 4 works for perimeter, not area.']],
       explain:`${n} × ${n} = ${n*n}, so each side is ${n} units.`};
   }
-  if(t==='cu'||t==='cuberoot'){
+  if(type==='cu'||type==='cuberoot'){
+    /* n cubed, or the edge of a cube from its volume */
     const n=R(2,5);const V=n**3;
-    box(f,n,n,n,[t==='cu'?n:'?',null,null]);
-    if(t==='cu')return {kind:'num',unit:'',fig:f,answer:V,
+    box(f,n,n,n,[type==='cu'?n:'?',null,null]);
+    if(type==='cu')return {kind:'num',unit:'',fig:f,answer:V,
       prompt:`What is ${n}<sup>3</sup>?`,
       hint:`${n}<sup>3</sup> is the volume of a cube with edge ${n}: ${n} × ${n} × ${n}.`,
       misc:[[3*n,`${n}<sup>3</sup> means ${n} × ${n} × ${n}, not ${n} × 3.`],[n*n,`That is ${n}<sup>2</sup>. Cubed means one more factor of ${n}.`]],
@@ -503,30 +572,33 @@ function genCube(){
       misc:[[V/3,`Volume is edge × edge × edge. Find the number used 3 times as a factor.`]],
       explain:`${n} × ${n} × ${n} = ${V}, so each edge is ${n} units.`};
   }
-  if(t==='cubeSA'){
+  if(type==='cubeSA'){
+    /* a cube's surface area */
     /* not an edge of 6, where the volume (6 × 6 × 6) is also the surface area (6 · 6²) */
     let s;do s=R(2,9);while(s===6);
-    const d=box(f,s,s,s,[s,null,null]);
-    f.onHint();f.txt(s/2,d+s/2,s*s);f.txt((s+d)/2,d/2,s*s);f.txt(s+d/2,d/2+s/2,s*s);
+    const depth=box(f,s,s,s,[s,null,null]);
+    f.onHint();f.txt(s/2,depth+s/2,s*s);f.txt((s+depth)/2,depth/2,s*s);f.txt(s+depth/2,depth/2+s/2,s*s);
     return {kind:'num',unit:SQ,fig:f,answer:6*s*s,
       prompt:`Find the surface area of a cube with edges of ${s} units.`,
       hint:`A cube has 6 identical square faces. Each face is ${s} × ${s}.`,
       misc:[[s**3,'That is the volume. Surface area covers the 6 square faces.'],[4*s*s,'A cube has 6 faces, not 4.'],[s*s,'That is just one face. A cube has 6.'],[6*s,`Each face is ${s} × ${s} = ${s*s}. Multiply that by 6.`]],
       explain:`One face: ${s} × ${s} = ${s*s}. Six faces: 6 × ${s*s} = ${6*s*s} square units. (You can write it 6 · ${s}<sup>2</sup>.)`};
   }
-  if(t==='units'){
-    const [q,u,dim]=pick(UNIT_Q);
-    const lab=[u,u+'<sup>2</sup>',u+'<sup>3</sup>'];
+  if(type==='units'){
+    /* which unit fits: length, area, or volume */
+    const [what,unit,dim]=pick(UNIT_Q);
+    const labels=[unit,unit+'<sup>2</sup>',unit+'<sup>3</sup>'];
     const why={};[1,2,3].forEach(d=>{if(d!==dim)why['d'+d]=DIM_MSG[d];});
-    return {kind:'mc',fig:null,answer:'d'+dim,choices:[1,2,3].map(d=>({id:'d'+d,label:lab[d-1]})),why,
-      prompt:`Which unit fits <b>${q}</b>?`,
+    return {kind:'mc',fig:null,answer:'d'+dim,choices:[1,2,3].map(d=>({id:'d'+d,label:labels[d-1]})),why,
+      prompt:`Which unit fits <b>${what}</b>?`,
       hint:'Is it a distance (length), a surface to cover (area), or a space to fill (volume)?',
-      explain:DIM_MSG[dim]+` So use ${lab[dim-1]}.`};
+      explain:DIM_MSG[dim]+` So use ${labels[dim-1]}.`};
   }
+  /* expr: repeated multiplication as an exponent */
   let n=R(2,9),k=R(3,4);if(n===k)n++;
   const prod=Array(k).fill(n).join(' × ');
-  const ch=shuffle([{id:'a',label:`${n}<sup>${k}</sup>`},{id:'b',label:`${k}<sup>${n}</sup>`},{id:'c',label:`${n} × ${k}`},{id:'d',label:`${n*k}`}]);
-  return {kind:'mc',fig:null,answer:'a',choices:ch,
+  const choices=shuffle([{id:'a',label:`${n}<sup>${k}</sup>`},{id:'b',label:`${k}<sup>${n}</sup>`},{id:'c',label:`${n} × ${k}`},{id:'d',label:`${n*k}`}]);
+  return {kind:'mc',fig:null,answer:'a',choices,
     why:{b:'The big number is what gets multiplied. The small raised number counts how many times.',c:`${n} × ${k} is ${n} added ${k} times. Repeated multiplication uses an exponent.`,d:`${n*k} is ${n} × ${k}. The expression multiplies ${n} by itself.`},
     prompt:`Which means the same as ${prod}?`,
     hint:`Count how many times ${n} is used as a factor. That count becomes the small raised number.`,
@@ -534,18 +606,31 @@ function genCube(){
 }
 
 /* ---------- Zone 6: frame & subtract (shape inside a rectangle) ---------- */
+/* the pieces' colors, in order */
 const PCLS=['fa','fb2','fc','fd'];
+/* a piece cut off the rectangle: its corners, its two legs along the grid (h, v), its kind ('tri', 'rect', or 'base': a
+   triangle on the rectangle's edge), and its area */
 const piece=(pts,h,v,kind='tri')=>({pts,legs:[h,v],kind,area:kind==='rect'?h*v:h*v/2});
+/* a piece's area as worked: "3 × 4 ÷ 2 = 6" */
 const pieceWork=q=>q.kind==='rect'?`${q.legs[0]} × ${q.legs[1]} = ${fmt(q.area)}`:`${q.legs[0]} × ${q.legs[1]} ÷ 2 = ${fmt(q.area)}`;
+/* the center of a polygon (the average of its corners), for a label */
 const cen=P=>[P.reduce((s,p)=>s+p[0],0)/P.length,P.reduce((s,p)=>s+p[1],0)/P.length];
+/* a polygon's area by the shoelace formula: half the sum of each side's cross product (x1 y2 − x2 y1), which counts the
+   area swept from the origin, with the sign taken off */
 function shoelace(p){let s=0;for(let i=0;i<p.length;i++){const[x1,y1]=p[i],[x2,y2]=p[(i+1)%p.length];s+=x1*y2-x2*y1;}return Math.abs(s)/2;}
+/* the lengths along each side of the W by H rectangle, split wherever a corner of the shape sh touches that side */
 function sideLabels(f,W,H,sh){
+  /* put(middle, length) for each gap between the sorted values */
   const seg=(vals,put)=>{vals=[...new Set(vals)].sort((a,b)=>a-b);for(let i=0;i<vals.length-1;i++)put((vals[i]+vals[i+1])/2,vals[i+1]-vals[i]);};
   seg([0,W,...sh.filter(p=>p[1]===0).map(p=>p[0])],(m,v)=>f.lbl(m,-.8,v));
   seg([0,W,...sh.filter(p=>p[1]===H).map(p=>p[0])],(m,v)=>f.lbl(m,H+.8,v));
   seg([0,H,...sh.filter(p=>p[0]===0).map(p=>p[1])],(m,v)=>f.lbl(-.85,m,v));
   seg([0,H,...sh.filter(p=>p[0]===W).map(p=>p[1])],(m,v)=>f.lbl(W+.85,m,v));
 }
+/* A shape inside a W by H rectangle, with the pieces around it that get subtracted. kind: corner (a triangle touching three
+   sides), edge (a triangle with two corners on the left and right sides), quad or psym (a quadrilateral with a corner on each
+   side; psym a parallelogram), para (a parallelogram across the full height), or dent (a dart with a notch up from the bottom).
+   Returns {W, H, name, shape, pieces, extra?, notch?}, or null when the numbers don't work. */
 function shapeOf(t){
   if(t==='corner'){
     const W=R(6,11),H=R(4,8),b=R(1,W-1),c=R(1,H-1),A=[0,H],B=[b,0],C=[W,c];
@@ -580,16 +665,20 @@ function shapeOf(t){
   }
   return null;
 }
+/* The figure for shapeOf's shape: flipped and maybe turned at random, with the side lengths, the lettered pieces (in the build
+   layer), and each piece's area (in the hint). Returns {f, R: the rectangle's area, ans: the shape's area}, or null when
+   subtracting the pieces doesn't give the shape's real area. */
 function frameFig(s){
-  const {W,H}=s,fx=Math.random()<.5,fy=Math.random()<.5,tr=Math.random()<.5;
-  const T=([x,y])=>{if(fx)x=W-x;if(fy)y=H-y;return tr?[y,x]:[x,y];};
-  const W2=tr?H:W,H2=tr?W:H,sh=s.shape.map(T);
+  const {W,H}=s,flipX=Math.random()<.5,flipY=Math.random()<.5,turn=Math.random()<.5;
+  const T=([x,y])=>{if(flipX)x=W-x;if(flipY)y=H-y;return turn?[y,x]:[x,y];};
+  const W2=turn?H:W,H2=turn?W:H,sh=s.shape.map(T);
   s.pieces.forEach((q,i)=>{q.P=q.pts.map(T);q.k='ABCD'[i];});
-  const Rc=W*H,S=s.pieces.reduce((a,q)=>a+q.area,0),ans=Rc-S;
+  const rectArea=W*H,piecesArea=s.pieces.reduce((a,q)=>a+q.area,0),ans=rectArea-piecesArea;
   if(ans<=0||Math.abs(shoelace(sh)-ans)>.01)return null;
   const f=new Fig();
   f.poly([[0,0],[W2,0],[W2,H2],[0,H2]],'frame');
   f.poly(sh,'shape solid');
+  /* the notch's height, labeled beside it */
   if(s.notch){const a=T(s.notch[0]),b=T(s.notch[1]),v=a[0]===b[0];f.line(a[0],a[1],b[0],b[1],'hgt');f.lbl((a[0]+b[0])/2+(v?.8:0),(a[1]+b[1])/2+(v?0:.8),s.notch[2],'h');}
   sideLabels(f,W2,H2,sh);
   f.on('build');
@@ -598,32 +687,36 @@ function frameFig(s){
   f.onHint();
   s.pieces.forEach((q,i)=>f.poly(q.P,PCLS[i]));
   s.pieces.forEach(q=>f.lbl(...cen(q.P),`${q.k}: ${fmt(q.area)}`,'letter'));
-  return {f,R:Rc,ans};
+  return {f,R:rectArea,ans};
 }
+/* the worked answer, a line at a time */
 function frameWork(s,fr){
   return [`Rectangle: ${s.W} × ${s.H} = ${fr.R}`,...s.pieces.map(q=>`${q.k}: ${pieceWork(q)}`),
     `Shape: ${fr.R} − ${s.pieces.map(q=>fmt(q.area)).join(' − ')} = ${fmt(fr.ans)}`];
 }
+/* Worked lines with one mistake in them: a triangle not halved, a leg that's the whole side, the rectangle's area wrong, or
+   the last subtraction wrong. Returns {all: the lines, bad: the first wrong line, why}, or null when no mistake fits. */
 function spotLines(s,fr){
   const P=s.pieces;
-  for(const e of shuffle(['halve','halve','leg','rect','final'])){
+  for(const mistake of shuffle(['halve','halve','leg','rect','final'])){
     let rc=fr.R,rLine=`Rectangle: ${s.W} × ${s.H} = ${fr.R}`,bad,why;
     const vals=P.map(q=>q.area),lines=P.map(q=>`${q.k}: ${pieceWork(q)}`);
-    if(e==='rect'){rc=fr.R+pick([s.W,s.H]);rLine=`Rectangle: ${s.W} × ${s.H} = ${rc}`;bad=0;why=`${s.W} × ${s.H} is ${fr.R}, not ${rc}.`;}
-    else if(e==='halve'||e==='leg'){
+    if(mistake==='rect'){rc=fr.R+pick([s.W,s.H]);rLine=`Rectangle: ${s.W} × ${s.H} = ${rc}`;bad=0;why=`${s.W} × ${s.H} is ${fr.R}, not ${rc}.`;}
+    else if(mistake==='halve'||mistake==='leg'){
       const i=pick(P.map((q,j)=>j).filter(j=>P[j].kind!=='rect')),q=P[i];
-      if(e==='halve'){vals[i]=q.legs[0]*q.legs[1];lines[i]=`${q.k}: ${q.legs[0]} × ${q.legs[1]} = ${vals[i]}`;why=`Piece ${q.k} is a triangle, so it needs ÷ 2. It should be ${fmt(q.area)}.`;}
+      if(mistake==='halve'){vals[i]=q.legs[0]*q.legs[1];lines[i]=`${q.k}: ${q.legs[0]} × ${q.legs[1]} = ${vals[i]}`;why=`Piece ${q.k} is a triangle, so it needs ÷ 2. It should be ${fmt(q.area)}.`;}
       else{const full=[s.W,s.H],j=pick([0,1]);if(q.legs[j]===full[j])continue;const L=q.legs.slice();L[j]=full[j];vals[i]=L[0]*L[1]/2;
         lines[i]=`${q.k}: ${L[0]} × ${L[1]} ÷ 2 = ${fmt(vals[i])}`;why=`Piece ${q.k} used ${full[j]}, the whole side of the rectangle. Its side is only ${q.legs[j]}, so it should be ${fmt(q.area)}.`;}
       bad=i+1;
     }
     let fin=rc-vals.reduce((a,b)=>a+b,0);
-    if(e==='final'){fin=fr.ans+pick([-3,-2,2,3,5]);bad=P.length+1;why=`${fr.R} − ${P.map(q=>fmt(q.area)).join(' − ')} is ${fmt(fr.ans)}, not ${fmt(fin)}.`;}
+    if(mistake==='final'){fin=fr.ans+pick([-3,-2,2,3,5]);bad=P.length+1;why=`${fr.R} − ${P.map(q=>fmt(q.area)).join(' − ')} is ${fmt(fr.ans)}, not ${fmt(fin)}.`;}
     if(fin<=0)continue;
     return {all:[rLine,...lines,`Shape: ${rc} − ${vals.map(fmt).join(' − ')} = ${fmt(fin)}`],bad,why};
   }
   return null;
 }
+/* reverse: the rectangle's width, from the area of the parallelogram in it (base, height H) and one corner triangle's width p */
 function makeReverse(){
   /* not when area − corner width happens to be the width too (height 3, base 3, corner 3) */
   let H,p,base;do{H=R(3,6);p=R(1,4);base=R(3,7);}while(base*H-p===base+p);
@@ -639,11 +732,15 @@ function makeReverse(){
 }
 /* a shape with a hole cut out (like the Lesson 3 practice problems): the whole shape minus the hole. Lengths come in
    pieces along the sides, so students add them up first. p.cut is for checks.js. */
+/* the mistakes that aren't the answer or each other, and are positive */
 function holeMisc(ans,m){const seen=new Set([ans]);return m.filter(([v])=>v>0&&!seen.has(v)&&seen.add(v));}
+/* Build it for a shape with a hole: the whole shape and the hole (A, drawn in the build layer). q: the hole's kind, area, and label */
 function holeBuild(f,hole,whole,wholeLabel,wholeKind,q){
   f.on('build');f.poly(hole,'pc fb2','data-k="A"');f.lbl(...cen(hole),'A','letter');
   return {R:whole,label:wholeLabel,kind:wholeKind,intro:'Find the area of the whole shape, as if nothing were cut out, and of the hole (A).',pieces:[{k:'A',P:hole,...q}]};
 }
+/* A triangle with a rectangle (or square) cut out of its base: the base is a + w + b with the hole w wide and h tall, and the
+   height is t above the hole plus h. The apex is at px. */
 function makeTriHole(){
   const a=R(2,5),b=R(2,5),w=R(2,4),h=Math.random()<.5?w:R(2,3),t=R(2,4),W=a+w+b,H=h+t,px=R(a+1,a+w-1);
   if((W*H)%2)return null;
@@ -666,6 +763,7 @@ function makeTriHole(){
       [T-S/2,`The hole is a ${sq}, not a triangle, so don’t halve it.`]]),
     explain:`Base: ${a} + ${w} + ${b} = ${W}. Height: ${t} + ${h} = ${H}.<br>Whole triangle: ${W} × ${H} ÷ 2 = ${T}.<br>Hole: ${w} × ${h} = ${S}.<br>Shaded: ${T} − ${S} = ${fmt(ans)} square units.`};
 }
+/* A rectangle with a triangle cut out of its top edge: the top is a + b + c, the triangle b wide and h deep with its point at x */
 function makeRectHole(){
   const a=R(1,4),b=R(3,6),c=R(1,4),W=a+b+c,H=R(5,7),h=R(3,H-2),x=a+R(1,b-1),A=W*H,T=b*h/2,ans=A-T;
   if(A>80||(b*h)%2)return null;
@@ -683,40 +781,42 @@ function makeRectHole(){
       [(a+c)*H-T,'The rectangle’s width runs all the way across the bottom, under the hole too.']]),
     explain:`Width: ${a} + ${b} + ${c} = ${W}.<br>Whole rectangle: ${W} × ${H} = ${A}.<br>Hole: ${b} × ${h} ÷ 2 = ${T}.<br>Shaded: ${A} − ${T} = ${fmt(ans)} square units.`};
 }
+/* a frame problem of kind t (see genFrame's pool), or null when the numbers don't work out (genFrame tries again) */
 function makeFrame(t){
   if(t==='reverse')return makeReverse();
   if(t==='trihole')return makeTriHole();
   if(t==='recthole')return makeRectHole();
   const s=shapeOf(t==='spot'?pick(['corner','edge','quad']):t);if(!s)return null;
-  const fr=frameFig(s);if(!fr)return null;
-  const work=frameWork(s,fr);
+  const framed=frameFig(s);if(!framed)return null;
+  const work=frameWork(s,framed);
   let hint='Draw the rectangle around the shape. Find the area of each unshaded piece, then subtract them all from the rectangle.';
   if(s.notch)hint+=' Piece A sits on the rectangle’s edge: ½ × that edge × the height up to the dent.';
   if(t==='spot'){
-    const sp=spotLines(s,fr);if(!sp)return null;
-    const why={};sp.all.forEach((l,i)=>{if(i<sp.bad)why['l'+i]='That line checks out. Is every triangle halved? Is every length right?';else if(i>sp.bad)why['l'+i]='That line uses an earlier mistake. Find where the mistake starts.';});
-    return {kind:'mc',stack:true,showBuild:true,fig:fr.f,answer:'l'+sp.bad,why,
-      choices:sp.all.map((l,i)=>({id:'l'+i,label:l})),
+    const spotted=spotLines(s,framed);if(!spotted)return null;
+    const why={};spotted.all.forEach((l,i)=>{if(i<spotted.bad)why['l'+i]='That line checks out. Is every triangle halved? Is every length right?';else if(i>spotted.bad)why['l'+i]='That line uses an earlier mistake. Find where the mistake starts.';});
+    return {kind:'mc',stack:true,showBuild:true,fig:framed.f,answer:'l'+spotted.bad,why,
+      choices:spotted.all.map((l,i)=>({id:'l'+i,label:l})),
       prompt:`A classmate found the area of the shaded ${s.name}. Which line has the first mistake?`,
       hint:'Check each line against the grid: count the sides of each piece, and make sure every triangle is halved.',
-      explain:`${sp.why}<br><br>Correct work:<br>${work.join('<br>')} square units.`};
+      explain:`${spotted.why}<br><br>Correct work:<br>${work.join('<br>')} square units.`};
   }
-  const R0=fr.R,S=R0-fr.ans,tris=s.pieces.filter(q=>q.kind!=='rect').reduce((a,q)=>a+q.area,0);
+  const R0=framed.R,S=R0-framed.ans,tris=s.pieces.filter(q=>q.kind!=='rect').reduce((a,q)=>a+q.area,0);
   const misc=[[R0,'That’s the whole rectangle. Now subtract the unshaded pieces.'],[S,'That’s the unshaded area around the shape. Subtract it from the rectangle.'],
-    [R0-S-tris,'The triangles weren’t halved. Each corner triangle is half of a rectangle.'],[fr.ans*2,'Check your subtraction. Find each piece’s area, then subtract them from the rectangle.']];
-  s.pieces.forEach(q=>{misc.push([fr.ans+q.area,'One unshaded piece wasn’t subtracted.']);misc.push([fr.ans-q.area,q.kind==='rect'?'One piece was subtracted twice.':'A triangle wasn’t halved, or a piece was subtracted twice.']);});
-  return {kind:'num',unit:SQ,fig:fr.f,answer:fr.ans,hint,
-    misc:misc.filter(([v])=>v>0&&Math.abs(v-fr.ans)>.01),
+    [R0-S-tris,'The triangles weren’t halved. Each corner triangle is half of a rectangle.'],[framed.ans*2,'Check your subtraction. Find each piece’s area, then subtract them from the rectangle.']];
+  s.pieces.forEach(q=>{misc.push([framed.ans+q.area,'One unshaded piece wasn’t subtracted.']);misc.push([framed.ans-q.area,q.kind==='rect'?'One piece was subtracted twice.':'A triangle wasn’t halved, or a piece was subtracted twice.']);});
+  return {kind:'num',unit:SQ,fig:framed.f,answer:framed.ans,hint,
+    misc:misc.filter(([v])=>v>0&&Math.abs(v-framed.ans)>.01),
     prompt:`Find the area of the shaded ${s.name}.`,
     explain:work.join('<br>')+' square units.'+(s.extra?'<br>'+s.extra:''),
     build:{R:R0,pieces:s.pieces}};
 }
+/* dented shapes join the frame zone at 2 stars */
 const dentsOpen=()=>Game.stars('frame')>=2;
 function genFrame(){
   const pool=['corner','corner','edge','quad','quad','para','psym','spot','spot','reverse','trihole','trihole','recthole'];
   if(dentsOpen())pool.push('dent','dent','dent','dent');
-  const t=pick(pool);
-  for(let i=0;i<60;i++){const p=makeFrame(t);if(p)return p;}
+  const kind=pick(pool);
+  for(let i=0;i<60;i++){const problem=makeFrame(kind);if(problem)return problem;}
   return makeFrame('reverse');
 }
 

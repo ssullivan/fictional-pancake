@@ -1,34 +1,38 @@
 /* Learn Area & Surface Area (Grade 6 Unit 1), chapter 6: Prisms, pyramids & nets. Its widgets and steps; loaded by prisms-and-pyramids.html. */
 /* build a prism or pyramid on any base from triangle to octagon */
 function wBuild(el){
-  const q=Q(el),st={n:5};let kind='prism',api=null;
+  const q=Q(el),values={n:5};let kind='prism',api=null;
   el.innerHTML=seg('Kind',[['prism','Prism'],['pyramid','Pyramid']])+`<div class="wrow">${stepper('n','Sides on the base')}</div><div data-st></div>`;
-  const make=()=>solidOf(kind,st.n,{a:st.n>6?1.4:2,h:kind==='prism'?2.4:2.6});
+  const make=()=>solidOf(kind,values.n,{a:values.n>6?1.4:2,h:kind==='prism'?2.4:2.6});
+  /* the readout: its name, and its faces, edges, and vertices worked out from the base */
   const read=s=>{
-    const n=s.n,P=POLYGON[n],c=countsOf(kind,n);
+    const n=s.n,P=POLYGON[n],counts=countsOf(kind,n);
     return `${/^[aeiou]/.test(s.name)?'An':'A'} <b>${s.name}</b>. `+(kind==='prism'
-      ?`Faces: 2 ${P}s + ${n} rectangles = <b>${c.faces}</b>. Edges: ${n} + ${n} + ${n} = <b>${c.edges}</b>. Vertices: ${n} + ${n} = <b>${c.vertices}</b>.`
-      :`Faces: 1 ${P} + ${n} triangles = <b>${c.faces}</b>. Edges: ${n} + ${n} = <b>${c.edges}</b>. Vertices: ${n} + 1 = <b>${c.vertices}</b>.`);
+      ?`Faces: 2 ${P}s + ${n} rectangles = <b>${counts.faces}</b>. Edges: ${n} + ${n} + ${n} = <b>${counts.edges}</b>. Vertices: ${n} + ${n} = <b>${counts.vertices}</b>.`
+      :`Faces: 1 ${P} + ${n} triangles = <b>${counts.faces}</b>. Edges: ${n} + ${n} = <b>${counts.edges}</b>. Vertices: ${n} + 1 = <b>${counts.vertices}</b>.`);
   };
   api=polyView(q('st'),make(),{bases:true,read});
-  const draw=()=>{press(el,kind);q('n').textContent=st.n;api.set(make());};
-  steppers(el,st,{n:[3,8]},draw);
+  const draw=()=>{press(el,kind);q('n').textContent=values.n;api.set(make());};
+  steppers(el,values,{n:[3,8]},draw);
   el.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{kind=b.dataset.m;draw();});
-  press(el,kind);q('n').textContent=st.n;
+  press(el,kind);q('n').textContent=values.n;
   return ()=>api.dispose();
 }
 /* fold a net: a list of [label, kind, sides, options] */
 const foldList=(list,read)=>el=>{
   const q=Q(el);let at=0,api=null;
-  el.innerHTML=seg('Net',list.map(([l],i)=>[i,l]))+'<div data-st></div><p class="readout" data-say></p>';
-  const go=()=>{if(api)api.dispose();const [,kind,n,o]=list[at];press(el,at);api=solid3D(q('st'),netOf(kind,n,o),{fold:0,slider:true,labels:false});q('say').innerHTML=read(list[at]);};
+  el.innerHTML=seg('Net',list.map(([label],i)=>[i,label]))+'<div data-st></div><p class="readout" data-say></p>';
+  /* show the picked net, unfolded */
+  const go=()=>{if(api)api.dispose();const [,kind,n,options]=list[at];press(el,at);api=solid3D(q('st'),netOf(kind,n,options),{fold:0,slider:true,labels:false});q('say').innerHTML=read(list[at]);};
   el.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{if(+b.dataset.m!==at){at=+b.dataset.m;go();}});
   go();
   return ()=>api&&api.dispose();
 };
+/* the nets to fold: Tyler's (a square prism, or is it a cube?), and four more */
 const TYLER=[['Square prism','prism',4,{a:1,h:2.2}],['Cube','prism',4,{a:1.6,h:1.6}]];
 const NETS=[['Triangular prism','prism',3,{a:1.8,h:2.4}],['Triangular pyramid','pyramid',3,{a:2.2,h:1.9}],['Pentagonal pyramid','pyramid',5,{a:1.6,h:1.8}],['Hexagonal prism','prism',6,{a:1.1,h:2.2}]];
-const netSay=([l,kind,n])=>`This net has ${kind==='prism'?`2 ${POLYGON[n]}s and ${n} rectangles`:`1 ${POLYGON[n]} and ${n} triangles`}. Fold it into a <b>${l.toLowerCase()}</b>.`;
+/* what a net is made of, and what it folds into */
+const netSay=([label,kind,n])=>`This net has ${kind==='prism'?`2 ${POLYGON[n]}s and ${n} rectangles`:`1 ${POLYGON[n]} and ${n} triangles`}. Fold it into a <b>${label.toLowerCase()}</b>.`;
 
 /* the quick checks' figures */
 const F={
