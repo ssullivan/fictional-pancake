@@ -21,7 +21,8 @@
 .flat.gone{opacity:.3}
 .rod.tr rect{fill:var(--good)}
 .unit1.c{fill:var(--good)}
-/* place-value charts (pvChart) */
+/* place-value charts (pvChart): p0, p1, p2 color hundreds, tens, and ones (and again for thousands); hi the outlined column;
+   per a period heading (Thousands, Ones); pb the line between periods; dp the decimal point after the ones; pvb a tappable digit */
 table.pv{border-collapse:collapse;margin:0 auto 12px;font:700 22px var(--mono)}
 table.pv th{color:var(--dim);font-size:14px;padding:6px 10px}
 table.pv td{border:1.5px solid rgba(170,205,255,.4);padding:8px 18px;text-align:center}
@@ -36,7 +37,8 @@ table.pv td.dp::after{content:'.';position:absolute;right:-5px;bottom:4px;color:
 .pvb{all:unset;cursor:pointer;display:block;min-width:1ch;border-radius:6px;padding:0 4px}
 .pvb:hover,.pvb:focus-visible{background:rgba(255,201,60,.2)}
 .pvb[aria-pressed="true"]{background:#fff;color:#0a2340}
-/* the standard algorithm (algFig) */
+/* the standard algorithm (algFig): adg a digit (ares in the answer); amk a carried 1 or rewritten digit above; axd the line
+   crossing out a digit; aline the line over the answer; acur the outline on the column to work next */
 .adg{fill:var(--chalk);font:700 26px var(--mono);text-anchor:middle;dominant-baseline:central}
 .adg.ares{fill:var(--gold)}
 .amk{fill:var(--cyan);font:700 17px var(--mono);text-anchor:middle;dominant-baseline:central}

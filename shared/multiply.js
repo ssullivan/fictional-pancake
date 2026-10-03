@@ -7,6 +7,7 @@
    chart(max, cls, {lo, tap})        a number chart, 10 to a row, with each square colored by cls(v) (svg)
    ctr(x, y, cls), arrayFig(r, c, {band, …}), ARRAY   a counter (markup), and an array of counters in rows and columns (svg)
    groupsFig(g, n)                   g equal groups of n counters, each group in a circle (svg) */
+/* the factors of n, smallest first */
 const factors=n=>range(n).map(i=>i+1).filter(d=>n%d===0);
 /* factor pairs [a, b] with a ≤ b */
 const pairsOf=n=>factors(n).filter(a=>a*a<=n).map(a=>[a,n/a]);
@@ -14,51 +15,59 @@ const isPrime=n=>factors(n).length===2;
 /* A number line from 0 to max with k hops of n from 0 (the multiples of n). mark: a number to point at (cyan).
    cls: 'r' or 'b' draws the hops red or blue instead of gold. nums: how many multiples after 0 get their number (default all). */
 function hopLine(n,max,k,{mark=null,cls='',nums=Infinity,label}={}){
-  const W=600,X=20,u=(W-2*X)/max,Y=70,x=v=>X+v*u,h=Math.min(48,n*u*.55);
-  let o=`<line class="axis" x1="${X}" y1="${Y}" x2="${x(max)}" y2="${Y}"/>`;
-  if(u>=5)range(max+1).forEach(v=>{if(v%n)o+=`<line class="tick mn" x1="${x(v)}" y1="${Y-5}" x2="${x(v)}" y2="${Y+5}"/>`;});
+  /* unitW: pixels per 1; hopH: how high a hop's curve reaches (a control point twice as high), up to 48 */
+  const width=600,left=20,unitW=(width-2*left)/max,lineY=70,xOf=v=>left+v*unitW,hopH=Math.min(48,n*unitW*.55);
+  let markup=`<line class="axis" x1="${left}" y1="${lineY}" x2="${xOf(max)}" y2="${lineY}"/>`;
+  /* small ticks at every whole number that isn't a multiple, when there's room for them */
+  if(unitW>=5)range(max+1).forEach(v=>{if(v%n)markup+=`<line class="tick mn" x1="${xOf(v)}" y1="${lineY-5}" x2="${xOf(v)}" y2="${lineY+5}"/>`;});
+  /* tall ticks at the multiples; their numbers are dim (dm) until a hop reaches them */
   range(Math.floor(max/n)+1).forEach(i=>{
     const v=i*n;
-    o+=`<line class="tick" x1="${x(v)}" y1="${Y-9}" x2="${x(v)}" y2="${Y+9}"/>`+(i>nums?'':`<text class="lbl s${v===mark?' cy':i&&i<=k?'':' dm'}" x="${x(v)}" y="${Y+24}">${v}</text>`);
+    markup+=`<line class="tick" x1="${xOf(v)}" y1="${lineY-9}" x2="${xOf(v)}" y2="${lineY+9}"/>`
+      +(i>nums?'':`<text class="lbl s${v===mark?' cy':i&&i<=k?'':' dm'}" x="${xOf(v)}" y="${lineY+24}">${v}</text>`);
   });
   range(k).forEach(i=>{
-    const a=x(i*n),b=x((i+1)*n);
-    o+=`<path class="hop ${cls}" d="M${a},${Y-3} Q${(a+b)/2},${Y-3-2*h} ${b},${Y-3}"/><circle class="land ${cls}" cx="${b}" cy="${Y}" r="5"/>`;
+    const xa=xOf(i*n),xb=xOf((i+1)*n);
+    markup+=`<path class="hop ${cls}" d="M${xa},${lineY-3} Q${(xa+xb)/2},${lineY-3-2*hopH} ${xb},${lineY-3}"/><circle class="land ${cls}" cx="${xb}" cy="${lineY}" r="5"/>`;
   });
   if(mark!==null){
-    o+=`<polygon class="mark" points="${x(mark)},${Y+34} ${x(mark)-7},${Y+46} ${x(mark)+7},${Y+46}"/>`;
-    if(mark%n)o+=`<text class="lbl s cy" x="${x(mark)}" y="${Y+60}">${mark}</text>`;
+    /* an arrow under the line pointing up at mark, with its number under that when it isn't a multiple (which has one already) */
+    markup+=`<polygon class="mark" points="${xOf(mark)},${lineY+34} ${xOf(mark)-7},${lineY+46} ${xOf(mark)+7},${lineY+46}"/>`;
+    if(mark%n)markup+=`<text class="lbl s cy" x="${xOf(mark)}" y="${lineY+60}">${mark}</text>`;
   }
-  return svgWrap(W,Y+(mark!==null?70:34),o,label||`Number line from 0 to ${max} with ${k} hops of ${n}`+(mark!==null?`, pointing at ${mark}`:''));
+  return svgWrap(width,lineY+(mark!==null?70:34),markup,label||`Number line from 0 to ${max} with ${k} hops of ${n}`+(mark!==null?`, pointing at ${mark}`:''));
 }
 /* n tiles in `rows` equal rows; tiles that don't fit a full column are left over (red) */
 function tiles(rows,n,label){
-  const cols=Math.floor(n/rows),left=n-rows*cols,g=left?8:0,s=Math.min(28,(540-g)/(cols+(left?1:0)),280/rows);
-  let o='';
-  range(rows).forEach(r=>range(cols).forEach(c=>{o+=`<rect class="ftile" x="${4+c*s}" y="${4+r*s}" width="${s}" height="${s}"/>`;}));
-  range(left).forEach(r=>{o+=`<rect class="ftile left" x="${4+cols*s+g}" y="${4+r*s}" width="${s}" height="${s}"/>`;});
-  return svgWrap(8+cols*s+(left?g+s:0),8+rows*s,o,label||(left?`${n} tiles in ${rows} rows of ${cols}, with ${left} left over`:`${n} tiles in ${rows} rows of ${cols}`));
+  /* the leftovers go in a column of their own, gap pixels to the right; tiles shrink to fit 540 wide and 280 tall (28 at most) */
+  const cols=Math.floor(n/rows),leftover=n-rows*cols,gap=leftover?8:0,size=Math.min(28,(540-gap)/(cols+(leftover?1:0)),280/rows);
+  let markup='';
+  range(rows).forEach(r=>range(cols).forEach(c=>{markup+=`<rect class="ftile" x="${4+c*size}" y="${4+r*size}" width="${size}" height="${size}"/>`;}));
+  range(leftover).forEach(r=>{markup+=`<rect class="ftile left" x="${4+cols*size+gap}" y="${4+r*size}" width="${size}" height="${size}"/>`;});
+  return svgWrap(8+cols*size+(leftover?gap+size:0),8+rows*size,markup,label||(leftover?`${n} tiles in ${rows} rows of ${cols}, with ${leftover} left over`:`${n} tiles in ${rows} rows of ${cols}`));
 }
 /* every rectangle n tiles make, side by side, each labelled rows × columns */
 function allRects(n){
-  const P=pairsOf(n),G=26,s=Math.min(18,(560-G*(P.length-1))/P.reduce((t,[,b])=>t+b,0)),H=P[P.length-1][0]*s;
-  let o='',x=4;
-  P.forEach(([a,b])=>{
-    range(a).forEach(r=>range(b).forEach(c=>{o+=`<rect class="ftile" x="${x+c*s}" y="${4+r*s}" width="${s}" height="${s}"/>`;}));
-    o+=`<text class="lbl s" x="${x+b*s/2}" y="${H+24}">${a} × ${b}</text>`;
-    x+=b*s+G;
+  /* one tile size for all of them, so they fit 560 wide (18 at most); the tallest rectangle (the last pair) sets the height */
+  const pairs=pairsOf(n),gap=26,size=Math.min(18,(560-gap*(pairs.length-1))/pairs.reduce((t,[,b])=>t+b,0)),tallest=pairs[pairs.length-1][0]*size;
+  let markup='',x=4;
+  pairs.forEach(([a,b])=>{
+    range(a).forEach(r=>range(b).forEach(c=>{markup+=`<rect class="ftile" x="${x+c*size}" y="${4+r*size}" width="${size}" height="${size}"/>`;}));
+    markup+=`<text class="lbl s" x="${x+b*size/2}" y="${tallest+24}">${a} × ${b}</text>`;
+    x+=b*size+gap;
   });
-  return svgWrap(Math.max(x-G+4,80),H+40,o,`Rectangles made of ${n} tiles: `+P.map(([a,b])=>`${a} by ${b}`).join(', '));
+  return svgWrap(Math.max(x-gap+4,80),tallest+40,markup,`Rectangles made of ${n} tiles: `+pairs.map(([a,b])=>`${a} by ${b}`).join(', '));
 }
 /* A chart of lo to max, 10 in a row. cls(v): classes for that number's square ('a' gold, 'b' blue, 'ab' green, 'one' gray, 'cur' outlined).
    tap: squares can be tapped (data-v); tap 'cand' makes each square a tap answer for engine.js instead (.cand, data-id = the number). */
 function chart(max,cls,{lo=1,tap=false,label}={}){
-  const C=44;let o='';
+  const cellSize=44;let markup='';
   range(max-lo+1).forEach(i=>{
-    const v=lo+i,x=2+i%10*C,y=2+Math.floor(i/10)*C;
-    o+=`<g class="${tap==='cand'?`cand hc ${cls(v)||''}" data-id="${v}" tabindex="0" role="button" aria-label="${v}"`:`hc ${cls(v)||''}"${tap?` data-v="${v}"`:''}`}><rect x="${x}" y="${y}" width="${C}" height="${C}"/><text class="lbl s" x="${x+C/2}" y="${y+C/2}">${v}</text></g>`;
+    const v=lo+i,x=2+i%10*cellSize,y=2+Math.floor(i/10)*cellSize;
+    const attrs=tap==='cand'?`class="cand hc ${cls(v)||''}" data-id="${v}" tabindex="0" role="button" aria-label="${v}"`:`class="hc ${cls(v)||''}"${tap?` data-v="${v}"`:''}`;
+    markup+=`<g ${attrs}><rect x="${x}" y="${y}" width="${cellSize}" height="${cellSize}"/><text class="lbl s" x="${x+cellSize/2}" y="${y+cellSize/2}">${v}</text></g>`;
   });
-  return svgWrap(10*C+4,Math.ceil((max-lo+1)/10)*C+4,o,label||`Numbers ${lo} to ${max}`);
+  return svgWrap(10*cellSize+4,Math.ceil((max-lo+1)/10)*cellSize+4,markup,label||`Numbers ${lo} to ${max}`);
 }
 /* a counter at x, y (cls 'a' gold, 'b' blue, plus 'moved' for a white ring) */
 const ctr=(x,y,cls='a',r=14)=>`<g class="ctr ${cls}"><circle cx="${x}" cy="${y}" r="${r}"/></g>`;
@@ -68,27 +77,36 @@ const ctr=(x,y,cls='a',r=14)=>`<g class="ctr ${cls}"><circle cx="${x}" cy="${y}"
    tap: every counter can be tapped (data-i = row × c + column). */
 const ARRAY={g:46,pad:10};
 function arrayFig(r,c,{band=null,k=-1,sum=false,hi=null,tap=false,label}={}){
-  const G=ARRAY.g,AP=ARRAY.pad,cx=j=>AP+G/2+j*G,cy=i=>AP+G/2+i*G,rowB=(i,cls='')=>`<rect class="band ${cls}" x="${AP+3}" y="${AP+i*G+3}" width="${c*G-6}" height="${G-6}" rx="${(G-6)/2}"/>`,
-    colB=(j,cls='b')=>`<rect class="band ${cls}" x="${AP+j*G+3}" y="${AP+3}" width="${G-6}" height="${r*G-6}" rx="${(G-6)/2}"/>`;
-  let o='';
-  if(band==='r')range(k<0?r:k).forEach(i=>{o+=rowB(i)+`<text class="lbl gd" x="${AP+c*G+22}" y="${cy(i)}">${sum?c*(i+1):c}</text>`;});
-  if(band==='c')range(k<0?c:k).forEach(j=>{o+=colB(j)+`<text class="lbl cy" x="${cx(j)}" y="${AP+r*G+14}">${sum?r*(j+1):r}</text>`;});
-  if(hi)o+=rowB(hi[0])+colB(hi[1]);
+  const spacing=ARRAY.g,pad=ARRAY.pad,colX=j=>pad+spacing/2+j*spacing,rowY=i=>pad+spacing/2+i*spacing,
+    /* a rounded band around row i, or column j */
+    rowBand=(i,cls='')=>`<rect class="band ${cls}" x="${pad+3}" y="${pad+i*spacing+3}" width="${c*spacing-6}" height="${spacing-6}" rx="${(spacing-6)/2}"/>`,
+    colBand=(j,cls='b')=>`<rect class="band ${cls}" x="${pad+j*spacing+3}" y="${pad+3}" width="${spacing-6}" height="${r*spacing-6}" rx="${(spacing-6)/2}"/>`;
+  let markup='';
+  /* row bands are counted at the right end of each row, column bands under each column */
+  if(band==='r')range(k<0?r:k).forEach(i=>{markup+=rowBand(i)+`<text class="lbl gd" x="${pad+c*spacing+22}" y="${rowY(i)}">${sum?c*(i+1):c}</text>`;});
+  if(band==='c')range(k<0?c:k).forEach(j=>{markup+=colBand(j)+`<text class="lbl cy" x="${colX(j)}" y="${pad+r*spacing+14}">${sum?r*(j+1):r}</text>`;});
+  if(hi)markup+=rowBand(hi[0])+colBand(hi[1]);
   range(r*c).forEach(n=>{
-    const i=Math.floor(n/c),j=n%c,sel=hi&&hi[0]===i&&hi[1]===j;
-    o+=tap?`<g data-i="${n}">${ctr(cx(j),cy(i),sel?'a moved':'a',16)}<rect class="hit" x="${AP+j*G}" y="${AP+i*G}" width="${G}" height="${G}" rx="8"/></g>`:ctr(cx(j),cy(i),'a',16);
+    /* counter n is in row n ÷ c, column n % c */
+    const i=Math.floor(n/c),j=n%c,picked=hi&&hi[0]===i&&hi[1]===j;
+    markup+=tap
+      ?`<g data-i="${n}">${ctr(colX(j),rowY(i),picked?'a moved':'a',16)}<rect class="hit" x="${pad+j*spacing}" y="${pad+i*spacing}" width="${spacing}" height="${spacing}" rx="8"/></g>`
+      :ctr(colX(j),rowY(i),'a',16);
   });
-  return svgWrap(2*AP+c*G+(band==='r'?44:0),2*AP+r*G+(band==='c'?26:0),o,label||`An array: ${r} row${r===1?'':'s'} with ${c} in each row`);
+  return svgWrap(2*pad+c*spacing+(band==='r'?44:0),2*pad+r*spacing+(band==='c'?26:0),markup,label||`An array: ${r} row${r===1?'':'s'} with ${c} in each row`);
 }
 /* g equal groups of n (up to 10 of each): a circle for each group, with n counters in it */
 function groupsFig(g,n,{label}={}){
-  const C=104,R=44,D=19,per=g<=5?g:Math.ceil(g/2),rows=n<=4?1:n<=8?2:3,left=[];
-  let m=n;range(rows).forEach(i=>{const k=Math.ceil(m/(rows-i));left.push(k);m-=k;});
-  let o='';
+  /* each group gets a cellSize square; up to 5 groups go in one row, more in two rows */
+  const cellSize=104,plateR=44,spacing=19,perRow=g<=5?g:Math.ceil(g/2),rows=n<=4?1:n<=8?2:3,perLine=[];
+  /* the counters in a group split into `rows` lines as evenly as they go, the longer lines first (5 is 3 then 2) */
+  let toPlace=n;range(rows).forEach(i=>{const k=Math.ceil(toPlace/(rows-i));perLine.push(k);toPlace-=k;});
+  let markup='';
   range(g).forEach(k=>{
-    const cx=C/2+k%per*C,cy=C/2+Math.floor(k/per)*C;
-    o+=`<circle class="plate" cx="${cx}" cy="${cy}" r="${R}"/>`;
-    left.forEach((cnt,i)=>range(cnt).forEach(j=>{o+=ctr(cx+(j-(cnt-1)/2)*D,cy+(i-(rows-1)/2)*D,'a',8);}));
+    const cx=cellSize/2+k%perRow*cellSize,cy=cellSize/2+Math.floor(k/perRow)*cellSize;
+    markup+=`<circle class="plate" cx="${cx}" cy="${cy}" r="${plateR}"/>`;
+    /* each line of counters centered in the circle */
+    perLine.forEach((count,i)=>range(count).forEach(j=>{markup+=ctr(cx+(j-(count-1)/2)*spacing,cy+(i-(rows-1)/2)*spacing,'a',8);}));
   });
-  return svgWrap(per*C,Math.ceil(g/per)*C,o,label||`${g} group${g===1?'':'s'} with ${n} in each`);
+  return svgWrap(perRow*cellSize,Math.ceil(g/perRow)*cellSize,markup,label||`${g} group${g===1?'':'s'} with ${n} in each`);
 }

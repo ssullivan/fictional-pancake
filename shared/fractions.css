@@ -1,8 +1,9 @@
 /* Styles for shared/fractions.js: fraction strips and hundred grids. */
+/* fraction strips (strips): fs one part, on when shaded (b blue, g green), gone when taken away */
 .fs{fill:rgba(170,205,255,.08);stroke:var(--chalk);stroke-width:2}
 .fs.on{fill:var(--gold)}.fs.on.b{fill:var(--cyan)}.fs.on.g{fill:var(--good)}
 .fs.on.gone{fill:rgba(255,154,134,.25)}
-/* hundred grids */
+/* hundred grids (hundredGrid): hg one square (a gold, b blue); hgt the heavier lines between tenths; hgw the whole's outline */
 .hg{fill:rgba(170,205,255,.08);stroke:rgba(243,246,251,.35);stroke-width:1}
 .hg.a{fill:var(--gold)}.hg.b{fill:var(--cyan)}
 .hgt{stroke:var(--chalk);stroke-width:2}

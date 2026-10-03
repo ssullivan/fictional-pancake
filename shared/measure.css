@@ -1,5 +1,6 @@
 /* Styles for shared/measure.js: clocks, the day bar, and coins and dollar bills. */
-/* clocks (clockFig) */
+/* clocks (clockFig): clk the face; clk-sh a shaded wedge; clk-t a minute tick (f every 5); clk-n the numbers;
+   clk-h and clk-m the hour and minute hands; clk-c the center. dayam and daypm the halves of the day bar (dayBar) */
 .clk{fill:#f3f6fb;stroke:var(--gold);stroke-width:5}
 .clk-sh{fill:rgba(255,201,60,.55)}
 .clk-t{stroke:#0a2340;stroke-width:1.5}.clk-t.f{stroke-width:3.5}
@@ -9,7 +10,7 @@
 .clk-c{fill:#0a2340}
 .dayam{fill:#ffe08a}.daypm{fill:#2a4f86;stroke:rgba(170,205,255,.4)}
 .lbl.dk{fill:#0a2340}
-/* coins and dollar bills (moneyFig) */
+/* coins and dollar bills (moneyFig): cn a coin (ag silver, cu copper); in the inner ring or border */
 .cn circle{stroke-width:2}
 .cn.ag circle{fill:#cdd6e1;stroke:#f3f6fb}.cn.cu circle{fill:#d9895a;stroke:#f5c6a5}
 .cn circle.in{fill:none;stroke:rgba(10,35,64,.3);stroke-width:1.5}

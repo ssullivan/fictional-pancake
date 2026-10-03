@@ -1,5 +1,7 @@
 /* Styles for shared/multiply.js: hops of n (hopLine: r red, b blue), tiles, number charts, equal groups, and arrays. */
-/* factors and multiples: hops of n (hopLine: r red, b blue), tiles, and number charts */
+/* factors and multiples: hops of n (hopLine: r red, b blue), tiles, and number charts.
+   mn the small ticks between multiples; land a hop's landing dot; mark the arrow under a number; ftile a tile (left: left over);
+   hc a chart square (a gold, b blue, ab both, one gray, cur outlined; right and wrong after a tap answer) */
 .tick.mn{stroke:rgba(243,246,251,.4);stroke-width:1.5}
 .land{fill:var(--gold)}
 .hop.r{stroke:#ff7b7b}.land.r{fill:#ff7b7b}
