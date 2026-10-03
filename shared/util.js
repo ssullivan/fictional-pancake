@@ -16,10 +16,10 @@ const lcm=(a,b)=>a*b/gcd(a,b);
 const $=id=>document.getElementById(id);
 /* Q(el)('x') finds the element marked data-x inside el */
 const Q=el=>a=>el.querySelector(`[data-${a}]`);
-/* Reads what a student typed: "12", "$4.50", "1,200", "3/4", "2 1/2", "12 cm". NaN if there is no number. */
+/* Reads what a student typed: "12", "$4.50", "1,200", "3/4", "2 1/2", "-2 1/2", "12 cm". NaN if there is no number. */
 function parseNum(s){
   s=String(s).trim().replace(/[,$]/g,'');
-  const mixed=s.match(/^(\d+)\s+(\d+)\/(\d+)/);if(mixed)return +mixed[1]+mixed[2]/mixed[3];
+  const mixed=s.match(/^(-?)(\d+)\s+(\d+)\/(\d+)/);if(mixed)return (mixed[1]?-1:1)*(+mixed[2]+mixed[3]/mixed[4]);
   const m=s.match(/^(-?\d*\.?\d+)\s*\/\s*(\d*\.?\d+)/);if(m)return +m[1]/+m[2];
   const n=s.match(/-?\d*\.?\d+/);return n?+n[0]:NaN;
 }

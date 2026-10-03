@@ -82,6 +82,18 @@ for (const home of globSync('grade*/unit*/learn.html', {cwd: ROOT}).sort()) {
   } catch (e) { fail(`${home}: ${e.message.split('\n')[0]}`); }
 }
 
+// parseNum (shared/util.js) reads every typed answer, so each way a student might write a number must read right
+{
+  const ctx = vm.createContext({});
+  vm.runInContext(readFileSync(join(ROOT, 'shared/util.js'), 'utf8') + ';globalThis.parseNum=parseNum', ctx);
+  const cases = [['12', 12], ['$4.50', 4.5], ['1,200', 1200], ['3/4', .75], ['2 1/2', 2.5], ['12 cm', 12], ['-7', -7], ['-3/4', -.75],
+    ['-2 1/2', -2.5], ['-1 1/2', -1.5], ['$-4.50', -4.5], ['.5', .5], ['', NaN], ['abc', NaN]];
+  for (const [s, want] of cases) {
+    const got = ctx.parseNum(s);
+    if (!Object.is(got, want) && Math.abs(got - want) > 1e-9) fail(`parseNum(${JSON.stringify(s)}) is ${got}, not ${want}`);
+  }
+}
+
 const fuzz = spawnSync(process.execPath, [join(ROOT, 'tools/fuzz.mjs')], {stdio: 'inherit'});
 if (fuzz.status) problems++;
 console.log(problems ? `${problems} problem(s)` : 'All checks passed.');
