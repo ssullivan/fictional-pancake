@@ -1,6 +1,8 @@
 /* Fraction Workshop (Grade 6 Unit 4): the problem generators, station list, and icons. Loaded by index.html and by tools/fuzz.mjs,
    after figs.js (fractions and pictures). Every problem carries facts for checks.js: the fractions in it (f), its answer as a
-   fraction (ans), the numbers met on the way (work), and real-world facts its context needs. */
+   fraction (ans), the numbers met on the way (work), and real-world facts its context needs.
+   Each generator deals one of a few kinds of problem (type). Fractions are [n, d] pairs (figs.js); a capital letter is often a
+   fraction as written (A = fx(a)), and t, g are a total and a group size. */
 const WHO=['Lin','Andre','Priya','Diego','Jada','Noah','Mai','Kiran','Elena','Han','Clare','Tyler'];
 /* a fraction with its unit: "3/4 foot", "2 1/2 feet" (u: [unit for 1 or less, unit for more]) */
 const qty=(f,u)=>`${fx(f)} ${unitOf(f,u)}`;
@@ -23,18 +25,20 @@ const SIZE_WHY={
 function genSize(){
   const type=pick(['size','size','meaning','equation','quotient']);
   if(type==='size'){
-    const cat=pick(['less','close','more']);let e;
-    if(cat==='more')e=pick([()=>`${pick([6,12,20,45,100,300])} ÷ ${fr(1,pick([10,100,1000]))}`,()=>`${pick([400,750,900,2000])} ÷ ${pick([0.1,0.01,0.5,2])}`,()=>`${pick([12,15,20])} ÷ ${fr(1,pick([8,10,12]))}`])();
-    else if(cat==='close'){const n=R(12,98),a=pick([[1,3],[1,4],[1,2],[2,3]]),b=pick([[1,5],[1,6],[1,8],[3,4]]);e=pick([()=>`${n} ${fr(...a)} ÷ ${n} ${fr(...b)}`,()=>{const x=R(30,89)/10,y=x+pick([-.4,-.3,.2,.3,.5]);return `${x} ÷ ${Math.round(y*10)/10}`;},()=>`${fr(...pick([[9,10],[7,8],[5,6]]))} ÷ ${fr(...pick([[8,9],[6,7],[4,5]]))}`])();}
-    else e=pick([()=>`${pick([2,3,7,9])} ÷ ${pick([1000,2500,7335,9000]).toLocaleString('en-US')}`,()=>`${fr(...pick([[3,4],[1,2],[2,3]]))} ÷ ${pick([500,800,1000]).toLocaleString('en-US')}`,()=>`${pick([0.002,0.05,0.4])} ÷ ${pick([200,2000,900]).toLocaleString('en-US')}`])();
-    const lab={less:'Much less than 1',close:'Close to 1',more:'Much more than 1'},why={};
-    ['less','close','more'].forEach(c=>{if(c!==cat)why[c]=SIZE_WHY[cat];});
-    return {kind:'mc',choices:['less','close','more'].map(c=>({id:c,label:lab[c]})),answer:cat,why,
-      prompt:`Without computing: is <b>${e}</b> much less than 1, close to 1, or much more than 1?`,
+    /* without computing: is the quotient much less than 1, close to 1, or much more? `size` is the answer; expression is dealt to fit it */
+    const size=pick(['less','close','more']);let expression;
+    if(size==='more')expression=pick([()=>`${pick([6,12,20,45,100,300])} ÷ ${fr(1,pick([10,100,1000]))}`,()=>`${pick([400,750,900,2000])} ÷ ${pick([0.1,0.01,0.5,2])}`,()=>`${pick([12,15,20])} ÷ ${fr(1,pick([8,10,12]))}`])();
+    else if(size==='close'){const n=R(12,98),a=pick([[1,3],[1,4],[1,2],[2,3]]),b=pick([[1,5],[1,6],[1,8],[3,4]]);expression=pick([()=>`${n} ${fr(...a)} ÷ ${n} ${fr(...b)}`,()=>{const x=R(30,89)/10,y=x+pick([-.4,-.3,.2,.3,.5]);return `${x} ÷ ${Math.round(y*10)/10}`;},()=>`${fr(...pick([[9,10],[7,8],[5,6]]))} ÷ ${fr(...pick([[8,9],[6,7],[4,5]]))}`])();}
+    else expression=pick([()=>`${pick([2,3,7,9])} ÷ ${pick([1000,2500,7335,9000]).toLocaleString('en-US')}`,()=>`${fr(...pick([[3,4],[1,2],[2,3]]))} ÷ ${pick([500,800,1000]).toLocaleString('en-US')}`,()=>`${pick([0.002,0.05,0.4])} ÷ ${pick([200,2000,900]).toLocaleString('en-US')}`])();
+    const labels={less:'Much less than 1',close:'Close to 1',more:'Much more than 1'},why={};
+    ['less','close','more'].forEach(id=>{if(id!==size)why[id]=SIZE_WHY[size];});
+    return {kind:'mc',choices:['less','close','more'].map(id=>({id,label:labels[id]})),answer:size,why,
+      prompt:`Without computing: is <b>${expression}</b> much less than 1, close to 1, or much more than 1?`,
       hint:'Compare the two numbers. How many of the second one fit in the first: none, about one, or lots?',
-      explain:SIZE_WHY[cat],facts:{t:type}};
+      explain:SIZE_WHY[size],facts:{t:type}};
   }
   if(type==='meaning'){
+    /* which question a ÷ b answers */
     let a,b;do{a=pick(TOT);b=pick(GROUPS);}while(fVal(b)>=fVal(a));
     const A=fx(a),B=fx(b);
     return {kind:'mc',stack:true,...mcOf([[`How many ${B}s are in ${A}?`,null],[`What is ${B} of ${A}?`,`That’s ${B} × ${A}, a multiplication. Division asks how many ${B}s fit in ${A}.`],
@@ -44,33 +48,38 @@ function genSize(){
       explain:`${A} ÷ ${B} = ? means ? × ${B} = ${A}: how many ${B}s are in ${A}?`,facts:{t:type,f:[a,b]}};
   }
   if(type==='equation'){
-    const kind=pick(['groups','each','total']),who=pick(WHO);let a,b,n,s;
-    if(kind==='groups'){do{a=pick(TOT);b=pick(GROUPS);}while(fVal(b)>=fVal(a)||fVal(a)>8);s=`${who} has ${qty(a,['cup','cups'])} of wood glue and uses ${qty(b,['cup','cups'])} for each birdhouse. How many birdhouses can ${who} glue?`;}
-    else if(kind==='each'){do{a=pick(TOT);n=R(2,6);}while(fVal(a)<2||isWhole(a));b=frac(n);s=`${who} cuts a board ${qty(a,['foot','feet'])} long into ${n} equal shelves. How long is each shelf?`;}
-    else{n=R(2,6);a=frac(n);b=pick(GROUPS);s=`${who} fills ${n} jars with ${qty(b,['cup','cups'])} of paint each. How much paint is that in all?`;}
-    const [x,y]=kind==='total'?[a,b]:[a,b],X=fx(x),Y=fx(y);
+    /* which equation fits a story: how many groups, how much in each (n equal shelves), or the total (n jars) */
+    const kind=pick(['groups','each','total']),who=pick(WHO);let a,b,n,story;
+    if(kind==='groups'){do{a=pick(TOT);b=pick(GROUPS);}while(fVal(b)>=fVal(a)||fVal(a)>8);story=`${who} has ${qty(a,['cup','cups'])} of wood glue and uses ${qty(b,['cup','cups'])} for each birdhouse. How many birdhouses can ${who} glue?`;}
+    else if(kind==='each'){do{a=pick(TOT);n=R(2,6);}while(fVal(a)<2||isWhole(a));b=frac(n);story=`${who} cuts a board ${qty(a,['foot','feet'])} long into ${n} equal shelves. How long is each shelf?`;}
+    else{n=R(2,6);a=frac(n);b=pick(GROUPS);story=`${who} fills ${n} jars with ${qty(b,['cup','cups'])} of paint each. How much paint is that in all?`;}
+    const X=fx(a),Y=fx(b);
     const div=`${X} ÷ ${Y} = ?`,mul=`${X} × ${Y} = ?`,rev=`${Y} ÷ ${X} = ?`;
     const right=kind==='total'?mul:div;
     const list=[[div,kind==='total'?`Dividing would find how many groups or how much in each. Here you know the groups and their size, and want the total: multiply.`:null],
       [mul,kind==='total'?null:`Multiplying finds a total, but the total (${X}) is already known. Divide it.`],
       [rev,`That divides the wrong way: the ${kind==='groups'?'total':'board'} is ${X}, so it comes first.`]];
     return {kind:'mc',...mcOf(kind==='total'?[[mul,null],[div,list[0][1]],[rev,'That divides the two numbers, but nothing here needs dividing: multiply to find the total.']]:list),
-      prompt:`${s} <b>Which equation fits?</b>`,
+      prompt:`${story} <b>Which equation fits?</b>`,
       hint:'Is the total known? If so, you are finding how many groups or how much in each group: divide the total. If not, multiply to find it.',
       explain:kind==='total'?`${n} groups of ${qty(b,['cup','cups'])}: ${right}`:`The total is ${X}, so divide: ${right}`,facts:{t:type,f:[a,b]}};
   }
-  const it=pick([['screws','bag','bags'],['nails','box','boxes'],['washers','cup','cups'],['bolts','tray','trays']]);
-  let g,n;do{g=R(2,9);n=R(2,9);}while(g===n);
-  const T=g*n,byGroups=Math.random()<.5,lab=[`${n} ${it[2]}`,`${n} ${it[0]} in each ${it[1]}`,`${n} ${it[0]} left over`];
-  const prompt=byGroups?`${T} ${it[0]} are put into ${it[2]}, ${g} in each ${it[1]}. ${T} ÷ ${g} = ${n}. <b>What does the ${n} mean?</b>`:`${T} ${it[0]} are shared equally among ${g} ${it[2]}. ${T} ÷ ${g} = ${n}. <b>What does the ${n} mean?</b>`;
-  return {kind:'mc',...mcOf([[lab[0],byGroups?null:`There are ${g} ${it[2]}; ${n} is how many ${it[0]} go in each one.`],[lab[1],byGroups?`Each ${it[1]} gets ${g}; ${n} is how many ${it[2]} you fill.`:null],[lab[2],`${g} × ${n} = ${T}, so nothing is left over.`]]),
-    prompt,hint:`What is known: the number of ${it[2]}, or how many go in each ${it[1]}? The quotient is the other one.`,
-    explain:byGroups?`${n} groups of ${g} make ${T}: ${n} ${it[2]}.`:`${g} groups of ${n} make ${T}: ${n} ${it[0]} in each ${it[1]}.`,facts:{t:'quotient'}};
+  /* quotient: what the quotient means: the number of groups (byGroups) or how many in each */
+  const item=pick([['screws','bag','bags'],['nails','box','boxes'],['washers','cup','cups'],['bolts','tray','trays']]),[things,one,many]=item;
+  let known,quotient;do{known=R(2,9);quotient=R(2,9);}while(known===quotient);
+  const total=known*quotient,byGroups=Math.random()<.5,labels=[`${quotient} ${many}`,`${quotient} ${things} in each ${one}`,`${quotient} ${things} left over`];
+  const prompt=byGroups?`${total} ${things} are put into ${many}, ${known} in each ${one}. ${total} ÷ ${known} = ${quotient}. <b>What does the ${quotient} mean?</b>`:`${total} ${things} are shared equally among ${known} ${many}. ${total} ÷ ${known} = ${quotient}. <b>What does the ${quotient} mean?</b>`;
+  return {kind:'mc',...mcOf([[labels[0],byGroups?null:`There are ${known} ${many}; ${quotient} is how many ${things} go in each one.`],[labels[1],byGroups?`Each ${one} gets ${known}; ${quotient} is how many ${many} you fill.`:null],[labels[2],`${known} × ${quotient} = ${total}, so nothing is left over.`]]),
+    prompt,hint:`What is known: the number of ${many}, or how many go in each ${one}? The quotient is the other one.`,
+    explain:byGroups?`${quotient} groups of ${known} make ${total}: ${quotient} ${many}.`:`${known} groups of ${quotient} make ${total}: ${quotient} ${things} in each ${one}.`,facts:{t:'quotient'}};
 }
 
 /* ---------- Station 2: how many groups? (Lessons 4–6) ---------- */
+/* group sizes, and totals (wholes, halves, thirds, fourths) */
 const GROUPS=[[1,2],[1,3],[1,4],[2,3],[3,4],[2,5],[3,5],[4,5],[1,6],[5,6],[3,8],[5,8],[3,2],[5,4],[4,3]];
 const TOT=[...range(8).map(i=>frac(i+1)),...[3,5,7,9,11,13,15].map(n=>frac(n,2)),...[4,5,7,8,10,11].map(n=>frac(n,3)),...[5,7,9,11,13,15].map(n=>frac(n,4))];
+/* stories for how many groups: cutting lengths, and filling containers. u: the unit; max and min: the most total and the
+   smallest group that make sense; unit and w: what's counted; s(T, G): the story for a total and a group, as written */
 const CUT=[
   {u:['foot','feet'],max:10,min:1/3,unit:'pieces',w:['piece','pieces'],s:(T,G)=>`A board is ${T} long. How many pieces ${G} long can be cut from it?`},
   {u:['yard','yards'],max:8,min:1/4,unit:'bows',w:['bow','bows'],s:(T,G)=>`A roll has ${T} of ribbon. Each bow uses ${G} of ribbon. How many bows can be made?`},
@@ -81,7 +90,8 @@ const FILL=[
   {u:['pound','pounds'],max:10,min:1/4,unit:'boxes',w:['box','boxes'],s:(T,G)=>`There are ${T} of nails. Each box holds ${G}. How many boxes do they fill?`},
   {u:['cup','cups'],max:6,min:1/4,unit:'shelves',w:['shelf','shelves'],s:(T,G)=>`Each shelf takes ${G} of stain. How many shelves can ${T} of stain cover?`},
 ];
-/* a total and a group size that draw well on one tape and keep the numbers small */
+/* a total t and a group size g that draw well on one tape and keep the numbers small: [t, g, t ÷ g, their common
+   denominator]. whole: true or false for a whole-number answer (null for either); max and min: the most total and smallest group */
 function groupsPair(whole,max=8,min=0){
   let t,g,a,d;
   do{t=pick(TOT);g=pick(GROUPS);a=fDiv(t,g);d=lcm(t[1],g[1]);}
@@ -90,52 +100,58 @@ function groupsPair(whole,max=8,min=0){
 }
 /* how many groups of g are in t, with the named mistakes */
 function groupsMisc(t,g,a,d){
-  const N=t[0]*d/t[1],n=g[0]*d/g[1],full=Math.floor(N/n),left=N-full*n,G=fx(g),T=fx(t),out=[
+  /* in parts of 1/d: the total is totalParts, a group is groupParts, and `full` groups fit with `left` parts over */
+  const totalParts=t[0]*d/t[1],groupParts=g[0]*d/g[1],full=Math.floor(totalParts/groupParts),left=totalParts-full*groupParts,G=fx(g),T=fx(t),out=[
     [fMul(t,g),`That’s ${T} × ${G}. Ask how many groups of ${G} fit in ${T}: divide.`],
     [fDiv(g,t),`That’s ${G} ÷ ${T}, how many ${T}s fit in ${G}. Divide ${T} by ${G}.`]];
   if(left&&full){
     out.push([frac(full),`That counts only the full groups. The ${partName(d,left)} left over make part of another group.`]);
-    out.push([frac(full*d+left,d),`The ${partName(d,left)} left over are a fraction of a group, not of a whole: a group is ${partName(d,n)}, so that’s ${fx(frac(left,n))} of a group.`]);
+    out.push([frac(full*d+left,d),`The ${partName(d,left)} left over are a fraction of a group, not of a whole: a group is ${partName(d,groupParts)}, so that’s ${fx(frac(left,groupParts))} of a group.`]);
   }
   return out;
 }
 function genGroups(){
   const type=pick(['cut','cut','fill','fill','fill','bare']);
   if(type==='bare'){
+    /* how many groups, with no story */
     const [t,g,a,d]=groupsPair(null);
     return numP({unit:'',ans:a,prompt:`How many groups of <b>${fx(g)}</b> are in <b>${fx(t)}</b>?`,
       fig:(show,done)=>groupTape(t,g,{upto:show?Infinity:0,tell:done}),
       hint:`Cut each whole into ${PART[d][1]}. A group of ${fx(g)} is ${partName(d,g[0]*d/g[1])}. Count the groups, and what part of a group is left.`,
       misc:groupsMisc(t,g,a,d),explain:`${fx(t)} ÷ ${fx(g)} = ${fx(a)}. ${backCheck(a,g,t)}`,facts:{t:type,f:[t,g],ans:a,work:[t[0]*g[1],t[1]*g[0]]}});
   }
-  const c=pick(type==='cut'?CUT:FILL),[t,g,a,d]=groupsPair(type==='cut'?true:null,c.max,c.min),T=qty(t,c.u),G=qty(g,c.u);
-  const N=t[0]*d/t[1],n=g[0]*d/g[1],full=Math.floor(N/n),lf=frac(N-full*n,n);
-  return numP({unit:c.unit,ans:a,prompt:c.s(T,G),
+  /* cut (always a whole number of pieces) or fill: how many groups, in a story; leftover is the part of a group left */
+  const story=pick(type==='cut'?CUT:FILL),[t,g,a,d]=groupsPair(type==='cut'?true:null,story.max,story.min),T=qty(t,story.u),G=qty(g,story.u);
+  const totalParts=t[0]*d/t[1],groupParts=g[0]*d/g[1],full=Math.floor(totalParts/groupParts),leftover=frac(totalParts-full*groupParts,groupParts);
+  return numP({unit:story.unit,ans:a,prompt:story.s(T,G),
     fig:(show,done)=>groupTape(t,g,{upto:show?Infinity:0,tell:done}),
-    hint:`How many groups of ${G} are in ${T}? On the tape, each whole is cut into ${PART[d][1]}, and one ${c.w[0]} uses ${partName(d,n)}.`,
+    hint:`How many groups of ${G} are in ${T}? On the tape, each whole is cut into ${PART[d][1]}, and one ${story.w[0]} uses ${partName(d,groupParts)}.`,
     misc:groupsMisc(t,g,a,d),
-    explain:`${fx(t)} ÷ ${fx(g)} = ${fx(a)}${isWhole(a)?'':`: ${full} full ${full===1?c.w[0]:c.w[1]} and ${fx(lf)} of another`}. ${backCheck(a,g,t)}`,
-    facts:{t:type,f:[t,g],ans:a,work:[t[0]*g[1],t[1]*g[0]],total:fVal(t),max:c.max,piece:fVal(g)}});
+    explain:`${fx(t)} ÷ ${fx(g)} = ${fx(a)}${isWhole(a)?'':`: ${full} full ${full===1?story.w[0]:story.w[1]} and ${fx(leftover)} of another`}. ${backCheck(a,g,t)}`,
+    facts:{t:type,f:[t,g],ans:a,work:[t[0]*g[1],t[1]*g[0]],total:fVal(t),max:story.max,piece:fVal(g)}});
 }
 
 /* ---------- Station 3: what fraction of a group? (Lessons 7, 12) ---------- */
+/* batches: what's made, the ingredient that runs short, and its unit; LENS: lengths in feet */
 const BATCH=[{what:'wood filler',of:'powder',u:['cup','cups']},{what:'stain',of:'dye',u:['ounce','ounces']},{what:'concrete',of:'sand',u:['pound','pounds']}];
 const LENS=[...[1,2,3,4,5,6,8].map(n=>frac(n)),...[3,5,7,9].map(n=>frac(n,2)),...[4,5,7,8].map(n=>frac(n,3)),...[3,5,7,9,11].map(n=>frac(n,4))];
 function genPart(){
   const type=pick(['batch','batch','times','times']),who=pick(WHO);
   if(type==='batch'){
-    const b=pick(BATCH);let B,A,a;
+    /* what fraction of a batch: A of an ingredient when a batch takes B (a = A ÷ B, less than 1) */
+    const batch=pick(BATCH);let B,A,a;
     do{B=pick([...range(11).map(i=>frac(i+2)),frac(1,2),frac(3,4),frac(3,2),frac(5,2)]);A=pick(LENS.concat([frac(1,4),frac(1,2),frac(3,4),frac(1,3),frac(2,3)]));a=fDiv(A,B);}
     while(fVal(A)>=fVal(B)||!nice(a)||a[1]<2||lcm(A[1],B[1])>12||A[0]*B[1]>144);
     const d=a[1],k=a[0];
     return numP({unit:'of a batch',ans:a,
-      prompt:`One batch of ${b.what} uses ${qty(B,b.u)} of ${b.of}. ${who} has only ${qty(A,b.u)}. <b>What fraction of a batch</b> can ${who} make?`,
-      fig:(show,done)=>oneGroup(d,done?k:0,{top:done?[A,unitOf(A,b.u)]:null,whole:[B,unitOf(B,b.u)],label:`Tape diagram: one batch, ${ftx(B)} ${b.u[1]}, cut into ${d} equal parts`}),
-      hint:`One batch is ${qty(B,b.u)}. What fraction of ${fx(B)} is ${fx(A)}? Divide: ${fx(A)} ÷ ${fx(B)}.`,
-      misc:[[fDiv(B,A),`That’s ${fx(B)} ÷ ${fx(A)}, how many batches the ${b.of} would make if you had ${qty(B,b.u)}. ${who} has less than a batch, so the answer is less than 1.`],[fSub(B,A),`That’s how much more ${b.of} a full batch needs. The question asks what fraction of a batch ${fx(A)} makes.`]],
+      prompt:`One batch of ${batch.what} uses ${qty(B,batch.u)} of ${batch.of}. ${who} has only ${qty(A,batch.u)}. <b>What fraction of a batch</b> can ${who} make?`,
+      fig:(show,done)=>oneGroup(d,done?k:0,{top:done?[A,unitOf(A,batch.u)]:null,whole:[B,unitOf(B,batch.u)],label:`Tape diagram: one batch, ${ftx(B)} ${batch.u[1]}, cut into ${d} equal parts`}),
+      hint:`One batch is ${qty(B,batch.u)}. What fraction of ${fx(B)} is ${fx(A)}? Divide: ${fx(A)} ÷ ${fx(B)}.`,
+      misc:[[fDiv(B,A),`That’s ${fx(B)} ÷ ${fx(A)}, how many batches the ${batch.of} would make if you had ${qty(B,batch.u)}. ${who} has less than a batch, so the answer is less than 1.`],[fSub(B,A),`That’s how much more ${batch.of} a full batch needs. The question asks what fraction of a batch ${fx(A)} makes.`]],
       explain:`${fx(A)} ÷ ${fx(B)} = ${fx(a)}. ${backCheck(a,B,A)}`,
       facts:{t:type,f:[A,B],ans:a,work:[A[0]*B[1],A[1]*B[0]]}});
   }
+  /* times: how many times as long x is as y (or what fraction of it, when q is less than 1) */
   let x,y,q;
   do{x=pick(LENS);y=pick(LENS);q=fDiv(x,y);}while(fVal(x)===fVal(y)||!nice(q)||lcm(x[1],y[1])>12||fVal(q)>6||x[0]*y[1]>144||x[1]*y[0]>144||(q[1]===1&&q[0]===1));
   const objs=pick([['shelf','board'],['table','bench'],['ladder','pole'],['gate','fence post']]),U=['foot','feet'];
@@ -151,23 +167,26 @@ function genPart(){
 }
 
 /* ---------- Station 4: how much in each group? (Lessons 8–9) ---------- */
+/* containers: c holds `of` in unit u, up to max; EACH: what one part holds */
 const CONT=[{c:'can',of:'paint',u:['quart','quarts'],max:16},{c:'bucket',of:'water',u:['gallon','gallons'],max:12},{c:'bin',of:'sawdust',u:['pound','pounds'],max:24},{c:'jar',of:'glue',u:['cup','cups'],max:8}];
 const EACH=[frac(1,2),frac(1),frac(3,2),frac(2),frac(5,2),frac(3),frac(4)];
 function genFill(){
   const type=pick(['part','part','share','price','two']),who=pick(WHO);
   if(type==='part'){
-    const c=pick(CONT);let d,k,e,A,W;
-    do{d=pick([2,3,4,5,6,8]);k=R(1,d-1);e=pick(EACH);A=fMul(frac(k),e);W=fMul(frac(d),e);}while(gcd(k,d)>1||fVal(W)>c.max||A[1]>2||A[0]*d>144);
+    /* the whole a container holds, when A fills the fraction p = k/d of it: each of the d parts holds e, and the whole W */
+    const container=pick(CONT);let d,k,e,A,W;
+    do{d=pick([2,3,4,5,6,8]);k=R(1,d-1);e=pick(EACH);A=fMul(frac(k),e);W=fMul(frac(d),e);}while(gcd(k,d)>1||fVal(W)>container.max||A[1]>2||A[0]*d>144);
     const p=frac(k,d);
-    return numP({unit:c.u[1],ans:W,
-      prompt:`${who} pours ${qty(A,c.u)} of ${c.of} into a ${c.c}, and it is ${fx(p)} full. <b>How many ${c.u[1]} does the full ${c.c} hold?</b>`,
-      fig:(show,done)=>oneGroup(d,k,{top:[A,unitOf(A,c.u)],each:show?[e,'']:null,whole:done?[W,unitOf(W,c.u)]:null,q:done?null:'whole',label:`Tape diagram: one ${c.c} cut into ${d} equal parts, ${k} of them filled with ${ftx(A)} ${c.u[1]}`}),
-      hint:`The ${c.c} is cut into ${PART[d][1]}, and ${partName(d,k)} hold${k===1?'s':''} ${qty(A,c.u)}. How much is in 1 ${PART[d][0]}? Then how much in all ${d}?`,
-      misc:[[fMul(A,p),`That’s ${fx(p)} of ${fx(A)}. ${fx(A)} is the part, and you need the whole: ${fx(A)} ÷ ${fx(p)}.`],[fDiv(A,frac(k)),`That’s 1 ${PART[d][0]} of the ${c.c}. The whole ${c.c} is ${d} ${PART[d][1]}.`],[fMul(A,frac(d)),`You multiplied by ${d} but didn’t divide by ${k}: ${fx(A)} fills ${partName(d,k)}, not 1.`]],
+    return numP({unit:container.u[1],ans:W,
+      prompt:`${who} pours ${qty(A,container.u)} of ${container.of} into a ${container.c}, and it is ${fx(p)} full. <b>How many ${container.u[1]} does the full ${container.c} hold?</b>`,
+      fig:(show,done)=>oneGroup(d,k,{top:[A,unitOf(A,container.u)],each:show?[e,'']:null,whole:done?[W,unitOf(W,container.u)]:null,q:done?null:'whole',label:`Tape diagram: one ${container.c} cut into ${d} equal parts, ${k} of them filled with ${ftx(A)} ${container.u[1]}`}),
+      hint:`The ${container.c} is cut into ${PART[d][1]}, and ${partName(d,k)} hold${k===1?'s':''} ${qty(A,container.u)}. How much is in 1 ${PART[d][0]}? Then how much in all ${d}?`,
+      misc:[[fMul(A,p),`That’s ${fx(p)} of ${fx(A)}. ${fx(A)} is the part, and you need the whole: ${fx(A)} ÷ ${fx(p)}.`],[fDiv(A,frac(k)),`That’s 1 ${PART[d][0]} of the ${container.c}. The whole ${container.c} is ${d} ${PART[d][1]}.`],[fMul(A,frac(d)),`You multiplied by ${d} but didn’t divide by ${k}: ${fx(A)} fills ${partName(d,k)}, not 1.`]],
       explain:`${fx(A)} ÷ ${fx(p)} = ${fx(W)}: each ${PART[d][0]} holds ${fx(e)}, and ${d} × ${fx(e)} = ${fx(W)}. ${backCheck(p,W,A)}`,
       facts:{t:type,f:[A,p],ans:W,work:[A[0]*d,A[1]*k],part:fVal(p)}});
   }
   if(type==='share'){
+    /* a length t shared into n equal pieces of e */
     let n,e,t;do{n=R(2,6);e=pick(LENS.concat([frac(1,2),frac(3,4),frac(2,3)]));t=fMul(frac(n),e);}while(fVal(t)>12||t[1]>4||isWhole(t));
     return numP({unit:'feet',ans:e,
       prompt:`${who} cuts a strip of trim ${qty(t,['foot','feet'])} long into ${n} equal pieces. <b>How long is each piece?</b>`,
@@ -177,14 +196,15 @@ function genFill(){
       explain:`${fx(t)} ÷ ${n} = ${fim(t)} × ${fr(1,n)} = ${fx(e)}. ${backCheck(frac(n),e,t)}`,facts:{t:type,f:[t],ans:e,work:[t[0],t[1]*n]}});
   }
   if(type==='price'){
-    const it=pick([['brass screws','pound','pounds'],['copper wire','yard','yards'],['wood stain','quart','quarts'],['wood glue','pint','pints']]);
+    /* the price of 1 unit, when k/d of a unit costs `cost`: each 1/d costs e */
+    const item=pick([['brass screws','pound','pounds'],['copper wire','yard','yards'],['wood stain','quart','quarts'],['wood glue','pint','pints']]);
     let d,k,e;do{d=pick([2,3,4,5,8]);k=R(1,d-1);e=pick([1,2,3,1.5,2.5,0.5]);}while(gcd(k,d)>1||(k*e)%0.25||k*e<1);
     const p=frac(k,d),cost=k*e,one=d*e;
     return numP({unit:'dollars',money:true,ans:one%1?frac(one*2,2):frac(one),
-      prompt:`${fx(p)} ${it[1]} of ${it[0]} costs ${cash(cost)}. <b>What does 1 ${it[1]} cost?</b>`,
-      fig:(show,done)=>oneGroup(d,k,{top:cash(cost),each:show?cash(e):null,whole:done?cash(one):null,q:done?null:'whole',label:`Tape diagram: 1 ${it[1]} cut into ${d} equal parts, ${k} of them cost ${cash(cost)}`}),
-      hint:`${partName(d,k)} of a ${it[1]} cost${k===1?'s':''} ${cash(cost)}. Find the cost of 1 ${PART[d][0]}, then of all ${d} ${PART[d][1]}.`,
-      misc:[[cost*k/d,`That’s ${fx(p)} of ${cash(cost)}. ${cash(cost)} buys only ${fx(p)} ${it[1]}, so 1 ${it[1]} costs more.`],[e,`That’s the cost of 1 ${PART[d][0]} of a ${it[1]}. A whole ${it[1]} is ${d} ${PART[d][1]}.`]],
+      prompt:`${fx(p)} ${item[1]} of ${item[0]} costs ${cash(cost)}. <b>What does 1 ${item[1]} cost?</b>`,
+      fig:(show,done)=>oneGroup(d,k,{top:cash(cost),each:show?cash(e):null,whole:done?cash(one):null,q:done?null:'whole',label:`Tape diagram: 1 ${item[1]} cut into ${d} equal parts, ${k} of them cost ${cash(cost)}`}),
+      hint:`${partName(d,k)} of a ${item[1]} cost${k===1?'s':''} ${cash(cost)}. Find the cost of 1 ${PART[d][0]}, then of all ${d} ${PART[d][1]}.`,
+      misc:[[cost*k/d,`That’s ${fx(p)} of ${cash(cost)}. ${cash(cost)} buys only ${fx(p)} ${item[1]}, so 1 ${item[1]} costs more.`],[e,`That’s the cost of 1 ${PART[d][0]} of a ${item[1]}. A whole ${item[1]} is ${d} ${PART[d][1]}.`]],
       explain:`${cash(cost)} ÷ ${fx(p)} = ${cash(one)}: each ${PART[d][0]} costs ${cash(e)}, and ${d} × ${cash(e)} = ${cash(one)}.`,facts:{t:type,f:[p],ans:frac(one*2,2),work:[cost*d],part:fVal(p)}});
   }
   /* two amounts to keep track of: a fraction of a pound fills a fraction of a mold */
@@ -238,26 +258,29 @@ const SIDES=[frac(1),frac(2),frac(3),frac(4),frac(5),frac(6),frac(1,2),frac(3,2)
 function genTile(){
   const type=pick(['area','area','side','side','along']);
   if(type==='area'){
+    /* the area of a w by h rectangle, drawn tiled in squares 1/p on a side; wp: the whole parts multiplied (a mistake) */
     let w,h,A,p;do{w=pick(SIDES);h=pick(SIDES);A=fMul(w,h);p=lcm(w[1],h[1]);}while(isWhole(w)&&isWhole(h)||p>4||!(nice(A)||A[1]===16)||w[0]*h[0]>144||fVal(w)*p>16||fVal(h)*p>12||fVal(w)<fVal(h));
-    const it=pick([['tabletop','ft'],['tile','in'],['picture frame','in'],['shelf top','ft']]),U=it[1]==='ft'?['foot','feet']:['inch','inches'];
+    const item=pick([['tabletop','ft'],['tile','in'],['picture frame','in'],['shelf top','ft']]),U=item[1]==='ft'?['foot','feet']:['inch','inches'];
     const wp=fMul(frac(Math.floor(fVal(w))),frac(Math.floor(fVal(h))));
     return numP({unit:`square ${U[1]}`,ans:A,
-      prompt:`A rectangular ${it[0]} is ${qty(w,U)} by ${qty(h,U)}. <b>What is its area?</b>`,
-      fig:show=>rectGrid(w,h,p,{unit:it[1],shade:show?Infinity:0}),
+      prompt:`A rectangular ${item[0]} is ${qty(w,U)} by ${qty(h,U)}. <b>What is its area?</b>`,
+      fig:show=>rectGrid(w,h,p,{unit:item[1],shade:show?Infinity:0}),
       hint:`Area = length × width: ${fx(w)} × ${fx(h)}. Write them as fractions first: ${fim(w)} × ${fim(h)}. In the picture, each small square is ${fr(1,p*p)} square ${U[0]}.`,
       misc:[[fAdd(w,h),`That’s ${fx(w)} + ${fx(h)}. Area is length times width: multiply.`],[fMul(frac(2),fAdd(w,h)),`That’s the perimeter, the distance around. Area is length times width.`],
         ...(fVal(wp)>0?[[wp,`That multiplies only the whole numbers. Write each side as a fraction and multiply: ${fim(w)} × ${fim(h)}.`]]:[])],
       explain:`${fim(w)} × ${fim(h)} = ${fim(A)}${isWhole(A)||A[0]<A[1]?'':` = ${fx(A)}`} square ${U[1]}.`,facts:{t:type,f:[w,h],ans:A,work:[w[0]*h[0],w[1]*h[1]]}});
   }
   if(type==='side'){
+    /* the other side o of a rectangle, from its area A and one side s */
     let s,o,A;do{s=pick(SIDES);o=pick(SIDES);A=fMul(s,o);}while(isWhole(s)||fVal(o)===1||A[1]>4||s[0]*o[0]>144||A[0]*s[1]>144||fVal(A)>30);
-    const it=pick([['garden bed','ft'],['rug','ft'],['poster','in'],['cutting board','in']]),U=it[1]==='ft'?['foot','feet']:['inch','inches'];
+    const item=pick([['garden bed','ft'],['rug','ft'],['poster','in'],['cutting board','in']]),U=item[1]==='ft'?['foot','feet']:['inch','inches'];
     return numP({unit:U[1],ans:o,
-      prompt:`A rectangular ${it[0]} has an area of ${qty(A,['square '+U[0],'square '+U[1]])}. One side is ${qty(s,U)}. <b>How long is the other side?</b>`,
+      prompt:`A rectangular ${item[0]} has an area of ${qty(A,['square '+U[0],'square '+U[1]])}. One side is ${qty(s,U)}. <b>How long is the other side?</b>`,
       hint:`${fx(s)} × ? = ${fx(A)}, so divide: ${fx(A)} ÷ ${fx(s)}.`,
       misc:[[fMul(A,s),`That’s ${fx(A)} × ${fx(s)}. You know the area and one side: divide.`],[fSub(A,s),`That’s ${fx(A)} − ${fx(s)}. Side × side = area, so divide the area by the side.`],[fDiv(s,A),`That’s ${fx(s)} ÷ ${fx(A)}. Divide the area by the side, not the side by the area.`]],
       explain:`${fx(A)} ÷ ${fx(s)} = ${fim(A)} × ${fim(fInv(s))} = ${fx(o)} ${U[1]}. ${backCheck(s,o,A)}`,facts:{t:type,f:[A,s],ans:o,work:[A[0]*s[1],A[1]*s[0]]}});
   }
+  /* along: how many tiles of side s fit along a length L */
   let s,n,L;do{s=pick([frac(1,2),frac(3,4),frac(3,2),frac(4,3),frac(5,4),frac(2,3),frac(5,2)]);n=R(4,16);L=fMul(frac(n),s);}while(L[1]>4||fVal(L)>24||isWhole(s)||L[0]*s[1]>144);
   return numP({unit:'tiles',ans:frac(n),
     prompt:`A hallway is ${qty(L,['foot','feet'])} long. Square tiles are ${qty(s,['foot','feet'])} on a side. <b>How many tiles fit along the length?</b>`,
@@ -272,6 +295,7 @@ const EDGES=[frac(1),frac(2),frac(3),frac(4),frac(1,2),frac(3,2),frac(5,2),frac(
 function genCrate(){
   const type=pick(['tri','tri','cubes','cubes','vol','edge']);
   if(type==='tri'){
+    /* a triangle's area from its base b and height h, or its height from its area */
     const findH=Math.random()<.5;
     let b,h,A;do{b=pick(SIDES);h=pick(SIDES);A=fMul(frac(1,2),fMul(b,h));}while(isWhole(b)&&isWhole(h)||A[1]>8||b[0]*h[0]>144||fVal(A)>30||(findH&&2*A[0]*b[1]>144));
     if(findH)return numP({unit:'inches',ans:h,
@@ -286,24 +310,27 @@ function genCrate(){
       explain:`${fr(1,2)} × ${fim(b)} × ${fim(h)} = ${fx(A)} square inches.`,facts:{t:type,f:[b,h],ans:A,work:[b[0]*h[0],b[1]*h[1]*2]}});
   }
   if(type==='cubes'){
+    /* how many cubes 1/p on an edge fill an l by w by h box: edgeCubes along each edge, n in all */
     let l,w,h,p,n;do{p=pick([2,2,3,4]);l=pick(EDGES);w=pick(EDGES);h=pick(EDGES);n=fVal(l)*fVal(w)*fVal(h)*p**3;}while(!Number.isInteger(fVal(l)*p)||!Number.isInteger(fVal(w)*p)||!Number.isInteger(fVal(h)*p)||n>216||fVal(l)*p>8||fVal(w)*p>8||fVal(h)*p>8||fVal(l)*fVal(w)*fVal(h)<1);
-    const V=fMul(fMul(l,w),h),c=[l,w,h].map(e=>fVal(e)*p);
+    const V=fMul(fMul(l,w),h),edgeCubes=[l,w,h].map(edge=>fVal(edge)*p);
     return numP({unit:'cubes',ans:frac(n),
       prompt:`A box is ${fx(l)} by ${fx(w)} by ${fx(h)} inches inside. <b>How many cubes with edges of ${fr(1,p)} inch</b> fill it?`,
       fig:()=>cubeBox(l,w,h,p,{unit:'in'}),
       hint:`Each inch holds ${p} cubes along an edge. How many cubes fit along each edge? Multiply the three.`,
       misc:[[V,`That’s the volume in cubic inches. Each cube is ${fr(1,p)} inch on an edge, so ${p ** 3} of them fit in 1 cubic inch.`],[fMul(V,frac(p)),`That counts ${p} cubes per inch along only one edge. Every edge holds ${p} cubes per inch.`]],
-      explain:`${c[0]} × ${c[1]} × ${c[2]} = ${n} cubes. (That’s ${fx(V)} cubic inches: ${n} cubes of ${fr(1,p ** 3)} cubic inch each.)`,facts:{t:type,f:[l,w,h],ans:frac(n),work:[n]}});
+      explain:`${edgeCubes[0]} × ${edgeCubes[1]} × ${edgeCubes[2]} = ${n} cubes. (That’s ${fx(V)} cubic inches: ${n} cubes of ${fr(1,p ** 3)} cubic inch each.)`,facts:{t:type,f:[l,w,h],ans:frac(n),work:[n]}});
   }
   if(type==='vol'){
+    /* the volume of a box; pw: only the whole parts multiplied (a mistake) */
     let l,w,h,V;do{l=pick(EDGES.concat([frac(5),frac(6)]));w=pick(EDGES);h=pick(EDGES.concat([frac(1,3),frac(2,3),frac(4,3),frac(1,4),frac(3,4)]));V=fMul(fMul(l,w),h);}while(isWhole(l)&&isWhole(w)&&isWhole(h)||V[1]>8||l[0]*w[0]*h[0]>144||fVal(V)>40);
-    const it=pick([['crate','ft',['foot','feet']],['toolbox','ft',['foot','feet']],['planter','ft',['foot','feet']]]),pw=Math.floor(fVal(l))*Math.floor(fVal(w))*Math.floor(fVal(h));
+    const item=pick([['crate','ft',['foot','feet']],['toolbox','ft',['foot','feet']],['planter','ft',['foot','feet']]]),pw=Math.floor(fVal(l))*Math.floor(fVal(w))*Math.floor(fVal(h));
     return numP({unit:'cubic feet',ans:V,
-      prompt:`A ${it[0]} shaped like a rectangular prism is ${qty(l,it[2])} long, ${qty(w,it[2])} wide, and ${qty(h,it[2])} tall. <b>What is its volume?</b>`,
+      prompt:`A ${item[0]} shaped like a rectangular prism is ${qty(l,item[2])} long, ${qty(w,item[2])} wide, and ${qty(h,item[2])} tall. <b>What is its volume?</b>`,
       hint:`Volume = length × width × height. Write each one as a fraction and multiply: ${fim(l)} × ${fim(w)} × ${fim(h)}.`,
       misc:[[fAdd(fAdd(l,w),h),`That adds the edges. Volume is length × width × height.`],...(pw?[[frac(pw),`That multiplies only the whole numbers. Write each edge as a fraction first.`]]:[])],
       explain:`${fim(l)} × ${fim(w)} × ${fim(h)} = ${fx(V)} cubic feet.`,facts:{t:type,f:[l,w,h],ans:V,work:[l[0]*w[0]*h[0],l[1]*w[1]*h[1]]}});
   }
+  /* edge: the height of a box, from its volume V and its bottom l by w (area B) */
   let l,w,h,V,B;do{l=pick(EDGES.concat([frac(5),frac(6)]));w=pick(EDGES);h=pick(EDGES.concat([frac(3,4),frac(5,4)]));B=fMul(l,w);V=fMul(B,h);}while(isWhole(h)||V[1]>8||B[1]>4||fVal(V)>40||V[0]*B[1]>144||V[1]*B[0]>144||l[0]*w[0]*h[0]>144);
   return numP({unit:'feet',ans:h,
     prompt:`A storage bin holds ${qty(V,['cubic foot','cubic feet'])}. Its bottom is ${qty(l,['foot','feet'])} by ${qty(w,['foot','feet'])}. <b>How tall is it?</b>`,
@@ -313,12 +340,15 @@ function genCrate(){
 }
 
 /* ---------- the final round: choosing the operation (Lesson 16), with the other stations ---------- */
+/* Which operation a story needs: a fraction of an amount (of), what fraction one is of another (fracOf), how many times
+   (times), or putting together and taking away. Every other operation's answer is a named mistake. */
 function genOps(){
   const who=pick(WHO),kind=pick(['of','fracOf','times','add','sub']),op={of:fMul,fracOf:(x,y)=>fDiv(y,x),times:fDiv,add:fAdd,sub:fSub}[kind];let a,b;
   do{a=pick([frac(3,4),frac(1,2),frac(2,3),frac(1,3),frac(1,4),frac(5,6),frac(3,2),frac(5,4),frac(3,8),frac(5,8)]);b=pick([frac(1,2),frac(1,3),frac(1,4),frac(2,3),frac(3,4),frac(2,5)]);}
   while(fVal(a)===fVal(b)||lcm(a[1],b[1])>12||!nice(op(a,b))||(kind!=='of'&&kind!=='add'&&fVal(b)>=fVal(a))||(kind==='of'&&fVal(b)>=1));
   const A=fx(a),B=fx(b),all={of:fMul(a,b),fracOf:fDiv(b,a),times:fDiv(a,b),add:fAdd(a,b),sub:fSub(a,b)},ans=all[kind];
-  const S={
+  /* the story: [prompt, unit, how to think about it] */
+  const story={
     of:[`${who} had ${qty(a,['liter','liters'])} of varnish and used ${B} of it. <b>How many liters did ${who} use?</b>`,'liters',`${B} of ${A} is ${B} × ${A}.`],
     fracOf:[`The path to the shed is ${qty(a,['kilometer','kilometers'])}. ${who} has walked ${qty(b,['kilometer','kilometers'])}. <b>What fraction of the way</b> has ${who} walked?`,'of the way',`What fraction of ${A} is ${B}? ${B} ÷ ${A}.`],
     times:[`${who}’s goal was to sweep up ${qty(b,['kilogram','kilograms'])} of sawdust. ${who} swept up ${qty(a,['kilogram','kilograms'])}. <b>How many times the goal</b> is that?`,'times the goal',`How many ${B}s are in ${A}? ${A} ÷ ${B}.`],
@@ -326,9 +356,9 @@ function genOps(){
     sub:[`A board is ${qty(a,['foot','feet'])} long. ${who} saws off ${qty(b,['foot','feet'])}. <b>How long is the board now?</b>`,'feet',`Take away: ${A} − ${B}.`],
   }[kind];
   const name={of:'multiplied',fracOf:`divided ${B} by ${A}`,times:`divided ${A} by ${B}`,add:'added',sub:'subtracted'};
-  const misc=Object.entries(all).filter(([k,v])=>k!==kind&&v[0]>0).map(([k,v])=>[v,`That ${name[k]}. ${S[2]}`]);
-  return numP({unit:S[1],ans,prompt:S[0],hint:`Ask what the question wants: a part of an amount (multiply), how many of one fit in another or what fraction one is of another (divide), or putting together or taking away (add or subtract).`,
-    misc,explain:`${S[2]} The answer is ${fx(ans)}.`,facts:{t:'ops',f:[a,b],ans,work:[a[0]*b[1],a[1]*b[0]]}});
+  const misc=Object.entries(all).filter(([other,v])=>other!==kind&&v[0]>0).map(([other,v])=>[v,`That ${name[other]}. ${story[2]}`]);
+  return numP({unit:story[1],ans,prompt:story[0],hint:`Ask what the question wants: a part of an amount (multiply), how many of one fit in another or what fraction one is of another (divide), or putting together or taking away (add or subtract).`,
+    misc,explain:`${story[2]} The answer is ${fx(ans)}.`,facts:{t:'ops',f:[a,b],ans,work:[a[0]*b[1],a[1]*b[0]]}});
 }
 
 /* ---------- stations ---------- */

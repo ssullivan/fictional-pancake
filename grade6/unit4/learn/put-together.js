@@ -1,5 +1,5 @@
 /* Learn Dividing Fractions (Grade 6 Unit 4), chapter 8: Putting it together. Its widgets and steps; loaded by put-together.html. */
-/* four situations with 3/4 and 1/2: multiply or divide? Each is a part of a group on the tape */
+/* four situations with 3/4 and 1/2: multiply or divide? Each is a part of a group on the tape (tape: [part, group]) */
 const H=frac(1,2),T=frac(3,4);
 const SITS=[
   {id:'drank',label:'Water',say:`Andre had ${fr(3,4)} liter of water and drank ${fr(1,2)} of it. How much did Andre drink?`,op:'×',a:H,b:T,ans:fMul(H,T),
@@ -11,21 +11,22 @@ const SITS=[
   {id:'park',label:'Park',say:`A park is ${fr(1,2)} square mile. A class cleaned ${fr(3,4)} of it. How many square miles did they clean?`,op:'×',a:T,b:H,ans:fMul(T,H),
     why:`${fr(3,4)} <i>of</i> ${fr(1,2)} square mile is a part of a known amount: multiply.`,tape:[fMul(T,H),H],unit:'square mile'},
 ];
+/* Pick a situation to see whether it multiplies or divides, and its tape. */
 function wOps(el){
-  const q=Q(el);let p='drank';
-  el.innerHTML=seg('Situation',SITS.map(s=>[s.id,s.label]))+`<p class="readout" data-s></p><div class="fig" data-f></div><p class="eq" data-e></p><p class="readout" data-r></p>`;
+  const q=Q(el);let situationId='drank';
+  el.innerHTML=seg('Situation',SITS.map(situation=>[situation.id,situation.label]))+`<p class="readout" data-s></p><div class="fig" data-f></div><p class="eq" data-e></p><p class="readout" data-r></p>`;
   const draw=()=>{
-    const s=SITS.find(x=>x.id===p),[part,grp]=s.tape;press(el,p);
-    q('s').innerHTML=s.say;
-    q('f').innerHTML=groupTape(part,grp,{label:`Tape diagram: ${ftx(part)} as a part of a group of ${ftx(grp)}`});
-    q('e').innerHTML=`${fx(s.a)} ${s.op} ${fx(s.b)} = ${fx(s.ans)}`;
-    q('r').innerHTML=`${s.why} <b>${fx(s.ans)}${s.unit?' '+s.unit:''}</b>.<br><span class="dimline">The same two numbers, but each question needs its own operation. Ask: what is the group, and what is unknown?</span>`;
+    const situation=SITS.find(x=>x.id===situationId),[part,group]=situation.tape;press(el,situationId);
+    q('s').innerHTML=situation.say;
+    q('f').innerHTML=groupTape(part,group,{label:`Tape diagram: ${ftx(part)} as a part of a group of ${ftx(group)}`});
+    q('e').innerHTML=`${fx(situation.a)} ${situation.op} ${fx(situation.b)} = ${fx(situation.ans)}`;
+    q('r').innerHTML=`${situation.why} <b>${fx(situation.ans)}${situation.unit?' '+situation.unit:''}</b>.<br><span class="dimline">The same two numbers, but each question needs its own operation. Ask: what is the group, and what is unknown?</span>`;
   };
-  onPick(el,m=>{p=m;draw();});
+  onPick(el,id=>{situationId=id;draw();});
   draw();
 }
 
-/* how many batches: each ingredient allows some number, and the smaller number wins */
+/* a batch takes FLOUR and BUTTER; what each friend has (f flour, b butter) */
 const FLOUR=frac(3,4),BUTTER=frac(1,3);
 const FRIENDS=[
   {who:'Mai',f:frac(2),b:frac(1,4)},
@@ -33,19 +34,21 @@ const FRIENDS=[
   {who:'Clare',f:frac(5,4),b:frac(3,4)},
   {who:'All three',f:frac(17,4),b:frac(3,2)},
 ];
+/* How many batches: each ingredient allows some number, and the smaller number wins. */
 function wBatches(el){
-  const q=Q(el);let p=0;
-  el.innerHTML=seg('Who',FRIENDS.map((f,i)=>[i,f.who]))+`<p class="tape-lab" data-lf></p><div class="fig" data-f></div><p class="tape-lab" data-lb></p><div class="fig" data-b></div><p class="readout" data-r></p>`;
+  const q=Q(el);let friendIndex=0;
+  el.innerHTML=seg('Who',FRIENDS.map((friend,i)=>[i,friend.who]))+`<p class="tape-lab" data-lf></p><div class="fig" data-f></div><p class="tape-lab" data-lb></p><div class="fig" data-b></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const f=FRIENDS[p],nf=fDiv(f.f,FLOUR),nb=fDiv(f.b,BUTTER),n=Math.floor(Math.min(fVal(nf),fVal(nb))),short=fVal(nf)<fVal(nb)?'flour':'butter';press(el,p);
-    q('lf').innerHTML=`Flour: ${fx(f.f)} cup${fVal(f.f)>1?'s':''}, ${fx(FLOUR)} cup a batch`;
-    q('f').innerHTML=groupTape(f.f,FLOUR,{label:`Tape diagram: ${ftx(f.f)} cups of flour in groups of 3/4 cup`});
-    q('lb').innerHTML=`Butter: ${fx(f.b)} cup${fVal(f.b)>1?'s':''}, ${fx(BUTTER)} cup a batch`;
-    q('b').innerHTML=groupTape(f.b,BUTTER,{label:`Tape diagram: ${ftx(f.b)} cups of butter in groups of 1/3 cup`});
-    q('r').innerHTML=`Flour is enough for ${fx(f.f)} ÷ ${fx(FLOUR)} = <b>${fx(nf)}</b> batches. Butter is enough for ${fx(f.b)} ÷ ${fx(BUTTER)} = <b>${fx(nb)}</b> batches.<br>`
-      +`<span class="ok">${f.who==='All three'?'Together they':f.who} can make <b>${n} whole batch${n===1?'':'es'}</b>: the ${short} runs out first.</span>`;
+    /* byFlour and byButter: the batches each allows; batches: whole batches of the smaller; short: what runs out */
+    const friend=FRIENDS[friendIndex],byFlour=fDiv(friend.f,FLOUR),byButter=fDiv(friend.b,BUTTER),batches=Math.floor(Math.min(fVal(byFlour),fVal(byButter))),short=fVal(byFlour)<fVal(byButter)?'flour':'butter';press(el,friendIndex);
+    q('lf').innerHTML=`Flour: ${fx(friend.f)} cup${fVal(friend.f)>1?'s':''}, ${fx(FLOUR)} cup a batch`;
+    q('f').innerHTML=groupTape(friend.f,FLOUR,{label:`Tape diagram: ${ftx(friend.f)} cups of flour in groups of 3/4 cup`});
+    q('lb').innerHTML=`Butter: ${fx(friend.b)} cup${fVal(friend.b)>1?'s':''}, ${fx(BUTTER)} cup a batch`;
+    q('b').innerHTML=groupTape(friend.b,BUTTER,{label:`Tape diagram: ${ftx(friend.b)} cups of butter in groups of 1/3 cup`});
+    q('r').innerHTML=`Flour is enough for ${fx(friend.f)} ÷ ${fx(FLOUR)} = <b>${fx(byFlour)}</b> batches. Butter is enough for ${fx(friend.b)} ÷ ${fx(BUTTER)} = <b>${fx(byButter)}</b> batches.<br>`
+      +`<span class="ok">${friend.who==='All three'?'Together they':friend.who} can make <b>${batches} whole batch${batches===1?'':'es'}</b>: the ${short} runs out first.</span>`;
   };
-  onPick(el,m=>{p=+m;draw();});
+  onPick(el,id=>{friendIndex=+id;draw();});
   draw();
 }
 

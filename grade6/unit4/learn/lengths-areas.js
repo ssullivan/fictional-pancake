@@ -1,73 +1,77 @@
 /* Learn Dividing Fractions (Grade 6 Unit 4), chapter 6: Lengths and areas. Its widgets and steps; loaded by lengths-areas.html. */
-/* how many times as long: lay copies of the shorter length along the longer one */
+/* lengths to compare: a is x long, b is y */
 const LONGER=[
   {x:frac(15,4),y:frac(3,2),a:'the long song',b:'the short song',u:'minutes'},
   {x:frac(9,2),y:frac(3,4),a:'the shelf',b:'a book',u:'feet'},
   {x:frac(10,3),y:frac(5,6),a:'the path',b:'one stride',u:'yards'},
 ];
+/* How many times as long: lay copies of the shorter length along the longer one (a stepper adds copies). */
 function wMeasure(el){
-  const q=Q(el),st={k:0},lim={k:[0,6]};let p=0;
-  el.innerHTML=seg('Compare',LONGER.map((c,i)=>[i,`${fx(c.x)} and ${fx(c.y)} ${c.u}`]))+`<div class="wrow">${stepper('k','Copies')}</div><div class="fig" data-f></div><p class="readout" data-r></p>`;
+  const q=Q(el),values={k:0},limits={k:[0,6]};let pairIndex=0;
+  el.innerHTML=seg('Compare',LONGER.map((pair,i)=>[i,`${fx(pair.x)} and ${fx(pair.y)} ${pair.u}`]))+`<div class="wrow">${stepper('k','Copies')}</div><div class="fig" data-f></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const c=LONGER[p],qt=fDiv(c.x,c.y),{k}=st,full=Math.floor(fVal(qt));press(el,p);q('k').textContent=k;
-    q('f').innerHTML=groupTape(c.x,c.y,{upto:k,label:`Tape diagram: ${c.a}, ${ftx(c.x)} ${c.u}, with ${k} copies of ${c.b}, ${ftx(c.y)} ${c.u}`});
-    q('r').innerHTML=!k?`How many times as long as ${c.b} (${fx(c.y)} ${c.u}) is ${c.a} (${fx(c.x)} ${c.u})? Lay copies of ${c.b} along it.`
-      :k<=full&&k<lim.k[1]?`${k} cop${k>1?'ies':'y'} of ${c.b} reach${k>1?'':'es'} ${fx(fMul(frac(k),c.y))} ${c.u}.`
-      :`<span class="ok">${fx(c.x)} ÷ ${fx(c.y)} = <b>${fx(qt)}</b>: ${c.a} is ${fx(qt)} times as long as ${c.b}.</span><br><span class="dimline">${fx(qt)} × ${fx(c.y)} = ${fx(c.x)}.</span>`;
+    const pair=LONGER[pairIndex],quotient=fDiv(pair.x,pair.y),{k}=values,full=Math.floor(fVal(quotient));press(el,pairIndex);q('k').textContent=k;
+    q('f').innerHTML=groupTape(pair.x,pair.y,{upto:k,label:`Tape diagram: ${pair.a}, ${ftx(pair.x)} ${pair.u}, with ${k} copies of ${pair.b}, ${ftx(pair.y)} ${pair.u}`});
+    q('r').innerHTML=!k?`How many times as long as ${pair.b} (${fx(pair.y)} ${pair.u}) is ${pair.a} (${fx(pair.x)} ${pair.u})? Lay copies of ${pair.b} along it.`
+      :k<=full&&k<limits.k[1]?`${k} cop${k>1?'ies':'y'} of ${pair.b} reach${k>1?'':'es'} ${fx(fMul(frac(k),pair.y))} ${pair.u}.`
+      :`<span class="ok">${fx(pair.x)} ÷ ${fx(pair.y)} = <b>${fx(quotient)}</b>: ${pair.a} is ${fx(quotient)} times as long as ${pair.b}.</span><br><span class="dimline">${fx(quotient)} × ${fx(pair.y)} = ${fx(pair.x)}.</span>`;
   };
-  const setMax=()=>{lim.k[1]=Math.ceil(fVal(fDiv(LONGER[p].x,LONGER[p].y)));};
-  steppers(el,st,lim,draw);
-  onPick(el,m=>{p=+m;setMax();st.k=0;draw();});
+  /* the stepper goes as far as the copies that cover the longer length */
+  const setMax=()=>{limits.k[1]=Math.ceil(fVal(fDiv(LONGER[pairIndex].x,LONGER[pairIndex].y)));};
+  steppers(el,values,limits,draw);
+  onPick(el,id=>{pairIndex=+id;setMax();values.k=0;draw();});
   setMax();draw();
 }
 
-/* a rectangle measured in quarter inches, tiled in 1/4-inch squares */
+/* A rectangle measured in quarter inches (a stepper for each side), tiled in 1/4-inch squares. */
 function wArea(el){
-  const q=Q(el),st={w:14,h:9};
+  /* the steppers' values: w and h, in quarter inches */
+  const q=Q(el),values={w:14,h:9};
   el.innerHTML=`<div class="wrow">${stepper('w','Width')}${stepper('h','Height')}</div><div class="fig" data-f></div><p class="eq" data-e></p><p class="readout" data-r></p>`;
   const draw=()=>{
-    const w=frac(st.w,4),h=frac(st.h,4),A=fMul(w,h);
+    const w=frac(values.w,4),h=frac(values.h,4),A=fMul(w,h);
     q('w').innerHTML=`${fx(w)} in`;q('h').innerHTML=`${fx(h)} in`;
     q('f').innerHTML=rectGrid(w,h,4);
-    q('e').innerHTML=`${fx(w)} × ${fx(h)} = ${fr(st.w,4)} × ${fr(st.h,4)} = ${fr(st.w*st.h,16)}${A[0]===st.w*st.h&&A[0]<16?'':` = ${fx(A)}`}`;
-    q('r').innerHTML=`Each small square is ${fr(1,4)} inch on a side, and 16 of them fill a square inch, so each is <b>${fr(1,16)} square inch</b>. There ${st.w*st.h>1?'are':'is'} ${st.w} × ${st.h} = ${st.w*st.h} small square${st.w*st.h>1?'s':''}: <b>${fx(A)} square inch${fVal(A)>1?'es':''}</b>.`
-      +`<br><span class="dimline">Length × width works for fractional sides too: multiply the tops (${st.w} × ${st.h} squares) and the bottoms (4 × 4 = 16 squares to a square inch).</span>`;
+    q('e').innerHTML=`${fx(w)} × ${fx(h)} = ${fr(values.w,4)} × ${fr(values.h,4)} = ${fr(values.w*values.h,16)}${A[0]===values.w*values.h&&A[0]<16?'':` = ${fx(A)}`}`;
+    q('r').innerHTML=`Each small square is ${fr(1,4)} inch on a side, and 16 of them fill a square inch, so each is <b>${fr(1,16)} square inch</b>. There ${values.w*values.h>1?'are':'is'} ${values.w} × ${values.h} = ${values.w*values.h} small square${values.w*values.h>1?'s':''}: <b>${fx(A)} square inch${fVal(A)>1?'es':''}</b>.`
+      +`<br><span class="dimline">Length × width works for fractional sides too: multiply the tops (${values.w} × ${values.h} squares) and the bottoms (4 × 4 = 16 squares to a square inch).</span>`;
   };
-  steppers(el,st,{w:[1,16],h:[1,12]},draw);
+  steppers(el,values,{w:[1,16],h:[1,12]},draw);
   draw();
 }
 
-/* a missing side (area ÷ side), or tiles along a length (length ÷ tile) */
+/* a missing side (area A ÷ side s), or tiles along a length (L ÷ tile s) */
 const MISSING=[
   {kind:'side',A:frac(11),s:frac(11,3),u:'meters'},
   {kind:'side',A:frac(405,8),s:frac(45,4),u:'inches'},
   {kind:'tiles',L:frac(21,2),s:frac(3,2),u:'feet'},
   {kind:'tiles',L:frac(13,2),s:frac(3,2),u:'feet'},
 ];
-/* a rectangle with one side known, its area inside, and the other side a "?", drawn to scale */
+/* a rectangle with one side known, its area inside, and the other side a "?", drawn to scale (fitting 300 by 160) */
 function sideFig(A,s,u){
-  const o=fVal(fDiv(A,s)),k=Math.min(300/fVal(s),160/o),w=fVal(s)*k,h=o*k,X=80,Y=14;
-  return svgWrap(X+w+20,Y+h+50,`<rect class="rg-out" x="${X}" y="${Y}" width="${w}" height="${h}" style="fill:rgba(255,201,60,.3)"/>`+fT(X+w/2,Y+h/2,A,{unit:'sq '+u.slice(0,2)})+fT(X+w/2,Y+h+24,s,{unit:u})+qbox(X-34,Y+h/2),`A rectangle with area ${ftx(A)} square ${u} and one side ${ftx(s)} ${u}; the other side is unknown`);
+  const other=fVal(fDiv(A,s)),scale=Math.min(300/fVal(s),160/other),width=fVal(s)*scale,height=other*scale,left=80,top=14;
+  return svgWrap(left+width+20,top+height+50,`<rect class="rg-out" x="${left}" y="${top}" width="${width}" height="${height}" style="fill:rgba(255,201,60,.3)"/>`+fT(left+width/2,top+height/2,A,{unit:'sq '+u.slice(0,2)})+fT(left+width/2,top+height+24,s,{unit:u})+qbox(left-34,top+height/2),`A rectangle with area ${ftx(A)} square ${u} and one side ${ftx(s)} ${u}; the other side is unknown`);
 }
+/* A missing side, or tiles along a length: both divide. */
 function wMissing(el){
-  const q=Q(el);let p=0;
-  el.innerHTML=seg('Problem',MISSING.map((m,i)=>[i,m.kind==='side'?`Area ${fx(m.A)}, side ${fx(m.s)}`:`${fx(m.L)} ft in ${fx(m.s)} ft tiles`]))+`<div class="fig" data-f></div><p class="eq" data-e></p><p class="readout" data-r></p>`;
+  const q=Q(el);let problemIndex=0;
+  el.innerHTML=seg('Problem',MISSING.map((problem,i)=>[i,problem.kind==='side'?`Area ${fx(problem.A)}, side ${fx(problem.s)}`:`${fx(problem.L)} ft in ${fx(problem.s)} ft tiles`]))+`<div class="fig" data-f></div><p class="eq" data-e></p><p class="readout" data-r></p>`;
   const draw=()=>{
-    const m=MISSING[p];press(el,p);
-    if(m.kind==='side'){
-      const o=fDiv(m.A,m.s);
-      q('f').innerHTML=sideFig(m.A,m.s,m.u);
-      q('e').innerHTML=`${fx(m.s)} × <span class="q">?</span> = ${fx(m.A)}`;
-      q('r').innerHTML=`Side × side = area, so divide the area by the side you know: ${fx(m.A)} ÷ ${fx(m.s)} = ${fim(m.A)} × ${fim(fInv(m.s))} = <b>${fx(o)} ${m.u}</b>.<br><span class="dimline">Check: ${fx(m.s)} × ${fx(o)} = ${fx(m.A)}.</span>`;
+    const problem=MISSING[problemIndex];press(el,problemIndex);
+    if(problem.kind==='side'){
+      const other=fDiv(problem.A,problem.s);
+      q('f').innerHTML=sideFig(problem.A,problem.s,problem.u);
+      q('e').innerHTML=`${fx(problem.s)} × <span class="q">?</span> = ${fx(problem.A)}`;
+      q('r').innerHTML=`Side × side = area, so divide the area by the side you know: ${fx(problem.A)} ÷ ${fx(problem.s)} = ${fim(problem.A)} × ${fim(fInv(problem.s))} = <b>${fx(other)} ${problem.u}</b>.<br><span class="dimline">Check: ${fx(problem.s)} × ${fx(other)} = ${fx(problem.A)}.</span>`;
     }else{
-      const n=fDiv(m.L,m.s),full=Math.floor(fVal(n));
-      q('f').innerHTML=groupTape(m.L,m.s,{label:`Tape diagram: ${ftx(m.L)} feet in tiles ${ftx(m.s)} feet long`});
-      q('e').innerHTML=`<span class="q">?</span> × ${fx(m.s)} = ${fx(m.L)}`;
-      q('r').innerHTML=`How many ${fx(m.s)}-foot tiles fit along ${fx(m.L)} feet? ${fx(m.L)} ÷ ${fx(m.s)} = <b>${fx(n)}</b>.`
-        +(isWhole(n)?' The tiles fit exactly.':` That’s ${full} whole tiles and ${fx(fSub(n,frac(full)))} of a tile, so the last tile has to be cut.`);
+      const tiles=fDiv(problem.L,problem.s),full=Math.floor(fVal(tiles));
+      q('f').innerHTML=groupTape(problem.L,problem.s,{label:`Tape diagram: ${ftx(problem.L)} feet in tiles ${ftx(problem.s)} feet long`});
+      q('e').innerHTML=`<span class="q">?</span> × ${fx(problem.s)} = ${fx(problem.L)}`;
+      q('r').innerHTML=`How many ${fx(problem.s)}-foot tiles fit along ${fx(problem.L)} feet? ${fx(problem.L)} ÷ ${fx(problem.s)} = <b>${fx(tiles)}</b>.`
+        +(isWhole(tiles)?' The tiles fit exactly.':` That’s ${full} whole tiles and ${fx(fSub(tiles,frac(full)))} of a tile, so the last tile has to be cut.`);
     }
   };
-  onPick(el,m=>{p=+m;draw();});
+  onPick(el,id=>{problemIndex=+id;draw();});
   draw();
 }
 

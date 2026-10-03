@@ -5,19 +5,22 @@ const DEALS=[
   {what:['muffin','muffins'],a:[4,6],b:[6,9]},
   {what:['kilogram of rice','kilograms of rice'],a:[2,5],b:[5,11]},
 ];
-const offer=(what,[n,c])=>`${n} ${what[n===1?0:1]} for ${money(c)}`;
+/* "3 pens for $6" */
+const offer=(what,[count,price])=>`${count} ${what[count===1?0:1]} for ${money(price)}`;
+/* Two offers on double number lines, each down to the price for one: the lower one is the better deal. */
 function wDeal(el){
-  const q=Q(el);let p=0;
-  el.innerHTML=seg('Compare',DEALS.map((d,i)=>[i,d.what[1]]))+`<div class="fig dnl2" data-f></div><p class="readout" data-r></p>`;
+  const q=Q(el);let dealIndex=0;
+  el.innerHTML=seg('Compare',DEALS.map((deal,i)=>[i,deal.what[1]]))+`<div class="fig dnl2" data-f></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const {what,a,b}=DEALS[p],ua=a[1]/a[0],ub=b[1]/b[0];press(el,p);
-    const line=([n,c])=>dnl(what[1],'dollars',[{t:0,b:0,st:1,sb:1},{t:1,b:c/n,st:2,sb:2},{t:n,b:c,st:1,sb:1}],{fb:money})(true);
+    /* unitA and unitB: the price for one in each offer */
+    const {what,a,b}=DEALS[dealIndex],unitA=a[1]/a[0],unitB=b[1]/b[0];press(el,dealIndex);
+    const line=([count,price])=>dnl(what[1],'dollars',[{t:0,b:0,st:1,sb:1},{t:1,b:price/count,st:2,sb:2},{t:count,b:price,st:1,sb:1}],{fb:money})(true);
     q('f').innerHTML=line(a)+line(b);
-    const best=Math.abs(ua-ub)<1e-9?null:ua<ub?a:b;
-    q('r').innerHTML=`${offer(what,a)}: <b>${money(ua)}</b> for each ${what[0]}.<br>${offer(what,b)}: <b>${money(ub)}</b> for each ${what[0]}.<br>`
+    const best=Math.abs(unitA-unitB)<1e-9?null:unitA<unitB?a:b;
+    q('r').innerHTML=`${offer(what,a)}: <b>${money(unitA)}</b> for each ${what[0]}.<br>${offer(what,b)}: <b>${money(unitB)}</b> for each ${what[0]}.<br>`
       +(best?`<span class="ok">${offer(what,best)} is the better deal: each ${what[0]} costs less.</span>`:`<span class="ok">They’re the same deal: the same price for each ${what[0]}.</span>`);
   };
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){p=+b.dataset.m;draw();}});
+  el.addEventListener('click',e=>{const dealBtn=e.target.closest('[data-m]');if(dealBtn){dealIndex=+dealBtn.dataset.m;draw();}});
   draw();
 }
 
@@ -27,15 +30,16 @@ const RACES=[
   {a:['Lin',[200,40]],b:['Andre',[120,24]]},
   {a:['Kiran',[90,15]],b:['Jada',[60,12]]},
 ];
+/* Two runners: compare their meters per second. */
 function wRace(el){
-  const q=Q(el);let p=0;
+  const q=Q(el);let raceIndex=0;
   el.innerHTML=seg('Race',RACES.map(({a,b},i)=>[i,`${a[0]} and ${b[0]}`]))+`<p class="readout" data-r></p>`;
   const draw=()=>{
-    const {a,b}=RACES[p],va=a[1][0]/a[1][1],vb=b[1][0]/b[1][1];press(el,p);
-    const say=([name,[m,s]],v)=>`${name} runs ${m} meters in ${s} seconds: ${m} ÷ ${s} = <b>${fmt(v)} meters per second</b>.`;
-    q('r').innerHTML=`${say(a,va)}<br>${say(b,vb)}<br>`+(va===vb?`<span class="ok">They run at the same speed.</span>`:`<span class="ok">${(va>vb?a:b)[0]} is faster: more meters every second.</span>`);
+    const {a,b}=RACES[raceIndex],speedA=a[1][0]/a[1][1],speedB=b[1][0]/b[1][1];press(el,raceIndex);
+    const say=([name,[meters,seconds]],speed)=>`${name} runs ${meters} meters in ${seconds} seconds: ${meters} ÷ ${seconds} = <b>${fmt(speed)} meters per second</b>.`;
+    q('r').innerHTML=`${say(a,speedA)}<br>${say(b,speedB)}<br>`+(speedA===speedB?`<span class="ok">They run at the same speed.</span>`:`<span class="ok">${(speedA>speedB?a:b)[0]} is faster: more meters every second.</span>`);
   };
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){p=+b.dataset.m;draw();}});
+  el.addEventListener('click',e=>{const raceBtn=e.target.closest('[data-m]');if(raceBtn){raceIndex=+raceBtn.dataset.m;draw();}});
   draw();
 }
 

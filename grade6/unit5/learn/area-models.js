@@ -1,38 +1,42 @@
 /* Learn Arithmetic in Base Ten (Grade 6 Unit 5), chapter 3: Area diagrams and grids. Its widgets and steps; loaded by area-models.html. */
 /* a 1 m by 1 m square in hundredths, with a w-tenths by h-tenths rectangle shaded from the bottom left */
 function grid(w,h){
-  const c=24,x0=58,y0=28,N=10*c;let o='';
-  for(let i=0;i<10;i++)for(let j=0;j<10;j++)o+=`<rect class="${i<w&&j>=10-h?'shade':'cell'}" x="${x0+i*c}" y="${y0+j*c}" width="${c}" height="${c}"/>`;
-  o+=`<rect class="frame" x="${x0}" y="${y0}" width="${N}" height="${N}"/><rect class="frame" style="stroke:var(--gold)" x="${x0}" y="${y0+N-h*c}" width="${w*c}" height="${h*c}"/>`;
-  o+=`<text class="ftxt mid" x="${x0+N/2}" y="${y0-10}">1 m</text><text class="ftxt mid" x="${x0+w*c/2}" y="${y0+N+22}">${fmt(w/10)} m</text><text class="ftxt" text-anchor="end" x="${x0-8}" y="${y0+N-h*c/2+5}">${fmt(h/10)} m</text>`;
-  return svgWrap(x0+N+20,y0+N+34,o,`A 1 meter square in hundredths, with ${fmt(w/10)} by ${fmt(h/10)} meters shaded`);
+  const cell=24,left=58,top=28,side=10*cell;let markup='';
+  for(let i=0;i<10;i++)for(let j=0;j<10;j++)markup+=`<rect class="${i<w&&j>=10-h?'shade':'cell'}" x="${left+i*cell}" y="${top+j*cell}" width="${cell}" height="${cell}"/>`;
+  markup+=`<rect class="frame" x="${left}" y="${top}" width="${side}" height="${side}"/><rect class="frame" style="stroke:var(--gold)" x="${left}" y="${top+side-h*cell}" width="${w*cell}" height="${h*cell}"/>`;
+  markup+=`<text class="ftxt mid" x="${left+side/2}" y="${top-10}">1 m</text><text class="ftxt mid" x="${left+w*cell/2}" y="${top+side+22}">${fmt(w/10)} m</text><text class="ftxt" text-anchor="end" x="${left-8}" y="${top+side-h*cell/2+5}">${fmt(h/10)} m</text>`;
+  return svgWrap(left+side+20,top+side+34,markup,`A 1 meter square in hundredths, with ${fmt(w/10)} by ${fmt(h/10)} meters shaded`);
 }
+/* A rectangle in tenths of a meter (a stepper for each side) on a hundredths grid: tenths times tenths are hundredths. */
 function wGrid(el){
-  const q=Q(el),st={w:6,h:3};
+  const q=Q(el),values={w:6,h:3};
   el.innerHTML=`<div class="wrow">${stepper('w','Width (tenths)')}${stepper('h','Height (tenths)')}</div><div class="fig" data-f></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const {w,h}=st;q('w').textContent=w;q('h').textContent=h;
+    const {w,h}=values;q('w').textContent=w;q('h').textContent=h;
     q('f').innerHTML=grid(w,h);
     q('r').innerHTML=`${fmt(w/10)} m × ${fmt(h/10)} m = ${w} × ${h} = <b>${w*h} hundredth${w*h===1?'':'s'}</b> of a square meter = <b>${fmt(w*h/100)} square meters</b>.`+(w*h===100?`<br><span class="ok">The whole square: 1 square meter.</span>`:'');
   };
-  steppers(el,st,{w:[1,10],h:[1,10]},draw);
+  steppers(el,values,{w:[1,10],h:[1,10]},draw);
   draw();
 }
 
-/* a price times a weight, split into the whole pounds and the part of a pound */
+/* buys: a price per pound and a weight */
 const BUY=[{what:'grapes',price:2.4,lb:1.5},{what:'cherries',price:3.2,lb:2.5},{what:'apples',price:1.8,lb:3.5}];
+/* A price times a weight, split into the whole pounds and the part of a pound, as an area diagram. */
 function wParts(el){
-  const q=Q(el);let p=0;
-  el.innerHTML=seg('Buy',BUY.map((b,i)=>[i,`${fmt(b.lb)} lb of ${b.what}`]))+`<div class="fig" data-f></div><p class="readout" data-r></p>`;
+  const q=Q(el);let buyIndex=0;
+  el.innerHTML=seg('Buy',BUY.map((buy,i)=>[i,`${fmt(buy.lb)} lb of ${buy.what}`]))+`<div class="fig" data-f></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const {what,price,lb}=BUY[p],w=Math.floor(lb),d=Math.round((lb-w)*10)/10,A=price*w,B=price*d;press(el,p);
-    const W=380,x0=70,y0=34,H=110,w1=W*w/lb,w2=W-w1;
-    q('f').innerHTML=svgWrap(W+x0+20,y0+H+20,`<rect class="part-a" x="${x0}" y="${y0}" width="${w1}" height="${H}"/><rect class="part-b" x="${x0+w1}" y="${y0}" width="${w2}" height="${H}"/>`
-      +`<text class="ftxt big mid" x="${x0+w1/2}" y="${y0-12}">${w}</text><text class="ftxt big mid" x="${x0+w1+w2/2}" y="${y0-12}">${fmt(d)}</text><text class="ftxt big mid" x="${x0-34}" y="${y0+H/2+7}">${money(price)}</text>`
-      +`<text class="ftxt big mid rev" x="${x0+w1/2}" y="${y0+H/2+7}">${money(A)}</text><text class="ftxt big mid rev" x="${x0+w1+w2/2}" y="${y0+H/2+7}">${money(B)}</text>`,`${money(price)} times ${w} and ${fmt(d)} pounds, split into two rectangles`);
-    q('r').innerHTML=`${fmt(lb)} pounds is ${w} + ${fmt(d)}.<br>${money(price)} × ${w} = ${money(A)} and ${money(price)} × ${fmt(d)} = ${money(B)}.<br><b>${fmt(lb)} pounds of ${what} cost ${money(A+B)}.</b>`;
+    /* wholePounds and partPound split the weight; wholeCost and partCost are their costs */
+    const {what,price,lb}=BUY[buyIndex],wholePounds=Math.floor(lb),partPound=Math.round((lb-wholePounds)*10)/10,wholeCost=price*wholePounds,partCost=price*partPound;press(el,buyIndex);
+    /* the rectangle is width wide, split in proportion to the two parts */
+    const width=380,left=70,top=34,height=110,wholeW=width*wholePounds/lb,partW=width-wholeW;
+    q('f').innerHTML=svgWrap(width+left+20,top+height+20,`<rect class="part-a" x="${left}" y="${top}" width="${wholeW}" height="${height}"/><rect class="part-b" x="${left+wholeW}" y="${top}" width="${partW}" height="${height}"/>`
+      +`<text class="ftxt big mid" x="${left+wholeW/2}" y="${top-12}">${wholePounds}</text><text class="ftxt big mid" x="${left+wholeW+partW/2}" y="${top-12}">${fmt(partPound)}</text><text class="ftxt big mid" x="${left-34}" y="${top+height/2+7}">${money(price)}</text>`
+      +`<text class="ftxt big mid rev" x="${left+wholeW/2}" y="${top+height/2+7}">${money(wholeCost)}</text><text class="ftxt big mid rev" x="${left+wholeW+partW/2}" y="${top+height/2+7}">${money(partCost)}</text>`,`${money(price)} times ${wholePounds} and ${fmt(partPound)} pounds, split into two rectangles`);
+    q('r').innerHTML=`${fmt(lb)} pounds is ${wholePounds} + ${fmt(partPound)}.<br>${money(price)} × ${wholePounds} = ${money(wholeCost)} and ${money(price)} × ${fmt(partPound)} = ${money(partCost)}.<br><b>${fmt(lb)} pounds of ${what} cost ${money(wholeCost+partCost)}.</b>`;
   };
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){p=+b.dataset.m;draw();}});
+  el.addEventListener('click',e=>{const buyBtn=e.target.closest('[data-m]');if(buyBtn){buyIndex=+buyBtn.dataset.m;draw();}});
   draw();
 }
 

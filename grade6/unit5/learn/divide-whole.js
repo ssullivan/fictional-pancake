@@ -1,43 +1,48 @@
 /* Learn Arithmetic in Base Ten (Grade 6 Unit 5), chapter 4: Dividing whole numbers. Its widgets and steps; loaded by divide-whole.html. */
-/* partial quotients: take away easy chunks of groups until nothing is left */
+/* divisions N ÷ d, and the chunks of groups to take out */
 const CHUNKS=[[156,12,[10,3]],[384,16,[20,4]],[252,7,[30,6]],[1000,8,[100,25]]];
+/* Partial quotients: take away easy chunks of groups (a button for each) until nothing is left. */
 function wChunks(el){
-  const q=Q(el);let p=0,k=0;
+  /* taken: how many chunks are taken out */
+  const q=Q(el);let problemIndex=0,taken=0;
   el.innerHTML=seg('Divide',CHUNKS.map(([N,d],i)=>[i,`${N.toLocaleString('en-US')} ÷ ${d}`]))+`<div class="fig" data-f></div><div class="wrow"><button type="button" class="btn" data-go>Take a chunk</button><button type="button" class="ghost-btn" data-clr>Start over</button></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const [N,d,cs]=CHUNKS[p];press(el,p);
-    let rem=N;const lines=[`${d} ) ${N}`];
-    cs.slice(0,k).forEach(c=>{rem-=c*d;lines.push(`  − ${c*d}   <span class="rev">${c} × ${d}</span>`,`    ${rem}`);});
+    const [N,d,chunks]=CHUNKS[problemIndex];press(el,problemIndex);
+    let rest=N;const lines=[`${d} ) ${N}`];
+    chunks.slice(0,taken).forEach(chunk=>{rest-=chunk*d;lines.push(`  − ${chunk*d}   <span class="rev">${chunk} × ${d}</span>`,`    ${rest}`);});
     q('f').innerHTML=`<pre class="vert" role="img" aria-label="Partial quotients for ${N} divided by ${d}">${lines.join('\n')}</pre>`;
-    q('go').disabled=k>=cs.length;
-    q('r').innerHTML=!k?`How many groups of ${d} are in ${N.toLocaleString('en-US')}? Take away a chunk of groups you can find easily.`
-      :k<cs.length?`${cs.slice(0,k).join(' + ')} groups so far, with <b>${rem}</b> left.`
-      :`<span class="ok">Nothing left: ${cs.join(' + ')} = <b>${cs.reduce((a,b)=>a+b)} groups</b>, so ${N.toLocaleString('en-US')} ÷ ${d} = ${N/d}.</span>`;
+    q('go').disabled=taken>=chunks.length;
+    q('r').innerHTML=!taken?`How many groups of ${d} are in ${N.toLocaleString('en-US')}? Take away a chunk of groups you can find easily.`
+      :taken<chunks.length?`${chunks.slice(0,taken).join(' + ')} groups so far, with <b>${rest}</b> left.`
+      :`<span class="ok">Nothing left: ${chunks.join(' + ')} = <b>${chunks.reduce((a,b)=>a+b)} groups</b>, so ${N.toLocaleString('en-US')} ÷ ${d} = ${N/d}.</span>`;
   };
-  q('go').onclick=()=>{k++;draw();};
-  q('clr').onclick=()=>{k=0;draw();};
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){p=+b.dataset.m;k=0;draw();}});
+  q('go').onclick=()=>{taken++;draw();};
+  q('clr').onclick=()=>{taken=0;draw();};
+  el.addEventListener('click',e=>{const problemBtn=e.target.closest('[data-m]');if(problemBtn){problemIndex=+problemBtn.dataset.m;taken=0;draw();}});
   draw();
 }
 
-/* keep dividing past the ones place: what's left becomes tenths, then hundredths */
+/* divisions X ÷ n that go past the ones place */
 const PAST=[[7,4],[3,8],[10,4],[9,2],[12,5]];
+/* place names by decimal places: PN for many, PN1 for one; u(n, k): "3 tenths", "1 hundredth" */
 const PN=['ones','tenths','hundredths','thousandths'],PN1=['one','tenth','hundredth','thousandth'];
 const u=(n,k)=>`${n} ${n===1?PN1[k]:PN[k]}`;
+/* X ÷ n in words, a place at a time: what's left becomes tenths, then hundredths (at most 3 places) */
 function steps(X,n){
-  const out=[];let q0=Math.floor(X/n),rem=X-q0*n,pl=0;
-  out.push(`${X} ÷ ${n} = ${u(q0,0)}${rem?`, with ${u(rem,0)} left`:''}.`);
-  while(rem&&pl<3){pl++;const v=rem*10,qd=Math.floor(v/n);out.push(`${u(rem,pl-1)} = ${u(v,pl)}. ${v} ÷ ${n} = ${u(qd,pl)}${v-qd*n?`, with ${u(v-qd*n,pl)} left`:''}.`);rem=v-qd*n;}
+  const out=[];let quotient=Math.floor(X/n),left=X-quotient*n,place=0;
+  out.push(`${X} ÷ ${n} = ${u(quotient,0)}${left?`, with ${u(left,0)} left`:''}.`);
+  while(left&&place<3){place++;const asNext=left*10,digit=Math.floor(asNext/n);out.push(`${u(left,place-1)} = ${u(asNext,place)}. ${asNext} ÷ ${n} = ${u(digit,place)}${asNext-digit*n?`, with ${u(asNext-digit*n,place)} left`:''}.`);left=asNext-digit*n;}
   return out;
 }
+/* Keep dividing past the ones place: what's left becomes tenths, then hundredths. */
 function wPast(el){
-  const q=Q(el);let p=0;
+  const q=Q(el);let problemIndex=0;
   el.innerHTML=seg('Divide',PAST.map(([X,n],i)=>[i,`${X} ÷ ${n}`]))+`<p class="readout" data-r></p>`;
   const draw=()=>{
-    const [X,n]=PAST[p];press(el,p);
+    const [X,n]=PAST[problemIndex];press(el,problemIndex);
     q('r').innerHTML=steps(X,n).join('<br>')+`<br><b>${X} ÷ ${n} = ${fmt(X/n)}</b>`;
   };
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){p=+b.dataset.m;draw();}});
+  el.addEventListener('click',e=>{const problemBtn=e.target.closest('[data-m]');if(problemBtn){problemIndex=+problemBtn.dataset.m;draw();}});
   draw();
 }
 

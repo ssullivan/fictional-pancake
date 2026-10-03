@@ -5,46 +5,51 @@ const RECIPES=[
   {dish:'pancakes',a:3,b:2,x:['cup of flour','cups of flour'],y:['egg','eggs']},
   {dish:'trail mix',a:2,b:1,x:['cup of peanuts','cups of peanuts'],y:['cup of raisins','cups of raisins']},
 ];
+/* Batches of a recipe (a stepper): every batch has the same ratio, so they all taste the same. */
 function wBatch(el){
-  const q=Q(el),st={n:1};let p=0;
-  el.innerHTML=seg('Recipe',RECIPES.map((r,i)=>[i,r.dish]))+`<div class="wrow">${stepper('n','Batches')}</div><div class="fig" data-f></div><p class="readout" data-r></p>`;
+  /* the stepper's value: n batches */
+  const q=Q(el),values={n:1};let recipeIndex=0;
+  el.innerHTML=seg('Recipe',RECIPES.map((recipe,i)=>[i,recipe.dish]))+`<div class="wrow">${stepper('n','Batches')}</div><div class="fig" data-f></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const r=RECIPES[p],{n}=st;press(el,p);q('n').textContent=n;
-    q('f').innerHTML=batchDiagram(r.a,r.b,n,r);
-    q('r').innerHTML=`${n} ${n===1?'batch':'batches'}: <b>${nOf(r.a*n,r.x)}</b> and <b>${nOf(r.b*n,r.y)}</b>, a ratio of <b>${r.a*n} : ${r.b*n}</b>.<br><span class="dimline">Every batch has ${r.a} : ${r.b}, so they all taste the same: ${Array.from({length:n},(_,i)=>`${r.a*(i+1)} : ${r.b*(i+1)}`).join(', ')}.</span>`;
+    const recipe=RECIPES[recipeIndex],{n}=values;press(el,recipeIndex);q('n').textContent=n;
+    q('f').innerHTML=batchDiagram(recipe.a,recipe.b,n,recipe);
+    q('r').innerHTML=`${n} ${n===1?'batch':'batches'}: <b>${nOf(recipe.a*n,recipe.x)}</b> and <b>${nOf(recipe.b*n,recipe.y)}</b>, a ratio of <b>${recipe.a*n} : ${recipe.b*n}</b>.<br><span class="dimline">Every batch has ${recipe.a} : ${recipe.b}, so they all taste the same: ${Array.from({length:n},(_,i)=>`${recipe.a*(i+1)} : ${recipe.b*(i+1)}`).join(', ')}.</span>`;
   };
-  steppers(el,st,{n:[1,5]},draw);
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){p=+b.dataset.m;st.n=1;draw();}});
+  steppers(el,values,{n:[1,5]},draw);
+  el.addEventListener('click',e=>{const recipeBtn=e.target.closest('[data-m]');if(recipeBtn){recipeIndex=+recipeBtn.dataset.m;values.n=1;draw();}});
   draw();
 }
 
-/* two paint mixes: the same color when their ratios are equivalent */
+/* Two paint mixes (steppers set mix B): the same color when their ratios are equivalent. */
 function wPaint(el){
-  const q=Q(el),st={bl:4,ye:5};
+  /* the steppers' values: bl cups of blue and ye cups of yellow in mix B */
+  const q=Q(el),values={bl:4,ye:5};
   el.innerHTML=`<p class="note">Mix A is 2 cups of blue to 3 cups of yellow. Make mix B.</p><div class="wrow">${stepper('bl','Blue cups')}${stepper('ye','Yellow cups')}</div><div class="swatches" data-s></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const {bl,ye}=st,same=bl*3===ye*2;q('bl').textContent=bl;q('ye').textContent=ye;
+    /* same: bl : ye is equivalent to 2 : 3 (cross-multiplying puts both over the same denominator) */
+    const {bl:blue,ye:yellow}=values,same=blue*3===yellow*2;q('bl').textContent=blue;q('ye').textContent=yellow;
     /* each swatch, with a bar that shows its share of blue and of yellow (close mixes can look alike) */
-    const card=(name,b,y)=>`<div class="swatch-card"><span style="background:${mixColor(b,y)}"></span><div class="mixbar" role="img" aria-label="${b} parts blue to ${y} parts yellow"><i class="bl" style="flex:${b}"></i><i class="ye" style="flex:${y}"></i></div>${name} ${b} : ${y}</div>`;
-    q('s').innerHTML=card('Mix A',2,3)+card('Mix B',bl,ye);
-    q('r').innerHTML=same?`<span class="ok">The same color! ${bl} : ${ye} is 2 : 3 times ${bl/2}.</span>`
-      :`<span class="no">A different color.</span> Mix B is ${bl*3>ye*2?'bluer':'more yellow'}.<br><span class="dimline">For the same color, blue and yellow have to be 2 : 3 times the same number, like 4 : 6 or 6 : 9.</span>`;
+    const card=(name,blueParts,yellowParts)=>`<div class="swatch-card"><span style="background:${mixColor(blueParts,yellowParts)}"></span><div class="mixbar" role="img" aria-label="${blueParts} parts blue to ${yellowParts} parts yellow"><i class="bl" style="flex:${blueParts}"></i><i class="ye" style="flex:${yellowParts}"></i></div>${name} ${blueParts} : ${yellowParts}</div>`;
+    q('s').innerHTML=card('Mix A',2,3)+card('Mix B',blue,yellow);
+    q('r').innerHTML=same?`<span class="ok">The same color! ${blue} : ${yellow} is 2 : 3 times ${blue/2}.</span>`
+      :`<span class="no">A different color.</span> Mix B is ${blue*3>yellow*2?'bluer':'more yellow'}.<br><span class="dimline">For the same color, blue and yellow have to be 2 : 3 times the same number, like 4 : 6 or 6 : 9.</span>`;
   };
-  steppers(el,st,{bl:[1,10],ye:[1,15]},draw);
+  steppers(el,values,{bl:[1,10],ye:[1,15]},draw);
   draw();
 }
 
-/* is it equivalent to 4 : 6? Both simplify to the same ratio */
+/* ratios to compare with 4 : 6 */
 const TRY=[[6,9],[8,10],[2,3],[12,18],[6,4]];
+/* Is it equivalent to 4 : 6? Both simplify to the same ratio. */
 function wEquiv(el){
-  const q=Q(el);let p=0;
+  const q=Q(el);let tryIndex=0;
   el.innerHTML=seg('Compare 4 : 6 with',TRY.map(([a,b],i)=>[i,`${a} : ${b}`]))+`<p class="readout" data-r></p>`;
   const draw=()=>{
-    const [a,b]=TRY[p],g=gcd(a,b),yes=a*6===b*4;press(el,p);
+    const [a,b]=TRY[tryIndex],g=gcd(a,b),equivalent=a*6===b*4;press(el,tryIndex);
     q('r').innerHTML=`4 : 6 divided by 2 is <b>2 : 3</b>. ${a} : ${b}${g>1?` divided by ${g} is <b>${a/g} : ${b/g}</b>`:' can’t be divided any more'}.<br>`
-      +(yes?`<span class="ok">Equivalent: both are 2 : 3 times a number.</span>`:`<span class="no">Not equivalent.</span> <span class="dimline">${a/g} : ${b/g} isn’t 2 : 3.</span>`);
+      +(equivalent?`<span class="ok">Equivalent: both are 2 : 3 times a number.</span>`:`<span class="no">Not equivalent.</span> <span class="dimline">${a/g} : ${b/g} isn’t 2 : 3.</span>`);
   };
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){p=+b.dataset.m;draw();}});
+  el.addEventListener('click',e=>{const tryBtn=e.target.closest('[data-m]');if(tryBtn){tryIndex=+tryBtn.dataset.m;draw();}});
   draw();
 }
 

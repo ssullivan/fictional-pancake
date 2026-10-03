@@ -1,12 +1,20 @@
-/* Rate Racers (Grade 6 Unit 3): the problem generators, station list, and icons. Loaded by index.html and by tools/fuzz.mjs. */
+/* Rate Racers (Grade 6 Unit 3): the problem generators, station list, and icons. Loaded by index.html and by tools/fuzz.mjs.
+   Diagrams (dnl, tableFig, coinsFig, pctTape, pctLine) and COIN_SET come from shared/figures.js. Each generator deals one of
+   a few kinds of problem (type), each with a comment saying what it asks. */
+/* a number to 2 decimal places, with commas */
 const fmt=n=>(Math.round(n*100)/100).toLocaleString('en-US');
+/* dollars and cents: $4.50 */
 const money=n=>'$'+n.toFixed(2);
-const pl=(w,n)=>`${fmt(n)} ${w[n===1?0:1]}`;
+/* n and the word for it: word is [one, many] */
+const pl=(word,n)=>`${fmt(n)} ${word[n===1?0:1]}`;
 
+/* whether v has at most 2 decimal places */
 const nice2=v=>Math.abs(v*100-Math.round(v*100))<1e-9;
+/* a percent as written: 25% */
 const pctF=v=>fmt(v)+'%';
 
 /* ---------- Station 1: unit conversion ---------- */
+/* conversions: 1 big unit is `f` small ones, and what they measure */
 const CONV=[
   {big:['foot','feet'],small:['inch','inches'],f:12,kind:'length'},
   {big:['yard','yards'],small:['foot','feet'],f:3,kind:'length'},
@@ -22,6 +30,7 @@ const CONV=[
 /* unit → [what it measures, size rank within that kind] */
 const UNIT={centimeters:['length',1],meters:['length',2],kilometers:['length',3],inches:['length',1],yards:['length',2],miles:['length',3],
   grams:['mass',1],kilograms:['mass',2],ounces:['weight',1],pounds:['weight',2],cups:['volume',1],gallons:['volume',2],liters:['volume',2],quarts:['volume',2]};
+/* things to measure, the unit that fits (ok), and the choices */
 const PICKS=[
   {what:'the length of a pencil',ok:'centimeters',opts:['centimeters','meters','kilometers']},
   {what:'the distance between two cities',ok:'kilometers',opts:['centimeters','meters','kilometers']},
@@ -35,55 +44,64 @@ const PICKS=[
   {what:'the weight of a large dog',ok:'pounds',opts:['ounces','pounds','quarts']}
 ];
 function genConv(){
-  const c=pick(CONV),type=pick(['down','down','up','up','more','cmp','pick']);
+  const conversion=pick(CONV),type=pick(['down','down','up','up','more','cmp','pick']);
+  /* factor: how many small units make 1 big one */
+  const {big,small,f:factor}=conversion;
   if(type==='down'||type==='up'){
+    /* convert big units to small (down) or small to big (up), on a double number line */
     /* not 1.5 yards, where adding the 3 feet gives the same as multiplying */
-    let n;do n=pick(c.f>=100?[2,3,4,5,1.5,2.5]:[2,3,4,5,6,7,1.5,2.5]);while(n+c.f===n*c.f);
-    const m=n*c.f,down=type==='down',step=Number.isInteger(n)?1:.5;
-    const ticks=[];for(let t=0;t<=n+1e-9;t+=step){const last=Math.abs(t-n)<1e-9,base=t===0||t===1;
-      ticks.push(down?{t,b:t*c.f,st:1,sb:base?1:(last?0:2),q:last?'b':null}:{t,b:t*c.f,st:base?1:(last?0:2),sb:base||last?1:2,q:last?'t':null});}
-    const fig=dnl(c.big[1],c.small[1],ticks);
-    if(down)return {kind:'num',unit:c.small[1],answer:m,fig,
-      prompt:`${fmt(n)} ${c.big[n===1?0:1]} is how many <b>${c.small[1]}</b>?`,
-      hint:`1 ${c.big[0]} = ${fmt(c.f)} ${c.small[1]}. ${c.small[1][0].toUpperCase()+c.small[1].slice(1)} are smaller, so there will be more of them. Multiply.`,
-      misc:[[n/c.f,`You divided. ${c.small[1]} are smaller than ${c.big[1]}, so it takes <b>more</b> of them. Multiply by ${fmt(c.f)}.`],[n+c.f,`Each ${c.big[0]} is ${fmt(c.f)} ${c.small[1]}. Multiply, don’t add.`]],
-      explain:`1 ${c.big[0]} = ${fmt(c.f)} ${c.small[1]}, so ${fmt(n)} × ${fmt(c.f)} = ${fmt(m)} ${c.small[1]}.`};
-    return {kind:'num',unit:c.big[1],answer:n,fig,
-      prompt:`${fmt(m)} ${c.small[1]} is how many <b>${c.big[1]}</b>?`,
-      hint:`1 ${c.big[0]} = ${fmt(c.f)} ${c.small[1]}. ${c.big[1][0].toUpperCase()+c.big[1].slice(1)} are bigger, so there will be fewer of them. Divide.`,
-      misc:[[m*c.f,`You multiplied. ${c.big[1]} are bigger, so it takes <b>fewer</b> of them. Divide by ${fmt(c.f)}.`]],
-      explain:`Every ${fmt(c.f)} ${c.small[1]} make 1 ${c.big[0]}: ${fmt(m)} ÷ ${fmt(c.f)} = ${fmt(n)} ${c.big[1]}.`};
+    let bigCount;do bigCount=pick(factor>=100?[2,3,4,5,1.5,2.5]:[2,3,4,5,6,7,1.5,2.5]);while(bigCount+factor===bigCount*factor);
+    const smallCount=bigCount*factor,down=type==='down',step=Number.isInteger(bigCount)?1:.5;
+    /* ticks every whole (or half) big unit; 0 and 1 are labeled, and the others only with the hint */
+    const ticks=[];for(let t=0;t<=bigCount+1e-9;t+=step){const last=Math.abs(t-bigCount)<1e-9,base=t===0||t===1;
+      ticks.push(down?{t,b:t*factor,st:1,sb:base?1:(last?0:2),q:last?'b':null}:{t,b:t*factor,st:base?1:(last?0:2),sb:base||last?1:2,q:last?'t':null});}
+    const fig=dnl(big[1],small[1],ticks);
+    if(down)return {kind:'num',unit:small[1],answer:smallCount,fig,
+      prompt:`${fmt(bigCount)} ${big[bigCount===1?0:1]} is how many <b>${small[1]}</b>?`,
+      hint:`1 ${big[0]} = ${fmt(factor)} ${small[1]}. ${small[1][0].toUpperCase()+small[1].slice(1)} are smaller, so there will be more of them. Multiply.`,
+      misc:[[bigCount/factor,`You divided. ${small[1]} are smaller than ${big[1]}, so it takes <b>more</b> of them. Multiply by ${fmt(factor)}.`],[bigCount+factor,`Each ${big[0]} is ${fmt(factor)} ${small[1]}. Multiply, don’t add.`]],
+      explain:`1 ${big[0]} = ${fmt(factor)} ${small[1]}, so ${fmt(bigCount)} × ${fmt(factor)} = ${fmt(smallCount)} ${small[1]}.`};
+    return {kind:'num',unit:big[1],answer:bigCount,fig,
+      prompt:`${fmt(smallCount)} ${small[1]} is how many <b>${big[1]}</b>?`,
+      hint:`1 ${big[0]} = ${fmt(factor)} ${small[1]}. ${big[1][0].toUpperCase()+big[1].slice(1)} are bigger, so there will be fewer of them. Divide.`,
+      misc:[[smallCount*factor,`You multiplied. ${big[1]} are bigger, so it takes <b>fewer</b> of them. Divide by ${fmt(factor)}.`]],
+      explain:`Every ${fmt(factor)} ${small[1]} make 1 ${big[0]}: ${fmt(smallCount)} ÷ ${fmt(factor)} = ${fmt(bigCount)} ${big[1]}.`};
   }
   if(type==='more'){
+    /* measuring again in the other unit: more of them or fewer? */
     const thing=pick(['a hallway','a rug','a garden hose','a desk']),bigFirst=Math.random()<.5;
-    const [u1,u2]=bigFirst?[c.big[1],c.small[1]]:[c.small[1],c.big[1]];
-    const ctx=c.kind==='length'?`Andre measures ${thing} in ${u1}, then measures it again in ${u2}.`:c.kind==='volume'?`Mai measures the water in a fish tank in ${u1}, then measures it again in ${u2}.`:`Kiran weighs a bag of rice in ${u1}, then weighs it again in ${u2}.`;
-    const ans=bigFirst?'more':'fewer';
-    return {kind:'mc',choices:[{id:'more',label:`More ${u2}`},{id:'fewer',label:`Fewer ${u2}`},{id:'same',label:'The same number'}],answer:ans,
-      why:{more:`${u2} are bigger than ${u1}, so it takes fewer of them.`,fewer:`${u2} are smaller than ${u1}, so it takes more of them.`,same:'The amount is the same, but the units are different sizes, so the numbers are different.'},
-      prompt:`${ctx} Compared with the number of ${u1}, will there be more or fewer ${u2}?`,
+    const [unit1,unit2]=bigFirst?[big[1],small[1]]:[small[1],big[1]];
+    const story=conversion.kind==='length'?`Andre measures ${thing} in ${unit1}, then measures it again in ${unit2}.`:conversion.kind==='volume'?`Mai measures the water in a fish tank in ${unit1}, then measures it again in ${unit2}.`:`Kiran weighs a bag of rice in ${unit1}, then weighs it again in ${unit2}.`;
+    const answer=bigFirst?'more':'fewer';
+    return {kind:'mc',choices:[{id:'more',label:`More ${unit2}`},{id:'fewer',label:`Fewer ${unit2}`},{id:'same',label:'The same number'}],answer,
+      why:{more:`${unit2} are bigger than ${unit1}, so it takes fewer of them.`,fewer:`${unit2} are smaller than ${unit1}, so it takes more of them.`,same:'The amount is the same, but the units are different sizes, so the numbers are different.'},
+      prompt:`${story} Compared with the number of ${unit1}, will there be more or fewer ${unit2}?`,
       hint:`Which unit is smaller? It takes more small units than big units to measure the same thing.`,
-      explain:`1 ${c.big[0]} = ${fmt(c.f)} ${c.small[1]}. ${bigFirst?`${u2} are smaller, so there are more of them.`:`${u2} are bigger, so there are fewer of them.`}`};
+      explain:`1 ${big[0]} = ${fmt(factor)} ${small[1]}. ${bigFirst?`${unit2} are smaller, so there are more of them.`:`${unit2} are bigger, so there are fewer of them.`}`};
   }
   if(type==='cmp'){
-    const p=R(2,6),same=Math.random()<.2,d=c.f>=100?pick([-1,1])*R(1,9)*c.f/10:pick([-1,1])*R(1,Math.max(1,c.f-1));
-    const q=same?p*c.f:p*c.f+d,word=c.kind==='length'?'longer':c.kind==='volume'?'more liquid':'heavier';
-    const win=q===p*c.f?'S':(p*c.f>q?'A':'B');
-    return {kind:'mc',choices:[{id:'A',label:`${p} ${c.big[1]}`},{id:'B',label:`${fmt(q)} ${c.small[1]}`},{id:'S',label:'They are equal'}],answer:win,
-      why:{A:`Change ${p} ${c.big[1]} into ${c.small[1]} first, then compare.`,B:`Change ${p} ${c.big[1]} into ${c.small[1]} first, then compare.`,S:`Change ${p} ${c.big[1]} into ${c.small[1]}: they don’t match.`},
+    /* which is more: a number of big units, or a number of small units near it (sometimes equal) */
+    const bigCount=R(2,6),same=Math.random()<.2,off=factor>=100?pick([-1,1])*R(1,9)*factor/10:pick([-1,1])*R(1,Math.max(1,factor-1));
+    const smallCount=same?bigCount*factor:bigCount*factor+off,word=conversion.kind==='length'?'longer':conversion.kind==='volume'?'more liquid':'heavier';
+    const win=smallCount===bigCount*factor?'S':(bigCount*factor>smallCount?'A':'B');
+    return {kind:'mc',choices:[{id:'A',label:`${bigCount} ${big[1]}`},{id:'B',label:`${fmt(smallCount)} ${small[1]}`},{id:'S',label:'They are equal'}],answer:win,
+      why:{A:`Change ${bigCount} ${big[1]} into ${small[1]} first, then compare.`,B:`Change ${bigCount} ${big[1]} into ${small[1]} first, then compare.`,S:`Change ${bigCount} ${big[1]} into ${small[1]}: they don’t match.`},
       prompt:`Which is <b>${word}</b>?`,
-      hint:`Use the same unit for both. 1 ${c.big[0]} = ${fmt(c.f)} ${c.small[1]}.`,
-      explain:`${p} ${c.big[1]} = ${p} × ${fmt(c.f)} = ${fmt(p*c.f)} ${c.small[1]}. Compare ${fmt(p*c.f)} with ${fmt(q)}.`};
+      hint:`Use the same unit for both. 1 ${big[0]} = ${fmt(factor)} ${small[1]}.`,
+      explain:`${bigCount} ${big[1]} = ${bigCount} × ${fmt(factor)} = ${fmt(bigCount*factor)} ${small[1]}. Compare ${fmt(bigCount*factor)} with ${fmt(smallCount)}.`};
   }
-  const it=pick(PICKS),okU=UNIT[it.ok];
-  const why={};it.opts.forEach(o=>{if(o===it.ok)return;const u=UNIT[o];why[o]=u[0]!==okU[0]?`${o} measure ${u[0]}, not ${okU[0]}.`:u[1]<okU[1]?`${o} are very small for this. You’d get a huge number.`:`${o} are very big for this. You’d get a tiny fraction.`;});
-  return {kind:'mc',choices:it.opts.map(o=>({id:o,label:o})),answer:it.ok,why,
-    prompt:`Which unit makes the most sense for measuring <b>${it.what}</b>?`,
+  /* pick: the unit that makes sense; a wrong one measures something else, or is too small or too big */
+  const thing=pick(PICKS),okUnit=UNIT[thing.ok];
+  const why={};thing.opts.forEach(option=>{if(option===thing.ok)return;const unit=UNIT[option];why[option]=unit[0]!==okUnit[0]?`${option} measure ${unit[0]}, not ${okUnit[0]}.`:unit[1]<okUnit[1]?`${option} are very small for this. You’d get a huge number.`:`${option} are very big for this. You’d get a tiny fraction.`;});
+  return {kind:'mc',choices:thing.opts.map(option=>({id:option,label:option})),answer:thing.ok,why,
+    prompt:`Which unit makes the most sense for measuring <b>${thing.what}</b>?`,
     hint:'Think of a unit you know: a centimeter is about the width of a fingernail, a meter is about one big step, a kilometer is a long walk.',
-    explain:`${it.ok[0].toUpperCase()+it.ok.slice(1)} give a sensible number for ${it.what}.`};
+    explain:`${thing.ok[0].toUpperCase()+thing.ok.slice(1)} give a sensible number for ${thing.what}.`};
 }
 
 /* ---------- Station 2: rates ---------- */
+/* rate stories: x of one thing for y of another. xn/xs and yn/ys: the plural and singular units; mx: x is money;
+   xbig or ybig: that one is always the bigger number */
 const RCTX=[
   {s:(x,y)=>`${money(x)} buys ${fmt(y)} pounds of apples.`,xn:'dollars',xs:'dollar',yn:'pounds',ys:'pound',mx:1},
   {s:(x,y)=>`${fmt(x)} cups of flour make ${fmt(y)} batches of cookies.`,xn:'cups',xs:'cup',yn:'batches',ys:'batch',xbig:1},
@@ -91,97 +109,109 @@ const RCTX=[
   {s:(x,y)=>`${fmt(x)} liters of water fill ${fmt(y)} bottles.`,xn:'liters',xs:'liter',yn:'bottles',ys:'bottle',ybig:1},
   {s:(x,y)=>`${money(x)} buys ${fmt(y)} ounces of tea.`,xn:'dollars',xs:'dollar',yn:'ounces',ys:'ounce',mx:1}
 ];
+/* numbers that make friendly rates */
 const NICE=[2,4,5,8,10,16,20,25,40];
-function ratePair(c){let x,y;do{x=pick(NICE);y=pick(NICE);}while(x===y||!nice2(x/y)||!nice2(y/x)||(c.xbig&&x<y)||(c.ybig&&y<x));return [x,y];}
+/* x and y for a story: different, with both unit rates to 2 decimal places, and the bigger one where the story wants it */
+function ratePair(context){let x,y;do{x=pick(NICE);y=pick(NICE);}while(x===y||!nice2(x/y)||!nice2(y/x)||(context.xbig&&x<y)||(context.ybig&&y<x));return [x,y];}
 function genRate(){
-  const c=pick(RCTX),[x,y]=ratePair(c),rx=x/y,ry=y/x;
+  /* the two unit rates: x per y and y per x */
+  const context=pick(RCTX),[x,y]=ratePair(context),xPerY=x/y,yPerX=y/x;
   const type=pick(['rx','ry','meaning','same','use','use']);
-  const unitX=c.mx?'dollars':c.xn;
+  const unitX=context.mx?'dollars':context.xn;
   if(type==='rx'||type==='ry'){
-    const wantX=type==='rx',[ans,other,top,bot]=wantX?[rx,ry,c.xn,c.ys]:[ry,rx,c.yn,c.xs];
-    return {kind:'num',unit:`${top} per ${bot}`,answer:ans,
-      prompt:`${c.s(x,y)} How many <b>${top} per ${bot}</b>?`,
-      hint:`“${top} per ${bot}” means ${top} for 1 ${bot}. Divide the ${top} by the ${wantX?c.yn:c.xn}.`,
-      misc:[[other,`That is ${wantX?c.yn:c.xn} per ${wantX?c.xs:c.ys}, the other unit rate. Put the ${top} on top: ${fmt(wantX?x:y)} ÷ ${fmt(wantX?y:x)}.`]],
-      explain:`${fmt(wantX?x:y)} ÷ ${fmt(wantX?y:x)} = ${fmt(ans)} ${top} per ${bot}.`};
+    /* one of the unit rates; the other is the mistake */
+    const wantX=type==='rx',[answer,other,top,per]=wantX?[xPerY,yPerX,context.xn,context.ys]:[yPerX,xPerY,context.yn,context.xs];
+    return {kind:'num',unit:`${top} per ${per}`,answer,
+      prompt:`${context.s(x,y)} How many <b>${top} per ${per}</b>?`,
+      hint:`“${top} per ${per}” means ${top} for 1 ${per}. Divide the ${top} by the ${wantX?context.yn:context.xn}.`,
+      misc:[[other,`That is ${wantX?context.yn:context.xn} per ${wantX?context.xs:context.ys}, the other unit rate. Put the ${top} on top: ${fmt(wantX?x:y)} ÷ ${fmt(wantX?y:x)}.`]],
+      explain:`${fmt(wantX?x:y)} ÷ ${fmt(wantX?y:x)} = ${fmt(answer)} ${top} per ${per}.`};
   }
   if(type==='meaning'){
-    const cs=shuffle([{t:`It costs or takes ${fmt(rx)} ${c.xn} for each ${c.ys}.`,ok:1},{t:`You get ${fmt(rx)} ${c.yn} for each ${c.xs}.`,why:`That would be ${c.yn} per ${c.xs}, which is ${fmt(y)} ÷ ${fmt(x)} = ${fmt(ry)}.`},{t:`There are ${fmt(rx)} ${c.yn} in all.`,why:`There are ${fmt(y)} ${c.yn} in all. ${fmt(rx)} is a rate: an amount for 1.`}]);
-    const why={};let ans;const choices=cs.map((q,i)=>{const id='abc'[i];if(q.ok)ans=id;else why[id]=q.why;return {id,label:q.t.replace('costs or takes',c.mx?'costs':'takes')};});
-    return {kind:'mc',stack:true,choices,answer:ans,why,
-      prompt:`${c.s(x,y)} ${fmt(x)} ÷ ${fmt(y)} = ${fmt(rx)}. What does <b>${fmt(rx)}</b> mean?`,
-      hint:`The number on top of the division (${fmt(x)} ${c.xn}) tells you the unit. The number you divided by (${c.yn}) is the “per”.`,
-      explain:`${fmt(x)} ${c.xn} ÷ ${fmt(y)} ${c.yn} = ${fmt(rx)} ${c.xn} per ${c.ys}.`};
+    /* what x ÷ y means */
+    const sentences=shuffle([{t:`It costs or takes ${fmt(xPerY)} ${context.xn} for each ${context.ys}.`,ok:1},{t:`You get ${fmt(xPerY)} ${context.yn} for each ${context.xs}.`,why:`That would be ${context.yn} per ${context.xs}, which is ${fmt(y)} ÷ ${fmt(x)} = ${fmt(yPerX)}.`},{t:`There are ${fmt(xPerY)} ${context.yn} in all.`,why:`There are ${fmt(y)} ${context.yn} in all. ${fmt(xPerY)} is a rate: an amount for 1.`}]);
+    const why={};let answer;const choices=sentences.map((sentence,i)=>{const id='abc'[i];if(sentence.ok)answer=id;else why[id]=sentence.why;return {id,label:sentence.t.replace('costs or takes',context.mx?'costs':'takes')};});
+    return {kind:'mc',stack:true,choices,answer,why,
+      prompt:`${context.s(x,y)} ${fmt(x)} ÷ ${fmt(y)} = ${fmt(xPerY)}. What does <b>${fmt(xPerY)}</b> mean?`,
+      hint:`The number on top of the division (${fmt(x)} ${context.xn}) tells you the unit. The number you divided by (${context.yn}) is the “per”.`,
+      explain:`${fmt(x)} ${context.xn} ÷ ${fmt(y)} ${context.yn} = ${fmt(xPerY)} ${context.xn} per ${context.ys}.`};
   }
   if(type==='same'){
-    const ks=shuffle([1,2,3,4,5]).slice(0,4).sort((a,b)=>a-b),bad=R(0,3);
-    const rows=ks.map((k,i)=>i===bad?[k*x,k*y+pick([1,2])]:[k*x,k*y]);
-    const why={};const choices=rows.map((r,i)=>{if(i!==bad)why['r'+i]=`${fmt(r[0])} ÷ ${fmt(r[1])} = ${fmt(rx)}, the same unit rate as the others.`;return {id:'r'+i,label:`${c.mx?money(r[0]):fmt(r[0])} ${c.mx?'':c.xn+' '}for ${fmt(r[1])} ${c.yn}`};});
-    const br=rows[bad];
-    return {kind:'mc',stack:true,choices,answer:'r'+bad,why,
+    /* which of four scaled rows doesn't belong: its y is a little off */
+    const scales=shuffle([1,2,3,4,5]).slice(0,4).sort((a,b)=>a-b),odd=R(0,3);
+    const rows=scales.map((scale,i)=>i===odd?[scale*x,scale*y+pick([1,2])]:[scale*x,scale*y]);
+    const why={};const choices=rows.map((row,i)=>{if(i!==odd)why['r'+i]=`${fmt(row[0])} ÷ ${fmt(row[1])} = ${fmt(xPerY)}, the same unit rate as the others.`;return {id:'r'+i,label:`${context.mx?money(row[0]):fmt(row[0])} ${context.mx?'':context.xn+' '}for ${fmt(row[1])} ${context.yn}`};});
+    const oddRow=rows[odd];
+    return {kind:'mc',stack:true,choices,answer:'r'+odd,why,
       prompt:`Three of these match the same rate. Which one <b>doesn’t belong</b>?`,
-      hint:`Find the ${c.xn} per ${c.ys} for each row. Equivalent ratios have the same unit rate.`,
-      explain:`The others all have ${fmt(rx)} ${c.xn} per ${c.ys}. This one: ${fmt(br[0])} ÷ ${fmt(br[1])} = ${fmt(br[0]/br[1])}.`};
+      hint:`Find the ${context.xn} per ${context.ys} for each row. Equivalent ratios have the same unit rate.`,
+      explain:`The others all have ${fmt(xPerY)} ${context.xn} per ${context.ys}. This one: ${fmt(oddRow[0])} ÷ ${fmt(oddRow[1])} = ${fmt(oddRow[0]/oddRow[1])}.`};
   }
-  let z=R(3,12);while(z===y)z=R(3,12);
-  const ans=z*rx;
-  return {kind:'num',unit:unitX,answer:ans,
-    fig:tableFig({hx:c.mx?'Dollars':c.xn[0].toUpperCase()+c.xn.slice(1),hy:c.yn[0].toUpperCase()+c.yn.slice(1)},[{x,y},{x:rx,y:1,h:1,note:`÷ ${fmt(y)}`},{x:ans,y:z,q:'x',note:`× ${z}`}]),
-    prompt:`${c.s(x,y)} At this rate, how many ${unitX} for <b>${z} ${c.yn}</b>?`,
-    hint:`Find the ${c.xn} for 1 ${c.ys} first: ${fmt(x)} ÷ ${fmt(y)}. Then multiply by ${z}.`,
-    misc:[[z*ry,`You used ${c.yn} per ${c.xs}. You need ${c.xn} per ${c.ys}: ${fmt(x)} ÷ ${fmt(y)} = ${fmt(rx)}.`],[x+(z-y),'You added. Find the amount for 1 first, then multiply.']],
-    explain:`${fmt(x)} ÷ ${fmt(y)} = ${fmt(rx)} ${c.xn} per ${c.ys}. ${fmt(rx)} × ${z} = ${fmt(ans)}.`};
+  /* use: the x for `count` of y, going through the unit rate */
+  let count=R(3,12);while(count===y)count=R(3,12);
+  const answer=count*xPerY;
+  return {kind:'num',unit:unitX,answer,
+    fig:tableFig({hx:context.mx?'Dollars':context.xn[0].toUpperCase()+context.xn.slice(1),hy:context.yn[0].toUpperCase()+context.yn.slice(1)},[{x,y},{x:xPerY,y:1,h:1,note:`÷ ${fmt(y)}`},{x:answer,y:count,q:'x',note:`× ${count}`}]),
+    prompt:`${context.s(x,y)} At this rate, how many ${unitX} for <b>${count} ${context.yn}</b>?`,
+    hint:`Find the ${context.xn} for 1 ${context.ys} first: ${fmt(x)} ÷ ${fmt(y)}. Then multiply by ${count}.`,
+    misc:[[count*yPerX,`You used ${context.yn} per ${context.xs}. You need ${context.xn} per ${context.ys}: ${fmt(x)} ÷ ${fmt(y)} = ${fmt(xPerY)}.`],[x+(count-y),'You added. Find the amount for 1 first, then multiply.']],
+    explain:`${fmt(x)} ÷ ${fmt(y)} = ${fmt(xPerY)} ${context.xn} per ${context.ys}. ${fmt(xPerY)} × ${count} = ${fmt(answer)}.`};
 }
 
 /* ---------- Station 3: speed & pace ---------- */
 const WHO=['Lin','Andre','Priya','Diego','Jada','Noah','Mai','Kiran'];
 function genSpeed(){
   const type=pick(['speed','pace','faster','faster','time']);
-  const [p1,p2]=shuffle(WHO);
+  const [person1,person2]=shuffle(WHO);
   if(type==='speed'){
-    const t=R(2,8),v=R(3,12),d=v*t;
-    const ticks=[];for(let i=0;i<=t;i++)ticks.push({t:i,b:i*v,st:1,sb:i===0||i===t?1:0,q:i===1?'b':null});
-    return {kind:'num',unit:'meters per second',answer:v,fig:dnl('time (seconds)','distance (meters)',ticks),
-      prompt:`${p1} runs ${d} meters in ${t} seconds at a constant speed. What is ${p1}’s <b>speed</b> in meters per second?`,
-      hint:`Speed is meters for 1 second. Split ${d} meters into ${t} equal parts.`,
-      misc:[[t/d,'That is seconds per meter: the pace. Speed is meters ÷ seconds.']],
-      explain:`${d} ÷ ${t} = ${v} meters per second.`};
+    /* meters per second from a distance in a time */
+    const seconds=R(2,8),speed=R(3,12),meters=speed*seconds;
+    const ticks=[];for(let i=0;i<=seconds;i++)ticks.push({t:i,b:i*speed,st:1,sb:i===0||i===seconds?1:0,q:i===1?'b':null});
+    return {kind:'num',unit:'meters per second',answer:speed,fig:dnl('time (seconds)','distance (meters)',ticks),
+      prompt:`${person1} runs ${meters} meters in ${seconds} seconds at a constant speed. What is ${person1}’s <b>speed</b> in meters per second?`,
+      hint:`Speed is meters for 1 second. Split ${meters} meters into ${seconds} equal parts.`,
+      misc:[[seconds/meters,'That is seconds per meter: the pace. Speed is meters ÷ seconds.']],
+      explain:`${meters} ÷ ${seconds} = ${speed} meters per second.`};
   }
   if(type==='pace'){
-    const p=pick([3,4,5,6,8,10,12,15]),d=R(2,6),t=p*d;
-    const ticks=[];for(let i=0;i<=d;i++)ticks.push({t:i,b:i*p,st:1,sb:i===0||i===d?1:0,q:i===1?'b':null});
-    return {kind:'num',unit:'minutes per mile',answer:p,fig:dnl('distance (miles)','time (minutes)',ticks),
-      prompt:`${p1} bikes ${d} miles in ${t} minutes at a constant speed. What is ${p1}’s <b>pace</b> in minutes per mile?`,
-      hint:`Pace is minutes for 1 mile. Split ${t} minutes into ${d} equal parts.`,
-      misc:[[d/t,'That is miles per minute: the speed. Pace is minutes ÷ miles.']],
-      explain:`${t} ÷ ${d} = ${p} minutes per mile.`};
+    /* minutes per mile from a time over a distance */
+    const pace=pick([3,4,5,6,8,10,12,15]),miles=R(2,6),minutes=pace*miles;
+    const ticks=[];for(let i=0;i<=miles;i++)ticks.push({t:i,b:i*pace,st:1,sb:i===0||i===miles?1:0,q:i===1?'b':null});
+    return {kind:'num',unit:'minutes per mile',answer:pace,fig:dnl('distance (miles)','time (minutes)',ticks),
+      prompt:`${person1} bikes ${miles} miles in ${minutes} minutes at a constant speed. What is ${person1}’s <b>pace</b> in minutes per mile?`,
+      hint:`Pace is minutes for 1 mile. Split ${minutes} minutes into ${miles} equal parts.`,
+      misc:[[miles/minutes,'That is miles per minute: the speed. Pace is minutes ÷ miles.']],
+      explain:`${minutes} ÷ ${miles} = ${pace} minutes per mile.`};
   }
   if(type==='faster'){
+    /* who is faster, by speed (bigger wins) or by pace (smaller wins) */
     const usePace=Math.random()<.6;let a=R(6,14),b=R(6,14);while(b===a)b=R(6,14);
     const win=usePace?(a<b?'A':'B'):(a>b?'A':'B');
-    const u=usePace?'minutes per mile':'meters per second';
-    return {kind:'mc',choices:[{id:'A',label:p1},{id:'B',label:p2}],answer:win,
-      why:{A:usePace?`${p1}’s pace is ${a} minutes for each mile. More minutes per mile means slower.`:`${p1} goes fewer meters each second, so ${p1} is slower.`,B:usePace?`${p2}’s pace is ${b} minutes for each mile. More minutes per mile means slower.`:`${p2} goes fewer meters each second, so ${p2} is slower.`},
-      prompt:`${p1}’s ${usePace?'pace':'speed'} is ${a} ${u}. ${p2}’s ${usePace?'pace':'speed'} is ${b} ${u}. <b>Who is faster?</b>`,
-      explain:usePace?`Pace is time for 1 mile, so a <b>smaller</b> pace is faster. ${win==='A'?p1:p2} takes only ${Math.min(a,b)} minutes per mile.`:`Speed is distance in 1 second, so a <b>bigger</b> speed is faster.`};
+    const unit=usePace?'minutes per mile':'meters per second';
+    return {kind:'mc',choices:[{id:'A',label:person1},{id:'B',label:person2}],answer:win,
+      why:{A:usePace?`${person1}’s pace is ${a} minutes for each mile. More minutes per mile means slower.`:`${person1} goes fewer meters each second, so ${person1} is slower.`,B:usePace?`${person2}’s pace is ${b} minutes for each mile. More minutes per mile means slower.`:`${person2} goes fewer meters each second, so ${person2} is slower.`},
+      prompt:`${person1}’s ${usePace?'pace':'speed'} is ${a} ${unit}. ${person2}’s ${usePace?'pace':'speed'} is ${b} ${unit}. <b>Who is faster?</b>`,
+      explain:usePace?`Pace is time for 1 mile, so a <b>smaller</b> pace is faster. ${win==='A'?person1:person2} takes only ${Math.min(a,b)} minutes per mile.`:`Speed is distance in 1 second, so a <b>bigger</b> speed is faster.`};
   }
+  /* time: how long a distance takes, at a speed or at a pace */
   if(Math.random()<.5){
-    const v=R(3,12),T=R(3,12),D=v*T;
-    return {kind:'num',unit:'seconds',answer:T,
-      prompt:`A drone flies at a constant speed of ${v} meters per second. How many seconds does it take to fly <b>${D} meters</b>?`,
-      hint:`Each second covers ${v} meters. How many groups of ${v} fit in ${D}?`,
-      misc:[[D*v,`That multiplies meters by meters per second. Divide instead: ${D} ÷ ${v}.`]],
-      explain:`${D} ÷ ${v} = ${T} seconds.`};
+    const speed=R(3,12),seconds=R(3,12),meters=speed*seconds;
+    return {kind:'num',unit:'seconds',answer:seconds,
+      prompt:`A drone flies at a constant speed of ${speed} meters per second. How many seconds does it take to fly <b>${meters} meters</b>?`,
+      hint:`Each second covers ${speed} meters. How many groups of ${speed} fit in ${meters}?`,
+      misc:[[meters*speed,`That multiplies meters by meters per second. Divide instead: ${meters} ÷ ${speed}.`]],
+      explain:`${meters} ÷ ${speed} = ${seconds} seconds.`};
   }
-  const p=pick([4,5,6,8,10,12]),d=R(3,9);
-  return {kind:'num',unit:'minutes',answer:p*d,
-    prompt:`${p1} walks at a pace of ${p} minutes per mile. How many minutes does it take to walk <b>${d} miles</b>?`,
-    hint:`Each mile takes ${p} minutes. Add ${p} minutes for every mile.`,
-    misc:[[p/d,`${p} minutes is for one mile, so ${d} miles take longer. Multiply.`],[p+d,'Multiply the minutes for 1 mile by the number of miles.']],
-    explain:`${p} × ${d} = ${p*d} minutes.`};
+  const pace=pick([4,5,6,8,10,12]),miles=R(3,9);
+  return {kind:'num',unit:'minutes',answer:pace*miles,
+    prompt:`${person1} walks at a pace of ${pace} minutes per mile. How many minutes does it take to walk <b>${miles} miles</b>?`,
+    hint:`Each mile takes ${pace} minutes. Add ${pace} minutes for every mile.`,
+    misc:[[pace/miles,`${pace} minutes is for one mile, so ${miles} miles take longer. Multiply.`],[pace+miles,'Multiply the minutes for 1 mile by the number of miles.']],
+    explain:`${pace} × ${miles} = ${pace*miles} minutes.`};
 }
 
 /* ---------- Station 4: percent strips, double number lines, tapes ---------- */
+/* percent stories: the whole, a percent of it, an amount it has, and the unit (over: more than 100% makes sense) */
 const PCTX=[
   {whole:(W)=>`A water tank holds ${W} liters.`,part:p=>`How many liters is ${p}% of the tank?`,have:a=>`It has ${a} liters in it.`,u:'liters'},
   {whole:(W)=>`A hiking trail is ${W} kilometers long.`,part:p=>`How far is ${p}% of the trail?`,have:a=>`Priya has hiked ${a} kilometers.`,u:'kilometers'},
@@ -192,87 +222,99 @@ const PCTX=[
 function genStrip(){
   const type=pick(['coins','coins','dnlA','dnlA','dnlP','tape','tape']);
   if(type==='coins'){
+    /* what percent of a dollar some coins are */
     /* not all pennies, where counting the coins gives the cents */
-    let list,tot;do{list=[];const k=R(2,6);for(let i=0;i<k;i++)list.push(pick(COIN_SET));tot=list.reduce((s,c)=>s+c.v,0);}while(tot>100||tot<5||tot===list.length);
-    list.sort((a,b)=>b.v-a.v);
-    return {kind:'num',unit:'%',answer:tot,fig:coinsFig(list),
+    let coins,cents;do{coins=[];const count=R(2,6);for(let i=0;i<count;i++)coins.push(pick(COIN_SET));cents=coins.reduce((sum,coin)=>sum+coin.v,0);}while(cents>100||cents<5||cents===coins.length);
+    coins.sort((a,b)=>b.v-a.v);
+    return {kind:'num',unit:'%',answer:cents,fig:coinsFig(coins),
       prompt:`What <b>percent of a dollar</b> is this?`,
       hint:'A dollar is 100 cents, so each cent is 1% of a dollar. Add up the cents.',
-      misc:[[list.length,'That is the number of coins. Add up how many cents they are worth.'],[tot/100,`${fmt(tot/100)} is the amount in dollars. As a percent of a dollar, that is ${tot}%.`]],
-      explain:`${list.map(c=>c.v).join(' + ')} = ${tot} cents. ${tot} out of 100 cents is ${tot}%.`};
+      misc:[[coins.length,'That is the number of coins. Add up how many cents they are worth.'],[cents/100,`${fmt(cents/100)} is the amount in dollars. As a percent of a dollar, that is ${cents}%.`]],
+      explain:`${coins.map(coin=>coin.v).join(' + ')} = ${cents} cents. ${cents} out of 100 cents is ${cents}%.`};
   }
   if(type==='dnlA'||type==='dnlP'){
-    const c=pick(PCTX),s=pick([20,25,50,25]),over=c.over&&s!==20&&Math.random()<.5,top=over?150:100;
-    const unit=pick([2,3,4,5,6,8,10,12,15,20,25]),W=unit*100/s;
-    const js=[];for(let p=s;p<=top;p+=s)if(p!==100)js.push(p);const P=pick(js),A=W*P/100;
-    const ticks=[];for(let p=0;p<=top;p+=s){const hit=p===P;ticks.push({t:W*p/100,b:p,st:p===0||p===100?1:(hit?(type==='dnlP'?1:0):2),sb:type==='dnlA'||!hit?1:0,q:hit?(type==='dnlA'?'t':'b'):null});}
-    const fig=dnl(c.u==='dollars'?'dollars':c.u,'percent',ticks,{fb:pctF});
-    if(type==='dnlA')return {kind:'num',unit:c.u,answer:A,fig,
-      prompt:`${c.whole(W)} ${c.part(P)}`,
-      hint:`100% is ${W}. Each step of ${s}% is the same amount: ${W} ÷ ${100/s}.`,
+    /* a double number line of amounts and percents in steps of `step`%, sometimes past 100%: find the amount (dnlA) or the percent (dnlP) */
+    const context=pick(PCTX),step=pick([20,25,50,25]),over=context.over&&step!==20&&Math.random()<.5,top=over?150:100;
+    const perStep=pick([2,3,4,5,6,8,10,12,15,20,25]),whole=perStep*100/step;
+    /* a percent on a tick that isn't 100%, and its amount */
+    const percents=[];for(let p=step;p<=top;p+=step)if(p!==100)percents.push(p);const percent=pick(percents),amount=whole*percent/100;
+    const ticks=[];for(let p=0;p<=top;p+=step){const hit=p===percent;ticks.push({t:whole*p/100,b:p,st:p===0||p===100?1:(hit?(type==='dnlP'?1:0):2),sb:type==='dnlA'||!hit?1:0,q:hit?(type==='dnlA'?'t':'b'):null});}
+    const fig=dnl(context.u==='dollars'?'dollars':context.u,'percent',ticks,{fb:pctF});
+    if(type==='dnlA')return {kind:'num',unit:context.u,answer:amount,fig,
+      prompt:`${context.whole(whole)} ${context.part(percent)}`,
+      hint:`100% is ${whole}. Each step of ${step}% is the same amount: ${whole} ÷ ${100/step}.`,
       /* when the whole is 100, the amount is the percent */
-      misc:W===100?[]:[[P,`That is the percent. The question asks for ${c.u}.`],[W+P-100,'Percents are parts of the whole. Find the amount for one step, then count steps.']],
-      explain:`${s}% of ${W} is ${fmt(W*s/100)}. ${P}% is ${P/s} steps: ${P/s} × ${fmt(W*s/100)} = ${fmt(A)} ${c.u}.${P>100?' More than 100% means more than the whole.':''}`};
-    return {kind:'num',unit:'%',answer:P,fig,
-      prompt:`${c.whole(W)} ${c.have(fmt(A))} What <b>percent</b> of ${c.u==='dollars'?'the goal':'the whole'} is that?`,
-      hint:`Line up the amounts with the percents. Each ${fmt(W*s/100)} ${c.u} is another ${s}%.`,
-      misc:[...(W!==100?[[A,'That is the amount. The question asks what percent it is.']]:[]),[A/W,`${fmt(A/W)} is the fraction of the whole. As a percent, multiply by 100.`]],
-      explain:`${fmt(A)} is ${fmt(A)} ÷ ${fmt(W*s/100)} = ${P/s} steps of ${s}%, so ${P}%.`};
+      misc:whole===100?[]:[[percent,`That is the percent. The question asks for ${context.u}.`],[whole+percent-100,'Percents are parts of the whole. Find the amount for one step, then count steps.']],
+      explain:`${step}% of ${whole} is ${fmt(whole*step/100)}. ${percent}% is ${percent/step} steps: ${percent/step} × ${fmt(whole*step/100)} = ${fmt(amount)} ${context.u}.${percent>100?' More than 100% means more than the whole.':''}`};
+    return {kind:'num',unit:'%',answer:percent,fig,
+      prompt:`${context.whole(whole)} ${context.have(fmt(amount))} What <b>percent</b> of ${context.u==='dollars'?'the goal':'the whole'} is that?`,
+      hint:`Line up the amounts with the percents. Each ${fmt(whole*step/100)} ${context.u} is another ${step}%.`,
+      misc:[...(whole!==100?[[amount,'That is the amount. The question asks what percent it is.']]:[]),[amount/whole,`${fmt(amount/whole)} is the fraction of the whole. As a percent, multiply by 100.`]],
+      explain:`${fmt(amount)} is ${fmt(amount)} ÷ ${fmt(whole*step/100)} = ${percent/step} steps of ${step}%, so ${percent}%.`};
   }
-  const n=pick([4,5,10]),m=R(1,n-1),each=pick([2,3,4,5,6,8,12,15]),W=n*each,part=m*each,P=100*m/n,c=pick(PCTX);
-  if(Math.random()<.5)return {kind:'num',unit:c.u,answer:part,fig:pctTape(n,m,{W,part,qP:1,each}),
-    prompt:`${c.whole(W)} ${c.part(P)}`,
-    hint:`The whole tape is ${n} equal boxes, so each box is ${100/n}% and worth ${W} ÷ ${n}.`,
-    misc:[[P,'That is the percent. Find the amount.'],...(m>1?[[each,`That is one box. ${P}% is ${m} boxes.`]]:[])],
-    explain:`${W} ÷ ${n} = ${each} per box. ${m} boxes × ${each} = ${part} ${c.u}.`};
-  return {kind:'num',unit:c.u,answer:W,fig:pctTape(n,m,{W,part,qW:1,each}),
-    prompt:`${fmt(part)} ${c.u} is ${P}% of the whole. How many ${c.u} is the <b>whole</b> (100%)?`,
-    hint:`${P}% fills ${m} boxes. Find one box (${part} ÷ ${m}), then fill all ${n}.`,
-    misc:[[part*P/100,`That is ${P}% of ${part}. Here ${part} <i>is</i> the ${P}%: the whole is bigger.`],[each,`That is one box. The whole is ${n} boxes.`]],
-    explain:`${part} ÷ ${m} = ${each} per box. ${n} boxes × ${each} = ${W} ${c.u}.`};
+  /* tape: a whole in `boxes` equal boxes, `filled` of them the part: find the part, or the whole */
+  const boxes=pick([4,5,10]),filled=R(1,boxes-1),each=pick([2,3,4,5,6,8,12,15]),whole=boxes*each,part=filled*each,percent=100*filled/boxes,context=pick(PCTX);
+  if(Math.random()<.5)return {kind:'num',unit:context.u,answer:part,fig:pctTape(boxes,filled,{W:whole,part,qP:1,each}),
+    prompt:`${context.whole(whole)} ${context.part(percent)}`,
+    hint:`The whole tape is ${boxes} equal boxes, so each box is ${100/boxes}% and worth ${whole} ÷ ${boxes}.`,
+    misc:[[percent,'That is the percent. Find the amount.'],...(filled>1?[[each,`That is one box. ${percent}% is ${filled} boxes.`]]:[])],
+    explain:`${whole} ÷ ${boxes} = ${each} per box. ${filled} boxes × ${each} = ${part} ${context.u}.`};
+  return {kind:'num',unit:context.u,answer:whole,fig:pctTape(boxes,filled,{W:whole,part,qW:1,each}),
+    prompt:`${fmt(part)} ${context.u} is ${percent}% of the whole. How many ${context.u} is the <b>whole</b> (100%)?`,
+    hint:`${percent}% fills ${filled} boxes. Find one box (${part} ÷ ${filled}), then fill all ${boxes}.`,
+    misc:[[part*percent/100,`That is ${percent}% of ${part}. Here ${part} <i>is</i> the ${percent}%: the whole is bigger.`],[each,`That is one box. The whole is ${boxes} boxes.`]],
+    explain:`${part} ÷ ${filled} = ${each} per box. ${boxes} boxes × ${each} = ${whole} ${context.u}.`};
 }
 
 /* ---------- Station 5: benchmark percentages ---------- */
+/* benchmark percents: the fraction, and how to find it */
 const BENCH={10:['1/10','÷ 10'],20:['1/5','÷ 5'],25:['1/4','÷ 4'],50:['1/2','÷ 2'],75:['3/4','÷ 4, then × 3'],1:['1/100','÷ 100']};
+/* the fraction for each percent, then two that look like it but aren't */
 const BMC={10:['1/10','1/100','0.01'],20:['1/5','1/20','0.02'],25:['1/4','1/25','0.025'],50:['1/2','1/50','0.05'],75:['3/4','1/75','0.075'],1:['1/100','1/10','0.1']};
 function genBench(){
   const type=pick(['of','of','of','sale','back','frac']);
-  const P=pick(type==='of'?[10,25,50,75,20,1]:[10,25,50,75,20]);
+  const percent=pick(type==='of'?[10,25,50,75,20,1]:[10,25,50,75,20]);
   if(type==='frac'){
-    const [ok,...bad]=BMC[P];const cs=shuffle([ok,...bad]);
-    return {kind:'mc',choices:cs.map(x=>({id:x,label:x})),answer:ok,
-      why:Object.fromEntries(bad.map(b=>[b,`${P}% means ${P} out of 100, which is ${P}/100. ${b} is not the same.`])),
-      prompt:`Which is the same as <b>${P}%</b>?`,
-      hint:`${P}% means ${P} out of 100. Simplify ${P}/100.`,
-      explain:`${P}% = ${P}/100 = ${ok}.`};
+    /* the fraction that is the same as the percent */
+    const [right,...wrong]=BMC[percent];const choices=shuffle([right,...wrong]);
+    return {kind:'mc',choices:choices.map(x=>({id:x,label:x})),answer:right,
+      why:Object.fromEntries(wrong.map(w=>[w,`${percent}% means ${percent} out of 100, which is ${percent}/100. ${w} is not the same.`])),
+      prompt:`Which is the same as <b>${percent}%</b>?`,
+      hint:`${percent}% means ${percent} out of 100. Simplify ${percent}/100.`,
+      explain:`${percent}% = ${percent}/100 = ${right}.`};
   }
   if(type==='back'){
-    const W=pick([20,40,60,80,100,120,200,240,400]),x=W*P/100;
-    return {kind:'num',unit:'',answer:W,
-      prompt:`${P}% of a number is ${fmt(x)}. What is the number?`,
-      hint:`${P}% is ${BENCH[P][0]} of the number. How many copies of ${P}% make 100%?`,
-      misc:[[x*P/100,`That is ${P}% of ${fmt(x)}. Here ${fmt(x)} <i>is</i> ${P}%: the whole number is bigger.`],[x/P,`That would be 1% of the number. Multiply by 100 to get 100%.`]],
-      explain:`${P}% is ${BENCH[P][0]}, so the number is ${fmt(x)} × ${fmt(100/P)} = ${W}.`};
+    /* the number, from a benchmark percent of it */
+    const number=pick([20,40,60,80,100,120,200,240,400]),part=number*percent/100;
+    return {kind:'num',unit:'',answer:number,
+      prompt:`${percent}% of a number is ${fmt(part)}. What is the number?`,
+      hint:`${percent}% is ${BENCH[percent][0]} of the number. How many copies of ${percent}% make 100%?`,
+      misc:[[part*percent/100,`That is ${percent}% of ${fmt(part)}. Here ${fmt(part)} <i>is</i> ${percent}%: the whole number is bigger.`],[part/percent,`That would be 1% of the number. Multiply by 100 to get 100%.`]],
+      explain:`${percent}% is ${BENCH[percent][0]}, so the number is ${fmt(part)} × ${fmt(100/percent)} = ${number}.`};
   }
-  const W=pick(P===75||P===25?[8,12,16,20,24,36,40,48,60,80,120]:[10,20,30,40,50,60,70,80,90,120,150,200,250,300,340,500]),x=W*P/100;
+  /* a whole whose benchmark percent is a friendly number */
+  const whole=pick(percent===75||percent===25?[8,12,16,20,24,36,40,48,60,80,120]:[10,20,30,40,50,60,70,80,90,120,150,200,250,300,340,500]),part=whole*percent/100;
   if(type==='sale'){
+    /* a sale: the sale price, or the savings */
     const item=pick(['jacket','skateboard','video game','pair of shoes','backpack']),askSale=Math.random()<.5;
-    return {kind:'num',unit:'dollars',answer:askSale?W-x:x,
-      prompt:`A ${item} costs ${money(W)}. It is on sale for <b>${P}% off</b>. ${askSale?'What is the <b>sale price</b>?':'How much money do you <b>save</b>?'}`,
-      hint:`${P}% is ${BENCH[P][0]}. Find ${P}% of ${money(W)} (${BENCH[P][1]}).${askSale?' Then subtract it.':''}`,
+    return {kind:'num',unit:'dollars',answer:askSale?whole-part:part,
+      prompt:`A ${item} costs ${money(whole)}. It is on sale for <b>${percent}% off</b>. ${askSale?'What is the <b>sale price</b>?':'How much money do you <b>save</b>?'}`,
+      hint:`${percent}% is ${BENCH[percent][0]}. Find ${percent}% of ${money(whole)} (${BENCH[percent][1]}).${askSale?' Then subtract it.':''}`,
       /* at 50% off, the savings and the sale price are the same; for 10%, ÷ 10 is right */
-      misc:askSale?[...(P!==50?[[x,`That is how much you save. Subtract it from ${money(W)}.`]]:[]),[W-P,`You subtracted ${P} dollars, not ${P}%. Find ${P}% of ${money(W)} first.`]]
-        :[...(P!==50?[[W-x,`That is the sale price. The question asks how much you save.`]]:[]),...(P!==10?[[W/P,`${P}% is ${BENCH[P][0]}, so ${BENCH[P][1]}.`]]:[])],
-      explain:`${P}% of ${money(W)} is ${money(x)}.${askSale?` ${money(W)} − ${money(x)} = ${money(W-x)}.`:''}`};
+      misc:askSale?[...(percent!==50?[[part,`That is how much you save. Subtract it from ${money(whole)}.`]]:[]),[whole-percent,`You subtracted ${percent} dollars, not ${percent}%. Find ${percent}% of ${money(whole)} first.`]]
+        :[...(percent!==50?[[whole-part,`That is the sale price. The question asks how much you save.`]]:[]),...(percent!==10?[[whole/percent,`${percent}% is ${BENCH[percent][0]}, so ${BENCH[percent][1]}.`]]:[])],
+      explain:`${percent}% of ${money(whole)} is ${money(part)}.${askSale?` ${money(whole)} − ${money(part)} = ${money(whole-part)}.`:''}`};
   }
-  return {kind:'num',unit:'',answer:x,
-    prompt:`What is <b>${P}% of ${W}</b>?`,
-    hint:`${P}% is ${BENCH[P][0]}, so ${BENCH[P][1]}.`,
-    misc:[...(P!==10?[[W/P,`${P}% means ${P} out of 100, which is ${BENCH[P][0]}. Use ${BENCH[P][1]}, not ÷ ${P}.`]]:[]),[W*P,'Multiplying by '+P+' makes it bigger. '+P+'% is only part of the number.']],
-    explain:`${P}% = ${BENCH[P][0]}. ${W} ${BENCH[P][1]} = ${fmt(x)}.`};
+  /* of: a benchmark percent of a number */
+  return {kind:'num',unit:'',answer:part,
+    prompt:`What is <b>${percent}% of ${whole}</b>?`,
+    hint:`${percent}% is ${BENCH[percent][0]}, so ${BENCH[percent][1]}.`,
+    misc:[...(percent!==10?[[whole/percent,`${percent}% means ${percent} out of 100, which is ${BENCH[percent][0]}. Use ${BENCH[percent][1]}, not ÷ ${percent}.`]]:[]),[whole*percent,'Multiplying by '+percent+' makes it bigger. '+percent+'% is only part of the number.']],
+    explain:`${percent}% = ${BENCH[percent][0]}. ${whole} ${BENCH[percent][1]} = ${fmt(part)}.`};
 }
 
 /* ---------- Station 6: percentage problems ---------- */
+/* what's counted, where, and what some of them do */
 const DCTX=[
   {all:'students',where:'in the class',verb:'play an instrument'},
   {all:'seats',where:'in the theater',verb:'are filled'},
@@ -281,29 +323,32 @@ const DCTX=[
   {all:'plants',where:'in the garden',verb:'are tomatoes'}
 ];
 function genDetect(){
-  const c=pick(DCTX),type=pick(['part','whole','pct']);
+  const context=pick(DCTX),type=pick(['part','whole','pct']);
   /* not 75% of 300, where subtracting the percent (300 − 75) gives the answer */
-  let P,W;do{P=pick([10,15,20,25,30,35,40,45,60,65,70,75,80,90]);W=20*R(1,15);}while(W-P===W*P/100);
-  const x=W*P/100;
+  let percent,whole;do{percent=pick([10,15,20,25,30,35,40,45,60,65,70,75,80,90]);whole=20*R(1,15);}while(whole-percent===whole*percent/100);
+  const part=whole*percent/100;
   const hint=`Find 10% first (the whole ÷ 10) or 1% (the whole ÷ 100), then scale up.`;
-  if(type==='part')return {kind:'num',unit:c.all,answer:x,fig:pctLine(W,P,x,{askA:1}),
-    prompt:`There are ${W} ${c.all} ${c.where}. ${P}% of them ${c.verb}. How many ${c.all} ${c.verb}?`,hint,
+  /* part: the part, from the whole and the percent */
+  if(type==='part')return {kind:'num',unit:context.all,answer:part,fig:pctLine(whole,percent,part,{askA:1}),
+    prompt:`There are ${whole} ${context.all} ${context.where}. ${percent}% of them ${context.verb}. How many ${context.all} ${context.verb}?`,hint,
     /* for 10%, ÷ 10 is right, and the whole ÷ the part is 10 */
-    misc:[...(P!==10?[[W/P,`${P}% is not “divide by ${P}”. It means ${P} out of every 100.`]]:[]),[W*P,`Multiply by ${P}/100, not by ${P}.`],[W-P,'Percents are parts of the whole, not an amount to subtract.']],
-    explain:`1% of ${W} is ${fmt(W/100)}. ${P} × ${fmt(W/100)} = ${fmt(x)} ${c.all}.`};
+    misc:[...(percent!==10?[[whole/percent,`${percent}% is not “divide by ${percent}”. It means ${percent} out of every 100.`]]:[]),[whole*percent,`Multiply by ${percent}/100, not by ${percent}.`],[whole-percent,'Percents are parts of the whole, not an amount to subtract.']],
+    explain:`1% of ${whole} is ${fmt(whole/100)}. ${percent} × ${fmt(whole/100)} = ${fmt(part)} ${context.all}.`};
   if(type==='whole'){
-    const whole=pick([20,40,60,80,100,120,160,200]),P2=pick([5,10,20,25,30,40,50,60,75,80].filter(p=>nice2(whole*p/100)&&Number.isInteger(whole*p/100))),x2=whole*P2/100;
-    return {kind:'num',unit:c.all,answer:whole,fig:pctLine(whole,P2,x2,{askW:1}),
-      prompt:`${fmt(x2)} ${c.all} ${c.where} ${c.verb}. That is ${P2}% of all the ${c.all}. How many ${c.all} are ${c.where}?`,
-      hint:`${fmt(x2)} is ${P2}%. Divide to find 1% (${fmt(x2)} ÷ ${P2}), then multiply by 100.`,
-      misc:[[x2*P2/100,`That is ${P2}% of ${fmt(x2)}. Here ${fmt(x2)} <i>is</i> the ${P2}%, so the whole is bigger.`],[x2/P2,'That is 1%. Multiply by 100 to get the whole.']],
-      explain:`${fmt(x2)} ÷ ${P2} = ${fmt(x2/P2)} for 1%. × 100 = ${whole} ${c.all}.`};
+    /* whole: the whole, from a part and its percent (dealt again, so the part is a whole number) */
+    const whole2=pick([20,40,60,80,100,120,160,200]),percent2=pick([5,10,20,25,30,40,50,60,75,80].filter(p=>nice2(whole2*p/100)&&Number.isInteger(whole2*p/100))),part2=whole2*percent2/100;
+    return {kind:'num',unit:context.all,answer:whole2,fig:pctLine(whole2,percent2,part2,{askW:1}),
+      prompt:`${fmt(part2)} ${context.all} ${context.where} ${context.verb}. That is ${percent2}% of all the ${context.all}. How many ${context.all} are ${context.where}?`,
+      hint:`${fmt(part2)} is ${percent2}%. Divide to find 1% (${fmt(part2)} ÷ ${percent2}), then multiply by 100.`,
+      misc:[[part2*percent2/100,`That is ${percent2}% of ${fmt(part2)}. Here ${fmt(part2)} <i>is</i> the ${percent2}%, so the whole is bigger.`],[part2/percent2,'That is 1%. Multiply by 100 to get the whole.']],
+      explain:`${fmt(part2)} ÷ ${percent2} = ${fmt(part2/percent2)} for 1%. × 100 = ${whole2} ${context.all}.`};
   }
-  return {kind:'num',unit:'%',answer:P,fig:pctLine(W,P,x,{askP:1}),
-    prompt:`There are ${W} ${c.all} ${c.where}. ${fmt(x)} of them ${c.verb}. What <b>percent</b> of the ${c.all} ${c.verb}?`,
-    hint:`Divide the part by the whole (${fmt(x)} ÷ ${W}), then multiply by 100.`,
-    misc:[[x/W,`${fmt(x/W)} is the part out of 1. Multiply by 100 to get the percent.`],...(P!==10?[[W/x,'Divide the part by the whole, not the whole by the part.']]:[])],
-    explain:`${fmt(x)} ÷ ${W} = ${fmt(x/W)}, and ${fmt(x/W)} × 100 = ${P}%.`};
+  /* pct: the percent, from the part and the whole */
+  return {kind:'num',unit:'%',answer:percent,fig:pctLine(whole,percent,part,{askP:1}),
+    prompt:`There are ${whole} ${context.all} ${context.where}. ${fmt(part)} of them ${context.verb}. What <b>percent</b> of the ${context.all} ${context.verb}?`,
+    hint:`Divide the part by the whole (${fmt(part)} ÷ ${whole}), then multiply by 100.`,
+    misc:[[part/whole,`${fmt(part/whole)} is the part out of 1. Multiply by 100 to get the percent.`],...(percent!==10?[[whole/part,'Divide the part by the whole, not the whole by the part.']]:[])],
+    explain:`${fmt(part)} ÷ ${whole} = ${fmt(part/whole)}, and ${fmt(part/whole)} × 100 = ${percent}%.`};
 }
 
 /* ---------- stations ---------- */

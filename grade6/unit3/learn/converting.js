@@ -9,27 +9,30 @@ const CONV=[
 ];
 /* the same length measured two ways: n big units on top, n × f small ones below (drawn one by one when there are few) */
 function convBars(n,f,big,small){
-  const W=520,x0=10,bw=W/n,m=n*f,few=m<=48;let o='';
-  for(let i=0;i<n;i++)o+=`<rect class="tape" x="${x0+i*bw}" y="24" width="${bw}" height="30"/>`;
-  if(few)for(let i=0;i<m;i++)o+=`<rect class="tape b" x="${x0+i*W/m}" y="84" width="${W/m}" height="30"/>`;
-  else for(let i=0;i<n;i++)o+=`<rect class="tape b" x="${x0+i*bw}" y="84" width="${bw}" height="30"/><text class="ftxt mid rev" x="${x0+i*bw+bw/2}" y="104">${fmt(f)}</text>`;
-  o+=`<text class="ftxt" x="${x0}" y="16">${nOf(n,big)}</text><text class="ftxt" x="${x0}" y="134">${nOf(m,small)}</text>`;
-  return svgWrap(W+20,142,o,`${nOf(n,big)} is ${nOf(m,small)}`);
+  /* bars fill `width` pixels; each big unit is bigW */
+  const width=520,left=10,bigW=width/n,smallCount=n*f,few=smallCount<=48;let markup='';
+  for(let i=0;i<n;i++)markup+=`<rect class="tape" x="${left+i*bigW}" y="24" width="${bigW}" height="30"/>`;
+  /* few small units are drawn each; many are drawn as one bar per big unit, labeled with f */
+  if(few)for(let i=0;i<smallCount;i++)markup+=`<rect class="tape b" x="${left+i*width/smallCount}" y="84" width="${width/smallCount}" height="30"/>`;
+  else for(let i=0;i<n;i++)markup+=`<rect class="tape b" x="${left+i*bigW}" y="84" width="${bigW}" height="30"/><text class="ftxt mid rev" x="${left+i*bigW+bigW/2}" y="104">${fmt(f)}</text>`;
+  markup+=`<text class="ftxt" x="${left}" y="16">${nOf(n,big)}</text><text class="ftxt" x="${left}" y="134">${nOf(smallCount,small)}</text>`;
+  return svgWrap(width+20,142,markup,`${nOf(n,big)} is ${nOf(smallCount,small)}`);
 }
+/* Convert big units to small ones (a stepper sets how many big units). */
 function wConvert(el){
-  const q=Q(el),st={n:2};let p=0;
-  el.innerHTML=seg('Units',CONV.map((c,i)=>[i,`${c.big[1]} to ${c.small[1]}`]))+`<div class="wrow">${stepper('n','How many')}</div><div class="fig" data-f></div><p class="readout" data-r></p>`;
+  const q=Q(el),values={n:2};let convIndex=0;
+  el.innerHTML=seg('Units',CONV.map((conv,i)=>[i,`${conv.big[1]} to ${conv.small[1]}`]))+`<div class="wrow">${stepper('n','How many')}</div><div class="fig" data-f></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const {big,small,f}=CONV[p],{n}=st;press(el,p);q('n').textContent=n;
+    const {big,small,f}=CONV[convIndex],{n}=values;press(el,convIndex);q('n').textContent=n;
     q('f').innerHTML=convBars(n,f,big,small);
     q('r').innerHTML=`1 ${big[0]} is ${nOf(f,small)}, so ${nOf(n,big)} ${n===1?'is':'are'} ${n} × ${fmt(f)} = <b>${nOf(n*f,small)}</b>.<br><span class="dimline">A smaller unit takes more of them to measure the same thing.</span>`;
   };
-  steppers(el,st,{n:[1,10]},draw);
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){p=+b.dataset.m;draw();}});
+  steppers(el,values,{n:[1,10]},draw);
+  el.addEventListener('click',e=>{const convBtn=e.target.closest('[data-m]');if(convBtn){convIndex=+convBtn.dataset.m;draw();}});
   draw();
 }
 
-/* the same thing measured in three units: the sensible one has a number that is easy to picture */
+/* the same thing measured in two or three units (v in each of u), and the sensible one (ok) */
 const THINGS=[
   {what:'a pencil',v:[18,0.18,0.00018],u:['centimeters','meters','kilometers'],ok:0},
   {what:'a classroom door',v:[210,2.1,0.0021],u:['centimeters','meters','kilometers'],ok:1},
@@ -37,16 +40,17 @@ const THINGS=[
   {what:'a paper clip',v:[1,0.001],u:['grams','kilograms'],ok:0},
   {what:'a bicycle',v:[12000,12],u:['grams','kilograms'],ok:1},
 ];
+/* The same thing in different units: the sensible one has a number that is easy to picture. */
 function wSensible(el){
-  const q=Q(el);let p=0;
-  el.innerHTML=seg('Measure',THINGS.map((t,i)=>[i,t.what]))+`<p class="readout" data-r></p>`;
+  const q=Q(el);let thingIndex=0;
+  el.innerHTML=seg('Measure',THINGS.map((thing,i)=>[i,thing.what]))+`<p class="readout" data-r></p>`;
   const draw=()=>{
-    const t=THINGS[p];press(el,p);
-    q('r').innerHTML=`${t.what[0].toUpperCase()+t.what.slice(1)} is about:<br>`
-      +t.v.map((v,i)=>`${i===t.ok?'<b>':''}${v.toLocaleString('en-US',{maximumFractionDigits:5})} ${v===1?t.u[i].replace(/s$/,''):t.u[i]}${i===t.ok?'</b>':''}`).join(' = ')
-      +`<br><span class="ok">${t.u[t.ok][0].toUpperCase()+t.u[t.ok].slice(1)} make sense: the number is easy to read and to picture.</span>`;
+    const thing=THINGS[thingIndex];press(el,thingIndex);
+    q('r').innerHTML=`${thing.what[0].toUpperCase()+thing.what.slice(1)} is about:<br>`
+      +thing.v.map((v,i)=>`${i===thing.ok?'<b>':''}${v.toLocaleString('en-US',{maximumFractionDigits:5})} ${v===1?thing.u[i].replace(/s$/,''):thing.u[i]}${i===thing.ok?'</b>':''}`).join(' = ')
+      +`<br><span class="ok">${thing.u[thing.ok][0].toUpperCase()+thing.u[thing.ok].slice(1)} make sense: the number is easy to read and to picture.</span>`;
   };
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){p=+b.dataset.m;draw();}});
+  el.addEventListener('click',e=>{const thingBtn=e.target.closest('[data-m]');if(thingBtn){thingIndex=+thingBtn.dataset.m;draw();}});
   draw();
 }
 

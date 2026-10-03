@@ -1,34 +1,40 @@
 /* Learn Arithmetic in Base Ten (Grade 6 Unit 5), chapter 2: Where the decimal point goes. Its widgets and steps; loaded by decimal-point.html. */
+/* place names and denominators by decimal places */
 const PLACE=['ones','tenths','hundredths','thousandths','ten-thousandths'];
 const DEN=['1','10','100','1,000','10,000'];
 /* a decimal as a whole number over 10, 100, …: 0.06 is 6 over 100 */
 const asInt=n=>Math.round(n*10**places(n));
 
-/* each factor as a fraction: tenths times tenths make hundredths */
+/* products to write as fractions */
 const FRAC=[[0.3,0.2],[0.4,0.02],[1.5,0.4],[0.06,0.5]];
+/* Each factor as a fraction: tenths times tenths make hundredths. */
 function wFraction(el){
-  const q=Q(el);let p=0;
+  const q=Q(el);let problemIndex=0;
   el.innerHTML=seg('Multiply',FRAC.map(([a,b],i)=>[i,`${fmt(a)} × ${fmt(b)}`]))+`<p class="readout" data-r></p>`;
   const draw=()=>{
-    const [a,b]=FRAC[p],pa=places(a),pb=places(b),k=pa+pb,ia=asInt(a),ib=asInt(b);press(el,p);
-    q('r').innerHTML=`${fmt(a)} × ${fmt(b)} = ${ia}/${DEN[pa]} × ${ib}/${DEN[pb]} = <b>${ia*ib}/${DEN[k]}</b> = <b>${fmt(a*b)}</b><br><span class="dimline">${PLACE[pa]} times ${PLACE[pb]} make ${PLACE[k]}.</span>`;
+    /* placesA and placesB: the factors' decimal places; the product has both */
+    const [a,b]=FRAC[problemIndex],placesA=places(a),placesB=places(b),productPlaces=placesA+placesB,wholeA=asInt(a),wholeB=asInt(b);press(el,problemIndex);
+    q('r').innerHTML=`${fmt(a)} × ${fmt(b)} = ${wholeA}/${DEN[placesA]} × ${wholeB}/${DEN[placesB]} = <b>${wholeA*wholeB}/${DEN[productPlaces]}</b> = <b>${fmt(a*b)}</b><br><span class="dimline">${PLACE[placesA]} times ${PLACE[placesB]} make ${PLACE[productPlaces]}.</span>`;
   };
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){p=+b.dataset.m;draw();}});
+  el.addEventListener('click',e=>{const problemBtn=e.target.closest('[data-m]');if(problemBtn){problemIndex=+problemBtn.dataset.m;draw();}});
   draw();
 }
 
-/* multiply as whole numbers, then put back all the decimal places */
+/* products to find by counting decimal places */
 const COUNT=[[1.25,0.4],[2.5,0.12],[0.35,0.2],[12,0.05]];
+/* Multiply as whole numbers, then put back all the decimal places. */
 function wPlaces(el){
-  const q=Q(el);let p=0;
+  const q=Q(el);let problemIndex=0;
   el.innerHTML=seg('Multiply',COUNT.map(([a,b],i)=>[i,`${fmt(a)} × ${fmt(b)}`]))+`<p class="readout" data-r></p>`;
   const draw=()=>{
-    const [a,b]=COUNT[p],pa=places(a),pb=places(b),k=pa+pb,P=asInt(a)*asInt(b),r=P/10**k,full=r.toFixed(k);press(el,p);
-    q('r').innerHTML=`Multiply without the decimal points: ${asInt(a)} × ${asInt(b)} = <b>${P}</b>.<br>${fmt(a)} has ${pl2(pa)} and ${fmt(b)} has ${pl2(pb)}: ${pl2(k)} in all.<br>So ${fmt(a)} × ${fmt(b)} = <b>${full}</b>${full!==fmt(r)?` = <b>${fmt(r)}</b>`:''}.`;
+    /* wholeProduct: the product without decimal points; full: the product written with all its places */
+    const [a,b]=COUNT[problemIndex],placesA=places(a),placesB=places(b),productPlaces=placesA+placesB,wholeProduct=asInt(a)*asInt(b),product=wholeProduct/10**productPlaces,full=product.toFixed(productPlaces);press(el,problemIndex);
+    q('r').innerHTML=`Multiply without the decimal points: ${asInt(a)} × ${asInt(b)} = <b>${wholeProduct}</b>.<br>${fmt(a)} has ${pl2(placesA)} and ${fmt(b)} has ${pl2(placesB)}: ${pl2(productPlaces)} in all.<br>So ${fmt(a)} × ${fmt(b)} = <b>${full}</b>${full!==fmt(product)?` = <b>${fmt(product)}</b>`:''}.`;
   };
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){p=+b.dataset.m;draw();}});
+  el.addEventListener('click',e=>{const problemBtn=e.target.closest('[data-m]');if(problemBtn){problemIndex=+problemBtn.dataset.m;draw();}});
   draw();
 }
+/* "1 decimal place", "3 decimal places" */
 const pl2=n=>`${n} decimal place${n===1?'':'s'}`;
 
 const STEPS=[

@@ -1,46 +1,50 @@
 /* Learn Unit Rates and Percentages (Grade 6 Unit 3), chapter 4: Percentages. Its widgets and steps; loaded by percentages.html. */
-/* coins as a percent of a dollar */
+/* Coins (a stepper for each kind) as a percent of a dollar. */
 function wCoins(el){
-  const q=Q(el),st={qu:2,di:1,ni:0,pe:0};
+  /* the steppers' values: how many quarters, dimes, nickels, and pennies */
+  const q=Q(el),values={qu:2,di:1,ni:0,pe:0};
   el.innerHTML=`<div class="wrow">${stepper('qu','Quarters')}${stepper('di','Dimes')}</div><div class="wrow">${stepper('ni','Nickels')}${stepper('pe','Pennies')}</div><div class="fig" data-f></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const [Qu,Di,Ni,Pe]=COIN_SET,{qu,di,ni,pe}=st,c=25*qu+10*di+5*ni+pe;
-    ['qu','di','ni','pe'].forEach(k=>q(k).textContent=st[k]);
-    const list=[...Array(qu).fill(Qu),...Array(di).fill(Di),...Array(ni).fill(Ni),...Array(pe).fill(Pe)];
-    q('f').innerHTML=list.length?coinsFig(list)():'<p class="note">No coins yet.</p>';
-    q('r').innerHTML=`${c}¢ is <b>${c}% of a dollar</b>${c>100?': more than a whole dollar':c===100?': a whole dollar':''}.<br><span class="dimline">A dollar is 100 cents, so each cent is 1% of a dollar.</span>`;
+    const [quarter,dime,nickel,penny]=COIN_SET,{qu,di,ni,pe}=values,cents=25*qu+10*di+5*ni+pe;
+    ['qu','di','ni','pe'].forEach(key=>q(key).textContent=values[key]);
+    const coins=[...Array(qu).fill(quarter),...Array(di).fill(dime),...Array(ni).fill(nickel),...Array(pe).fill(penny)];
+    q('f').innerHTML=coins.length?coinsFig(coins)():'<p class="note">No coins yet.</p>';
+    q('r').innerHTML=`${cents}¢ is <b>${cents}% of a dollar</b>${cents>100?': more than a whole dollar':cents===100?': a whole dollar':''}.<br><span class="dimline">A dollar is 100 cents, so each cent is 1% of a dollar.</span>`;
   };
-  steppers(el,st,{qu:[0,4],di:[0,5],ni:[0,5],pe:[0,5]},draw);
+  steppers(el,values,{qu:[0,4],di:[0,5],ni:[0,5],pe:[0,5]},draw);
   draw();
 }
 
-/* a percent of a whole on a tape split into tenths */
+/* wholes to take a percent of */
 const WHOLES=[{w:80,u:'liters'},{w:40,u:'kilometers'},{w:250,u:'grams'}];
+/* A percent of a whole on a tape split into tenths (a stepper sets how many tenths). */
 function wTape(el){
-  const q=Q(el),st={t:3};let p=0;
-  el.innerHTML=seg('Whole',WHOLES.map((x,i)=>[i,`${x.w} ${x.u}`]))+`<div class="wrow">${stepper('t','Tenths')}</div><div class="fig" data-f></div><p class="readout" data-r></p>`;
+  const q=Q(el),values={t:3};let wholeIndex=0;
+  el.innerHTML=seg('Whole',WHOLES.map((whole,i)=>[i,`${whole.w} ${whole.u}`]))+`<div class="wrow">${stepper('t','Tenths')}</div><div class="fig" data-f></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const {w,u}=WHOLES[p],{t}=st,each=w/10;press(el,p);q('t').textContent=t;
-    q('f').innerHTML=pctTape(10,t,{W:w,part:each*t,each})(true);
-    q('r').innerHTML=`${t*10}% is ${t} tenth${t===1?'':'s'} of the whole. Each tenth is ${w} ÷ 10 = ${fmt(each)}, so <b>${t*10}% of ${w} ${u} is ${fmt(each*t)} ${u}</b>.`;
+    const {w:whole,u:unit}=WHOLES[wholeIndex],{t:tenths}=values,each=whole/10;press(el,wholeIndex);q('t').textContent=tenths;
+    q('f').innerHTML=pctTape(10,tenths,{W:whole,part:each*tenths,each})(true);
+    q('r').innerHTML=`${tenths*10}% is ${tenths} tenth${tenths===1?'':'s'} of the whole. Each tenth is ${whole} ÷ 10 = ${fmt(each)}, so <b>${tenths*10}% of ${whole} ${unit} is ${fmt(each*tenths)} ${unit}</b>.`;
   };
-  steppers(el,st,{t:[0,10]},draw);
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){p=+b.dataset.m;draw();}});
+  steppers(el,values,{t:[0,10]},draw);
+  el.addEventListener('click',e=>{const wholeBtn=e.target.closest('[data-m]');if(wholeBtn){wholeIndex=+wholeBtn.dataset.m;draw();}});
   draw();
 }
 
-/* percents on a double number line, past 100% too */
+/* wholes for the double number line */
 const LINES=[50,120,15];
+/* Percents on a double number line, past 100% too (a stepper counts tens of percent). */
 function wLine(el){
-  const q=Q(el),st={k:6};let p=0;
-  el.innerHTML=seg('Whole',LINES.map((w,i)=>[i,`100% is ${w}`]))+`<div class="wrow">${stepper('k','Tens of percent')}</div><div class="fig" data-f></div><p class="readout" data-r></p>`;
+  /* the stepper's value: k tens of percent */
+  const q=Q(el),values={k:6};let wholeIndex=0;
+  el.innerHTML=seg('Whole',LINES.map((whole,i)=>[i,`100% is ${whole}`]))+`<div class="wrow">${stepper('k','Tens of percent')}</div><div class="fig" data-f></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const w=LINES[p],{k}=st,P=10*k,x=w*k/10;press(el,p);q('k').textContent=k;
-    q('f').innerHTML=pctPoint(w,P,x);
-    q('r').innerHTML=`<b>${P}% of ${w} is ${fmt(x)}</b>: ${k} × 10% (${fmt(w/10)} each).`+(P>100?`<br><span class="dimline">More than 100% is more than the whole.</span>`:P===100?`<br><span class="dimline">100% is the whole.</span>`:'');
+    const whole=LINES[wholeIndex],{k}=values,percent=10*k,amount=whole*k/10;press(el,wholeIndex);q('k').textContent=k;
+    q('f').innerHTML=pctPoint(whole,percent,amount);
+    q('r').innerHTML=`<b>${percent}% of ${whole} is ${fmt(amount)}</b>: ${k} × 10% (${fmt(whole/10)} each).`+(percent>100?`<br><span class="dimline">More than 100% is more than the whole.</span>`:percent===100?`<br><span class="dimline">100% is the whole.</span>`:'');
   };
-  steppers(el,st,{k:[0,15]},draw);
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){p=+b.dataset.m;draw();}});
+  steppers(el,values,{k:[0,15]},draw);
+  el.addEventListener('click',e=>{const wholeBtn=e.target.closest('[data-m]');if(wholeBtn){wholeIndex=+wholeBtn.dataset.m;draw();}});
   draw();
 }
 

@@ -1,34 +1,37 @@
 /* Learn Introducing Ratios (Grade 6 Unit 2), chapter 1: Ratios. Its widgets and steps; loaded by ratios.html. */
+/* the circle and square marks */
 const [CIRC,SQ]=MARKS;
 const isAre=n=>n===1?'is':'are';
 
-/* two amounts, and the ratio each way round */
+/* Two amounts (a stepper for each), and the ratio each way round. */
 function wRatio(el){
-  const q=Q(el),st={a:3,b:2};
+  /* the steppers' values: a circles, b squares */
+  const q=Q(el),values={a:3,b:2};
   el.innerHTML=`<div class="wrow">${stepper('a','Circles')}${stepper('b','Squares')}</div><div class="fig" data-f></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const {a,b}=st;q('a').textContent=a;q('b').textContent=b;
+    const {a,b}=values;q('a').textContent=a;q('b').textContent=b;
     q('f').innerHTML=rowsDiagram([{sh:CIRC,n:a},{sh:SQ,n:b}],{label:`${a} circles and ${b} squares`});
     q('r').innerHTML=`The ratio of circles to squares is <b>${a} : ${b}</b>.<br>The ratio of squares to circles is <b>${b} : ${a}</b>.<br><span class="dimline">For every ${a} ${a===1?'circle':'circles'}, there ${isAre(b)} ${b} ${b===1?'square':'squares'}.</span>`;
   };
-  steppers(el,st,{a:[1,9],b:[1,9]},draw);
+  steppers(el,values,{a:[1,9],b:[1,9]},draw);
   draw();
 }
 
-/* a ratio in equal groups: 6 : 9 is 3 groups of 2 : 3 */
+/* ratios to put in equal groups */
 const GROUPS=[[6,9],[8,4],[10,15],[12,8]];
+/* A ratio in equal groups: 6 : 9 is 3 groups of 2 : 3 (a button groups them). */
 function wGroups(el){
-  const q=Q(el);let p=0,grouped=false;
+  const q=Q(el);let ratioIndex=0,grouped=false;
   el.innerHTML=seg('Ratio',GROUPS.map(([a,b],i)=>[i,`${a} : ${b}`]))+`<div class="fig" data-f></div><div class="wrow"><button type="button" class="btn" data-g></button></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const [a,b]=GROUPS[p],g=gcd(a,b);press(el,p);
+    const [a,b]=GROUPS[ratioIndex],g=gcd(a,b);press(el,ratioIndex);
     q('f').innerHTML=rowsDiagram([{sh:CIRC,n:a},{sh:SQ,n:b}],{groups:grouped?g:0,label:`${a} circles and ${b} squares`+(grouped?`, in ${g} equal groups`:'')});
     q('g').textContent=grouped?'Ungroup':'Put them in equal groups';
     q('r').innerHTML=grouped?`<b>${g}</b> equal groups, each with <b>${a/g}</b> circles and <b>${b/g}</b> squares.<br><span class="ok">For every ${a/g} circles, there ${isAre(b/g)} ${b/g} ${b/g===1?'square':'squares'}: ${a} : ${b} and ${a/g} : ${b/g} describe the same mix.</span>`
       :`${a} circles and ${b} squares: the ratio is <b>${a} : ${b}</b>.<br><span class="dimline">Put them in equal groups to see the smaller pattern inside.</span>`;
   };
   q('g').onclick=()=>{grouped=!grouped;draw();};
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){p=+b.dataset.m;grouped=false;draw();}});
+  el.addEventListener('click',e=>{const ratioBtn=e.target.closest('[data-m]');if(ratioBtn){ratioIndex=+ratioBtn.dataset.m;grouped=false;draw();}});
   draw();
 }
 

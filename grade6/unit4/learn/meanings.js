@@ -1,25 +1,28 @@
 /* Learn Dividing Fractions (Grade 6 Unit 4), chapter 1: Making sense of division. Its widgets and steps; loaded by meanings.html. */
-/* 12 divided by smaller and smaller numbers: how many of each fit */
+/* the numbers to divide 12 by, smaller and smaller */
 const DIVS=[frac(24),frac(12),frac(6),frac(4),frac(2),frac(1),frac(1,2),frac(1,4)];
+/* 12 divided by smaller and smaller numbers: how many of each fit. */
 function wSize(el){
-  const q=Q(el);let p=3;
+  const q=Q(el);let divisorIndex=3;
   el.innerHTML=seg('Divide 12 by',DIVS.map((v,i)=>[i,fx(v)]))+`<div class="fig" data-f></div><p class="eq" data-e></p><p class="readout" data-r></p>`;
   const draw=()=>{
-    const b=DIVS[p],v=fVal(b),qt=fDiv(frac(12),b);press(el,p);
+    const b=DIVS[divisorIndex],v=fVal(b),quotient=fDiv(frac(12),b);press(el,divisorIndex);
     q('f').innerHTML=groupTape(frac(12),b,{label:`Tape diagram: 12 with groups of ${ftx(b)} marked`});
-    q('e').innerHTML=`12 ÷ ${fx(b)} = ${fx(qt)}`;
+    q('e').innerHTML=`12 ÷ ${fx(b)} = ${fx(quotient)}`;
     q('r').innerHTML=(v>12?`${fx(b)} is more than 12, so not even 1 group of ${fx(b)} fits in 12: the quotient is <b>less than 1</b>.`
       :v===12?`${fx(b)} is the same as 12, so exactly 1 group fits: the quotient is <b>1</b>.`
       :`${fx(b)} is less than 12, so more than 1 group of ${fx(b)} fits in 12: the quotient is <b>more than 1</b>.`)
       +`<br><span class="dimline">The smaller the divisor, the more groups fit, and the bigger the quotient. Dividing by a number less than 1 gives more than you started with.</span>`;
   };
-  onPick(el,m=>{p=+m;draw();});
+  onPick(el,id=>{divisorIndex=+id;draw();});
   draw();
 }
 
-/* 24 bagels: shared into n boxes, or n in each box */
+/* the numbers of boxes, or bagels in each */
 const BOX_N=[2,3,4,6,8];
+/* 24 bagels: shared into n boxes, or n in each box (one row of choices for each). */
 function wMeaning(el){
+  /* how: 'share' into n boxes, or 'fill' boxes with n each */
   const q=Q(el);let how='share',n=3;
   el.innerHTML=`<div data-top>${seg('How',[['share','Share into boxes'],['fill','Fill boxes']])}</div><div data-bot>${seg('Number',BOX_N.map(v=>[v,String(v)]))}</div><div class="fig" data-f></div><p class="eq" data-e></p><p class="readout" data-r></p>`;
   const draw=()=>{
@@ -36,7 +39,7 @@ function wMeaning(el){
       q('r').innerHTML=`24 bagels go into boxes, <b>${n} in each box</b>. 24 ÷ ${n} = ${m}: <b>${m} boxes</b>.<br><span class="dimline">You know how much is in each group. Division finds how many groups.</span>`;
     }
   };
-  el.addEventListener('click',e=>{const h=segHit(e,['top','bot']);if(!h)return;if(h[0]==='top')how=h[1];else n=+h[1];draw();});
+  el.addEventListener('click',e=>{const [row,id]=segHit(e,['top','bot'])||[];if(!row)return;if(row==='top')how=id;else n=+id;draw();});
   draw();
 }
 
@@ -49,15 +52,16 @@ const KINDS=[
   {id:'groups',label:'How many groups?',fig:()=>groupTape(frac(40),frac(12),{label:'Tape diagram: 40 ounces in groups of 12'}),
     eq:`<span class="q">?</span> × 12 = 40, so 40 ÷ 12 = <span class="q">?</span>`,say:`40 ounces of water, 12 ounces in each bottle. The total and the size of each group are known, so divide: 40 ÷ 12 = <b>3 ${fr(1,3)} bottles</b> (3 full and ${fr(1,3)} of another).`},
 ];
+/* Pick which one is unknown to see its tape, equation, and operation. */
 function wKinds(el){
-  const q=Q(el);let p='total';
-  el.innerHTML=seg('Unknown',KINDS.map(k=>[k.id,k.label]))+`<div class="fig" data-f></div><p class="eq" data-e></p><p class="readout" data-r></p>`;
+  const q=Q(el);let unknown='total';
+  el.innerHTML=seg('Unknown',KINDS.map(kind=>[kind.id,kind.label]))+`<div class="fig" data-f></div><p class="eq" data-e></p><p class="readout" data-r></p>`;
   const draw=()=>{
-    const k=KINDS.find(x=>x.id===p);press(el,p);
-    q('f').innerHTML=k.fig();q('e').innerHTML=k.eq;
-    q('r').innerHTML=`${k.say}<br><span class="dimline">Number of groups × size of each group = total. When the total is known, divide it to find either of the others.</span>`;
+    const kind=KINDS.find(x=>x.id===unknown);press(el,unknown);
+    q('f').innerHTML=kind.fig();q('e').innerHTML=kind.eq;
+    q('r').innerHTML=`${kind.say}<br><span class="dimline">Number of groups × size of each group = total. When the total is known, divide it to find either of the others.</span>`;
   };
-  onPick(el,m=>{p=m;draw();});
+  onPick(el,id=>{unknown=id;draw();});
   draw();
 }
 

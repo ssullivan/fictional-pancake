@@ -1,6 +1,7 @@
 /* Learn Dividing Fractions (Grade 6 Unit 4), chapter 5: Dividing fractions. Its widgets and steps; loaded by algorithm.html. */
-/* dividing by a whole number is multiplying by a unit fraction */
+/* the whole numbers to divide 12 by */
 const WHOLE_N=[2,3,4,6];
+/* Dividing by a whole number is multiplying by a unit fraction: 12 ÷ n and 12 × 1/n, on one tape. */
 function wWhole(el){
   const q=Q(el);let n=3;
   el.innerHTML=seg('Divide 12 by',WHOLE_N.map(v=>[v,String(v)]))+`<div class="fig" data-f></div><p class="eq" data-e></p><p class="readout" data-r></p>`;
@@ -10,105 +11,115 @@ function wWhole(el){
     q('e').innerHTML=`12 ÷ ${n} = ${12/n} and 12 × ${fr(1,n)} = ${fr(12,n)} = ${12/n}`;
     q('r').innerHTML=`How many ${n}s are in 12? <b>${12/n}</b>. And ${fr(1,n)} of 12, which is 12 groups of ${fr(1,n)}, is also <b>${12/n}</b>.<br><span class="dimline">Dividing by ${n} gives the same as multiplying by ${fr(1,n)}. ${n} and ${fr(1,n)} are <b>reciprocals</b>: their product is 1.</span>`;
   };
-  onPick(el,m=>{n=+m;draw();});
+  onPick(el,id=>{n=+id;draw();});
   draw();
 }
 
-/* dividing by a unit fraction: each whole holds b of them */
+/* the unit fractions 1/b to divide by */
 const UNIT_B=[2,3,4,5,6,8];
+/* Dividing by a unit fraction: each whole holds b of them (a stepper sets the wholes). */
 function wUnitFrac(el){
-  const q=Q(el),st={a:3};let b=4;
+  /* the stepper's value: a wholes */
+  const q=Q(el),values={a:3};let b=4;
   el.innerHTML=seg('Divide by',UNIT_B.map(v=>[v,fr(1,v)]))+`<div class="wrow">${stepper('a','Wholes')}</div><div class="fig" data-f></div><p class="eq" data-e></p><p class="readout" data-r></p>`;
   const draw=()=>{
-    const {a}=st;press(el,b);q('a').textContent=a;
+    const {a}=values;press(el,b);q('a').textContent=a;
     q('f').innerHTML=groupTape(frac(a),frac(1,b),{label:`Tape diagram: ${a} wholes cut into ${PART[b][1]}`});
     q('e').innerHTML=`${a} ÷ ${fr(1,b)} = ${a} × ${b} = ${a*b}`;
     q('r').innerHTML=`Each whole holds ${b} ${PART[b][1]}, so ${a} whole${a>1?'s hold':' holds'} ${a} × ${b} = <b>${a*b} ${PART[b][1]}</b>.<br><span class="dimline">Dividing by ${fr(1,b)} is the same as multiplying by ${b}.</span>`;
   };
-  steppers(el,st,{a:[1,6]},draw);
-  onPick(el,m=>{b=+m;draw();});
+  steppers(el,values,{a:[1,6]},draw);
+  onPick(el,id=>{b=+id;draw();});
   draw();
 }
 
-/* dividing by a non-unit fraction: cut into parts (× the bottom), then make groups (÷ the top) */
+/* the fractions to divide 6 by */
 const NONUNIT=[frac(2,3),frac(3,2),frac(2,5),frac(4,3),frac(5,6)];
+/* Dividing by a fraction that isn't a unit fraction: cut into parts (× the bottom), then make groups (÷ the top), a button for each. */
 function wNonUnit(el){
-  const q=Q(el);let p=0,k=0;
+  /* stage: 0 at the start, 1 cut into parts, 2 in groups */
+  const q=Q(el);let divisorIndex=0,stage=0;
   el.innerHTML=seg('Divide 6 by',NONUNIT.map((b,i)=>[i,fx(b)]))+`<div class="fig" data-f></div><div class="wrow"><button type="button" class="btn" data-go>Cut into parts</button><button type="button" class="btn" data-gr>Make groups</button><button type="button" class="ghost-btn" data-clr>Start over</button></div><div data-w></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const b=NONUNIT[p],[c,d]=b,qt=fDiv(frac(6),b);press(el,p);
-    q('f').innerHTML=groupTape(frac(6),b,{upto:k>1?Infinity:0,parts:k>0,label:`Tape diagram: 6 wholes${k?` cut into ${PART[d][1]}`:''}${k>1?`, in groups of ${ftx(b)}`:''}`});
-    q('go').disabled=k>0;q('gr').disabled=k!==1;
-    q('w').innerHTML=workLines([`Cut each whole into ${PART[d][1]}: 6 × ${d} = ${6*d} ${PART[d][1]}.`,`A group of ${fx(b)} is ${partName(d,c)}: ${6*d} ÷ ${c} = ${fx(qt)} groups.`],k);
-    q('r').innerHTML=k<2?`How many groups of ${fx(b)} are in 6?`
-      :`<span class="ok">6 ÷ ${fx(b)} = 6 × ${d} ÷ ${c} = <b>${fx(qt)}</b>.</span><br><span class="dimline">Multiply by the bottom number (to count the parts), then divide by the top number (to put them in groups). That’s multiplying by ${fim(fInv(b))}.</span>`;
+    const b=NONUNIT[divisorIndex],[c,d]=b,quotient=fDiv(frac(6),b);press(el,divisorIndex);
+    q('f').innerHTML=groupTape(frac(6),b,{upto:stage>1?Infinity:0,parts:stage>0,label:`Tape diagram: 6 wholes${stage?` cut into ${PART[d][1]}`:''}${stage>1?`, in groups of ${ftx(b)}`:''}`});
+    q('go').disabled=stage>0;q('gr').disabled=stage!==1;
+    q('w').innerHTML=workLines([`Cut each whole into ${PART[d][1]}: 6 × ${d} = ${6*d} ${PART[d][1]}.`,`A group of ${fx(b)} is ${partName(d,c)}: ${6*d} ÷ ${c} = ${fx(quotient)} groups.`],stage);
+    q('r').innerHTML=stage<2?`How many groups of ${fx(b)} are in 6?`
+      :`<span class="ok">6 ÷ ${fx(b)} = 6 × ${d} ÷ ${c} = <b>${fx(quotient)}</b>.</span><br><span class="dimline">Multiply by the bottom number (to count the parts), then divide by the top number (to put them in groups). That’s multiplying by ${fim(fInv(b))}.</span>`;
   };
-  q('go').onclick=()=>{k=1;draw();};
-  q('gr').onclick=()=>{k=2;draw();};
-  q('clr').onclick=()=>{k=0;draw();};
-  onPick(el,m=>{p=+m;k=0;draw();});
+  q('go').onclick=()=>{stage=1;draw();};
+  q('gr').onclick=()=>{stage=2;draw();};
+  q('clr').onclick=()=>{stage=0;draw();};
+  onPick(el,id=>{divisorIndex=+id;stage=0;draw();});
   draw();
 }
 
-/* the algorithm, a line at a time: fractions, the reciprocal, multiply, and check */
+/* the divisions a ÷ b to work */
 const ALGO=[[frac(8,9),frac(4)],[frac(3,4),frac(1,2)],[frac(10,3),frac(2,9)],[frac(9,2),frac(3,8)],[frac(32,5),frac(3)]];
+/* The algorithm, a line at a time (a button for the next): fractions, the reciprocal, multiply, and check. */
 function wAlgo(el){
-  const q=Q(el);let p=0,k=1;
+  /* shown: how many lines are shown */
+  const q=Q(el);let problemIndex=0,shown=1;
   el.innerHTML=seg('Divide',ALGO.map(([a,b],i)=>[i,`${fx(a)} ÷ ${fx(b)}`]))+`<div class="wrow"><button type="button" class="btn" data-go>Next step</button><button type="button" class="ghost-btn" data-clr>Start over</button></div><div data-w></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const [a,b]=ALGO[p],r=fInv(b),qt=fDiv(a,b),isMixed=a[1]>1&&a[0]>a[1];press(el,p);
+    const [a,b]=ALGO[problemIndex],reciprocal=fInv(b),quotient=fDiv(a,b),isMixed=a[1]>1&&a[0]>a[1];press(el,problemIndex);
     const lines=[
       isMixed||b[1]===1?`Write each number as a fraction: ${fx(a)} ÷ ${fx(b)} = ${fr(a[0],a[1])} ÷ ${fr(b[0],b[1])}.`:`Both numbers are fractions: ${fr(a[0],a[1])} ÷ ${fr(b[0],b[1])}.`,
-      `Dividing by ${fr(b[0],b[1])} is multiplying by its reciprocal, ${fr(r[0],r[1])}: ${fr(a[0],a[1])} × ${fr(r[0],r[1])}.`,
-      `Multiply the tops and the bottoms: ${fr(a[0]*r[0],a[1]*r[1])} = <b>${fx(qt)}</b>.`,
-      `Check by multiplying back: ${fx(qt)} × ${fx(b)} = ${fx(a)}.`];
-    q('w').innerHTML=workLines(lines,k);
-    q('go').disabled=k>=lines.length;
-    q('r').innerHTML=k<lines.length?'Press Next step to keep going.'
-      :`<span class="ok">${fx(a)} ÷ ${fx(b)} = ${fx(qt)}.</span><br><span class="dimline">Why the reciprocal: dividing by ${fr(b[0],b[1])} means multiplying by ${b[1]} and dividing by ${b[0]}, and that’s × ${fr(r[0],r[1])}.</span>`;
+      `Dividing by ${fr(b[0],b[1])} is multiplying by its reciprocal, ${fr(reciprocal[0],reciprocal[1])}: ${fr(a[0],a[1])} × ${fr(reciprocal[0],reciprocal[1])}.`,
+      `Multiply the tops and the bottoms: ${fr(a[0]*reciprocal[0],a[1]*reciprocal[1])} = <b>${fx(quotient)}</b>.`,
+      `Check by multiplying back: ${fx(quotient)} × ${fx(b)} = ${fx(a)}.`];
+    q('w').innerHTML=workLines(lines,shown);
+    q('go').disabled=shown>=lines.length;
+    q('r').innerHTML=shown<lines.length?'Press Next step to keep going.'
+      :`<span class="ok">${fx(a)} ÷ ${fx(b)} = ${fx(quotient)}.</span><br><span class="dimline">Why the reciprocal: dividing by ${fr(b[0],b[1])} means multiplying by ${b[1]} and dividing by ${b[0]}, and that’s × ${fr(reciprocal[0],reciprocal[1])}.</span>`;
   };
-  q('go').onclick=()=>{k++;draw();};
-  q('clr').onclick=()=>{k=1;draw();};
-  onPick(el,m=>{p=+m;k=1;draw();});
+  q('go').onclick=()=>{shown++;draw();};
+  q('clr').onclick=()=>{shown=1;draw();};
+  onPick(el,id=>{problemIndex=+id;shown=1;draw();});
   draw();
 }
 
-/* another way: write both with the same denominator, then divide the numerators */
+/* divisions to do with a common denominator */
 const SAME=[[frac(3,4),frac(1,8)],[frac(2,3),frac(1,6)],[frac(3,2),frac(3,8)],[frac(9,10),frac(3,5)],[frac(1,2),frac(1,3)]];
+/* Another way: write both with the same denominator (a button), then divide the numerators. */
 function wSame(el){
-  const q=Q(el);let p=0,same=false;
+  /* same: both are cut into same-size pieces */
+  const q=Q(el);let problemIndex=0,same=false;
   el.innerHTML=seg('Divide',SAME.map(([a,b],i)=>[i,`${fx(a)} ÷ ${fx(b)}`]))+`<div class="fig" data-f></div><div class="wrow"><button type="button" class="btn" data-go>Same-size pieces</button><button type="button" class="ghost-btn" data-clr>Start over</button></div><p class="eq" data-e></p><p class="readout" data-r></p>`;
   const draw=()=>{
-    const [a,b]=SAME[p],D=lcm(a[1],b[1]),A=a[0]*D/a[1],B=b[0]*D/b[1],qt=fDiv(a,b),W=Math.ceil(Math.max(fVal(a),fVal(b)));press(el,p);
+    /* in the common denominator D, a is A pieces and b is B; the strips run to `wholes` */
+    const [a,b]=SAME[problemIndex],D=lcm(a[1],b[1]),A=a[0]*D/a[1],B=b[0]*D/b[1],quotient=fDiv(a,b),wholes=Math.ceil(Math.max(fVal(a),fVal(b)));press(el,problemIndex);
     const rows=same?[{d:D,k:A,lab:[A,D]},{d:D,k:B,cls:'b',lab:[B,D]}]:[{d:a[1],k:a[0],lab:a},{d:b[1],k:b[0],cls:'b',lab:b}];
-    q('f').innerHTML=strips(rows,{wholes:W,empty:true,label:`Fraction strips: ${same?`${A}/${D} and ${B}/${D}`:`${a[0]}/${a[1]} and ${b[0]}/${b[1]}`}`});
+    q('f').innerHTML=strips(rows,{wholes,empty:true,label:`Fraction strips: ${same?`${A}/${D} and ${B}/${D}`:`${a[0]}/${a[1]} and ${b[0]}/${b[1]}`}`});
     q('go').disabled=same;
-    q('e').innerHTML=same?`${fr(A,D)} ÷ ${fr(B,D)} = ${A} ÷ ${B} = ${fx(qt)}`:`${fx(a)} ÷ ${fx(b)} = <span class="q">?</span>`;
+    q('e').innerHTML=same?`${fr(A,D)} ÷ ${fr(B,D)} = ${A} ÷ ${B} = ${fx(quotient)}`:`${fx(a)} ÷ ${fx(b)} = <span class="q">?</span>`;
     q('r').innerHTML=!same?`The pieces are different sizes, so they’re hard to compare. Cut both into the same size pieces.`
-      :`${fx(a)} is ${partName(D,A)} and ${fx(b)} is ${partName(D,B)}. How many groups of ${partName(D,B)} are in ${partName(D,A)}? <b>${A} ÷ ${B} = ${fx(qt)}</b>.<br><span class="dimline">With the same denominator, just divide the numerators. The answer matches multiplying by the reciprocal: ${fim(a)} × ${fim(fInv(b))} = ${fx(qt)}.</span>`;
+      :`${fx(a)} is ${partName(D,A)} and ${fx(b)} is ${partName(D,B)}. How many groups of ${partName(D,B)} are in ${partName(D,A)}? <b>${A} ÷ ${B} = ${fx(quotient)}</b>.<br><span class="dimline">With the same denominator, just divide the numerators. The answer matches multiplying by the reciprocal: ${fim(a)} × ${fim(fInv(b))} = ${fx(quotient)}.</span>`;
   };
   q('go').onclick=()=>{same=true;draw();};
   q('clr').onclick=()=>{same=false;draw();};
-  onPick(el,m=>{p=+m;same=false;draw();});
+  onPick(el,id=>{problemIndex=+id;same=false;draw();});
   draw();
 }
 
-/* is it reasonable? compare the dividend and the divisor before dividing */
+/* dividends and divisors to pick from */
 const TOPS=[frac(1,2),frac(3,4),frac(4,3),frac(5,2)],BOTS=[frac(1,3),frac(2,3),frac(5,4),frac(3)];
+/* Is it reasonable? Compare the dividend and the divisor before dividing (one row of choices for each). */
 function wSense(el){
-  const q=Q(el);let i=1,j=1;
+  const q=Q(el);let topIndex=1,botIndex=1;
   el.innerHTML=`<div data-top>${seg('Dividend',TOPS.map((v,k)=>[k,fx(v)]))}</div><div data-bot>${seg('Divisor',BOTS.map((v,k)=>[k,fx(v)]))}</div><div class="fig" data-f></div><p class="eq" data-e></p><p class="readout" data-r></p>`;
   const draw=()=>{
-    const a=TOPS[i],b=BOTS[j],qt=fDiv(a,b),A=fx(a),B=fx(b);
-    q('top').querySelectorAll('[data-m]').forEach(x=>x.setAttribute('aria-pressed',x.dataset.m===String(i)));
-    q('bot').querySelectorAll('[data-m]').forEach(x=>x.setAttribute('aria-pressed',x.dataset.m===String(j)));
+    const a=TOPS[topIndex],b=BOTS[botIndex],quotient=fDiv(a,b),A=fx(a),B=fx(b);
+    q('top').querySelectorAll('[data-m]').forEach(x=>x.setAttribute('aria-pressed',x.dataset.m===String(topIndex)));
+    q('bot').querySelectorAll('[data-m]').forEach(x=>x.setAttribute('aria-pressed',x.dataset.m===String(botIndex)));
     q('f').innerHTML=groupTape(a,b,{label:`Tape diagram: ${ftx(a)} in groups of ${ftx(b)}`});
-    q('e').innerHTML=`${A} ÷ ${B} = ${fx(qt)}`;
+    q('e').innerHTML=`${A} ÷ ${B} = ${fx(quotient)}`;
     q('r').innerHTML=`<b>Is it more or less than 1?</b> ${A} is ${fVal(a)>fVal(b)?`more than ${B}, so more than 1 group fits: more than 1`:`less than ${B}, so not even 1 group fits: less than 1`}.<br>`
       +`<b>Is it more or less than ${A}?</b> ${B} is ${fVal(b)<1?`less than 1, so there are more groups than wholes: more than ${A}`:`more than 1, so there are fewer groups than wholes: less than ${A}`}.`
       +`<br><span class="dimline">Estimate first, then check your answer against it.</span>`;
   };
-  el.addEventListener('click',e=>{const h=segHit(e,['top','bot']);if(!h)return;if(h[0]==='top')i=+h[1];else j=+h[1];draw();});
+  el.addEventListener('click',e=>{const [row,id]=segHit(e,['top','bot'])||[];if(!row)return;if(row==='top')topIndex=+id;else botIndex=+id;draw();});
   draw();
 }
 

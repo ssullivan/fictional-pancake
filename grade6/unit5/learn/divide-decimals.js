@@ -1,20 +1,22 @@
 /* Learn Arithmetic in Base Ten (Grade 6 Unit 5), chapter 5: Dividing decimals. Its widgets and steps; loaded by divide-decimals.html. */
-/* multiply both numbers by 10 until the divisor is a whole number: the quotient doesn't change */
+/* divisions to scale */
 const SCALE=[[1.8,0.3],[4.5,0.05],[7.2,1.2],[0.96,0.08],[3,0.25]];
+/* Multiply both numbers by 10 (a button) until the divisor is a whole number: the quotient doesn't change. */
 function wScale(el){
-  const q=Q(el);let p=0,s=0;
+  /* scaled: how many times both were multiplied by 10 */
+  const q=Q(el);let problemIndex=0,scaled=0;
   el.innerHTML=seg('Divide',SCALE.map(([a,b],i)=>[i,`${fmt(a)} ÷ ${fmt(b)}`]))+`<p class="eq" data-e></p><div class="wrow"><button type="button" class="btn" data-go>Multiply both by 10</button><button type="button" class="ghost-btn" data-clr>Start over</button></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const [a,b]=SCALE[p],k=10**s,A=a*k,B=b*k,whole=places(B)===0;press(el,p);
+    const [a,b]=SCALE[problemIndex],factor=10**scaled,A=a*factor,B=b*factor,whole=places(B)===0;press(el,problemIndex);
     q('e').innerHTML=`${fmt(A)} ÷ ${fmt(B)}`;
     q('go').disabled=whole;
-    q('r').innerHTML=!s?`Multiply both numbers by 10 until you divide by a whole number. The answer stays the same.`
-      :`Both numbers × ${k.toLocaleString('en-US')}: ${fmt(a)} ÷ ${fmt(b)} is the same as ${fmt(A)} ÷ ${fmt(B)}.`
+    q('r').innerHTML=!scaled?`Multiply both numbers by 10 until you divide by a whole number. The answer stays the same.`
+      :`Both numbers × ${factor.toLocaleString('en-US')}: ${fmt(a)} ÷ ${fmt(b)} is the same as ${fmt(A)} ÷ ${fmt(B)}.`
       +(whole?`<br><span class="ok">Now you divide by a whole number: ${fmt(A)} ÷ ${fmt(B)} = <b>${fmt(a/b)}</b>, so ${fmt(a)} ÷ ${fmt(b)} = ${fmt(a/b)}.</span>`:'');
   };
-  q('go').onclick=()=>{s++;draw();};
-  q('clr').onclick=()=>{s=0;draw();};
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){p=+b.dataset.m;s=0;draw();}});
+  q('go').onclick=()=>{scaled++;draw();};
+  q('clr').onclick=()=>{scaled=0;draw();};
+  el.addEventListener('click',e=>{const problemBtn=e.target.closest('[data-m]');if(problemBtn){problemIndex=+problemBtn.dataset.m;scaled=0;draw();}});
   draw();
 }
 

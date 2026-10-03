@@ -2,55 +2,61 @@
 /* ticks 0, 1, …, last times (a, b); the ones up to k are labeled, and tick k stands out */
 const ladder=(a,b,last,k)=>Array.from({length:last+1},(_,i)=>({t:i*a,b:i*b,st:i===k?2:i<=k?1:0,sb:i===k?2:i<=k?1:0}));
 
+/* ratios a : b, and what the top and bottom lines count */
 const MIXES=[
   {name:'blue paint',top:'cups of blue',bot:'cups of yellow',a:2,b:5},
   {name:'running laps',top:'laps',bot:'minutes',a:3,b:4},
   {name:'granola',top:'cups of oats',bot:'spoonfuls of honey',a:4,b:1},
 ];
+/* A double number line for a ratio: a stepper sets how many batches, and that tick lines up with its partner. */
 function wLadder(el){
-  const q=Q(el),st={k:1};let p=0;
-  el.innerHTML=seg('Ratio',MIXES.map((m,i)=>[i,m.name]))+`<div class="wrow">${stepper('k','Batches')}</div><div class="fig" data-f></div><p class="readout" data-r></p>`;
+  /* the stepper's value: k batches */
+  const q=Q(el),values={k:1};let mixIndex=0;
+  el.innerHTML=seg('Ratio',MIXES.map((mix,i)=>[i,mix.name]))+`<div class="wrow">${stepper('k','Batches')}</div><div class="fig" data-f></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const m=MIXES[p],{k}=st;press(el,p);q('k').textContent=k;
-    q('f').innerHTML=dnl(m.top,m.bot,ladder(m.a,m.b,6,k))(true);
-    q('r').innerHTML=`${k} ${k===1?'batch':'batches'}: <b>${m.a*k} ${m.top}</b> lines up with <b>${m.b*k} ${m.bot}</b>.<br><span class="dimline">Each tick on top lines up with its partner below: every pair is ${m.a} : ${m.b} times the same number.</span>`;
+    const mix=MIXES[mixIndex],{k}=values;press(el,mixIndex);q('k').textContent=k;
+    q('f').innerHTML=dnl(mix.top,mix.bot,ladder(mix.a,mix.b,6,k))(true);
+    q('r').innerHTML=`${k} ${k===1?'batch':'batches'}: <b>${mix.a*k} ${mix.top}</b> lines up with <b>${mix.b*k} ${mix.bot}</b>.<br><span class="dimline">Each tick on top lines up with its partner below: every pair is ${mix.a} : ${mix.b} times the same number.</span>`;
   };
-  steppers(el,st,{k:[0,6]},draw);
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){p=+b.dataset.m;st.k=1;draw();}});
+  steppers(el,values,{k:[0,6]},draw);
+  el.addEventListener('click',e=>{const mixBtn=e.target.closest('[data-m]');if(mixBtn){mixIndex=+mixBtn.dataset.m;values.k=1;draw();}});
   draw();
 }
 
-/* how much for one: split both lines into n equal parts */
+/* buys of n things for a cost */
 const BUYS=[
   {n:4,what:['taco','tacos'],cost:10},
   {n:6,what:['ticket','tickets'],cost:18},
   {n:8,what:['pencil','pencils'],cost:2},
   {n:5,what:['pound of grapes','pounds of grapes'],cost:7.5},
 ];
+/* How much for one: split both lines into n equal parts. */
 function wUnit(el){
-  const q=Q(el);let p=0;
-  el.innerHTML=seg('Buy',BUYS.map((b,i)=>[i,`${b.n} for ${money(b.cost)}`]))+`<div class="fig" data-f></div><p class="readout" data-r></p>`;
+  const q=Q(el);let buyIndex=0;
+  el.innerHTML=seg('Buy',BUYS.map((buy,i)=>[i,`${buy.n} for ${money(buy.cost)}`]))+`<div class="fig" data-f></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const {n,what,cost}=BUYS[p],one=cost/n;press(el,p);
+    const {n,what,cost}=BUYS[buyIndex],one=cost/n;press(el,buyIndex);
     q('f').innerHTML=dnl(what[1],'dollars',[{t:0,b:0,st:1,sb:1},{t:1,b:one,st:2,sb:2},{t:n,b:cost,st:1,sb:1}],{fb:money})(true);
     q('r').innerHTML=`${n} ${what[1]} cost ${money(cost)}. Split both lines into ${n} equal parts: 1 ${what[0]} costs <b>${money(cost)} ÷ ${n} = ${money(one)}</b>.<br><span class="dimline">The price for one is the <b>unit price</b>.</span>`;
   };
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){p=+b.dataset.m;draw();}});
+  el.addEventListener('click',e=>{const buyBtn=e.target.closest('[data-m]');if(buyBtn){buyIndex=+buyBtn.dataset.m;draw();}});
   draw();
 }
 
-/* constant speed: the same distance every second */
+/* the speeds to choose from, in meters per second */
 const SPEEDS=[2,3,5];
+/* Constant speed: the same distance every second (a stepper sets the seconds). */
 function wSpeed(el){
-  const q=Q(el),st={s:4};let p=0;
-  el.innerHTML=seg('Speed',SPEEDS.map((v,i)=>[i,`${v} meters per second`]))+`<div class="wrow">${stepper('s','Seconds')}</div><div class="fig" data-f></div><p class="readout" data-r></p>`;
+  /* the stepper's value: s seconds */
+  const q=Q(el),values={s:4};let speedIndex=0;
+  el.innerHTML=seg('Speed',SPEEDS.map((speed,i)=>[i,`${speed} meters per second`]))+`<div class="wrow">${stepper('s','Seconds')}</div><div class="fig" data-f></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const v=SPEEDS[p],{s}=st;press(el,p);q('s').textContent=s;
-    q('f').innerHTML=dnl('meters','seconds',ladder(v,1,10,s))(true);
-    q('r').innerHTML=`In <b>${s} ${s===1?'second':'seconds'}</b> at ${v} meters per second, it goes <b>${v*s} meters</b>.<br><span class="dimline">A constant speed covers the same distance every second: ${v} × ${s} = ${v*s}.</span>`;
+    const speed=SPEEDS[speedIndex],{s:seconds}=values;press(el,speedIndex);q('s').textContent=seconds;
+    q('f').innerHTML=dnl('meters','seconds',ladder(speed,1,10,seconds))(true);
+    q('r').innerHTML=`In <b>${seconds} ${seconds===1?'second':'seconds'}</b> at ${speed} meters per second, it goes <b>${speed*seconds} meters</b>.<br><span class="dimline">A constant speed covers the same distance every second: ${speed} × ${seconds} = ${speed*seconds}.</span>`;
   };
-  steppers(el,st,{s:[0,10]},draw);
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){p=+b.dataset.m;draw();}});
+  steppers(el,values,{s:[0,10]},draw);
+  el.addEventListener('click',e=>{const speedBtn=e.target.closest('[data-m]');if(speedBtn){speedIndex=+speedBtn.dataset.m;draw();}});
   draw();
 }
 

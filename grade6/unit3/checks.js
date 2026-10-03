@@ -9,6 +9,7 @@ module.exports = {
     bench:  {dp: 2, nz: 3, max: 500},
     detect: {dp: 0, nz: 3, max: 300},
   },
+  // what's wrong with problem p in the real world (an empty list when nothing is)
   check(p) {
     const text = p.prompt.replace(/<[^>]*>/g, ''), bad = [];
     for (const [, v] of text.matchAll(/(\d+(?:\.\d+)?)%/g)) {

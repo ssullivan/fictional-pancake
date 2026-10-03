@@ -1,43 +1,49 @@
 /* Learn Arithmetic in Base Ten (Grade 6 Unit 5), chapter 1: Adding and subtracting decimals. Its widgets and steps; loaded by add-subtract.html. */
-const pl=(n,w)=>`${n} ${w}${n===1?'':'s'}`;
-/* a number drawn as tenth strips and hundredth squares, from x; returns [markup, width] */
-function pieces(t,h,x){
-  let o='';
-  for(let i=0;i<t;i++)o+=`<rect class="bt-t" x="${x+i*14}" y="10" width="10" height="100"/>`;
-  const hx=x+t*14+(t?8:0);
-  for(let i=0;i<h;i++)o+=`<rect class="bt-h" x="${hx+Math.floor(i/5)*14}" y="${100-(i%5)*14}" width="10" height="10"/>`;
-  return [o,hx+Math.ceil(h/5)*14-x];
+/* n and the word for it: "1 tenth", "3 tenths" */
+const pl=(n,word)=>`${n} ${word}${n===1?'':'s'}`;
+/* a number drawn as `tenths` strips and `hundredths` small squares (in columns of 5), from x; returns [markup, width] */
+function pieces(tenths,hundredths,x){
+  let markup='';
+  for(let i=0;i<tenths;i++)markup+=`<rect class="bt-t" x="${x+i*14}" y="10" width="10" height="100"/>`;
+  const squaresX=x+tenths*14+(tenths?8:0);
+  for(let i=0;i<hundredths;i++)markup+=`<rect class="bt-h" x="${squaresX+Math.floor(i/5)*14}" y="${100-(i%5)*14}" width="10" height="10"/>`;
+  return [markup,squaresX+Math.ceil(hundredths/5)*14-x];
 }
+/* Add two numbers in tenths and hundredths (a stepper for each), bundling 10 hundredths into a tenth and 10 tenths into a one. */
 function wBundle(el){
-  const q=Q(el),st={at:4,ah:7,bt:3,bh:8};
+  /* the steppers' values: at and ah, the first number's tenths and hundredths; bt and bh, the second's */
+  const q=Q(el),values={at:4,ah:7,bt:3,bh:8};
   el.innerHTML=`<div class="wrow">${stepper('at','First: tenths')}${stepper('ah','First: hundredths')}</div><div class="wrow">${stepper('bt','Second: tenths')}${stepper('bh','Second: hundredths')}</div><div class="fig" data-f></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const {at,ah,bt,bh}=st,A=(10*at+ah)/100,B=(10*bt+bh)/100,T=at+bt,H=ah+bh;
-    ['at','ah','bt','bh'].forEach(k=>q(k).textContent=st[k]);
-    const [pa,wa]=pieces(at,ah,10),[pb,wb]=pieces(bt,bh,10+wa+40);
-    q('f').innerHTML=svgWrap(Math.max(60+wa+wb,120),120,pa+`<text class="ftxt big mid" x="${10+wa+20}" y="66">+</text>`+pb,`${fmt(A)} and ${fmt(B)} in strips (tenths) and small squares (hundredths)`);
-    const c=H>=10?1:0,T2=T+c;
-    q('r').innerHTML=`${fmt(A)} + ${fmt(B)} is ${pl(T,'tenth')} and ${pl(H,'hundredth')}.`
-      +(c?`<br>Bundle 10 hundredths into 1 tenth: ${pl(T2,'tenth')} and ${pl(H-10,'hundredth')}.`:'')
-      +(T2>=10?`<br>Bundle 10 tenths into 1 one: 1 one, ${pl(T2-10,'tenth')}, and ${pl(H-10*c,'hundredth')}.`:'')
+    const {at,ah,bt,bh}=values,A=(10*at+ah)/100,B=(10*bt+bh)/100,tenths=at+bt,hundredths=ah+bh;
+    ['at','ah','bt','bh'].forEach(key=>q(key).textContent=values[key]);
+    const [markupA,widthA]=pieces(at,ah,10),[markupB,widthB]=pieces(bt,bh,10+widthA+40);
+    q('f').innerHTML=svgWrap(Math.max(60+widthA+widthB,120),120,markupA+`<text class="ftxt big mid" x="${10+widthA+20}" y="66">+</text>`+markupB,`${fmt(A)} and ${fmt(B)} in strips (tenths) and small squares (hundredths)`);
+    /* bundled: 1 when the hundredths make a new tenth */
+    const bundled=hundredths>=10?1:0,tenthsAfter=tenths+bundled;
+    q('r').innerHTML=`${fmt(A)} + ${fmt(B)} is ${pl(tenths,'tenth')} and ${pl(hundredths,'hundredth')}.`
+      +(bundled?`<br>Bundle 10 hundredths into 1 tenth: ${pl(tenthsAfter,'tenth')} and ${pl(hundredths-10,'hundredth')}.`:'')
+      +(tenthsAfter>=10?`<br>Bundle 10 tenths into 1 one: 1 one, ${pl(tenthsAfter-10,'tenth')}, and ${pl(hundredths-10*bundled,'hundredth')}.`:'')
       +`<br><b>${fmt(A)} + ${fmt(B)} = ${fmt(A+B)}</b>`;
   };
-  steppers(el,st,{at:[0,9],ah:[0,9],bt:[0,9],bh:[0,9]},draw);
+  steppers(el,values,{at:[0,9],ah:[0,9],bt:[0,9],bh:[0,9]},draw);
   draw();
 }
 
-/* decimal points lined up, with zeros filled in */
+/* sums and differences: [a, b, op] */
 const SUMS=[[2.5,0.75,'+'],[3,1.25,'−'],[10,0.4,'−'],[1.23,4.5,'+']];
+/* Decimal points lined up in columns, with zeros filled in. */
 function wColumns(el){
-  const q=Q(el);let p=0;
+  const q=Q(el);let problemIndex=0;
   el.innerHTML=seg('Problem',SUMS.map(([a,b,op],i)=>[i,`${fmt(a)} ${op} ${fmt(b)}`]))+`<div class="fig" data-f></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const [a,b,op]=SUMS[p],r=op==='+'?a+b:a-b,k=Math.max(places(a),places(b));press(el,p);
-    q('f').innerHTML=columns([a,b],op,r);
-    const fill=[a,b].filter(n=>places(n)<k).map(n=>`${fmt(n)} as ${n.toFixed(k)}`);
-    q('r').innerHTML=`Line up the decimal points, so ones are over ones and tenths over tenths.${fill.length?` Write ${fill.join(' and ')}.`:''}<br><b>${fmt(a)} ${op} ${fmt(b)} = ${fmt(r)}</b>`;
+    const [a,b,op]=SUMS[problemIndex],result=op==='+'?a+b:a-b,mostPlaces=Math.max(places(a),places(b));press(el,problemIndex);
+    q('f').innerHTML=columns([a,b],op,result);
+    /* the numbers that get zeros filled in */
+    const fill=[a,b].filter(n=>places(n)<mostPlaces).map(n=>`${fmt(n)} as ${n.toFixed(mostPlaces)}`);
+    q('r').innerHTML=`Line up the decimal points, so ones are over ones and tenths over tenths.${fill.length?` Write ${fill.join(' and ')}.`:''}<br><b>${fmt(a)} ${op} ${fmt(b)} = ${fmt(result)}</b>`;
   };
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){p=+b.dataset.m;draw();}});
+  el.addEventListener('click',e=>{const problemBtn=e.target.closest('[data-m]');if(problemBtn){problemIndex=+problemBtn.dataset.m;draw();}});
   draw();
 }
 

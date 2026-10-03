@@ -1,22 +1,27 @@
 /* Learn Unit Rates and Percentages (Grade 6 Unit 3), chapter 5: Benchmark percents. Its widgets and steps; loaded by benchmarks.html. */
-/* benchmark percents as fractions, and how to find them */
+/* benchmark percents: the fraction, how to find it (as written), and its value, for a price v */
 const BENCH={10:['1/10',v=>`${money(v)} ÷ 10`,v=>v/10],25:['1/4',v=>`${money(v)} ÷ 4`,v=>v/4],50:['1/2',v=>`${money(v)} ÷ 2`,v=>v/2],75:['3/4',v=>`${money(v)} ÷ 4 × 3`,v=>v/4*3]};
 const PRICES=[{what:'jacket',v:40},{what:'book',v:12},{what:'pair of shoes',v:80},{what:'bike',v:200}];
-/* a price seg (data-m) and a row of percent chips (data-p) */
+/* A widget with a price seg (data-m) and a row of percent chips (data-p); read(price, percent) says what they make (html). */
 function benchWidget(el,percents,read){
-  const q=Q(el);let p=0,P=percents[1];
-  el.innerHTML=seg('Price',PRICES.map((x,i)=>[i,`${x.what} ${money(x.v)}`]))+`<div class="chips" role="group" aria-label="Percent">${percents.map(v=>`<button type="button" class="chip" data-p="${v}">${v}%</button>`).join('')}</div><p class="readout" data-r></p>`;
+  const q=Q(el);let priceIndex=0,percent=percents[1];
+  el.innerHTML=seg('Price',PRICES.map((price,i)=>[i,`${price.what} ${money(price.v)}`]))+`<div class="chips" role="group" aria-label="Percent">${percents.map(v=>`<button type="button" class="chip" data-p="${v}">${v}%</button>`).join('')}</div><p class="readout" data-r></p>`;
   const draw=()=>{
-    press(el,p);el.querySelectorAll('[data-p]').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.p===P));
-    q('r').innerHTML=read(PRICES[p],P);
+    press(el,priceIndex);el.querySelectorAll('[data-p]').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.p===percent));
+    q('r').innerHTML=read(PRICES[priceIndex],percent);
   };
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){p=+b.dataset.m;draw();return;}const c=e.target.closest('[data-p]');if(c){P=+c.dataset.p;draw();}});
+  el.addEventListener('click',e=>{
+    const priceBtn=e.target.closest('[data-m]');if(priceBtn){priceIndex=+priceBtn.dataset.m;draw();return;}
+    const chip=e.target.closest('[data-p]');if(chip){percent=+chip.dataset.p;draw();}
+  });
   draw();
 }
-const wBench=el=>benchWidget(el,[10,25,50,75],({what,v},P)=>{const [f,how,of]=BENCH[P];
-  return `${P}% is ${f}, so ${P}% of ${money(v)} is ${how(v)} = <b>${money(of(v))}</b>.`;});
-const wSale=el=>benchWidget(el,[10,25,50],({what,v},P)=>{const d=BENCH[P][2](v);
-  return `Discount: ${P}% of ${money(v)} is <b>${money(d)}</b>.<br>Sale price: ${money(v)} − ${money(d)} = <b>${money(v-d)}</b>, which is ${100-P}% of the price.`;});
+/* A benchmark percent of a price, as a fraction of it. */
+const wBench=el=>benchWidget(el,[10,25,50,75],({what,v},percent)=>{const [fraction,how,of]=BENCH[percent];
+  return `${percent}% is ${fraction}, so ${percent}% of ${money(v)} is ${how(v)} = <b>${money(of(v))}</b>.`;});
+/* A sale: the discount, and the sale price that's left. */
+const wSale=el=>benchWidget(el,[10,25,50],({what,v},percent)=>{const discount=BENCH[percent][2](v);
+  return `Discount: ${percent}% of ${money(v)} is <b>${money(discount)}</b>.<br>Sale price: ${money(v)} − ${money(discount)} = <b>${money(v-discount)}</b>, which is ${100-percent}% of the price.`;});
 
 const STEPS=[
   {title:'10%, 25%, 50%, and 75%',widget:wBench,

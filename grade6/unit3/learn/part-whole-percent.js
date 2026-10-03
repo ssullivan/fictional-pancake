@@ -1,32 +1,34 @@
 /* Learn Unit Rates and Percentages (Grade 6 Unit 3), chapter 6: Part, whole, or percent. Its widgets and steps; loaded by part-whole-percent.html. */
-/* the whole from a part: a part that is P% fills P/10 tenths of the tape */
+/* parts and their percents: [part, percent] */
 const WHOLE=[[12,30],[18,60],[9,90],[35,70]];
+/* The whole from a part: a part that is P% fills P/10 tenths of the tape (a button finds the whole). */
 function wWhole(el){
-  const q=Q(el);let p=0,shown=false;
-  el.innerHTML=seg('Part',WHOLE.map(([a,P],i)=>[i,`${a} is ${P}%`]))+`<div class="fig" data-f></div><div class="wrow"><button type="button" class="btn" data-go></button></div><p class="readout" data-r></p>`;
+  const q=Q(el);let partIndex=0,shown=false;
+  el.innerHTML=seg('Part',WHOLE.map(([part,percent],i)=>[i,`${part} is ${percent}%`]))+`<div class="fig" data-f></div><div class="wrow"><button type="button" class="btn" data-go></button></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const [a,P]=WHOLE[p],k=P/10,each=a/k,W=each*10;press(el,p);
-    q('f').innerHTML=pctTape(10,k,{W,part:a,qW:!shown,each})(shown);
+    const [part,percent]=WHOLE[partIndex],tenths=percent/10,each=part/tenths,whole=each*10;press(el,partIndex);
+    q('f').innerHTML=pctTape(10,tenths,{W:whole,part,qW:!shown,each})(shown);
     q('go').textContent=shown?'Hide the whole':'Find the whole';
-    q('r').innerHTML=shown?`${P}% is ${k} tenths. ${a} ÷ ${k} = ${fmt(each)} in each tenth, so the whole is 10 × ${fmt(each)} = <b>${fmt(W)}</b>.`
-      :`<b>${a} is ${P}% of what?</b> <span class="dimline">The part fills ${k} of the 10 boxes.</span>`;
+    q('r').innerHTML=shown?`${percent}% is ${tenths} tenths. ${part} ÷ ${tenths} = ${fmt(each)} in each tenth, so the whole is 10 × ${fmt(each)} = <b>${fmt(whole)}</b>.`
+      :`<b>${part} is ${percent}% of what?</b> <span class="dimline">The part fills ${tenths} of the 10 boxes.</span>`;
   };
   q('go').onclick=()=>{shown=!shown;draw();};
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){p=+b.dataset.m;shown=false;draw();}});
+  el.addEventListener('click',e=>{const partBtn=e.target.closest('[data-m]');if(partBtn){partIndex=+partBtn.dataset.m;shown=false;draw();}});
   draw();
 }
 
-/* the percent a part is: part ÷ whole, as hundredths */
+/* parts and wholes: [part, whole] */
 const FIND=[[18,24],[9,36],[14,20],[30,25]];
+/* The percent a part is: part ÷ whole, as hundredths. */
 function wPercent(el){
-  const q=Q(el);let p=0;
-  el.innerHTML=seg('Part and whole',FIND.map(([a,W],i)=>[i,`${a} of ${W}`]))+`<div class="fig" data-f></div><p class="readout" data-r></p>`;
+  const q=Q(el);let pairIndex=0;
+  el.innerHTML=seg('Part and whole',FIND.map(([part,whole],i)=>[i,`${part} of ${whole}`]))+`<div class="fig" data-f></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const [a,W]=FIND[p],P=a/W*100;press(el,p);
-    q('f').innerHTML=pctPoint(W,P,a);
-    q('r').innerHTML=`${a} out of ${W}: ${a} ÷ ${W} = ${fmt(a/W)}, so ${a} is <b>${fmt(P)}%</b> of ${W}.`+(P>100?`<br><span class="dimline">The part is more than the whole, so it’s more than 100%.</span>`:'');
+    const [part,whole]=FIND[pairIndex],percent=part/whole*100;press(el,pairIndex);
+    q('f').innerHTML=pctPoint(whole,percent,part);
+    q('r').innerHTML=`${part} out of ${whole}: ${part} ÷ ${whole} = ${fmt(part/whole)}, so ${part} is <b>${fmt(percent)}%</b> of ${whole}.`+(percent>100?`<br><span class="dimline">The part is more than the whole, so it’s more than 100%.</span>`:'');
   };
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){p=+b.dataset.m;draw();}});
+  el.addEventListener('click',e=>{const pairBtn=e.target.closest('[data-m]');if(pairBtn){pairIndex=+pairBtn.dataset.m;draw();}});
   draw();
 }
 

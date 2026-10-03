@@ -1,75 +1,86 @@
 /* Learn Dividing Fractions (Grade 6 Unit 4), chapter 2: How many groups? Its widgets and steps; loaded by how-many-groups.html. */
-/* pattern blocks: a hexagon is 1 whole; fill some hexagons with smaller blocks and count them */
+/* pattern blocks, and how many of each fill a hexagon (1 whole) */
 const BLOCKS=[['triangle','triangles',6],['rhombus','rhombuses',3],['trapezoid','trapezoids',2]];
-const hexRow=(n,b)=>`<div class="pbrow">${range(n).map(()=>pbFig('hexagon',b,{s:44})).join('')}</div>`;
+/* n hexagons filled with a block */
+const hexRow=(n,block)=>`<div class="pbrow">${range(n).map(()=>pbFig('hexagon',block,{s:44})).join('')}</div>`;
+/* Pattern blocks: a hexagon is 1 whole; fill some hexagons (a stepper) with smaller blocks and count them. */
 function wBlocks(el){
-  const q=Q(el),st={n:2};let p=0;
-  el.innerHTML=seg('Fill with',BLOCKS.map(([,bs,k],i)=>[i,`${bs} (${fr(1,k)})`]))+`<div class="wrow">${stepper('n','Hexagons')}</div><div class="fig" data-f></div><p class="eq" data-e></p><p class="readout" data-r></p>`;
+  const q=Q(el),values={n:2};let blockIndex=0;
+  el.innerHTML=seg('Fill with',BLOCKS.map(([,plural,fill],i)=>[i,`${plural} (${fr(1,fill)})`]))+`<div class="wrow">${stepper('n','Hexagons')}</div><div class="fig" data-f></div><p class="eq" data-e></p><p class="readout" data-r></p>`;
   const draw=()=>{
-    const [b,bs,k]=BLOCKS[p],{n}=st;press(el,p);q('n').textContent=n;
-    q('f').innerHTML=hexRow(n,b);
-    q('e').innerHTML=`${n*k} × ${fr(1,k)} = ${n}, so ${n} ÷ ${fr(1,k)} = ${n*k}`;
-    q('r').innerHTML=`A hexagon is 1 whole, and ${k} ${bs} fill it, so a ${b} is ${fr(1,k)}. ${n} hexagon${n>1?'s hold':' holds'} <b>${n*k} ${bs}</b>: there are ${n*k} groups of ${fr(1,k)} in ${n}.`
-      +`<br><span class="dimline">“How many ${fr(1,k)}s are in ${n}?” is the division ${n} ÷ ${fr(1,k)}.</span>`;
+    /* fill: how many blocks fill a hexagon, so each block is 1/fill */
+    const [block,plural,fill]=BLOCKS[blockIndex],{n}=values;press(el,blockIndex);q('n').textContent=n;
+    q('f').innerHTML=hexRow(n,block);
+    q('e').innerHTML=`${n*fill} × ${fr(1,fill)} = ${n}, so ${n} ÷ ${fr(1,fill)} = ${n*fill}`;
+    q('r').innerHTML=`A hexagon is 1 whole, and ${fill} ${plural} fill it, so a ${block} is ${fr(1,fill)}. ${n} hexagon${n>1?'s hold':' holds'} <b>${n*fill} ${plural}</b>: there are ${n*fill} groups of ${fr(1,fill)} in ${n}.`
+      +`<br><span class="dimline">“How many ${fr(1,fill)}s are in ${n}?” is the division ${n} ÷ ${fr(1,fill)}.</span>`;
   };
-  steppers(el,st,{n:[1,4]},draw);
-  onPick(el,m=>{p=+m;draw();});
+  steppers(el,values,{n:[1,4]},draw);
+  onPick(el,id=>{blockIndex=+id;draw();});
   draw();
 }
 
-/* groups of a fraction that isn't a unit fraction, landing exactly: show them one group at a time */
+/* divisions t ÷ g that come out even */
 const EVEN=[[frac(4),frac(2,3)],[frac(2),frac(2,5)],[frac(3),frac(3,4)],[frac(6),frac(3,2)],[frac(5,2),frac(5,6)]];
+/* Groups of a fraction that isn't a unit fraction, landing exactly: a stepper adds them one group at a time. */
 function wEven(el){
-  const q=Q(el),st={k:0},lim={k:[0,6]};let p=0;
+  /* the stepper's value: k groups, up to the quotient */
+  const q=Q(el),values={k:0},limits={k:[0,6]};let problemIndex=0;
   el.innerHTML=seg('Divide',EVEN.map(([t,g],i)=>[i,`${fx(t)} ÷ ${fx(g)}`]))+`<div class="wrow">${stepper('k','Groups')}</div><div class="fig" data-f></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const [t,g]=EVEN[p],a=fVal(fDiv(t,g)),d=lcm(t[1],g[1]),n=g[0]*d/g[1],{k}=st;press(el,p);q('k').textContent=k;
+    /* in parts of 1/d, a group is groupParts */
+    const [t,g]=EVEN[problemIndex],quotient=fVal(fDiv(t,g)),d=lcm(t[1],g[1]),groupParts=g[0]*d/g[1],{k}=values;press(el,problemIndex);q('k').textContent=k;
     q('f').innerHTML=groupTape(t,g,{upto:k});
-    q('r').innerHTML=!k?`Cut ${fx(t)} into ${PART[d][1]}. A group of ${fx(g)} is ${partName(d,n)}. Add groups until the tape is full.`
-      :k<a?`${k} group${k>1?'s':''} of ${fx(g)} so far: ${k} × ${fx(g)} = ${fx(fMul(frac(k),g))}.`
-      :`<span class="ok">The tape is full: <b>${a} groups</b> of ${fx(g)} make ${fx(t)}. ${a} × ${fx(g)} = ${fx(t)}, so ${fx(t)} ÷ ${fx(g)} = ${a}.</span>`;
+    q('r').innerHTML=!k?`Cut ${fx(t)} into ${PART[d][1]}. A group of ${fx(g)} is ${partName(d,groupParts)}. Add groups until the tape is full.`
+      :k<quotient?`${k} group${k>1?'s':''} of ${fx(g)} so far: ${k} × ${fx(g)} = ${fx(fMul(frac(k),g))}.`
+      :`<span class="ok">The tape is full: <b>${quotient} groups</b> of ${fx(g)} make ${fx(t)}. ${quotient} × ${fx(g)} = ${fx(t)}, so ${fx(t)} ÷ ${fx(g)} = ${quotient}.</span>`;
   };
-  steppers(el,st,lim,draw);
-  onPick(el,m=>{p=+m;lim.k[1]=fVal(fDiv(...EVEN[p]));st.k=0;draw();});
-  lim.k[1]=fVal(fDiv(...EVEN[p]));
+  steppers(el,values,limits,draw);
+  onPick(el,id=>{problemIndex=+id;limits.k[1]=fVal(fDiv(...EVEN[problemIndex]));values.k=0;draw();});
+  limits.k[1]=fVal(fDiv(...EVEN[problemIndex]));
   draw();
 }
 
-/* a part of a group left over: the leftover is a fraction of a group, not of a whole */
+/* divisions t ÷ g with part of a group left over */
 const LEFT=[[frac(7,2),frac(3,4)],[frac(2),frac(3,4)],[frac(3),frac(2,5)],[frac(10,3),frac(1,2)],[frac(5,2),frac(2,3)]];
+/* A part of a group left over (a button makes the groups): the leftover is a fraction of a group, not of a whole. */
 function wLeft(el){
-  const q=Q(el);let p=0,shown=false;
+  const q=Q(el);let problemIndex=0,shown=false;
   el.innerHTML=seg('Divide',LEFT.map(([t,g],i)=>[i,`${fx(t)} ÷ ${fx(g)}`]))+`<div class="fig" data-f></div><div class="wrow"><button type="button" class="btn" data-go>Make the groups</button></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const [t,g]=LEFT[p],a=fDiv(t,g),d=lcm(t[1],g[1]),N=t[0]*d/t[1],n=g[0]*d/g[1],full=Math.floor(N/n),left=N-full*n;press(el,p);
+    /* in parts of 1/d: the total is totalParts, a group is groupParts, and `full` groups fit with `left` parts over */
+    const [t,g]=LEFT[problemIndex],quotient=fDiv(t,g),d=lcm(t[1],g[1]),totalParts=t[0]*d/t[1],groupParts=g[0]*d/g[1],full=Math.floor(totalParts/groupParts),left=totalParts-full*groupParts;press(el,problemIndex);
     q('f').innerHTML=groupTape(t,g,{upto:shown?Infinity:0});
     q('go').disabled=shown;
-    q('r').innerHTML=!shown?`How many groups of ${fx(g)} are in ${fx(t)}? Each whole is ${d} ${PART[d][1]}, and a group is ${partName(d,n)}.`
-      :`${full} full group${full>1?'s':''}, and ${partName(d,left)} left over. A whole group is ${partName(d,n)}, so the leftover is <b>${fx(frac(left,n))} of a group</b>.<br><span class="ok">${fx(t)} ÷ ${fx(g)} = <b>${fx(a)}</b>. Check: ${fx(a)} × ${fx(g)} = ${fx(t)}.</span>`
+    q('r').innerHTML=!shown?`How many groups of ${fx(g)} are in ${fx(t)}? Each whole is ${d} ${PART[d][1]}, and a group is ${partName(d,groupParts)}.`
+      :`${full} full group${full>1?'s':''}, and ${partName(d,left)} left over. A whole group is ${partName(d,groupParts)}, so the leftover is <b>${fx(frac(left,groupParts))} of a group</b>.<br><span class="ok">${fx(t)} ÷ ${fx(g)} = <b>${fx(quotient)}</b>. Check: ${fx(quotient)} × ${fx(g)} = ${fx(t)}.</span>`
         +`<br><span class="dimline">Not ${full} ${fr(left,d)}: the leftover is measured in groups of ${fx(g)}, not in wholes.</span>`;
   };
   q('go').onclick=()=>{shown=true;draw();};
-  onPick(el,m=>{p=+m;shown=false;draw();});
+  onPick(el,id=>{problemIndex=+id;shown=false;draw();});
   draw();
 }
 
-/* hops along a ruler marked in eighths of an inch, 0 to 6 inches */
+/* hop lengths, in eighths of an inch */
 const HOPS=[3,4,6,12];
+/* Hops along a ruler marked in eighths of an inch, 0 to 6 inches (a stepper adds hops). */
 function wRuler(el){
-  const q=Q(el),st={k:0},lim={k:[0,16]};let p=0;
-  el.innerHTML=seg('Hop',HOPS.map((h,i)=>[i,`${fx(frac(h,8))} inch`]))+`<div class="wrow">${stepper('k','Hops')}</div><div class="fig" data-f></div><p class="readout" data-r></p>`;
+  const q=Q(el),values={k:0},limits={k:[0,16]};let hopIndex=0;
+  el.innerHTML=seg('Hop',HOPS.map((eighths,i)=>[i,`${fx(frac(eighths,8))} inch`]))+`<div class="wrow">${stepper('k','Hops')}</div><div class="fig" data-f></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const h=HOPS[p],hf=frac(h,8),max=48/h,{k}=st,at=frac(k*h,8);press(el,p);q('k').textContent=k;
-    q('f').innerHTML=numLine(0,48,{step:1,big:8,lab:v=>v%8===0,fmt:v=>v/8,hops:range(k).map(i=>({a:i*h,b:(i+1)*h,t:''})),label:`A ruler from 0 to 6 inches in eighths, with ${k} hops of ${ftx(hf)} inch`});
-    q('r').innerHTML=!k?`Hop ${fx(hf)} inch at a time from 0. How many hops land on 6 inches?`
-      :k<max?`${k} hop${k>1?'s':''} of ${fx(hf)} inch reach${k>1?'':'es'} <b>${fx(at)} inch${fVal(at)>1?'es':''}</b>: ${k} × ${fx(hf)} = ${fx(at)}.`
-      :`<span class="ok"><b>${max} hops</b> land exactly on 6: there are ${max} groups of ${fx(hf)} in 6, so 6 ÷ ${fx(hf)} = ${max}.</span>`;
+    /* hop: eighths in a hop, hopFrac as a fraction; most: hops in 6 inches; at: where k hops land */
+    const hop=HOPS[hopIndex],hopFrac=frac(hop,8),most=48/hop,{k}=values,at=frac(k*hop,8);press(el,hopIndex);q('k').textContent=k;
+    q('f').innerHTML=numLine(0,48,{step:1,big:8,lab:v=>v%8===0,fmt:v=>v/8,hops:range(k).map(i=>({a:i*hop,b:(i+1)*hop,t:''})),label:`A ruler from 0 to 6 inches in eighths, with ${k} hops of ${ftx(hopFrac)} inch`});
+    q('r').innerHTML=!k?`Hop ${fx(hopFrac)} inch at a time from 0. How many hops land on 6 inches?`
+      :k<most?`${k} hop${k>1?'s':''} of ${fx(hopFrac)} inch reach${k>1?'':'es'} <b>${fx(at)} inch${fVal(at)>1?'es':''}</b>: ${k} × ${fx(hopFrac)} = ${fx(at)}.`
+      :`<span class="ok"><b>${most} hops</b> land exactly on 6: there are ${most} groups of ${fx(hopFrac)} in 6, so 6 ÷ ${fx(hopFrac)} = ${most}.</span>`;
   };
-  steppers(el,st,lim,draw);
-  onPick(el,m=>{p=+m;lim.k[1]=48/HOPS[p];st.k=0;draw();});
+  steppers(el,values,limits,draw);
+  onPick(el,id=>{hopIndex=+id;limits.k[1]=48/HOPS[hopIndex];values.k=0;draw();});
   draw();
 }
 
+/* the quick checks' figures */
 const F={
   blocks:`<div class="pbrow">${pbFig('hexagon','rhombus',{s:44})}${pbFig('hexagon','rhombus',{show:2,s:44})}</div>`,
 };

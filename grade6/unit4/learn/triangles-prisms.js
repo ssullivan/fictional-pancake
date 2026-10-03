@@ -1,54 +1,60 @@
 /* Learn Dividing Fractions (Grade 6 Unit 4), chapter 7: Triangles and prisms. Its widgets and steps; loaded by triangles-prisms.html. */
-/* a triangle with its base and height in halves of a centimeter, drawn to scale with the height dashed */
+/* a triangle with base b and height h (in cm), drawn to scale (44 pixels a cm) with the height dashed */
 function triFig(b,h){
-  const k=44,X=60,Y=14,w=fVal(b)*k,t=fVal(h)*k,ax=X+w*.35;
-  return svgWrap(X+5*k+30,Y+4*k+44,`<polygon points="${X},${Y+t} ${X+w},${Y+t} ${ax},${Y}" class="rg-out" style="fill:rgba(255,201,60,.35)"/><line class="tri-h" x1="${ax}" y1="${Y}" x2="${ax}" y2="${Y+t}"/><rect class="tri-sq" x="${ax}" y="${Y+t-10}" width="10" height="10"/>`
-    +fT(X+w/2,Y+t+24,b,{unit:'cm'})+fT(ax-36,Y+t/2,h,{unit:'cm'}),`A triangle with base ${ftx(b)} cm and height ${ftx(h)} cm`);
+  /* apexX: the top corner, 35% of the way along the base */
+  const scale=44,left=60,top=14,baseW=fVal(b)*scale,height=fVal(h)*scale,apexX=left+baseW*.35;
+  return svgWrap(left+5*scale+30,top+4*scale+44,`<polygon points="${left},${top+height} ${left+baseW},${top+height} ${apexX},${top}" class="rg-out" style="fill:rgba(255,201,60,.35)"/><line class="tri-h" x1="${apexX}" y1="${top}" x2="${apexX}" y2="${top+height}"/><rect class="tri-sq" x="${apexX}" y="${top+height-10}" width="10" height="10"/>`
+    +fT(left+baseW/2,top+height+24,b,{unit:'cm'})+fT(apexX-36,top+height/2,h,{unit:'cm'}),`A triangle with base ${ftx(b)} cm and height ${ftx(h)} cm`);
 }
+/* A triangle's area (a stepper for the base and the height, in half centimeters). */
 function wTri(el){
-  const q=Q(el),st={b:9,h:6};
+  /* the steppers' values: b and h, in half centimeters */
+  const q=Q(el),values={b:9,h:6};
   el.innerHTML=`<div class="wrow">${stepper('b','Base')}${stepper('h','Height')}</div><div class="fig" data-f></div><p class="eq" data-e></p><p class="readout" data-r></p>`;
   const draw=()=>{
-    const b=frac(st.b,2),h=frac(st.h,2),A=fMul(frac(1,2),fMul(b,h));
+    const b=frac(values.b,2),h=frac(values.h,2),A=fMul(frac(1,2),fMul(b,h));
     q('b').innerHTML=`${fx(b)} cm`;q('h').innerHTML=`${fx(h)} cm`;
     q('f').innerHTML=triFig(b,h);
     q('e').innerHTML=`${fr(1,2)} × ${fx(b)} × ${fx(h)} = ${fx(A)}`;
     q('r').innerHTML=`Area = ${fr(1,2)} × base × height = ${fr(1,2)} × ${fim(b)} × ${fim(h)} = <b>${fx(A)} square cm</b>.`
       +`<br><span class="dimline">Going the other way: if you know the area and the base, double the area and divide by the base to get the height. ${fx(fMul(frac(2),A))} ÷ ${fx(b)} = ${fx(h)}.</span>`;
   };
-  steppers(el,st,{b:[1,10],h:[1,8]},draw);
+  steppers(el,values,{b:[1,10],h:[1,8]},draw);
   draw();
 }
 
-/* small cubes with a fractional edge filling a bigger cube */
+/* small cube edges: 1/2, 1/3, or 1/4 inch */
 const SMALL=[2,3,4];
+/* Small cubes with a fractional edge filling a bigger cube (a stepper sets the big cube's edge). */
 function wCubes(el){
-  const q=Q(el),st={e:1};let p=2;
+  /* the stepper's value: e, the big cube's edge in inches; perInch: small cubes along an inch */
+  const q=Q(el),values={e:1};let perInch=2;
   el.innerHTML=seg('Small cube edge',SMALL.map(v=>[v,`${fr(1,v)} inch`]))+`<div class="wrow">${stepper('e','Big cube edge')}</div><div class="fig" data-f></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const {e}=st,n=e*p,c=n**3;press(el,p);q('e').textContent=`${e} in`;
-    q('f').innerHTML=cubeBox(frac(e),frac(e),frac(e),p,{label:`A cube ${e} inch${e>1?'es':''} on an edge filled with cubes ${fr(1,p).replace(/<[^>]*>/g,'')} inch on an edge`});
-    q('r').innerHTML=`${p} small cubes fit along each inch, so ${e} × ${p} = ${n} fit along each edge, and ${n} × ${n} × ${n} = <b>${c} small cubes</b> fill the big cube.`
-      +`<br>Each small cube is ${fr(1,p)} × ${fr(1,p)} × ${fr(1,p)} = ${fr(1,p**3)} cubic inch, so the volume is ${c} × ${fr(1,p**3)} = <b>${e**3} cubic inch${e>1?'es':''}</b>, the same as ${e} × ${e} × ${e}.`;
+    const {e:edge}=values,alongEdge=edge*perInch,count=alongEdge**3;press(el,perInch);q('e').textContent=`${edge} in`;
+    q('f').innerHTML=cubeBox(frac(edge),frac(edge),frac(edge),perInch,{label:`A cube ${edge} inch${edge>1?'es':''} on an edge filled with cubes ${fr(1,perInch).replace(/<[^>]*>/g,'')} inch on an edge`});
+    q('r').innerHTML=`${perInch} small cubes fit along each inch, so ${edge} × ${perInch} = ${alongEdge} fit along each edge, and ${alongEdge} × ${alongEdge} × ${alongEdge} = <b>${count} small cubes</b> fill the big cube.`
+      +`<br>Each small cube is ${fr(1,perInch)} × ${fr(1,perInch)} × ${fr(1,perInch)} = ${fr(1,perInch**3)} cubic inch, so the volume is ${count} × ${fr(1,perInch**3)} = <b>${edge**3} cubic inch${edge>1?'es':''}</b>, the same as ${edge} × ${edge} × ${edge}.`;
   };
-  steppers(el,st,{e:[1,3]},draw);
-  onPick(el,m=>{p=+m;draw();});
+  steppers(el,values,{e:[1,3]},draw);
+  onPick(el,id=>{perInch=+id;draw();});
   draw();
 }
 
-/* a box measured in half inches: count the 1/2-inch cubes, then find the volume */
+/* A box measured in half inches (a stepper for each edge): count the 1/2-inch cubes, then find the volume. */
 function wPrism(el){
-  const q=Q(el),st={l:3,w:2,h:5};
+  /* the steppers' values: l, w, and h in half inches */
+  const q=Q(el),values={l:3,w:2,h:5};
   el.innerHTML=`<div class="wrow">${stepper('l','Length')}${stepper('w','Width')}${stepper('h','Height')}</div><div class="fig" data-f></div><p class="eq" data-e></p><p class="readout" data-r></p>`;
   const draw=()=>{
-    const l=frac(st.l,2),w=frac(st.w,2),h=frac(st.h,2),c=st.l*st.w*st.h,V=frac(c,8);
+    const l=frac(values.l,2),w=frac(values.w,2),h=frac(values.h,2),cubes=values.l*values.w*values.h,V=frac(cubes,8);
     q('l').innerHTML=fx(l);q('w').innerHTML=fx(w);q('h').innerHTML=fx(h);
     q('f').innerHTML=cubeBox(l,w,h,2);
     q('e').innerHTML=`${fx(l)} × ${fx(w)} × ${fx(h)} = ${fx(V)}`;
-    q('r').innerHTML=`${st.l} × ${st.w} × ${st.h} = ${c} cube${c>1?'s':''}, each ${fr(1,2)} inch on an edge and ${fr(1,8)} cubic inch: ${c} × ${fr(1,8)} = <b>${fx(V)} cubic inch${fVal(V)>1?'es':''}</b>.`
+    q('r').innerHTML=`${values.l} × ${values.w} × ${values.h} = ${cubes} cube${cubes>1?'s':''}, each ${fr(1,2)} inch on an edge and ${fr(1,8)} cubic inch: ${cubes} × ${fr(1,8)} = <b>${fx(V)} cubic inch${fVal(V)>1?'es':''}</b>.`
       +`<br><span class="dimline">Length × width × height gives the same volume, with fractional edges too. If you know the volume and two edges, divide to find the third.</span>`;
   };
-  steppers(el,st,{l:[1,8],w:[1,6],h:[1,6]},draw);
+  steppers(el,values,{l:[1,8],w:[1,6],h:[1,6]},draw);
   draw();
 }
 

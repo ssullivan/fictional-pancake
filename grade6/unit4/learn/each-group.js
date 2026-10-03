@@ -1,5 +1,5 @@
 /* Learn Dividing Fractions (Grade 6 Unit 4), chapter 4: How much in each group? Its widgets and steps; loaded by each-group.html. */
-/* part of a container is full: find one part, then the whole */
+/* part of a container is full: A fills k of its d parts */
 const FILLS=[
   {A:frac(5),k:2,d:3,c:'pitcher',of:'iced tea',u:['cup','cups']},
   {A:frac(15),k:1,d:3,c:'pail',of:'water',u:['cup','cups']},
@@ -7,75 +7,84 @@ const FILLS=[
   {A:frac(5,4),k:1,d:2,c:'batch of rolls',of:'flour',u:['cup','cups']},
   {A:frac(3,4),k:1,d:3,c:'section of road',of:'new paving',u:['mile','miles']},
 ];
+/* Part of a container is full: find one part, then the whole (a button for each step). */
 function wFill(el){
-  const q=Q(el);let p=0,k=0;
-  el.innerHTML=seg('Problem',FILLS.map((f,i)=>[i,`${fx(f.A)} fills ${fx(frac(f.k,f.d))}`]))+`<div class="fig" data-f></div><div class="wrow"><button type="button" class="btn" data-go>Next step</button><button type="button" class="ghost-btn" data-clr>Start over</button></div><div data-w></div><p class="readout" data-r></p>`;
+  /* stage: 0 at the start, 1 one part found, 2 the whole */
+  const q=Q(el);let fillIndex=0,stage=0;
+  el.innerHTML=seg('Problem',FILLS.map((fill,i)=>[i,`${fx(fill.A)} fills ${fx(frac(fill.k,fill.d))}`]))+`<div class="fig" data-f></div><div class="wrow"><button type="button" class="btn" data-go>Next step</button><button type="button" class="ghost-btn" data-clr>Start over</button></div><div data-w></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const f=FILLS[p],P=frac(f.k,f.d),e=fDiv(f.A,frac(f.k)),W=fDiv(f.A,P);press(el,p);
-    q('f').innerHTML=oneGroup(f.d,f.k,{top:[f.A,unitOf(f.A,f.u)],each:k?[e,'']:null,eachShaded:k<2,whole:k>1?[W,unitOf(W,f.u)]:null,q:k>1?null:'whole',label:`Tape diagram: one ${f.c} cut into ${f.d} equal parts, ${f.k} of them holding ${ftx(f.A)} ${f.u[1]}`});
-    q('go').disabled=k>=2;
+    /* P: the fraction full; each: one part; W: the whole */
+    const fill=FILLS[fillIndex],P=frac(fill.k,fill.d),each=fDiv(fill.A,frac(fill.k)),W=fDiv(fill.A,P);press(el,fillIndex);
+    q('f').innerHTML=oneGroup(fill.d,fill.k,{top:[fill.A,unitOf(fill.A,fill.u)],each:stage?[each,'']:null,eachShaded:stage<2,whole:stage>1?[W,unitOf(W,fill.u)]:null,q:stage>1?null:'whole',label:`Tape diagram: one ${fill.c} cut into ${fill.d} equal parts, ${fill.k} of them holding ${ftx(fill.A)} ${fill.u[1]}`});
+    q('go').disabled=stage>=2;
     q('w').innerHTML=workLines([
-      f.k===1?`1 ${PART[f.d][0]} of the ${f.c} is ${fx(f.A)} ${unitOf(f.A,f.u)}.`:`${partName(f.d,f.k)} of the ${f.c} is ${fx(f.A)} ${unitOf(f.A,f.u)}, so 1 ${PART[f.d][0]} is ${fx(f.A)} ÷ ${f.k} = ${fx(e)} ${unitOf(e,f.u)}.`,
-      `The whole ${f.c} is ${f.d} ${PART[f.d][1]}: ${f.d} × ${fx(e)} = <b>${fx(W)} ${unitOf(W,f.u)}</b>.`],k);
-    q('r').innerHTML=!k?`${fx(f.A)} ${unitOf(f.A,f.u)} of ${f.of} fill ${fx(P)} of a ${f.c}. How much fills the whole ${f.c}? That’s ${fx(P)} × ? = ${fx(f.A)}.`
-      :k<2?'Now fill the rest of the parts.'
-      :`<span class="ok">${fx(f.A)} ÷ ${fx(P)} = ${fx(W)}. Check: ${fx(P)} × ${fx(W)} = ${fx(f.A)}.</span><br><span class="dimline">Divide by ${f.k===1?'':f.k+' and multiply by '}${f.d}: that’s the same as multiplying by ${fim(fInv(P))}.</span>`;
+      fill.k===1?`1 ${PART[fill.d][0]} of the ${fill.c} is ${fx(fill.A)} ${unitOf(fill.A,fill.u)}.`:`${partName(fill.d,fill.k)} of the ${fill.c} is ${fx(fill.A)} ${unitOf(fill.A,fill.u)}, so 1 ${PART[fill.d][0]} is ${fx(fill.A)} ÷ ${fill.k} = ${fx(each)} ${unitOf(each,fill.u)}.`,
+      `The whole ${fill.c} is ${fill.d} ${PART[fill.d][1]}: ${fill.d} × ${fx(each)} = <b>${fx(W)} ${unitOf(W,fill.u)}</b>.`],stage);
+    q('r').innerHTML=!stage?`${fx(fill.A)} ${unitOf(fill.A,fill.u)} of ${fill.of} fill ${fx(P)} of a ${fill.c}. How much fills the whole ${fill.c}? That’s ${fx(P)} × ? = ${fx(fill.A)}.`
+      :stage<2?'Now fill the rest of the parts.'
+      :`<span class="ok">${fx(fill.A)} ÷ ${fx(P)} = ${fx(W)}. Check: ${fx(P)} × ${fx(W)} = ${fx(fill.A)}.</span><br><span class="dimline">Divide by ${fill.k===1?'':fill.k+' and multiply by '}${fill.d}: that’s the same as multiplying by ${fim(fInv(P))}.</span>`;
   };
-  q('go').onclick=()=>{k++;draw();};
-  q('clr').onclick=()=>{k=0;draw();};
-  onPick(el,m=>{p=+m;k=0;draw();});
+  q('go').onclick=()=>{stage++;draw();};
+  q('clr').onclick=()=>{stage=0;draw();};
+  onPick(el,id=>{fillIndex=+id;stage=0;draw();});
   draw();
 }
 
-/* two amounts to keep track of: a fraction of a pound fills a fraction of a container, on a double number line */
+/* two amounts to keep track of: a fills the fraction p of a container */
 const TWO=[
   {a:frac(3,4),p:frac(2,5),top:'pounds of rice',bot:'containers',one:'pound'},
   {a:frac(5,4),p:frac(5,6),top:'gallons of water',bot:'buckets',one:'gallon'},
   {a:frac(3,4),p:frac(3,5),top:'liters of juice',bot:'bottles',one:'liter'},
 ];
+/* a decimal written as a fraction, for the number line's labels */
 const fFmt=v=>ftx(toFrac(v));
+/* A fraction of a pound fills a fraction of a container, on a double number line: how much fills 1, or what 1 fills. */
 function wTwo(el){
-  const q=Q(el);let p=0,ask='whole';
-  el.innerHTML=`<div data-top>${seg('Problem',TWO.map((t,i)=>[i,`${fx(t.a)} fills ${fx(t.p)}`]))}</div><div data-bot>${seg('Question',[['whole','How much fills 1?'],['one','What does 1 fill?']])}</div><div class="fig" data-f></div><p class="eq" data-e></p><p class="readout" data-r></p>`;
+  /* ask: 'whole' (how much fills 1 container) or 'one' (what 1 unit fills) */
+  const q=Q(el);let problemIndex=0,ask='whole';
+  el.innerHTML=`<div data-top>${seg('Problem',TWO.map((problem,i)=>[i,`${fx(problem.a)} fills ${fx(problem.p)}`]))}</div><div data-bot>${seg('Question',[['whole','How much fills 1?'],['one','What does 1 fill?']])}</div><div class="fig" data-f></div><p class="eq" data-e></p><p class="readout" data-r></p>`;
   const draw=()=>{
-    const t=TWO[p],d=t.p[1],k=t.p[0],per=fVal(t.a)/k,W=fDiv(t.a,t.p),one=fInv(W);
-    q('top').querySelectorAll('[data-m]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.m===String(p)));
+    /* p is k/d of a container; perPart: the amount in 1/d of it; W: the amount that fills 1; one: what 1 unit fills */
+    const problem=TWO[problemIndex],d=problem.p[1],k=problem.p[0],perPart=fVal(problem.a)/k,W=fDiv(problem.a,problem.p),one=fInv(W);
+    q('top').querySelectorAll('[data-m]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.m===String(problemIndex)));
     q('bot').querySelectorAll('[data-m]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.m===ask));
-    const ticks=range(d+1).map(i=>({t:i*per,b:i/d,st:i===0||i===k?1:i===d&&ask==='whole'?2:0,sb:i===0||i===k||i===d?1:0}));
+    const ticks=range(d+1).map(i=>({t:i*perPart,b:i/d,st:i===0||i===k?1:i===d&&ask==='whole'?2:0,sb:i===0||i===k||i===d?1:0}));
     if(ask==='one')ticks.push({t:1,b:fVal(one),st:1,sb:2});
     ticks.sort((x,y)=>x.t-y.t);
-    q('f').innerHTML=dnl(t.top,t.bot,ticks,{ft:fFmt,fb:fFmt})(true);
+    q('f').innerHTML=dnl(problem.top,problem.bot,ticks,{ft:fFmt,fb:fFmt})(true);
     if(ask==='whole'){
-      q('e').innerHTML=`${fx(t.p)} × <span class="q">?</span> = ${fx(t.a)}, so ${fx(t.a)} ÷ ${fx(t.p)} = ${fx(W)}`;
-      q('r').innerHTML=`${fx(t.a)} ${t.top} fill ${fx(t.p)} of the ${t.bot.slice(0,-1)}. Each ${fr(1,d)} holds ${fx(t.a)} ÷ ${k} = ${fx(frac(t.a[0],t.a[1]*k))}, and the whole is ${d} of those: <b>${fx(W)} ${t.top.split(' ')[0]}</b> fill 1 ${t.bot.slice(0,-1)}.`;
+      q('e').innerHTML=`${fx(problem.p)} × <span class="q">?</span> = ${fx(problem.a)}, so ${fx(problem.a)} ÷ ${fx(problem.p)} = ${fx(W)}`;
+      q('r').innerHTML=`${fx(problem.a)} ${problem.top} fill ${fx(problem.p)} of the ${problem.bot.slice(0,-1)}. Each ${fr(1,d)} holds ${fx(problem.a)} ÷ ${k} = ${fx(frac(problem.a[0],problem.a[1]*k))}, and the whole is ${d} of those: <b>${fx(W)} ${problem.top.split(' ')[0]}</b> fill 1 ${problem.bot.slice(0,-1)}.`;
     }else{
       q('e').innerHTML=`<span class="q">?</span> × ${fx(W)} = 1, so 1 ÷ ${fx(W)} = ${fx(one)}`;
-      q('r').innerHTML=`A full ${t.bot.slice(0,-1)} holds ${fx(W)} ${t.top.split(' ')[0]}. 1 ${t.one} is <b>${fx(one)} of a ${t.bot.slice(0,-1)}</b>.<br><span class="dimline">The two questions have reciprocal answers: ${fx(W)} and ${fx(one)}.</span>`;
+      q('r').innerHTML=`A full ${problem.bot.slice(0,-1)} holds ${fx(W)} ${problem.top.split(' ')[0]}. 1 ${problem.one} is <b>${fx(one)} of a ${problem.bot.slice(0,-1)}</b>.<br><span class="dimline">The two questions have reciprocal answers: ${fx(W)} and ${fx(one)}.</span>`;
     }
   };
-  el.addEventListener('click',e=>{const h=segHit(e,['top','bot']);if(!h)return;if(h[0]==='top')p=+h[1];else ask=h[1];draw();});
+  el.addEventListener('click',e=>{const [row,id]=segHit(e,['top','bot'])||[];if(!row)return;if(row==='top')problemIndex=+id;else ask=id;draw();});
   draw();
 }
 
-/* how much for 1: a price for part of a unit, or for more than one */
+/* buys: an amount of something for a price */
 const PER=[
   {amt:frac(4,5),price:2,what:'baking soda',u:['kilogram','kilograms']},
   {amt:frac(5,2),price:15,what:'fabric',u:['yard','yards']},
   {amt:frac(3,4),price:3,what:'rope',u:['meter','meters']},
   {amt:frac(5,4),price:10,what:'cheese',u:['pound','pounds']},
 ];
+/* How much for 1: a price for part of a unit, or for more than one. */
 function wPer(el){
-  const q=Q(el);let p=0;
-  el.innerHTML=seg('Buy',PER.map((b,i)=>[i,`${fx(b.amt)} ${unitOf(b.amt,b.u)} for ${cash(b.price)}`]))+`<div class="fig" data-f></div><p class="eq" data-e></p><p class="readout" data-r></p>`;
+  const q=Q(el);let buyIndex=0;
+  el.innerHTML=seg('Buy',PER.map((buy,i)=>[i,`${fx(buy.amt)} ${unitOf(buy.amt,buy.u)} for ${cash(buy.price)}`]))+`<div class="fig" data-f></div><p class="eq" data-e></p><p class="readout" data-r></p>`;
   const draw=()=>{
-    const b=PER[p],[k,d]=b.amt,each=b.price/k,one=b.price*d/k;press(el,p);
-    q('f').innerHTML=k<d?oneGroup(d,k,{top:cash(b.price),each:cash(each),eachShaded:true,whole:cash(one),label:`Tape diagram: 1 ${b.u[0]} cut into ${d} parts, ${k} of them cost ${cash(b.price)}`})
-      :groupTape(b.amt,frac(1),{label:`Tape diagram: ${ftx(b.amt)} ${b.u[1]} with each whole ${b.u[0]} bracketed`});
-    q('e').innerHTML=`${cash(b.price)} ÷ ${fx(b.amt)} = ${cash(b.price)} × ${fim(fInv(b.amt))} = ${cash(one)}`;
-    q('r').innerHTML=`${fx(b.amt)} ${unitOf(b.amt,b.u)} of ${b.what} cost ${cash(b.price)}. That’s ${partName(d,k)} of a ${b.u[0]}, so 1 ${PART[d][0]} costs ${cash(b.price)} ÷ ${k} = ${cash(each)}, and 1 ${b.u[0]} (${d} ${PART[d][1]}) costs <b>${cash(one)}</b>.`
-      +`<br><span class="dimline">${fx(b.amt)} × ${cash(one)} = ${cash(b.price)}: the price for 1 times how much you buy is what you pay.</span>`;
+    /* the amount is k/d: each 1/d costs `each`, and 1 unit costs `one` */
+    const buy=PER[buyIndex],[k,d]=buy.amt,each=buy.price/k,one=buy.price*d/k;press(el,buyIndex);
+    q('f').innerHTML=k<d?oneGroup(d,k,{top:cash(buy.price),each:cash(each),eachShaded:true,whole:cash(one),label:`Tape diagram: 1 ${buy.u[0]} cut into ${d} parts, ${k} of them cost ${cash(buy.price)}`})
+      :groupTape(buy.amt,frac(1),{label:`Tape diagram: ${ftx(buy.amt)} ${buy.u[1]} with each whole ${buy.u[0]} bracketed`});
+    q('e').innerHTML=`${cash(buy.price)} ÷ ${fx(buy.amt)} = ${cash(buy.price)} × ${fim(fInv(buy.amt))} = ${cash(one)}`;
+    q('r').innerHTML=`${fx(buy.amt)} ${unitOf(buy.amt,buy.u)} of ${buy.what} cost ${cash(buy.price)}. That’s ${partName(d,k)} of a ${buy.u[0]}, so 1 ${PART[d][0]} costs ${cash(buy.price)} ÷ ${k} = ${cash(each)}, and 1 ${buy.u[0]} (${d} ${PART[d][1]}) costs <b>${cash(one)}</b>.`
+      +`<br><span class="dimline">${fx(buy.amt)} × ${cash(one)} = ${cash(buy.price)}: the price for 1 times how much you buy is what you pay.</span>`;
   };
-  onPick(el,m=>{p=+m;draw();});
+  onPick(el,id=>{buyIndex=+id;draw();});
   draw();
 }
 
