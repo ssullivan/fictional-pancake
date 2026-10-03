@@ -25,7 +25,7 @@ shared/                   used by every grade; each file's header comment docume
   landing.css             grade cards (root page) and unit cards (grade pages)
   util.js                 R, pick, range, shuffle, miscOf, mcOf, problemKey, gcd, lcm, $, Q, parseNum, and Learn controls (seg, press, segHit, stepper)
   speak.js                Read to me buttons for K–2 Learn pages and games (readAloud)
-tools/                    check.mjs, fuzz.mjs, snap.mjs (see Checking a change)
+tools/                    check.mjs, fuzz.mjs, snap.mjs, same.mjs (see Checking a change)
 grade6/
   index.html              grade page: one card per IM unit, with Learn/Play links
   CLAUDE.md               that grade's games, grade-specific rules, and IM curriculum reference
@@ -48,6 +48,19 @@ grade4/unit1/figs.js      pictures a unit's game and its Learn pages both use, a
 - `.nojekyll` disables Jekyll processing so files are served as-is.
 - `localStorage` is shared by the whole site, so keys must be unique across grades. Existing pages keep their keys (`bb-save`, `mm-save`, `rr-save`, `dd-save`, `bb-learn`) so saved progress survives; new ones use `g<N>u<M>-save` / `g<N>u<M>-learn`.
 - Local CSS and JS are loaded with a `?v=<hash>` cache stamp; `node tools/check.mjs --fix` writes them. Never edit a stamp by hand.
+
+## Code style
+
+Compact code is fine (arrow functions, several short statements on a line), but someone new to a file must be able to tell what each function does and what each variable holds.
+
+- Names: loop indices (`i`, `j`, `k`), SVG coordinates (`x`, `y`), the numbers in pure math (`gcd(a, b)`), and events (`e`) can be one letter. Everything else is named for what it holds: `width` not `W`, `markup` not `o`, `scale` not `k`, `problem` not `p`, `chapterIndex` not `ci`, `stepsDone` not `d`. Helpers that place things say what they give: `colX(i)`, `rowY(i)`.
+- Name the numbers in layout code (`colW=30,commaGap=12`), or comment them where a name doesn't fit.
+- Give a condition used more than once, or a long one, a name (`const makesTen=onesSum>=10`).
+- Don't give a local the name of a shared global (`R`, `near`, `$`, `Q`).
+- Comments: one line above every function saying what it returns or draws and what its options mean (a shared file also lists its API in its header). Inside a function, a short comment above each block that isn't obvious says what it does and why ("ones fill each column of 5 from the bottom up"). Put the math in words: what a cross product, a shoelace sum, or a winding sign is for. Write plain sentences like the existing comments; no JSDoc.
+- Split long template strings at element boundaries, one part per line.
+- Names other files use are an API, so leave them alone unless you rename them in every page that uses them; document them instead. That covers top-level names in `shared/` (`check.mjs` tracks which file owns each), option names (`{lab, tap, hi}`), fields of returned objects (`Game.state`'s `p`, `z`, `i`, `done`; `algSteps`' steps; `solidOf`'s `V`, `F`, `E`), CSS classes, ids, and `data-*` attributes.
+- A change for readability must not change behavior: keep the math in the same order so numbers in the markup come out the same, and confirm with `node tools/same.mjs` as you go (seconds) and `snap.mjs --compare` before committing (0 differences for both; see Checking a change).
 
 ## Building games
 
@@ -84,3 +97,4 @@ Interactive tutorials live next to each game. A unit's `grade<N>/unit<M>/learn.h
 
 - `node tools/check.mjs` before every commit (GitHub Actions also runs it on every push and pull request, in `.github/workflows/check.yml`; Pages deploys `main` regardless, so fix a red check right away): relative links resolve, cache stamps are current (`--fix` rewrites them), every page loads the shared scripts it uses and no picture file it doesn't, no two shared files declare the same name, typed answers parse (`parseNum`), and `tools/fuzz.mjs` deals 5,000 problems per station (`N=20000` for more) checking for NaN/undefined, duplicate choices, a missing answer, a named mistake that gives the right answer, too few different problems for a round, the limits, and the real-world checks.
 - `node tools/snap.mjs <dir>` screenshots every landing page, station, answer state, results screen, and Learn step (it finds `grade*/index.html`, `grade*/unit*/stations.js`, and `grade*/unit*/learn.html` itself) at desktop and phone width, with a seeded `Math.random` and outside files (fonts, three.js) cached in `tools/.cache/`, so runs are identical. It also prints an `OVERFLOW` line for any page that scrolls sideways; there must be none. For a change that shouldn't alter how pages look (anything in `shared/`, any refactor), take shots before and after and run `node tools/snap.mjs --compare <before> <after>`: it must report 0 differences. Take the "before" shots from a clean checkout (`git worktree add <dir> HEAD`). For a change that should alter the look, look at the differing shots.
+- `node tools/same.mjs [rev] [file …]` loads the `shared/` picture and helper files (all but engine.js, learn.js, and speak.js) as they are at `rev` (default `HEAD`) and as they are now, runs the same few thousand calls in both with a seeded `Math.random`, and fails if any result differs or a call throws. It takes about a second, so run it after each step of a refactor; `snap.mjs --compare` still decides before a commit. Its calls are listed in `CALLS` at the top of the file: when you add a shared function or option, add calls that reach it.
