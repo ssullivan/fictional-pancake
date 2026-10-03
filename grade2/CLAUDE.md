@@ -26,7 +26,7 @@ Players are 7 and 8 years old, so on top of the root rules:
 - Time to the nearest 5 minutes, with a.m. and p.m. (Unit 6).
 - Big tap targets, and pictures students can tap or drag instead of typed answers where the lesson allows it. Pages use `<body class="young">` (bigger text and buttons, in `shared/theme.css` and `learn.css`).
 - Learn pages and games turn on `readAloud` (in the unit's `UNIT` and `Game.init`, with `shared/speak.js` loaded), so every step, quick check, and problem has a Read to me button. A game's read-aloud never reads the picture, so give picture choices neutral labels ("Picture A").
-- Games are built like Unit 5's Dragon Duel (`unit5/index.html`, `stations.js`, `checks.js`): `<body class="young">`, `shared/k5.css` and `k5.js` for pictures, and mostly tap or multiple-choice answers.
+- Games are built like Unit 5's Dragon Duel (`unit5/index.html`, `stations.js`, `checks.js`): `<body class="young">`, the K–5 picture files in `shared/` (see the root `CLAUDE.md`), and mostly tap or multiple-choice answers.
 - No gendered pronouns for named students: repeat the name instead ("Mai gives 6 stickers to Diego. How many stickers does Mai have now?").
 - Skip the optional lessons (Center Days, and the projects at the end of each unit); say so in the game's "For grown-ups" section.
 

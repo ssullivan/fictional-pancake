@@ -1,0 +1,45 @@
+/* Styles for shared/blocks.js: ten-frames, cubes, base-ten blocks, place-value charts, and the standard algorithm. */
+/* ten-frames and cubes */
+.cell{fill:rgba(9,32,61,.6);stroke:rgba(243,246,251,.55);stroke-width:1.5}
+.cube{stroke:rgba(243,246,251,.7);stroke-width:1.5}
+.cube.a{fill:var(--gold)}.cube.b{fill:var(--cyan)}
+.cube.off{opacity:.2}
+/* base-ten blocks: tr = a one from a broken ten, gone = taken away */
+.rod rect,.unit1{stroke:rgba(10,35,64,.8);stroke-width:1}
+.rod line{stroke:rgba(10,35,64,.55);stroke-width:1}
+.rod.a rect,.unit1.a{fill:var(--gold)}
+.rod.b rect,.unit1.b{fill:var(--cyan)}
+.rod rect{fill:var(--gold)}
+.rod.new rect{fill:var(--good);stroke:#fff;stroke-width:2.5}
+.unit1.tr{fill:var(--good)}
+.rod.gone,.unit1.gone{opacity:.3}
+/* base-ten diagrams with hundreds (hto): flats, and tens from a broken hundred (tr) */
+.flat rect{fill:var(--gold);stroke:rgba(10,35,64,.8);stroke-width:1}
+.flat line{stroke:rgba(10,35,64,.35);stroke-width:.8}
+.flat.new rect{fill:var(--good);stroke:#fff;stroke-width:2.5}
+.flat.b rect{fill:var(--cyan)}
+.flat.gone{opacity:.3}
+.rod.tr rect{fill:var(--good)}
+.unit1.c{fill:var(--good)}
+/* place-value charts (pvChart) */
+table.pv{border-collapse:collapse;margin:0 auto 12px;font:700 22px var(--mono)}
+table.pv th{color:var(--dim);font-size:14px;padding:6px 10px}
+table.pv td{border:1.5px solid rgba(170,205,255,.4);padding:8px 18px;text-align:center}
+table.pv td.p0{color:var(--gold)}table.pv td.p1{color:var(--cyan)}table.pv td.p2{color:var(--good)}
+table.pv td.hi{outline:3px solid #fff;outline-offset:-3px}
+table.pv.big td{padding:8px 10px}
+table.pv.big th{padding:4px 6px}
+table.pv th.per{border-bottom:1.5px solid rgba(170,205,255,.4)}
+table.pv .pb{border-left:4px solid var(--chalk)}
+table.pv td.dp{position:relative}
+table.pv td.dp::after{content:'.';position:absolute;right:-5px;bottom:4px;color:var(--chalk)}
+.pvb{all:unset;cursor:pointer;display:block;min-width:1ch;border-radius:6px;padding:0 4px}
+.pvb:hover,.pvb:focus-visible{background:rgba(255,201,60,.2)}
+.pvb[aria-pressed="true"]{background:#fff;color:#0a2340}
+/* the standard algorithm (algFig) */
+.adg{fill:var(--chalk);font:700 26px var(--mono);text-anchor:middle;dominant-baseline:central}
+.adg.ares{fill:var(--gold)}
+.amk{fill:var(--cyan);font:700 17px var(--mono);text-anchor:middle;dominant-baseline:central}
+.axd{stroke:var(--cyan);stroke-width:2.5;stroke-linecap:round}
+.aline{stroke:var(--chalk);stroke-width:2.5}
+.acur{fill:rgba(255,201,60,.1);stroke:var(--gold);stroke-width:2}

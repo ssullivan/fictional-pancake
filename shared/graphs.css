@@ -1,0 +1,17 @@
+/* Styles for shared/graphs.js: line plots, picture graphs, and bar graphs. */
+/* line plots */
+.xm{fill:var(--gold);font:700 22px var(--mono);text-anchor:middle;dominant-baseline:central}
+.xm.hi{fill:var(--cyan)}
+.colhi{fill:rgba(127,227,255,.12);stroke:var(--cyan);stroke-width:2}
+/* data graphs (picGraph, barGraph) */
+.sticky{stroke:rgba(243,246,251,.6);stroke-width:1.5}
+.sticky.red{fill:#ff7b7b}.sticky.blue{fill:#6fa8ff}.sticky.green{fill:#5fe0a8}.sticky.yellow{fill:#ffc93c}
+.p-sun circle{fill:var(--gold)}.p-sun line{stroke:var(--gold);stroke-width:2.5;stroke-linecap:round}
+.p-cloud circle,.p-cloud rect{fill:#dfe8f3}
+.p-rain{fill:#6fa8ff}
+.rowhi{fill:rgba(255,201,60,.14);stroke:var(--gold);stroke-width:1.5}
+.gl{stroke:rgba(170,205,255,.18);stroke-width:1}
+rect.bar{stroke:rgba(243,246,251,.7);stroke-width:1.5}
+rect.bar.red{fill:#ff7b7b}rect.bar.blue{fill:#6fa8ff}rect.bar.green{fill:#5fe0a8}rect.bar.yellow{fill:#ffc93c}
+rect.bar.hi{stroke:#fff;stroke-width:4}
+.match{stroke:#fff;stroke-width:2;stroke-dasharray:6 5}

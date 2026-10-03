@@ -19,7 +19,7 @@ Players are 8 and 9 years old, so on top of the root rules:
 - Fractions: denominators 2, 3, 4, 6, and 8 only, as parts of a whole, points on a number line, and whole numbers written as fractions. Compare with the same numerator or the same denominator. No adding or multiplying fractions (that's Grade 4).
 - Measurement: lengths to the nearest half or fourth of an inch; grams and kilograms; liters; time to the nearest minute, with elapsed time in minutes. Area in square units (square cm, m, in, ft) and perimeter of polygons with whole-number sides.
 - Scaled picture and bar graphs use a scale of 2, 5, or 10.
-- Pages use the standard body (no `young` class) and no `readAloud`; those are for K–2. Learn pages and games load `shared/k5.css` and `k5.js` for their pictures and controls (scaled graphs are `picGraph` and `barGraph` with a `scale`, equal groups `groupsFig`, arrays `arrayFig`).
+- Pages use the standard body (no `young` class) and no `readAloud`; those are for K–2. Learn pages and games load the K–5 picture files in `shared/` (see the root `CLAUDE.md`): scaled graphs are `picGraph` and `barGraph` with a `scale` (`graphs.js`), equal groups `groupsFig` and arrays `arrayFig` (`multiply.js`).
 - Games are built like Unit 1's Orchard Market (`unit1/index.html`, `stations.js`, `checks.js`): standard body, K–5 pictures, and typed, multiple-choice, and tap answers. Its `checks.js` shows how to check every stated product, equations with an unknown, things with a fixed count (a spider's 8 legs), and every multiple-choice answer.
 - Write multiplication the way IM does: 4 × 3 is 4 groups of 3, and in an array 4 rows of 3.
 - No gendered pronouns for named students: repeat the name instead.

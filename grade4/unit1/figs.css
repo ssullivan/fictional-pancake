@@ -1,0 +1,7 @@
+/* Styles for figs.js: the Locker Problem's lockers. */
+.lk{fill:rgba(127,227,255,.35);stroke:var(--cyan);stroke-width:1.5}
+.lk.open{fill:#061528}
+.lk.hi{stroke:var(--gold);stroke-width:3}
+.lk.sel{stroke:#fff;stroke-width:3}
+.door{fill:rgba(127,227,255,.6);stroke:var(--cyan);stroke-width:1}
+.vent{stroke:rgba(10,35,64,.6);stroke-width:2}

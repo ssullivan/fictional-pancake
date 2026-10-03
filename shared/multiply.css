@@ -1,0 +1,26 @@
+/* Styles for shared/multiply.js: hops of n (hopLine: r red, b blue), tiles, number charts, equal groups, and arrays. */
+/* factors and multiples: hops of n (hopLine: r red, b blue), tiles, and number charts */
+.tick.mn{stroke:rgba(243,246,251,.4);stroke-width:1.5}
+.land{fill:var(--gold)}
+.hop.r{stroke:#ff7b7b}.land.r{fill:#ff7b7b}
+.hop.b{stroke:var(--cyan)}.land.b{fill:var(--cyan)}
+.mark{fill:var(--cyan)}
+.ftile{fill:rgba(255,201,60,.55);stroke:#0a2340;stroke-width:1}
+.ftile.left{fill:rgba(255,154,134,.65)}
+.hc rect{fill:rgba(9,32,61,.6);stroke:rgba(243,246,251,.35);stroke-width:1}
+.hc.a rect{fill:rgba(255,201,60,.5)}
+.hc.b rect{fill:rgba(127,227,255,.4)}
+.hc.ab rect{fill:var(--good)}
+.hc.ab text{fill:#0a2340}
+.hc.one rect{fill:rgba(169,196,228,.25)}
+.hc.cur rect{stroke:#fff;stroke-width:3}
+.hc.cand{cursor:pointer}
+.hc.cand:hover rect{stroke:var(--gold);stroke-width:2}
+.hc.right rect{fill:var(--good);stroke:#fff;stroke-width:3}
+.hc.right text{fill:#0a2340}
+.hc.wrong rect{fill:rgba(255,154,134,.3);stroke:var(--bad);stroke-width:2}
+.hc.wrong{cursor:default}
+/* equal groups (groupsFig) and arrays (arrayFig): a group's circle, and rows and columns outlined */
+.plate{fill:rgba(170,205,255,.08);stroke:var(--chalk);stroke-width:2.5}
+rect.band{fill:rgba(255,201,60,.14);stroke:var(--gold);stroke-width:2.5}
+rect.band.b{fill:rgba(127,227,255,.12);stroke:var(--cyan)}

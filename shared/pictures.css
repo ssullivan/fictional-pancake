@@ -1,0 +1,51 @@
+/* Styles for shared/pictures.js and every K–5 picture: labels, number-line marks (axes, ticks, arrows, hops, dots), tap targets,
+   counters, controls, and fractions written stacked. Load after learn.css or game.css, before the topic files' styles. */
+/* labels in pictures (s small, big, cy cyan, dm dim, gd gold, st and en anchored at the start or end) */
+.lbl{fill:var(--chalk);font:700 17px var(--mono);text-anchor:middle;dominant-baseline:central}
+.lbl.s{font-size:14px}.lbl.big{font-size:30px}.lbl.cy{fill:var(--cyan)}.lbl.dm{fill:var(--dim)}.lbl.gd{fill:var(--gold)}.lbl.st{text-anchor:start}.lbl.en{text-anchor:end}
+/* number-line marks (used by number lines, hops, fraction lines, line plots, and bar graphs): axes and ticks, arrows, hops, and dots */
+.axis{stroke:var(--chalk);stroke-width:2.5}
+.tick{stroke:var(--chalk);stroke-width:2}
+.guide{fill:none;stroke:var(--dim);stroke-width:1.5;stroke-dasharray:4 4}
+.arr{stroke:var(--gold);stroke-width:3}
+.arrh{fill:var(--gold)}
+.arr.q{stroke:var(--cyan)}.arrh.q{fill:var(--cyan)}
+.arrh.ax{fill:var(--chalk)}
+.hop{fill:none;stroke:var(--gold);stroke-width:3}
+.hop.q{stroke:var(--cyan)}
+.pt{fill:var(--gold);stroke:#fff1b8;stroke-width:2}
+.pt.b{fill:var(--cyan);stroke:#d6f6ff}
+.pt.g{fill:var(--good);stroke:#d8ffef}
+/* counters (ten-frames, arrays, equal groups) and tap targets */
+.ctr circle{stroke-width:2}
+.ctr.a circle{fill:var(--gold);stroke:#fff1b8}
+.ctr.b circle{fill:var(--cyan);stroke:#d6f6ff}
+.ctr.moved circle{stroke:#fff;stroke-width:4}
+.ctr.gone circle{opacity:.25}
+.ctr path{stroke:var(--bad);stroke-width:4;stroke-linecap:round}
+[data-i]{cursor:pointer}
+.hit{fill:transparent;cursor:pointer}
+.hit:hover{fill:rgba(255,201,60,.15)}
+.hit.right{fill:rgba(95,224,168,.35);stroke:var(--good);stroke-width:2}
+.hit.wrong{fill:rgba(255,154,134,.3);stroke:var(--bad);stroke-width:2;cursor:default}
+/* a dashed outline, something faded or crossed out, and a brace over a tape */
+.extra{fill:none;stroke:#fff;stroke-width:3;stroke-dasharray:5 4}
+.fade{opacity:.2}
+.xout{stroke:var(--bad);stroke-width:3.5;stroke-linecap:round}
+.brace{fill:none;stroke:var(--cyan);stroke-width:3}
+/* controls, equations, and stories */
+.eq{margin:0 0 10px;font:700 24px var(--mono)}
+.eq .q{background:var(--gold);color:#1a1300;border-radius:6px;padding:0 8px}
+.story{margin:0 0 10px;font-size:19px}
+.choice svg{max-height:130px}
+/* picture rows (picRow): side by side, two to a row on a phone */
+.picrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;max-width:720px;margin:0 auto}
+/* fractions written stacked (fr in text, frT in pictures) */
+.fr{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;margin:0 .1em;font-size:.85em;line-height:1.1}
+.fr>span:first-child{border-bottom:.1em solid currentColor;padding:0 .15em}
+.eq .fr{font-size:.8em}
+.wrow+.eq{margin-top:14px}
+.chip:has(.fr){font-size:17px;padding:6px 16px}
+.frt line{stroke:var(--chalk);stroke-width:1.8}
+.frt.dk .lbl{fill:#0a2340}.frt.dk line{stroke:#0a2340}
+.frt.cy .lbl{fill:var(--cyan)}.frt.cy line{stroke:var(--cyan)}

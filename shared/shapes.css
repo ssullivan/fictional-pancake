@@ -1,0 +1,13 @@
+/* Styles for shared/shapes.js: flat shapes, solid shapes, equal parts, and pattern blocks. */
+/* flat shapes (shapeAt), solid shapes (solidFig), equal parts (shareFig), and pattern blocks (pbFig) */
+.shp{fill:rgba(255,201,60,.28);stroke:var(--gold);stroke-width:3;stroke-linejoin:round}
+.shp.b{fill:rgba(127,227,255,.22);stroke:var(--cyan)}
+.sqc{fill:none;stroke:var(--chalk);stroke-width:2}
+.sf{stroke:#0a2340;stroke-width:2;stroke-linejoin:round}
+.sf.f{fill:#f0c24a}.sf.t{fill:#ffe08a}.sf.r{fill:#c99a26}
+.hid{stroke:var(--chalk);stroke-width:2.5;stroke-dasharray:6 5}
+.pc{fill:rgba(170,205,255,.1);stroke:var(--chalk);stroke-width:3;stroke-linejoin:round}
+.pc.on{fill:var(--gold)}
+.pb{stroke:#0a2340;stroke-width:2;stroke-linejoin:round}
+.pb.triangle{fill:#5fe0a8}.pb.rhombus{fill:#6f9bff}.pb.trapezoid{fill:#ff7b7b}.pb.hexagon{fill:var(--gold)}
+.pb.out{fill:none;stroke:var(--chalk);stroke-width:2.5;stroke-dasharray:7 5}

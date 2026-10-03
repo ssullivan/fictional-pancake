@@ -1,0 +1,19 @@
+/* Styles for shared/measure.js: clocks, the day bar, and coins and dollar bills. */
+/* clocks (clockFig) */
+.clk{fill:#f3f6fb;stroke:var(--gold);stroke-width:5}
+.clk-sh{fill:rgba(255,201,60,.55)}
+.clk-t{stroke:#0a2340;stroke-width:1.5}.clk-t.f{stroke-width:3.5}
+.clk-n{fill:#0a2340;font-family:var(--mono);font-weight:700;text-anchor:middle;dominant-baseline:central}
+.clk-h{stroke:#0a2340;stroke-width:9;stroke-linecap:round}
+.clk-m{stroke:#e0445e;stroke-width:5;stroke-linecap:round}
+.clk-c{fill:#0a2340}
+.dayam{fill:#ffe08a}.daypm{fill:#2a4f86;stroke:rgba(170,205,255,.4)}
+.lbl.dk{fill:#0a2340}
+/* coins and dollar bills (moneyFig) */
+.cn circle{stroke-width:2}
+.cn.ag circle{fill:#cdd6e1;stroke:#f3f6fb}.cn.cu circle{fill:#d9895a;stroke:#f5c6a5}
+.cn circle.in{fill:none;stroke:rgba(10,35,64,.3);stroke-width:1.5}
+.cn text{fill:#0a2340;font:700 10px var(--mono);text-anchor:middle;dominant-baseline:central}
+.bill rect{fill:#9fd8a8;stroke:#d8f5dd;stroke-width:2}
+.bill .in{fill:none;stroke:#2f6b3a;stroke-width:1.5}
+.bill text{fill:#1d4a26;font:800 22px var(--mono);text-anchor:middle;dominant-baseline:central}

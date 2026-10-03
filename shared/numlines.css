@@ -1,0 +1,12 @@
+/* Styles for shared/numlines.js: tape diagrams and open number lines (the marks every number line uses are in pictures.css). */
+/* tape diagrams */
+.tape{stroke-width:2.5}
+.tape.t0{fill:rgba(255,201,60,.3);stroke:var(--gold)}
+.tape.t1{fill:rgba(127,227,255,.25);stroke:var(--cyan)}
+.tape.gap{fill:none;stroke:var(--cyan);stroke-dasharray:6 4}
+.tape.hi{stroke:#fff;stroke-width:4}
+/* open number lines (jumps) */
+.jn{fill:rgba(9,32,61,.9);stroke:var(--cyan);stroke-width:2.5}
+.jn.st{stroke:var(--gold)}
+.jarc{fill:none;stroke:var(--cyan);stroke-width:2.5}
+.jhead{fill:var(--cyan)}

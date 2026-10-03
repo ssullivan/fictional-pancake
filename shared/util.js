@@ -2,6 +2,8 @@
    Number formatting (fmt, money) stays in each page, because units round differently. */
 const R=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
 const pick=a=>a[Math.floor(Math.random()*a.length)];
+/* range(n) is [0, 1, …, n-1] */
+const range=n=>[...Array(n).keys()];
 const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
 /* For generators. miscOf: wrong answers [[value, message], …], leaving out any that equal the answer or repeat.
    mcOf: an mc problem with choices a, b, c (d) in random order from [[label, message, or null for the answer], …]. */
