@@ -1,41 +1,46 @@
 /* Learn Introducing Multiplication (Grade 3 Unit 1), chapter 1: Scaled picture graphs. Its widgets and steps; loaded by picture-graphs.html. */
-/* how one row of a picture graph adds up, when each picture shows k */
-function rowWhy(r,k,unit){
-  const whole=Math.floor(r.n/k),half=r.n%k;
-  if(k===1)return `${r.label}: ${pl(whole,'picture')}, and each one shows 1 ${unit}. <b>${pl(r.n,unit)}</b>.`;
-  return `${r.label}: ${half?`${whole} and a half pictures`:pl(whole,'picture')}. Each picture shows ${k} ${unit}s${half?`, and half a picture shows ${half}`:''}.`
-    +`<br>Count by ${k}s: ${countBy(k,whole)}${half?`, and ${half} more`:''}. <b>${pl(r.n,unit)}</b>.`;
+/* how one row of a picture graph adds up (html), when each picture shows `scale` of the unit */
+function rowWhy(row,scale,unit){
+  const whole=Math.floor(row.n/scale),half=row.n%scale;
+  if(scale===1)return `${row.label}: ${pl(whole,'picture')}, and each one shows 1 ${unit}. <b>${pl(row.n,unit)}</b>.`;
+  return `${row.label}: ${half?`${whole} and a half pictures`:pl(whole,'picture')}. Each picture shows ${scale} ${unit}s${half?`, and half a picture shows ${half}`:''}.`
+    +`<br>Count by ${scale}s: ${countBy(scale,whole)}${half?`, and ${half} more`:''}. <b>${pl(row.n,unit)}</b>.`;
 }
-/* read a picture graph with each picture showing 1 or 2 */
 const FRUIT=[{label:'Apples',n:12,pic:'dot',c:'red'},{label:'Bananas',n:7,pic:'dot',c:'yellow'},{label:'Grapes',n:10,pic:'dot',c:'green'},{label:'Pears',n:4,pic:'dot',c:'blue'}];
+/* Read a picture graph with each picture showing 1 or 2 votes; tap a row to see how it adds up. */
 function wKey(el){
-  const q=Q(el);let k=2,hi=-1;
+  const q=Q(el);let scale=2,tapped=-1;
   el.innerHTML=seg('Each picture shows',[[1,'1 vote'],[2,'2 votes']])+`<div class="fig" data-f></div><p class="readout" data-o></p>`;
   const draw=()=>{
-    press(el,k);
-    q('f').innerHTML=picGraph(FRUIT,{scale:k,unit:pl(k,'vote'),hi,tap:true,title:'Favorite fruit in Room 9'});
-    q('o').innerHTML=hi<0?`Each picture shows <b>${pl(k,'vote')}</b>. Tap a row to count it.`:rowWhy(FRUIT[hi],k,'vote');
+    press(el,scale);
+    q('f').innerHTML=picGraph(FRUIT,{scale,unit:pl(scale,'vote'),hi:tapped,tap:true,title:'Favorite fruit in Room 9'});
+    q('o').innerHTML=tapped<0?`Each picture shows <b>${pl(scale,'vote')}</b>. Tap a row to count it.`:rowWhy(FRUIT[tapped],scale,'vote');
   };
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]'),t=e.target.closest('[data-r]');if(b){k=+b.dataset.m;draw();}else if(t){hi=+t.dataset.r;draw();}});
+  el.addEventListener('click',e=>{
+    const scaleBtn=e.target.closest('[data-m]'),row=e.target.closest('[data-r]');
+    if(scaleBtn){scale=+scaleBtn.dataset.m;draw();}else if(row){tapped=+row.dataset.r;draw();}
+  });
   draw();
 }
-/* make a picture graph from a table: + and − add or take away 5 votes, which is a picture or half a picture */
 const TRIP=[{label:'Zoo',n:20,pic:'note',c:'green'},{label:'Museum',n:10,pic:'note',c:'blue'},{label:'Farm',n:15,pic:'note',c:'yellow'}];
-const pics=(v,k)=>{const w=Math.floor(v/k);return v%k?(w?`${w}½`:'½'):String(w);};
+/* how many pictures show `votes` when each shows `scale`: "3", "2½", or "½" */
+const pics=(votes,scale)=>{const whole=Math.floor(votes/scale);return votes%scale?(whole?`${whole}½`:'½'):String(whole);};
+/* Make a picture graph from a table: + and − add or take away 5 votes, which is a picture or half a picture. */
 function wBuild(el){
-  const q=Q(el),st={zoo:0,museum:0,farm:0},keys=Object.keys(st);let k=5;
-  el.innerHTML=seg('Each picture shows',[[5,'5 votes'],[10,'10 votes']])+`<div class="fig" data-f></div><div class="wrow">${TRIP.map((r,i)=>stepper(keys[i],r.label)).join('')}</div><p class="readout" data-o></p>`;
+  /* fives counts the 5s of votes in each row, keyed by the steppers' ids */
+  const q=Q(el),fives={zoo:0,museum:0,farm:0},keys=Object.keys(fives);let scale=5;
+  el.innerHTML=seg('Each picture shows',[[5,'5 votes'],[10,'10 votes']])+`<div class="fig" data-f></div><div class="wrow">${TRIP.map((row,i)=>stepper(keys[i],row.label)).join('')}</div><p class="readout" data-o></p>`;
   const draw=()=>{
-    press(el,k);
-    const rows=TRIP.map((r,i)=>({...r,n:st[keys[i]]*5})),done=rows.every((r,i)=>r.n===TRIP[i].n);
-    keys.forEach(key=>{q(key).textContent=pics(st[key]*5,k);});
-    q('f').innerHTML=picGraph(rows,{scale:k,max:30,unit:`${k} votes`,title:'Our class trip vote'});
-    q('o').innerHTML=`Each picture shows ${k} votes${k===10?', and half a picture shows 5':''}.<br>`
-      +rows.map((r,i)=>{const want=TRIP[i].n;return r.n===want?`${r.label}: ${r.n} ✓`:`${r.label}: ${r.n}. The table says ${want}.`;}).join('<br>')
-      +(done?`<br><span class="ok">Your graph matches the table, with ${pics(45,k)} pictures in all.</span>`:'');
+    press(el,scale);
+    const rows=TRIP.map((row,i)=>({...row,n:fives[keys[i]]*5})),done=rows.every((row,i)=>row.n===TRIP[i].n);
+    keys.forEach(key=>{q(key).textContent=pics(fives[key]*5,scale);});
+    q('f').innerHTML=picGraph(rows,{scale,max:30,unit:`${scale} votes`,title:'Our class trip vote'});
+    q('o').innerHTML=`Each picture shows ${scale} votes${scale===10?', and half a picture shows 5':''}.<br>`
+      +rows.map((row,i)=>{const want=TRIP[i].n;return row.n===want?`${row.label}: ${row.n} ✓`:`${row.label}: ${row.n}. The table says ${want}.`;}).join('<br>')
+      +(done?`<br><span class="ok">Your graph matches the table, with ${pics(45,scale)} pictures in all.</span>`:'');
   };
-  steppers(el,st,{zoo:[0,6],museum:[0,6],farm:[0,6]},draw);
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){k=+b.dataset.m;draw();}});
+  steppers(el,fives,{zoo:[0,6],museum:[0,6],farm:[0,6]},draw);
+  el.addEventListener('click',e=>{const scaleBtn=e.target.closest('[data-m]');if(scaleBtn){scale=+scaleBtn.dataset.m;draw();}});
   draw();
 }
 /* the quick checks' figures */

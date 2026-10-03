@@ -1,33 +1,39 @@
 /* Learn Introducing Multiplication (Grade 3 Unit 1), chapter 6: Find the unknown. Its widgets and steps; loaded by unknowns.html. */
-/* guess and check the unknown factor: [groups, in each, which one is unknown] */
+/* equations with an unknown factor: [groups, in each, which one is unknown ('g' or 'n')] */
 const UK=[[4,5,'n'],[3,6,'g'],[6,4,'n']];
-const ukEq=([g,n,u])=>`${u==='g'?'?':g} × ${u==='n'?'?':n} = ${g*n}`;
+/* the equation with a ? for the unknown: "4 × ? = 20" */
+const ukEq=([groups,perGroup,unknown])=>`${unknown==='g'?'?':groups} × ${unknown==='n'?'?':perGroup} = ${groups*perGroup}`;
+/* Guess and check the unknown factor: a stepper tries numbers in its place. */
 function wTry(el){
-  const q=Q(el),st={t:1};let p=0;
-  el.innerHTML=seg('Equation',UK.map((e,i)=>[i,ukEq(e)]))+`<div class="fig" data-f></div><div class="wrow">${stepper('t','Try')}</div><p class="eq" data-e></p><p class="readout" data-o></p>`;
+  /* the stepper's value: t, the number tried */
+  const q=Q(el),values={t:1};let eqIndex=0;
+  el.innerHTML=seg('Equation',UK.map((equation,i)=>[i,ukEq(equation)]))+`<div class="fig" data-f></div><div class="wrow">${stepper('t','Try')}</div><p class="eq" data-e></p><p class="readout" data-o></p>`;
   const draw=()=>{
-    const [g,n,u]=UK[p],t=st.t,G=u==='g'?t:g,N=u==='n'?t:n,got=G*N,want=g*n;press(el,p);q('t').textContent=t;
-    q('f').innerHTML=groupsFig(G,N);
-    q('e').innerHTML=`${G} × ${N} = ${got}`;
-    q('o').innerHTML=`Find the ? in <b>${ukEq(UK[p])}</b>: ${u==='g'?`how many groups of ${n} make ${want}?`:`${g} groups of how many make ${want}?`}<br>`
-      +(got===want?`<span class="ok">${G} × ${N} = ${want}. The unknown is ${t}.</span>`
-        :`${G} × ${N} = ${got}. That’s too ${got<want?'few':'many'}: you need ${want}.`);
+    /* the groups drawn: the equation's, with the number tried in place of the unknown */
+    const [groups,perGroup,unknown]=UK[eqIndex],tried=values.t,triedGroups=unknown==='g'?tried:groups,triedEach=unknown==='n'?tried:perGroup,
+      got=triedGroups*triedEach,want=groups*perGroup;press(el,eqIndex);q('t').textContent=tried;
+    q('f').innerHTML=groupsFig(triedGroups,triedEach);
+    q('e').innerHTML=`${triedGroups} × ${triedEach} = ${got}`;
+    q('o').innerHTML=`Find the ? in <b>${ukEq(UK[eqIndex])}</b>: ${unknown==='g'?`how many groups of ${perGroup} make ${want}?`:`${groups} groups of how many make ${want}?`}<br>`
+      +(got===want?`<span class="ok">${triedGroups} × ${triedEach} = ${want}. The unknown is ${tried}.</span>`
+        :`${triedGroups} × ${triedEach} = ${got}. That’s too ${got<want?'few':'many'}: you need ${want}.`);
   };
-  steppers(el,st,{t:[1,10]},draw);
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){p=+b.dataset.m;st.t=1;draw();}});
+  steppers(el,values,{t:[1,10]},draw);
+  el.addEventListener('click',e=>{const eqBtn=e.target.closest('[data-m]');if(eqBtn){eqIndex=+eqBtn.dataset.m;values.t=1;draw();}});
   draw();
 }
-/* hops of a bigger factor on a number line */
+/* Hops of a bigger factor (6 to 9) on a number line; a stepper sets how many hops. */
 function wHops(el){
-  const q=Q(el),st={k:3};let n=7;
-  el.innerHTML=seg('Hops of',[6,7,8,9].map(v=>[v,`Hops of ${v}`]))+`<div class="fig" data-f></div><div class="wrow">${stepper('k','Hops')}</div><p class="readout" data-o></p>`;
+  /* the stepper's value: k hops; hopSize: what each hop is */
+  const q=Q(el),values={k:3};let hopSize=7;
+  el.innerHTML=seg('Hops of',[6,7,8,9].map(size=>[size,`Hops of ${size}`]))+`<div class="fig" data-f></div><div class="wrow">${stepper('k','Hops')}</div><p class="readout" data-o></p>`;
   const draw=()=>{
-    const k=st.k;press(el,n);q('k').textContent=k;
-    q('f').innerHTML=hopLine(n,n*10,k);
-    q('o').innerHTML=`${pl(k,'hop')} of ${n}: <b>${k} × ${n} = ${k*n}</b>.<br><span class="dimline">Count by ${n}s: ${countBy(n,k)}.</span>`;
+    const hops=values.k;press(el,hopSize);q('k').textContent=hops;
+    q('f').innerHTML=hopLine(hopSize,hopSize*10,hops);
+    q('o').innerHTML=`${pl(hops,'hop')} of ${hopSize}: <b>${hops} × ${hopSize} = ${hops*hopSize}</b>.<br><span class="dimline">Count by ${hopSize}s: ${countBy(hopSize,hops)}.</span>`;
   };
-  steppers(el,st,{k:[1,10]},draw);
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){n=+b.dataset.m;draw();}});
+  steppers(el,values,{k:[1,10]},draw);
+  el.addEventListener('click',e=>{const sizeBtn=e.target.closest('[data-m]');if(sizeBtn){hopSize=+sizeBtn.dataset.m;draw();}});
   draw();
 }
 const STEPS=[

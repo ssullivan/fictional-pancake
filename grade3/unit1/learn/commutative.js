@@ -1,32 +1,36 @@
 /* Learn Introducing Multiplication (Grade 3 Unit 1), chapter 8: Turn it around. Its widgets and steps; loaded by commutative.html. */
-/* turn an array a quarter turn: the rows become the columns */
+/* the arrays to turn: [rows, in each row] */
 const TA=[[3,5],[2,7],[4,6]];
+/* Turn an array a quarter turn: the rows become the columns, and the product stays the same. */
 function wTurn(el){
-  const q=Q(el);let p=0,turned=false;
-  el.innerHTML=seg('Array',TA.map(([r,c],i)=>[i,`${r} × ${c}`]))+`<div class="fig" data-f></div><div class="wrow"><button type="button" class="btn" data-go></button></div><p class="readout" data-o></p>`;
+  const q=Q(el);let arrayIndex=0,turned=false;
+  el.innerHTML=seg('Array',TA.map(([rows,cols],i)=>[i,`${rows} × ${cols}`]))+`<div class="fig" data-f></div><div class="wrow"><button type="button" class="btn" data-go></button></div><p class="readout" data-o></p>`;
   const draw=()=>{
-    const [r,c]=TA[p],R=turned?c:r,C=turned?r:c;press(el,p);
+    /* shownRows and shownCols: the array as drawn, swapped when it's turned */
+    const [rows,cols]=TA[arrayIndex],shownRows=turned?cols:rows,shownCols=turned?rows:cols;press(el,arrayIndex);
     q('go').textContent=turned?'Turn it back':'Turn it';
-    q('f').innerHTML=arrayFig(R,C,{band:'r'});
-    q('o').innerHTML=`${pl(R,'row')} of ${C}: <b>${R} × ${C} = ${r*c}</b>.`
-      +(turned?`<br><span class="ok">Same counters, just turned. So ${r} × ${c} = ${c} × ${r}.</span>`:'<br><span class="dimline">Turn the array and see what changes.</span>');
+    q('f').innerHTML=arrayFig(shownRows,shownCols,{band:'r'});
+    q('o').innerHTML=`${pl(shownRows,'row')} of ${shownCols}: <b>${shownRows} × ${shownCols} = ${rows*cols}</b>.`
+      +(turned?`<br><span class="ok">Same counters, just turned. So ${rows} × ${cols} = ${cols} × ${rows}.</span>`:'<br><span class="dimline">Turn the array and see what changes.</span>');
   };
   q('go').onclick=()=>{turned=!turned;draw();};
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){p=+b.dataset.m;turned=false;draw();}});
+  el.addEventListener('click',e=>{const arrayBtn=e.target.closest('[data-m]');if(arrayBtn){arrayIndex=+arrayBtn.dataset.m;turned=false;draw();}});
   draw();
 }
-/* hops both ways land on the same number */
+/* the pairs of factors to hop both ways */
 const TF=[[2,9],[5,8],[3,7]];
+/* Hop a × b both ways on a number line: both land on the same number. */
 function wFact(el){
-  const q=Q(el);let p=0,w=0;
+  /* way: 0 for b hops of a, 1 for a hops of b */
+  const q=Q(el);let pairIndex=0,way=0;
   el.innerHTML=`<div data-top>${seg('Factors',TF.map(([a,b],i)=>[i,`${a} and ${b}`]))}</div><div data-bot></div><div class="fig" data-f></div><p class="readout" data-o></p>`;
   const draw=()=>{
-    const [a,b]=TF[p],[k,n]=w?[a,b]:[b,a];
-    q('bot').innerHTML=seg('Which hops',[[0,`${b} hops of ${a}`],[1,`${a} hops of ${b}`]]);press(q('top'),p);press(q('bot'),w);
-    q('f').innerHTML=hopLine(n,a*b+Math.max(a,b),k);
-    q('o').innerHTML=`${k} hops of ${n}: <b>${k} × ${n} = ${a*b}</b>.<br><span class="dimline">${b} × ${a} and ${a} × ${b} land on the same number, so if you know one, you know the other.</span>`;
+    const [a,b]=TF[pairIndex],[hops,hopSize]=way?[a,b]:[b,a];
+    q('bot').innerHTML=seg('Which hops',[[0,`${b} hops of ${a}`],[1,`${a} hops of ${b}`]]);press(q('top'),pairIndex);press(q('bot'),way);
+    q('f').innerHTML=hopLine(hopSize,a*b+Math.max(a,b),hops);
+    q('o').innerHTML=`${hops} hops of ${hopSize}: <b>${hops} × ${hopSize} = ${a*b}</b>.<br><span class="dimline">${b} × ${a} and ${a} × ${b} land on the same number, so if you know one, you know the other.</span>`;
   };
-  el.addEventListener('click',e=>{const h=segHit(e,['top','bot']);if(!h)return;if(h[0]==='top')p=+h[1];else w=+h[1];draw();});
+  el.addEventListener('click',e=>{const [row,id]=segHit(e,['top','bot'])||[];if(!row)return;if(row==='top')pairIndex=+id;else way=+id;draw();});
   draw();
 }
 const STEPS=[

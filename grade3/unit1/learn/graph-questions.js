@@ -1,32 +1,35 @@
 /* Learn Introducing Multiplication (Grade 3 Unit 1), chapter 3: Questions about bar graphs. Its widgets and steps; loaded by graph-questions.html. */
 const LENT=[{label:'Mon',day:'Monday',n:25,c:'red'},{label:'Tue',day:'Tuesday',n:15,c:'yellow'},{label:'Wed',day:'Wednesday',n:35,c:'green'},{label:'Thu',day:'Thursday',n:20,c:'blue'}];
-const lent=o=>barGraph(LENT,{max:40,scale:5,title:'Books the library lent',...o});
-/* compare two days: the shorter bar, then the taller one, with how much taller */
+/* the LENT bar graph; options add to barGraph's */
+const lent=options=>barGraph(LENT,{max:40,scale:5,title:'Books the library lent',...options});
+/* the pairs of days to compare (indexes into LENT) */
 const PAIRS=[[2,1],[0,3],[2,0],[3,1]];
+/* Compare two days: the shorter bar, then the taller one, with how much taller. */
 function wCompare(el){
-  const q=Q(el);let p=0;
+  const q=Q(el);let pairIndex=0;
   el.innerHTML=seg('Compare',PAIRS.map(([a,b],i)=>[i,`${LENT[a].label} and ${LENT[b].label}`]))+`<div class="fig" data-f></div><p class="readout" data-o></p>`;
   const draw=()=>{
-    const [a,b]=PAIRS[p],[s,t]=LENT[a].n<LENT[b].n?[LENT[a],LENT[b]]:[LENT[b],LENT[a]],d=t.n-s.n;press(el,p);
-    q('f').innerHTML=barGraph([s,t],{max:40,scale:5,diff:[0,1],showDiff:true,title:'Books the library lent',label:`Bar graph: ${s.day} ${s.n}, ${t.day} ${t.n}, and ${d} more on ${t.day}`});
-    q('o').innerHTML=`${t.day}: ${t.n}. ${s.day}: ${s.n}. ${t.n} − ${s.n} = ${d}.<br><span class="ok">The library lent ${d} more books on ${t.day} than on ${s.day}, so ${s.day} had ${d} fewer.</span>`;
+    const [a,b]=PAIRS[pairIndex],[fewer,more]=LENT[a].n<LENT[b].n?[LENT[a],LENT[b]]:[LENT[b],LENT[a]],diff=more.n-fewer.n;press(el,pairIndex);
+    q('f').innerHTML=barGraph([fewer,more],{max:40,scale:5,diff:[0,1],showDiff:true,title:'Books the library lent',label:`Bar graph: ${fewer.day} ${fewer.n}, ${more.day} ${more.n}, and ${diff} more on ${more.day}`});
+    q('o').innerHTML=`${more.day}: ${more.n}. ${fewer.day}: ${fewer.n}. ${more.n} − ${fewer.n} = ${diff}.<br><span class="ok">The library lent ${diff} more books on ${more.day} than on ${fewer.day}, so ${fewer.day} had ${diff} fewer.</span>`;
   };
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){p=+b.dataset.m;draw();}});
+  el.addEventListener('click',e=>{const pairBtn=e.target.closest('[data-m]');if(pairBtn){pairIndex=+pairBtn.dataset.m;draw();}});
   draw();
 }
-/* tap bars to add them up */
+/* Tap bars to add them up; tap one again to take it out. */
 function wTotal(el){
-  const q=Q(el),on=new Set();
+  /* tapped: the indexes of the bars being added */
+  const q=Q(el),tapped=new Set();
   el.innerHTML=`<div class="fig" data-f></div><div class="wrow"><button type="button" class="ghost-btn" data-clr>Clear</button></div><p class="readout" data-o></p>`;
   const draw=()=>{
-    const sel=[...on].sort(),sum=sel.reduce((t,i)=>t+LENT[i].n,0);
-    q('f').innerHTML=lent({hi:sel,tap:true});
-    q('o').innerHTML=!sel.length?'Tap bars to add them up. Tap a bar again to take it out.'
-      :sel.length===1?`${LENT[sel[0]].day}: <b>${LENT[sel[0]].n} books</b>. Tap another bar to add it.`
-      :`${sel.map(i=>LENT[i].label).join(' + ')}: ${sel.map(i=>LENT[i].n).join(' + ')} = <b>${sum} books</b>`+(sel.length===4?'.<br><span class="ok">That’s every day: the library lent 95 books in all.</span>':'.');
+    const picked=[...tapped].sort(),sum=picked.reduce((total,i)=>total+LENT[i].n,0);
+    q('f').innerHTML=lent({hi:picked,tap:true});
+    q('o').innerHTML=!picked.length?'Tap bars to add them up. Tap a bar again to take it out.'
+      :picked.length===1?`${LENT[picked[0]].day}: <b>${LENT[picked[0]].n} books</b>. Tap another bar to add it.`
+      :`${picked.map(i=>LENT[i].label).join(' + ')}: ${picked.map(i=>LENT[i].n).join(' + ')} = <b>${sum} books</b>`+(picked.length===4?'.<br><span class="ok">That’s every day: the library lent 95 books in all.</span>':'.');
   };
-  el.addEventListener('click',e=>{const t=e.target.closest('[data-r]');if(!t)return;const i=+t.dataset.r;if(on.has(i))on.delete(i);else on.add(i);draw();});
-  q('clr').onclick=()=>{on.clear();draw();};
+  el.addEventListener('click',e=>{const bar=e.target.closest('[data-r]');if(!bar)return;const i=+bar.dataset.r;if(tapped.has(i))tapped.delete(i);else tapped.add(i);draw();});
+  q('clr').onclick=()=>{tapped.clear();draw();};
   draw();
 }
 /* the quick checks' figures */

@@ -4,19 +4,27 @@
 //   node tools/same.mjs                    the working tree against HEAD
 //   node tools/same.mjs main               against another revision
 //   node tools/same.mjs HEAD blocks shapes only those files' calls
+//   node tools/same.mjs HEAD grade3/unit1  a unit's own code: its game's problems and its Learn chapters' quick checks
 //
 // The shared files that don't need a page (everything but engine.js, learn.js, and speak.js) are loaded twice, as they are
 // at the revision and as they are now, each set in its own context like a page's scripts. Every call in CALLS below then
 // runs in both, with the same seeded Math.random, and the results (markup, numbers, objects) must match exactly.
 // A function's calls should reach every option and branch; add calls when you add a function or an option.
 // This only covers what CALLS covers, so a change that should look the same still needs snap.mjs --compare before it ships.
-import {readFileSync} from 'node:fs';
-import {join, resolve} from 'node:path';
+//
+// A unit folder (grade<N>/unit<M>) loads that unit's pages instead, at the revision and now: its game's scripts as
+// index.html lists them, dealing PROBLEMS problems from every station (with 0 and 3 stars saved) with the same seed, and
+// each Learn chapter's scripts as its page lists them, comparing its steps (titles, text, quick checks) and quick-check
+// figures (F). Widgets need a page, so they aren't run: snap.mjs --compare and npm test cover them.
+import {readFileSync, existsSync, globSync} from 'node:fs';
+import {join, resolve, dirname, basename, normalize} from 'node:path';
 import {execFileSync} from 'node:child_process';
 import vm from 'node:vm';
 
 const ROOT = resolve(import.meta.dirname, '..');
-const [rev = 'HEAD', ...only] = process.argv.slice(2);
+const [rev = 'HEAD', ...args] = process.argv.slice(2);
+const isUnit = a => /^grade\d+\/unit\d+\/?$/.test(a);
+const only = args.filter(a => !isUnit(a)), units = args.filter(isUnit).map(a => a.replace(/\/$/, ''));
 // in load order: each file may use the ones before it
 const FILES = ['util', 'pictures', 'figures', 'blocks', 'numlines', 'fractions', 'graphs', 'shapes', 'measure', 'multiply', 'solids'];
 
@@ -190,7 +198,7 @@ const firstDiff = (a, b) => { let i = 0; while (a[i] === b[i]) i++; const from =
 
 let calls = 0, differ = 0, broken = 0;
 for (const [file, list] of Object.entries(CALLS)) {
-  if (only.length && !only.includes(file)) continue;
+  if (only.length ? !only.includes(file) : units.length) continue;
   let bad = 0;
   for (const expr of list) {
     const a = result(before, expr), b = result(now, expr);
@@ -205,6 +213,62 @@ for (const [file, list] of Object.entries(CALLS)) {
     }
   }
   if (bad > 3) console.log(`${file}: ${bad - 3} more differ`);
+}
+
+// ---------- a unit's own code ----------
+const PROBLEMS = 300;
+// a file at the revision (null when it didn't exist yet) or now
+const fileAt = (path, atRev) => {
+  if (!atRev) return existsSync(join(ROOT, path)) ? readFileSync(join(ROOT, path), 'utf8') : null;
+  try { return execFileSync('git', ['show', `${atRev}:${path}`], {cwd: ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore']}); }
+  catch { return null; }
+};
+// the local scripts a page loads, in order, as paths from the repo root, leaving out the ones that need a page
+const NEEDS_PAGE = ['engine.js', 'learn.js', 'speak.js'];
+const scriptsOf = page => [...readFileSync(join(ROOT, page), 'utf8').matchAll(/<script src="([^"?]+)(?:\?[^"]*)?"><\/script>/g)]
+  .map(m => normalize(join(dirname(page), m[1]))).filter(path => !NEEDS_PAGE.includes(basename(path)));
+// a page's scripts loaded into one context, as they are at atRev (or now); Game.stars stands in for saved progress
+function loadPage(page, atRev, globals = {}) {
+  const context = vm.createContext({Math, JSON, console, document: {}, window: {}, matchMedia: () => ({matches: false}), ...globals});
+  for (const path of scriptsOf(page)) {
+    const src = fileAt(path, atRev);
+    if (src !== null) vm.runInContext(src, context, {filename: `${atRev || 'now'}:${path}`});
+  }
+  return context;
+}
+// a problem as text: its figure drawn both ways (without and with the hint), and any other function by name
+function problemText(p) {
+  if (!p || typeof p !== 'object') return JSON.stringify(p);
+  const figs = [false, true].map(show => typeof p.fig === 'function' ? p.fig(show, show)
+    : p.fig && typeof p.fig.svg === 'function' ? p.fig.svg(show, show ? ['build'] : []) : p.fig);
+  return JSON.stringify({...p, fig: figs}, (key, v) => typeof v === 'function' ? `function ${v.name}` : v);
+}
+// runs the same thing in both and counts a difference; what() names it in the report
+function compare(what, a, b) {
+  calls++;
+  if (a === b) return;
+  differ++;
+  const [was, is] = firstDiff(String(a), String(b));
+  console.log(`${what}\n  was ${was}\n  now ${is}`);
+}
+const seeded = (context, f) => { vm.runInContext(SEED, context); try { return f(); } catch (e) { return `throws ${e.message}`; } };
+for (const unit of units) {
+  if (existsSync(join(ROOT, unit, 'stations.js'))) for (const stars of [0, 3]) {
+    const [before, now] = [rev, null].map(atRev => loadPage(`${unit}/index.html`, atRev, {Game: {stars: () => stars}}));
+    const zonesOf = context => vm.runInContext('ZONES', context);
+    zonesOf(now).forEach((zone, i) => {
+      // every problem the station deals, one after another from the same seed
+      const deal = context => seeded(context, () => range(0, PROBLEMS).map(() => problemText(zonesOf(context)[i].gen())).join('\n'));
+      compare(`${unit} game, ${zone.id} with ${stars} stars`, deal(before), deal(now));
+    });
+    compare(`${unit} game, icons`, JSON.stringify(vm.runInContext('ICON', before)), JSON.stringify(vm.runInContext('ICON', now)));
+  }
+  for (const page of globSync(`${unit}/learn/*.html`, {cwd: ROOT}).sort()) {
+    // a chapter's steps and quick-check figures; widgets are left as their names
+    const chapter = context => seeded(context, () => JSON.stringify(vm.runInContext('({STEPS, F: typeof F === "undefined" ? null : F})', context),
+      (key, v) => typeof v === 'function' ? `function ${v.name}` : v));
+    compare(`${page} steps`, chapter(loadPage(page, rev)), chapter(loadPage(page, null)));
+  }
 }
 console.log(`${calls} calls against ${rev}, ${differ} differ${broken ? `, ${broken} throw` : ''}`);
 process.exit(differ || broken ? 1 : 0);

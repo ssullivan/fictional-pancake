@@ -1,38 +1,40 @@
 /* Learn Introducing Multiplication (Grade 3 Unit 1), chapter 2: Scaled bar graphs. Its widgets and steps; loaded by bar-graphs.html. */
 /* where a value sits on a scale: "on the 40 line", or "halfway between 20 and 30" */
-const onScale=(v,s)=>v%s?`halfway between ${v-v%s} and ${v-v%s+s}`:`on the ${v} line`;
-/* set each bar by tapping, on a scale of 10, in steps of 5 */
+const onScale=(value,scale)=>value%scale?`halfway between ${value-value%scale} and ${value-value%scale+scale}`:`on the ${value} line`;
 const CANS=[{label:'Room 1',n:25,c:'red'},{label:'Room 2',n:40,c:'blue'},{label:'Room 3',n:15,c:'green'}];
+/* Set each bar by tapping, on a scale of 10, in steps of 5, to match the table. */
 function wBars(el){
-  const q=Q(el),h=[0,0,0];
+  /* heights: where each bar ends (0 for no bar yet) */
+  const q=Q(el),heights=[0,0,0];
   el.innerHTML=`<div class="fig" data-f></div><div class="wrow"><button type="button" class="ghost-btn" data-clr>Start over</button></div><p class="readout" data-o></p>`;
   const draw=()=>{
-    q('f').innerHTML=barGraph(CANS.map((r,i)=>({...r,n:h[i]})),{max:50,scale:10,step:5,uh:48,edit:true,title:'Cans collected: tap to set each bar'});
-    const done=CANS.every((r,i)=>h[i]===r.n);
-    q('o').innerHTML=`The table says: ${CANS.map(r=>`${r.label} ${r.n}`).join(', ')}.<br>`
-      +CANS.map((r,i)=>!h[i]?`${r.label}: no bar yet.`:`${r.label}: ${h[i]}, ${onScale(h[i],10)}${h[i]===r.n?' ✓':''}.`).join('<br>')
+    q('f').innerHTML=barGraph(CANS.map((row,i)=>({...row,n:heights[i]})),{max:50,scale:10,step:5,uh:48,edit:true,title:'Cans collected: tap to set each bar'});
+    const done=CANS.every((row,i)=>heights[i]===row.n);
+    q('o').innerHTML=`The table says: ${CANS.map(row=>`${row.label} ${row.n}`).join(', ')}.<br>`
+      +CANS.map((row,i)=>!heights[i]?`${row.label}: no bar yet.`:`${row.label}: ${heights[i]}, ${onScale(heights[i],10)}${heights[i]===row.n?' ✓':''}.`).join('<br>')
       +(done?'<br><span class="ok">All three bars match. A bar can end between two lines: 25 is halfway between 20 and 30.</span>':'');
   };
-  el.addEventListener('click',e=>{const t=e.target.closest('[data-v]');if(t){h[+t.dataset.r]=+t.dataset.v;draw();}});
-  q('clr').onclick=()=>{h.fill(0);draw();};
+  /* a tap target says which bar (data-r) and how high (data-v) */
+  el.addEventListener('click',e=>{const target=e.target.closest('[data-v]');if(target){heights[+target.dataset.r]=+target.dataset.v;draw();}});
+  q('clr').onclick=()=>{heights.fill(0);draw();};
   draw();
 }
-/* the same data on scales of 2, 5, and 10 */
 const PICKED=[{label:'Mon',n:40,c:'red'},{label:'Tue',n:25,c:'yellow'},{label:'Wed',n:35,c:'green'},{label:'Thu',n:20,c:'blue'}];
 const SCALE_WHY={
   2:'A line every 2 makes 20 spaces. That’s a very tall graph with lots of lines to count, and 25 and 35 still end between lines.',
   5:'A line every 5 makes 8 spaces. Every bar ends right on a line, and the graph isn’t too tall. <span class="ok">This scale fits best.</span>',
   10:'A line every 10 makes only 4 spaces. It’s short, but Tuesday and Wednesday end between lines, so they’re harder to read.'
 };
+/* The same data on scales of 2, 5, and 10, and what each scale is like to read. */
 function wScale(el){
-  const q=Q(el);let s=5;
+  const q=Q(el);let scale=5;
   el.innerHTML=seg('Scale',[[2,'Count by 2s'],[5,'Count by 5s'],[10,'Count by 10s']])+`<div class="fig" data-f></div><p class="readout" data-o></p>`;
   const draw=()=>{
-    press(el,s);
-    q('f').innerHTML=barGraph(PICKED,{max:40,scale:s,title:'Apples picked'});
-    q('o').innerHTML=`Apples picked: ${PICKED.map(r=>`${r.label} ${r.n}`).join(', ')}.<br>${SCALE_WHY[s]}`;
+    press(el,scale);
+    q('f').innerHTML=barGraph(PICKED,{max:40,scale,title:'Apples picked'});
+    q('o').innerHTML=`Apples picked: ${PICKED.map(row=>`${row.label} ${row.n}`).join(', ')}.<br>${SCALE_WHY[scale]}`;
   };
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){s=+b.dataset.m;draw();}});
+  el.addEventListener('click',e=>{const scaleBtn=e.target.closest('[data-m]');if(scaleBtn){scale=+scaleBtn.dataset.m;draw();}});
   draw();
 }
 /* the quick checks' figures */

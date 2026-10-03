@@ -1,30 +1,34 @@
 /* Learn Introducing Multiplication (Grade 3 Unit 1), chapter 4: Equal groups. Its widgets and steps; loaded by equal-groups.html. */
-/* how many groups, and how many in each */
+/* Steppers for how many groups and how many in each, with the groups drawn and added up. */
 function wGroups(el){
-  const q=Q(el),st={g:4,n:3};
+  /* the steppers' values: g groups, n in each */
+  const q=Q(el),values={g:4,n:3};
   el.innerHTML=`<div class="fig" data-f></div><div class="wrow">${stepper('g','Groups')}${stepper('n','In each group')}</div><p class="readout" data-o></p>`;
   const draw=()=>{
-    const {g,n}=st;q('g').textContent=g;q('n').textContent=n;
-    q('f').innerHTML=groupsFig(g,n);
-    q('o').innerHTML=`<b>${pl(g,'group')} of ${n}</b>. `+(g===1?`1 group of ${n} is just ${n}.`
-      :`${addends(g,n)} = <b>${g*n}</b>.<br><span class="dimline">Count by ${n}s: ${countBy(n,g)}.</span>`);
+    const {g:groups,n:perGroup}=values;q('g').textContent=groups;q('n').textContent=perGroup;
+    q('f').innerHTML=groupsFig(groups,perGroup);
+    q('o').innerHTML=`<b>${pl(groups,'group')} of ${perGroup}</b>. `+(groups===1?`1 group of ${perGroup} is just ${perGroup}.`
+      :`${addends(groups,perGroup)} = <b>${groups*perGroup}</b>.<br><span class="dimline">Count by ${perGroup}s: ${countBy(perGroup,groups)}.</span>`);
   };
-  steppers(el,st,{g:[1,6],n:[1,10]},draw);draw();
+  steppers(el,values,{g:[1,6],n:[1,10]},draw);draw();
 }
-/* the same story as a drawing or a diagram */
+/* stories of g groups with n in each: what the groups and things are, and the story in words */
 const STORY=[{g:3,n:6,groups:'packs',things:'juice boxes',say:'3 packs of juice boxes, 6 in each pack'},{g:5,n:2,groups:'vases',things:'flowers',say:'5 vases with 2 flowers in each'},{g:4,n:8,groups:'boxes',things:'crayons',say:'4 boxes of crayons, 8 in each box'}];
-const tapeOf=(g,n,label)=>partWhole(range(g).map(()=>({n:1,show:n})),'?',label||`Tape diagram: ${g} equal parts of ${n}, and the whole unknown`);
+/* a tape diagram of `groups` equal parts of perGroup, with the whole unknown */
+const tapeOf=(groups,perGroup,label)=>partWhole(range(groups).map(()=>({n:1,show:perGroup})),'?',label||`Tape diagram: ${groups} equal parts of ${perGroup}, and the whole unknown`);
+/* Pick a story, and show it as a drawing of equal groups or as a tape diagram. */
 function wDiagram(el){
-  const q=Q(el);let p=0,m='draw';
-  el.innerHTML=`<div data-top>${seg('Story',STORY.map((s,i)=>[i,`${s.g} ${s.groups}`]))}</div><div data-bot>${seg('Show it as',[['draw','Drawing'],['tape','Diagram']])}</div><div class="fig" data-f></div><p class="readout" data-o></p>`;
+  /* view: 'draw' or 'tape' */
+  const q=Q(el);let storyIndex=0,view='draw';
+  el.innerHTML=`<div data-top>${seg('Story',STORY.map((story,i)=>[i,`${story.g} ${story.groups}`]))}</div><div data-bot>${seg('Show it as',[['draw','Drawing'],['tape','Diagram']])}</div><div class="fig" data-f></div><p class="readout" data-o></p>`;
   const draw=()=>{
-    const {g,n,groups,things,say}=STORY[p];press(q('top'),p);press(q('bot'),m);
-    q('f').innerHTML=m==='draw'?groupsFig(g,n,{label:`${g} circles with ${n} dots in each`}):tapeOf(g,n);
-    q('o').innerHTML=`${say[0].toUpperCase()+say.slice(1)}: ${g} groups of ${n}.<br>`
-      +(m==='draw'?`<span class="dimline">Each circle is one of the ${groups}. The dots are the ${things}.</span>`:`<span class="dimline">The diagram has ${g} equal parts, one for each of the ${groups}. Each part is ${n}. The ? is the whole.</span>`)
-      +`<br>${addends(g,n)} = <b>${g*n} ${things}</b>.`;
+    const {g:groupCount,n:perGroup,groups,things,say}=STORY[storyIndex];press(q('top'),storyIndex);press(q('bot'),view);
+    q('f').innerHTML=view==='draw'?groupsFig(groupCount,perGroup,{label:`${groupCount} circles with ${perGroup} dots in each`}):tapeOf(groupCount,perGroup);
+    q('o').innerHTML=`${say[0].toUpperCase()+say.slice(1)}: ${groupCount} groups of ${perGroup}.<br>`
+      +(view==='draw'?`<span class="dimline">Each circle is one of the ${groups}. The dots are the ${things}.</span>`:`<span class="dimline">The diagram has ${groupCount} equal parts, one for each of the ${groups}. Each part is ${perGroup}. The ? is the whole.</span>`)
+      +`<br>${addends(groupCount,perGroup)} = <b>${groupCount*perGroup} ${things}</b>.`;
   };
-  el.addEventListener('click',e=>{const h=segHit(e,['top','bot']);if(!h)return;if(h[0]==='top')p=+h[1];else m=h[1];draw();});
+  el.addEventListener('click',e=>{const [row,id]=segHit(e,['top','bot'])||[];if(!row)return;if(row==='top')storyIndex=+id;else view=id;draw();});
   draw();
 }
 /* the quick checks' figures */

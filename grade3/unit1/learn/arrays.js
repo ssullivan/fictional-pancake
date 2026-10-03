@@ -1,29 +1,32 @@
 /* Learn Introducing Multiplication (Grade 3 Unit 1), chapter 7: Arrays. Its widgets and steps; loaded by arrays.html. */
-/* rows and columns, and the expression for them */
+/* Steppers for the rows and how many in each row, with the array and its expression. */
 function wArr(el){
-  const q=Q(el),st={r:3,c:5};
+  /* the steppers' values: r rows, c in each row */
+  const q=Q(el),values={r:3,c:5};
   el.innerHTML=`<div class="fig" data-f></div><div class="wrow">${stepper('r','Rows')}${stepper('c','In each row')}</div><p class="readout" data-o></p>`;
   const draw=()=>{
-    const {r,c}=st;q('r').textContent=r;q('c').textContent=c;
-    q('f').innerHTML=arrayFig(r,c,{band:'r'});
-    q('o').innerHTML=`<b>${pl(r,'row')} of ${c}</b>: ${r} × ${c} = ${r*c}.<br><span class="dimline">Each row is a group of ${c}. Count by ${c}s: ${countBy(c,r)}.</span>`;
+    const {r:rows,c:cols}=values;q('r').textContent=rows;q('c').textContent=cols;
+    q('f').innerHTML=arrayFig(rows,cols,{band:'r'});
+    q('o').innerHTML=`<b>${pl(rows,'row')} of ${cols}</b>: ${rows} × ${cols} = ${rows*cols}.<br><span class="dimline">Each row is a group of ${cols}. Count by ${cols}s: ${countBy(cols,rows)}.</span>`;
   };
-  steppers(el,st,{r:[1,5],c:[1,10]},draw);draw();
+  steppers(el,values,{r:[1,5],c:[1,10]},draw);draw();
 }
-/* array stories: count one row at a time */
+/* array stories: t its button, r rows of c, u the unit, s the story */
 const AS=[{t:'Chairs',r:5,c:6,u:'chairs',s:'5 rows of chairs, with 6 chairs in each row'},{t:'Eggs',r:2,c:6,u:'eggs',s:'An egg carton with 2 rows of 6 eggs'},{t:'Garden',r:4,c:7,u:'plants',s:'A garden with 4 rows of 7 plants'},{t:'Stamps',r:3,c:8,u:'stamps',s:'A sheet of stamps, 3 rows of 8'}];
+/* Pick an array story and count it one row at a time. */
 function wStory(el){
-  const q=Q(el);let p=0,k=0;
-  el.innerHTML=seg('Story',AS.map((a,i)=>[i,a.t]))+`<div class="fig" data-f></div><div class="wrow"><button type="button" class="btn" data-go>Count a row</button><button type="button" class="ghost-btn" data-clr>Start over</button></div><p class="readout" data-o></p>`;
+  /* rowsCounted: how many rows have been counted so far */
+  const q=Q(el);let storyIndex=0,rowsCounted=0;
+  el.innerHTML=seg('Story',AS.map((story,i)=>[i,story.t]))+`<div class="fig" data-f></div><div class="wrow"><button type="button" class="btn" data-go>Count a row</button><button type="button" class="ghost-btn" data-clr>Start over</button></div><p class="readout" data-o></p>`;
   const draw=()=>{
-    const {r,c,u,s}=AS[p];press(el,p);q('go').disabled=k===r;
-    q('f').innerHTML=arrayFig(r,c,{band:'r',k,sum:true,label:`${s}: ${r} rows of ${c}`});
-    q('o').innerHTML=`${s}.<br>`+(!k?'How many in all? Tap Count a row.'
-      :`Count by ${c}s: ${countBy(c,k)}`+(k===r?`.<br><span class="ok">${r} × ${c} = ${r*c} ${u}.</span>`:'…'));
+    const {r:rows,c:cols,u:unit,s:say}=AS[storyIndex];press(el,storyIndex);q('go').disabled=rowsCounted===rows;
+    q('f').innerHTML=arrayFig(rows,cols,{band:'r',k:rowsCounted,sum:true,label:`${say}: ${rows} rows of ${cols}`});
+    q('o').innerHTML=`${say}.<br>`+(!rowsCounted?'How many in all? Tap Count a row.'
+      :`Count by ${cols}s: ${countBy(cols,rowsCounted)}`+(rowsCounted===rows?`.<br><span class="ok">${rows} × ${cols} = ${rows*cols} ${unit}.</span>`:'…'));
   };
-  q('go').onclick=()=>{k++;draw();};
-  q('clr').onclick=()=>{k=0;draw();};
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){p=+b.dataset.m;k=0;draw();}});
+  q('go').onclick=()=>{rowsCounted++;draw();};
+  q('clr').onclick=()=>{rowsCounted=0;draw();};
+  el.addEventListener('click',e=>{const storyBtn=e.target.closest('[data-m]');if(storyBtn){storyIndex=+storyBtn.dataset.m;rowsCounted=0;draw();}});
   draw();
 }
 /* the quick checks' figures */

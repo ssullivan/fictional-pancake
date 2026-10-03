@@ -1,32 +1,35 @@
 /* Learn Introducing Multiplication (Grade 3 Unit 1), chapter 5: Expressions and equations. Its widgets and steps; loaded by expressions.html. */
-/* a story as a multiplication expression, then its product */
+/* stories of g groups with n in each: what the groups and things are */
 const EXS=[{g:4,n:5,groups:'bags',things:'apples'},{g:3,n:8,groups:'spiders',things:'legs'},{g:2,n:5,groups:'hands',things:'fingers'},{g:6,n:4,groups:'cars',things:'wheels'}];
+/* Pick a story to see it as a multiplication expression; a button finds its product. */
 function wExpr(el){
-  const q=Q(el);let p=0,shown=false;
-  el.innerHTML=seg('Story',EXS.map((s,i)=>[i,`${s.g} ${s.groups}`]))+`<div class="fig" data-f></div><p class="eq" data-e></p><div class="wrow"><button type="button" class="btn" data-go>Find the product</button></div><p class="readout" data-o></p>`;
+  /* shown: the product has been found */
+  const q=Q(el);let storyIndex=0,shown=false;
+  el.innerHTML=seg('Story',EXS.map((story,i)=>[i,`${story.g} ${story.groups}`]))+`<div class="fig" data-f></div><p class="eq" data-e></p><div class="wrow"><button type="button" class="btn" data-go>Find the product</button></div><p class="readout" data-o></p>`;
   const draw=()=>{
-    const {g,n,groups,things}=EXS[p];press(el,p);q('go').disabled=shown;
-    q('f').innerHTML=groupsFig(g,n,{label:`${g} ${groups} with ${n} ${things} each`});
-    q('e').innerHTML=shown?`${g} × ${n} = ${g*n}`:`${g} × ${n}`;
-    q('o').innerHTML=`${g} ${groups} with ${n} ${things} each: <b>${g} × ${n}</b>.<br><span class="dimline">Say “${g} times ${n}”: ${g} groups of ${n}. ${g} and ${n} are the <b>factors</b>.</span>`
-      +(shown?`<br><span class="ok">${countBy(n,g)}. ${g} × ${n} = ${g*n}, so there are ${g*n} ${things}. ${g*n} is the <b>product</b>.</span>`:'');
+    const {g:groupCount,n:perGroup,groups,things}=EXS[storyIndex],product=groupCount*perGroup;press(el,storyIndex);q('go').disabled=shown;
+    q('f').innerHTML=groupsFig(groupCount,perGroup,{label:`${groupCount} ${groups} with ${perGroup} ${things} each`});
+    q('e').innerHTML=shown?`${groupCount} × ${perGroup} = ${product}`:`${groupCount} × ${perGroup}`;
+    q('o').innerHTML=`${groupCount} ${groups} with ${perGroup} ${things} each: <b>${groupCount} × ${perGroup}</b>.<br><span class="dimline">Say “${groupCount} times ${perGroup}”: ${groupCount} groups of ${perGroup}. ${groupCount} and ${perGroup} are the <b>factors</b>.</span>`
+      +(shown?`<br><span class="ok">${countBy(perGroup,groupCount)}. ${groupCount} × ${perGroup} = ${product}, so there are ${product} ${things}. ${product} is the <b>product</b>.</span>`:'');
   };
   q('go').onclick=()=>{shown=true;draw();};
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){p=+b.dataset.m;shown=false;draw();}});
+  el.addEventListener('click',e=>{const storyBtn=e.target.closest('[data-m]');if(storyBtn){storyIndex=+storyBtn.dataset.m;shown=false;draw();}});
   draw();
 }
-/* an equation, written either way around */
+/* Steppers for groups and how many in each, and their equation, which a button writes either way around. */
 function wEq(el){
-  const q=Q(el),st={g:3,n:4};let flip=false;
+  /* the steppers' values: g groups, n in each; flip: write the product first */
+  const q=Q(el),values={g:3,n:4};let flip=false;
   el.innerHTML=`<div class="fig" data-f></div><div class="wrow">${stepper('g','Groups')}${stepper('n','In each group')}</div><p class="eq" data-e></p><div class="wrow"><button type="button" class="btn" data-go>Write it the other way</button></div><p class="readout" data-o></p>`;
   const draw=()=>{
-    const {g,n}=st,p=g*n;q('g').textContent=g;q('n').textContent=n;
-    q('f').innerHTML=groupsFig(g,n);
-    q('e').innerHTML=flip?`${p} = ${g} × ${n}`:`${g} × ${n} = ${p}`;
-    q('o').innerHTML=`${pl(g,'group')} of ${n} is ${p}.<br><span class="dimline">The = sign means both sides are worth the same, so ${g} × ${n} = ${p} and ${p} = ${g} × ${n} say the same thing.</span>`;
+    const {g:groups,n:perGroup}=values,product=groups*perGroup;q('g').textContent=groups;q('n').textContent=perGroup;
+    q('f').innerHTML=groupsFig(groups,perGroup);
+    q('e').innerHTML=flip?`${product} = ${groups} × ${perGroup}`:`${groups} × ${perGroup} = ${product}`;
+    q('o').innerHTML=`${pl(groups,'group')} of ${perGroup} is ${product}.<br><span class="dimline">The = sign means both sides are worth the same, so ${groups} × ${perGroup} = ${product} and ${product} = ${groups} × ${perGroup} say the same thing.</span>`;
   };
   q('go').onclick=()=>{flip=!flip;draw();};
-  steppers(el,st,{g:[1,5],n:[1,10]},draw);draw();
+  steppers(el,values,{g:[1,5],n:[1,10]},draw);draw();
 }
 /* the quick checks' figures */
 const F={

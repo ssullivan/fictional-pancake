@@ -90,13 +90,14 @@
 <script src="../../shared/graphs.js?v=ec29052a"></script>
 <script src="../../shared/multiply.js?v=6cd3ac57"></script>
 <script src="../../shared/engine.js?v=f20ed8cf"></script>
-<script src="stations.js?v=e5ca7418"></script>
+<script src="stations.js?v=a442c430"></script>
 <script>
 /* the Harvest Festival: one apple goes in the basket for each right answer */
-let lit=0;
-function drawPower(G,hit){
-  const el=$('power');el.hidden=G.z.id!=='boss';if(el.hidden)return;
-  el.innerHTML=`<svg viewBox="0 0 64 64" role="img" aria-label="${lit} of 10 apples in the basket">${basket(lit)}</svg><div><b>${lit} of 10 apples</b><p>${lit===10?'The basket is full. Happy harvest!':hit?'Right! Another apple goes in.':'Answer right to add an apple.'}</p></div>`;
+let apples=0;
+/* the basket beside a boss problem (hidden at the other stations); hit: the last answer was right */
+function drawPower(state,hit){
+  const el=$('power');el.hidden=state.z.id!=='boss';if(el.hidden)return;
+  el.innerHTML=`<svg viewBox="0 0 64 64" role="img" aria-label="${apples} of 10 apples in the basket">${basket(apples)}</svg><div><b>${apples} of 10 apples</b><p>${apples===10?'The basket is full. Happy harvest!':hit?'Right! Another apple goes in.':'Answer right to add an apple.'}</p></div>`;
   el.classList.toggle('hit',!!hit);
 }
 Game.init({
@@ -110,8 +111,9 @@ Game.init({
     stuck:'Use “Show me a hint” when you’re stuck. It shows the picture from class.',
     tap:'Tap your answer in the graph.'
   },
-  onQuestion:G=>{if(G.i===0)lit=0;drawPower(G,false);},
-  onAnswer:(G,ok)=>{if(ok)lit++;drawPower(G,ok);}
+  /* the basket empties at the start of a round */
+  onQuestion:state=>{if(state.i===0)apples=0;drawPower(state,false);},
+  onAnswer:(state,ok)=>{if(ok)apples++;drawPower(state,ok);}
 });
 </script>
 </body>
