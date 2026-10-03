@@ -1,25 +1,94 @@
 /* Learn Area & Surface Area (Grade 6 Unit 1): the unit's chapters and their icons. Loaded by learn.html and every chapter page in learn/.
    Each chapter is learn/<id>.html with its widgets and steps in learn/<id>.js; shared/learn.js has the format. */
-const ICON={
-  area:'<g fill="rgba(255,201,60,.45)" stroke="#ffc93c" stroke-width="2"><rect x="6" y="30" width="14" height="14"/><rect x="20" y="30" width="14" height="14"/><rect x="34" y="30" width="14" height="14"/><rect x="6" y="16" width="14" height="14"/><rect x="20" y="16" width="14" height="14"/></g><rect x="6" y="44" width="14" height="14" fill="none" stroke="#7fe3ff" stroke-width="2" stroke-dasharray="3 3"/>',
-  para:'<polygon points="4,52 42,52 60,14 22,14" fill="rgba(255,201,60,.3)" stroke="#ffc93c" stroke-width="2.5"/><line x1="22" y1="14" x2="22" y2="52" stroke="#f3f6fb" stroke-width="2" stroke-dasharray="4 3"/>',
-  tri:'<polygon points="6,54 46,54 20,12" fill="rgba(255,201,60,.35)" stroke="#ffc93c" stroke-width="2.5"/><polygon points="46,54 60,12 20,12" fill="rgba(127,227,255,.2)" stroke="#7fe3ff" stroke-width="2" stroke-dasharray="4 3"/>',
-  poly:'<polygon points="6,54 58,54 46,20 18,20" fill="rgba(255,201,60,.35)" stroke="#ffc93c" stroke-width="2.5"/><line x1="18" y1="20" x2="18" y2="54" stroke="#7fe3ff" stroke-width="2"/><line x1="46" y1="20" x2="46" y2="54" stroke="#7fe3ff" stroke-width="2"/>',
-  net:'<g stroke="#f3f6fb" stroke-width="1.5"><rect x="22" y="4" width="18" height="14" fill="rgba(127,227,255,.5)"/><rect x="4" y="18" width="18" height="18" fill="rgba(255,138,196,.5)"/><rect x="22" y="18" width="18" height="18" fill="rgba(255,201,60,.6)"/><rect x="40" y="18" width="18" height="18" fill="rgba(255,138,196,.5)"/><rect x="22" y="36" width="18" height="14" fill="rgba(127,227,255,.5)"/><rect x="22" y="50" width="18" height="12" fill="rgba(255,201,60,.6)"/></g>',
-  poly3:'<g stroke="#f3f6fb" stroke-width="1.8" stroke-linejoin="round"><polygon points="10,22 24,10 44,10 30,22" fill="rgba(255,201,60,.55)"/><polygon points="10,22 30,22 30,54 10,54" fill="rgba(127,227,255,.4)"/><polygon points="30,22 44,10 44,42 30,54" fill="rgba(127,227,255,.25)"/></g><circle cx="44" cy="10" r="4" fill="#5fe0a8"/><line x1="10" y1="22" x2="30" y2="22" stroke="#ffc93c" stroke-width="4"/><path d="M50,30L60,48H40Z" fill="rgba(255,138,196,.5)" stroke="#f3f6fb" stroke-width="1.8" stroke-linejoin="round"/>',
-  pyr:'<g stroke="#f3f6fb" stroke-width="1.8" stroke-linejoin="round"><polygon points="8,48 24,56 40,48 24,40" fill="rgba(255,201,60,.55)"/><polygon points="8,48 24,56 24,8" fill="rgba(127,227,255,.4)"/><polygon points="24,56 40,48 24,8" fill="rgba(127,227,255,.25)"/><polygon points="44,22 56,16 56,50 44,56" fill="rgba(127,227,255,.3)"/><polygon points="44,22 56,16 62,20 50,26" fill="rgba(255,201,60,.55)"/><polygon points="50,26 62,20 62,54 50,60" fill="rgba(127,227,255,.2)"/></g>',
-  cube:'<g stroke="#f3f6fb" stroke-width="1.8" stroke-linejoin="round"><polygon points="32,6 56,18 32,30 8,18" fill="rgba(127,227,255,.55)"/><polygon points="8,18 32,30 32,58 8,46" fill="rgba(255,201,60,.55)"/><polygon points="56,18 32,30 32,58 56,46" fill="rgba(255,138,196,.5)"/></g>'
+const ICON = {
+  area: '<g fill="rgba(255,201,60,.45)" stroke="#ffc93c" stroke-width="2"><rect x="6" y="30" width="14" height="14"/><rect x="20" y="30" width="14" height="14"/><rect x="34" y="30" width="14" height="14"/><rect x="6" y="16" width="14" height="14"/><rect x="20" y="16" width="14" height="14"/></g><rect x="6" y="44" width="14" height="14" fill="none" stroke="#7fe3ff" stroke-width="2" stroke-dasharray="3 3"/>',
+  para: '<polygon points="4,52 42,52 60,14 22,14" fill="rgba(255,201,60,.3)" stroke="#ffc93c" stroke-width="2.5"/><line x1="22" y1="14" x2="22" y2="52" stroke="#f3f6fb" stroke-width="2" stroke-dasharray="4 3"/>',
+  tri: '<polygon points="6,54 46,54 20,12" fill="rgba(255,201,60,.35)" stroke="#ffc93c" stroke-width="2.5"/><polygon points="46,54 60,12 20,12" fill="rgba(127,227,255,.2)" stroke="#7fe3ff" stroke-width="2" stroke-dasharray="4 3"/>',
+  poly: '<polygon points="6,54 58,54 46,20 18,20" fill="rgba(255,201,60,.35)" stroke="#ffc93c" stroke-width="2.5"/><line x1="18" y1="20" x2="18" y2="54" stroke="#7fe3ff" stroke-width="2"/><line x1="46" y1="20" x2="46" y2="54" stroke="#7fe3ff" stroke-width="2"/>',
+  net: '<g stroke="#f3f6fb" stroke-width="1.5"><rect x="22" y="4" width="18" height="14" fill="rgba(127,227,255,.5)"/><rect x="4" y="18" width="18" height="18" fill="rgba(255,138,196,.5)"/><rect x="22" y="18" width="18" height="18" fill="rgba(255,201,60,.6)"/><rect x="40" y="18" width="18" height="18" fill="rgba(255,138,196,.5)"/><rect x="22" y="36" width="18" height="14" fill="rgba(127,227,255,.5)"/><rect x="22" y="50" width="18" height="12" fill="rgba(255,201,60,.6)"/></g>',
+  poly3:
+    '<g stroke="#f3f6fb" stroke-width="1.8" stroke-linejoin="round"><polygon points="10,22 24,10 44,10 30,22" fill="rgba(255,201,60,.55)"/><polygon points="10,22 30,22 30,54 10,54" fill="rgba(127,227,255,.4)"/><polygon points="30,22 44,10 44,42 30,54" fill="rgba(127,227,255,.25)"/></g><circle cx="44" cy="10" r="4" fill="#5fe0a8"/><line x1="10" y1="22" x2="30" y2="22" stroke="#ffc93c" stroke-width="4"/><path d="M50,30L60,48H40Z" fill="rgba(255,138,196,.5)" stroke="#f3f6fb" stroke-width="1.8" stroke-linejoin="round"/>',
+  pyr: '<g stroke="#f3f6fb" stroke-width="1.8" stroke-linejoin="round"><polygon points="8,48 24,56 40,48 24,40" fill="rgba(255,201,60,.55)"/><polygon points="8,48 24,56 24,8" fill="rgba(127,227,255,.4)"/><polygon points="24,56 40,48 24,8" fill="rgba(127,227,255,.25)"/><polygon points="44,22 56,16 56,50 44,56" fill="rgba(127,227,255,.3)"/><polygon points="44,22 56,16 62,20 50,26" fill="rgba(255,201,60,.55)"/><polygon points="50,26 62,20 62,54 50,60" fill="rgba(127,227,255,.2)"/></g>',
+  cube: '<g stroke="#f3f6fb" stroke-width="1.8" stroke-linejoin="round"><polygon points="32,6 56,18 32,30 8,18" fill="rgba(127,227,255,.55)"/><polygon points="8,18 32,30 32,58 8,46" fill="rgba(255,201,60,.55)"/><polygon points="56,18 32,30 32,58 56,46" fill="rgba(255,138,196,.5)"/></g>',
 };
-const UNIT={saveKey:'bb-learn',game:'Blueprint Builders',icons:ICON,
+const UNIT = {
+  saveKey: "bb-learn",
+  game: "Blueprint Builders",
+  icons: ICON,
   /* the order of the chapters when the unit was one page (learn.html#c2s1), for progress saved then and old links */
-  legacy:['area','parallelograms','triangles','polygons','nets','cubes'],
-  chapters:[
-  {id:'area',icon:'area',title:'What is area?',lessons:'Lessons 1–3',blurb:'Cover shapes with unit squares, and see why cutting and moving pieces keeps the area the same.',game:{zone:'frame',name:'Frame & Subtract'},steps:3},
-  {id:'parallelograms',icon:'para',title:'Parallelograms',lessons:'Lessons 4–6',blurb:'Turn a parallelogram into a rectangle, and find the height that really counts.',game:{zone:'para',name:'Parallelogram Plaza'},steps:3},
-  {id:'triangles',icon:'tri',title:'Triangles',lessons:'Lessons 7–10',blurb:'Two copies of a triangle make a parallelogram, so a triangle is half of base × height.',game:{zone:'tri',name:'Triangle Tower'},steps:3},
-  {id:'polygons',icon:'poly',title:'Polygons',lessons:'Lesson 11',blurb:'Break any polygon into rectangles and triangles, or frame it and subtract. Then take away a hole.',game:{zone:'poly',name:'Polygon Park'},steps:3},
-  {id:'polyhedra',icon:'poly3',title:'Polyhedra',game:{zone:'solid',name:'Polyhedron Yard'},lessons:'Lesson 13',blurb:'Turn 3D shapes to count their faces, edges, and vertices, and see which shapes aren’t polyhedra.',steps:5},
-  {id:'prisms-and-pyramids',icon:'pyr',title:'Prisms, pyramids & nets',game:{zone:'solid',name:'Polyhedron Yard'},lessons:'Lesson 13',blurb:'Name prisms and pyramids by their bases, and fold their nets.',steps:3},
-  {id:'nets',icon:'net',title:'Nets & surface area',lessons:'Lessons 12–15',blurb:'Spin 3D shapes, unfold them into nets, and add up every face.',game:{zone:'net',name:'Net Factory'},steps:4},
-  {id:'cubes',icon:'cube',title:'Squares & cubes',lessons:'Lessons 16–18',blurb:'Exponents, the surface area of a cube, and square units vs. cubic units.',game:{zone:'cube',name:'Squares & Cubes Lab'},steps:3}
-]};
+  legacy: ["area", "parallelograms", "triangles", "polygons", "nets", "cubes"],
+  chapters: [
+    {
+      id: "area",
+      icon: "area",
+      title: "What is area?",
+      lessons: "Lessons 1–3",
+      blurb: "Cover shapes with unit squares, and see why cutting and moving pieces keeps the area the same.",
+      game: { zone: "frame", name: "Frame & Subtract" },
+      steps: 3,
+    },
+    {
+      id: "parallelograms",
+      icon: "para",
+      title: "Parallelograms",
+      lessons: "Lessons 4–6",
+      blurb: "Turn a parallelogram into a rectangle, and find the height that really counts.",
+      game: { zone: "para", name: "Parallelogram Plaza" },
+      steps: 3,
+    },
+    {
+      id: "triangles",
+      icon: "tri",
+      title: "Triangles",
+      lessons: "Lessons 7–10",
+      blurb: "Two copies of a triangle make a parallelogram, so a triangle is half of base × height.",
+      game: { zone: "tri", name: "Triangle Tower" },
+      steps: 3,
+    },
+    {
+      id: "polygons",
+      icon: "poly",
+      title: "Polygons",
+      lessons: "Lesson 11",
+      blurb: "Break any polygon into rectangles and triangles, or frame it and subtract. Then take away a hole.",
+      game: { zone: "poly", name: "Polygon Park" },
+      steps: 3,
+    },
+    {
+      id: "polyhedra",
+      icon: "poly3",
+      title: "Polyhedra",
+      game: { zone: "solid", name: "Polyhedron Yard" },
+      lessons: "Lesson 13",
+      blurb: "Turn 3D shapes to count their faces, edges, and vertices, and see which shapes aren’t polyhedra.",
+      steps: 5,
+    },
+    {
+      id: "prisms-and-pyramids",
+      icon: "pyr",
+      title: "Prisms, pyramids & nets",
+      game: { zone: "solid", name: "Polyhedron Yard" },
+      lessons: "Lesson 13",
+      blurb: "Name prisms and pyramids by their bases, and fold their nets.",
+      steps: 3,
+    },
+    {
+      id: "nets",
+      icon: "net",
+      title: "Nets & surface area",
+      lessons: "Lessons 12–15",
+      blurb: "Spin 3D shapes, unfold them into nets, and add up every face.",
+      game: { zone: "net", name: "Net Factory" },
+      steps: 4,
+    },
+    {
+      id: "cubes",
+      icon: "cube",
+      title: "Squares & cubes",
+      lessons: "Lessons 16–18",
+      blurb: "Exponents, the surface area of a cube, and square units vs. cubic units.",
+      game: { zone: "cube", name: "Squares & Cubes Lab" },
+      steps: 3,
+    },
+  ],
+};

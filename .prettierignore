@@ -1,0 +1,10 @@
+# Prettier formats the JavaScript (.js and .mjs) only; pages, styles, and docs keep their own layout.
+*.html
+*.css
+*.md
+*.json
+*.yml
+node_modules/
+tools/.cache/
+test-results/
+playwright-report/

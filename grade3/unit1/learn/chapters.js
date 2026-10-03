@@ -1,23 +1,124 @@
 /* Learn Introducing Multiplication (Grade 3 Unit 1): the unit's chapters and their icons. Loaded by learn.html and every chapter page in learn/.
    Each chapter is learn/<id>.html with its widgets and steps in learn/<id>.js; shared/learn.js has the format. */
-const ICON={
-  pics:'<line x1="14" y1="6" x2="14" y2="58" stroke="#f3f6fb" stroke-width="2"/><g stroke="#f3f6fb" stroke-width="1"><rect x="18" y="9" width="12" height="12" rx="2" fill="#ff7b7b"/><rect x="34" y="9" width="12" height="12" rx="2" fill="#ff7b7b"/><rect x="50" y="9" width="6" height="12" fill="#ff7b7b"/><rect x="18" y="26" width="12" height="12" rx="2" fill="#6fa8ff"/><rect x="18" y="43" width="12" height="12" rx="2" fill="#5fe0a8"/><rect x="34" y="43" width="12" height="12" rx="2" fill="#5fe0a8"/></g>',
-  bars:'<g stroke="rgba(170,205,255,.4)" stroke-width="1"><line x1="10" y1="16" x2="60" y2="16"/><line x1="10" y1="36" x2="60" y2="36"/></g><line x1="10" y1="56" x2="60" y2="56" stroke="#f3f6fb" stroke-width="2"/><rect x="14" y="26" width="12" height="30" fill="#ff7b7b"/><rect x="30" y="10" width="12" height="46" fill="#6fa8ff"/><rect x="46" y="36" width="12" height="20" fill="#5fe0a8"/><g fill="#a9c4e4" font-size="8" font-family="monospace" text-anchor="end"><text x="8" y="19">10</text><text x="8" y="39">5</text></g>',
-  compare:'<line x1="6" y1="56" x2="60" y2="56" stroke="#f3f6fb" stroke-width="2"/><rect x="10" y="34" width="14" height="22" fill="#6fa8ff"/><rect x="32" y="12" width="14" height="44" fill="#ffc93c"/><line x1="10" y1="34" x2="46" y2="34" stroke="#fff" stroke-width="1.5" stroke-dasharray="3 3"/><path d="M50,12h4V34h-4" fill="none" stroke="#7fe3ff" stroke-width="2"/>',
-  groups:'<g fill="none" stroke="#f3f6fb" stroke-width="2"><circle cx="16" cy="18" r="12"/><circle cx="48" cy="18" r="12"/><circle cx="16" cy="46" r="12"/><circle cx="48" cy="46" r="12"/></g><g fill="#ffc93c">'+[[16,18],[48,18],[16,46],[48,46]].map(([x,y])=>`<circle cx="${x-5}" cy="${y-4}" r="3.5"/><circle cx="${x+5}" cy="${y-4}" r="3.5"/><circle cx="${x}" cy="${y+5}" r="3.5"/>`).join('')+'</g>',
-  times:'<text x="32" y="30" fill="#ffc93c" font-size="18" font-weight="700" text-anchor="middle" font-family="monospace">4 × 3</text><text x="32" y="52" fill="#7fe3ff" font-size="12" font-weight="700" text-anchor="middle" font-family="monospace">4 groups of 3</text>',
-  unknown:'<text x="32" y="38" fill="#f3f6fb" font-size="16" font-weight="700" text-anchor="middle" font-family="monospace">4×<tspan fill="#ffc93c">?</tspan>=20</text><rect x="22" y="20" width="16" height="24" rx="3" fill="none" stroke="#ffc93c" stroke-width="2" stroke-dasharray="3 3"/>',
-  array:'<g fill="#ffc93c">'+Array.from({length:15},(_,i)=>`<circle cx="${10+i%5*11}" cy="${14+Math.floor(i/5)*16}" r="4.5"/>`).join('')+'</g><rect x="3" y="6" width="58" height="16" rx="8" fill="none" stroke="#ffc93c" stroke-width="1.5"/>',
-  turn:'<g fill="#ffc93c">'+Array.from({length:6},(_,i)=>`<circle cx="${8+i%3*10}" cy="${22+Math.floor(i/3)*10}" r="3.5"/>`).join('')+'</g><g fill="#7fe3ff">'+Array.from({length:6},(_,i)=>`<circle cx="${46+i%2*10}" cy="${17+Math.floor(i/2)*10}" r="3.5"/>`).join('')+'</g><path d="M30,12Q36,4 42,12" fill="none" stroke="#f3f6fb" stroke-width="2"/><path d="M42,12l-5,0M42,12l0,-5" stroke="#f3f6fb" stroke-width="2"/><text x="32" y="58" fill="#f3f6fb" font-size="10" font-weight="700" text-anchor="middle" font-family="monospace">2×3=3×2</text>',
+const ICON = {
+  pics: '<line x1="14" y1="6" x2="14" y2="58" stroke="#f3f6fb" stroke-width="2"/><g stroke="#f3f6fb" stroke-width="1"><rect x="18" y="9" width="12" height="12" rx="2" fill="#ff7b7b"/><rect x="34" y="9" width="12" height="12" rx="2" fill="#ff7b7b"/><rect x="50" y="9" width="6" height="12" fill="#ff7b7b"/><rect x="18" y="26" width="12" height="12" rx="2" fill="#6fa8ff"/><rect x="18" y="43" width="12" height="12" rx="2" fill="#5fe0a8"/><rect x="34" y="43" width="12" height="12" rx="2" fill="#5fe0a8"/></g>',
+  bars: '<g stroke="rgba(170,205,255,.4)" stroke-width="1"><line x1="10" y1="16" x2="60" y2="16"/><line x1="10" y1="36" x2="60" y2="36"/></g><line x1="10" y1="56" x2="60" y2="56" stroke="#f3f6fb" stroke-width="2"/><rect x="14" y="26" width="12" height="30" fill="#ff7b7b"/><rect x="30" y="10" width="12" height="46" fill="#6fa8ff"/><rect x="46" y="36" width="12" height="20" fill="#5fe0a8"/><g fill="#a9c4e4" font-size="8" font-family="monospace" text-anchor="end"><text x="8" y="19">10</text><text x="8" y="39">5</text></g>',
+  compare:
+    '<line x1="6" y1="56" x2="60" y2="56" stroke="#f3f6fb" stroke-width="2"/><rect x="10" y="34" width="14" height="22" fill="#6fa8ff"/><rect x="32" y="12" width="14" height="44" fill="#ffc93c"/><line x1="10" y1="34" x2="46" y2="34" stroke="#fff" stroke-width="1.5" stroke-dasharray="3 3"/><path d="M50,12h4V34h-4" fill="none" stroke="#7fe3ff" stroke-width="2"/>',
+  groups:
+    '<g fill="none" stroke="#f3f6fb" stroke-width="2"><circle cx="16" cy="18" r="12"/><circle cx="48" cy="18" r="12"/><circle cx="16" cy="46" r="12"/><circle cx="48" cy="46" r="12"/></g><g fill="#ffc93c">' +
+    [
+      [16, 18],
+      [48, 18],
+      [16, 46],
+      [48, 46],
+    ]
+      .map(
+        ([x, y]) =>
+          `<circle cx="${x - 5}" cy="${y - 4}" r="3.5"/><circle cx="${x + 5}" cy="${y - 4}" r="3.5"/><circle cx="${x}" cy="${y + 5}" r="3.5"/>`,
+      )
+      .join("") +
+    "</g>",
+  times:
+    '<text x="32" y="30" fill="#ffc93c" font-size="18" font-weight="700" text-anchor="middle" font-family="monospace">4 × 3</text><text x="32" y="52" fill="#7fe3ff" font-size="12" font-weight="700" text-anchor="middle" font-family="monospace">4 groups of 3</text>',
+  unknown:
+    '<text x="32" y="38" fill="#f3f6fb" font-size="16" font-weight="700" text-anchor="middle" font-family="monospace">4×<tspan fill="#ffc93c">?</tspan>=20</text><rect x="22" y="20" width="16" height="24" rx="3" fill="none" stroke="#ffc93c" stroke-width="2" stroke-dasharray="3 3"/>',
+  array:
+    '<g fill="#ffc93c">' +
+    Array.from(
+      { length: 15 },
+      (_, i) => `<circle cx="${10 + (i % 5) * 11}" cy="${14 + Math.floor(i / 5) * 16}" r="4.5"/>`,
+    ).join("") +
+    '</g><rect x="3" y="6" width="58" height="16" rx="8" fill="none" stroke="#ffc93c" stroke-width="1.5"/>',
+  turn:
+    '<g fill="#ffc93c">' +
+    Array.from(
+      { length: 6 },
+      (_, i) => `<circle cx="${8 + (i % 3) * 10}" cy="${22 + Math.floor(i / 3) * 10}" r="3.5"/>`,
+    ).join("") +
+    '</g><g fill="#7fe3ff">' +
+    Array.from(
+      { length: 6 },
+      (_, i) => `<circle cx="${46 + (i % 2) * 10}" cy="${17 + Math.floor(i / 2) * 10}" r="3.5"/>`,
+    ).join("") +
+    '</g><path d="M30,12Q36,4 42,12" fill="none" stroke="#f3f6fb" stroke-width="2"/><path d="M42,12l-5,0M42,12l0,-5" stroke="#f3f6fb" stroke-width="2"/><text x="32" y="58" fill="#f3f6fb" font-size="10" font-weight="700" text-anchor="middle" font-family="monospace">2×3=3×2</text>',
 };
-const UNIT={saveKey:'g3u1-learn',game:'Orchard Market',icons:ICON,
-  chapters:[
-  {id:'picture-graphs',icon:'pics',title:'Scaled picture graphs',game:{zone:'pics',name:'Picture Barn'},lessons:'Lessons 1–4',blurb:'Read picture graphs where each picture shows 2, 5, or 10, and make one from a table.',steps:2},
-  {id:'bar-graphs',icon:'bars',title:'Scaled bar graphs',game:{zone:'bars',name:'Bar Silo'},lessons:'Lessons 5–6',blurb:'Read and draw bars that end between the lines, and choose a good scale.',steps:2},
-  {id:'graph-questions',icon:'compare',title:'Questions about bar graphs',game:{zone:'bars',name:'Bar Silo'},lessons:'Lessons 7–8',blurb:'Find how many more, how many fewer, and how many in all.',steps:2},
-  {id:'equal-groups',icon:'groups',title:'Equal groups',game:{zone:'groups',name:'Basket Row'},lessons:'Lessons 9–10',blurb:'Count equal groups, and show them with drawings and diagrams.',steps:2},
-  {id:'expressions',icon:'times',title:'Expressions and equations',game:{zone:'groups',name:'Basket Row'},lessons:'Lessons 11–13',blurb:'Write 4 × 3 for 4 groups of 3, and write equations like 4 × 3 = 12.',steps:2},
-  {id:'unknowns',icon:'unknown',title:'Find the unknown',game:{zone:'equations',name:'Equation Shed'},lessons:'Lessons 14–15',blurb:'Find the missing number in 4 × ? = 20, and pick the equation for a story.',steps:2},
-  {id:'arrays',icon:'array',title:'Arrays',game:{zone:'arrays',name:'Tree Rows'},lessons:'Lessons 16–19',blurb:'Build arrays in rows and columns, write their expressions, and solve array stories.',steps:2},
-  {id:'commutative',icon:'turn',title:'Turn it around',game:{zone:'flip',name:'Flip Field'},lessons:'Lesson 20',blurb:'Turn an array to see why 3 × 5 = 5 × 3, and use a fact you know.',steps:2}
-]};
+const UNIT = {
+  saveKey: "g3u1-learn",
+  game: "Orchard Market",
+  icons: ICON,
+  chapters: [
+    {
+      id: "picture-graphs",
+      icon: "pics",
+      title: "Scaled picture graphs",
+      game: { zone: "pics", name: "Picture Barn" },
+      lessons: "Lessons 1–4",
+      blurb: "Read picture graphs where each picture shows 2, 5, or 10, and make one from a table.",
+      steps: 2,
+    },
+    {
+      id: "bar-graphs",
+      icon: "bars",
+      title: "Scaled bar graphs",
+      game: { zone: "bars", name: "Bar Silo" },
+      lessons: "Lessons 5–6",
+      blurb: "Read and draw bars that end between the lines, and choose a good scale.",
+      steps: 2,
+    },
+    {
+      id: "graph-questions",
+      icon: "compare",
+      title: "Questions about bar graphs",
+      game: { zone: "bars", name: "Bar Silo" },
+      lessons: "Lessons 7–8",
+      blurb: "Find how many more, how many fewer, and how many in all.",
+      steps: 2,
+    },
+    {
+      id: "equal-groups",
+      icon: "groups",
+      title: "Equal groups",
+      game: { zone: "groups", name: "Basket Row" },
+      lessons: "Lessons 9–10",
+      blurb: "Count equal groups, and show them with drawings and diagrams.",
+      steps: 2,
+    },
+    {
+      id: "expressions",
+      icon: "times",
+      title: "Expressions and equations",
+      game: { zone: "groups", name: "Basket Row" },
+      lessons: "Lessons 11–13",
+      blurb: "Write 4 × 3 for 4 groups of 3, and write equations like 4 × 3 = 12.",
+      steps: 2,
+    },
+    {
+      id: "unknowns",
+      icon: "unknown",
+      title: "Find the unknown",
+      game: { zone: "equations", name: "Equation Shed" },
+      lessons: "Lessons 14–15",
+      blurb: "Find the missing number in 4 × ? = 20, and pick the equation for a story.",
+      steps: 2,
+    },
+    {
+      id: "arrays",
+      icon: "array",
+      title: "Arrays",
+      game: { zone: "arrays", name: "Tree Rows" },
+      lessons: "Lessons 16–19",
+      blurb: "Build arrays in rows and columns, write their expressions, and solve array stories.",
+      steps: 2,
+    },
+    {
+      id: "commutative",
+      icon: "turn",
+      title: "Turn it around",
+      game: { zone: "flip", name: "Flip Field" },
+      lessons: "Lesson 20",
+      blurb: "Turn an array to see why 3 × 5 = 5 × 3, and use a fact you know.",
+      steps: 2,
+    },
+  ],
+};

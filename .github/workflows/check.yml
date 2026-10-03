@@ -1,4 +1,4 @@
-# Runs tools/check.mjs (links, cache stamps, Learn chapter pages, fuzz test of every generator) and the Playwright tests
+# Runs tools/check.mjs (Prettier formatting, links, cache stamps, Learn chapter pages, fuzz test of every generator) and the Playwright tests
 # (real clicks and taps on every game station, Learn chapter, and 3D step) on every push and pull request.
 # GitHub Pages deploys main on its own, so a red check here means the live site may already be broken: fix it fast.
 name: Check
@@ -19,6 +19,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: npm
+      - run: npm ci
       - run: node tools/check.mjs
 
   playwright:

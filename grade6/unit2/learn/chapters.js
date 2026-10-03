@@ -1,19 +1,74 @@
 /* Learn Introducing Ratios (Grade 6 Unit 2): the unit's chapters and their icons. Loaded by learn.html and every chapter page in learn/.
    Each chapter is learn/<id>.html with its widgets and steps in learn/<id>.js; shared/learn.js has the format. */
-const ICON={
-  ratio:'<g stroke="#0a2340" stroke-width="1.5"><circle cx="12" cy="18" r="7" fill="#ffc93c"/><circle cx="28" cy="18" r="7" fill="#ffc93c"/><circle cx="44" cy="18" r="7" fill="#ffc93c"/><rect x="5" y="36" width="14" height="14" rx="3" fill="#7fe3ff"/><rect x="21" y="36" width="14" height="14" rx="3" fill="#7fe3ff"/></g><text x="54" y="48" fill="#f3f6fb" font-size="13" font-weight="700" text-anchor="middle" font-family="monospace">3:2</text>',
-  equiv:'<rect x="6" y="10" width="22" height="44" rx="5" fill="hsl(157 72% 50%)" stroke="#f3f6fb" stroke-width="2"/><rect x="36" y="10" width="22" height="44" rx="5" fill="hsl(157 72% 50%)" stroke="#f3f6fb" stroke-width="2"/><text x="32" y="38" fill="#f3f6fb" font-size="14" font-weight="700" text-anchor="middle" font-family="monospace">=</text>',
-  dnl:'<g stroke="#f3f6fb" stroke-width="2.5"><line x1="4" y1="20" x2="60" y2="20"/><line x1="4" y1="44" x2="60" y2="44"/></g><g stroke="#ffc93c" stroke-width="2.5"><line x1="10" y1="14" x2="10" y2="50"/><line x1="28" y1="14" x2="28" y2="50"/><line x1="46" y1="14" x2="46" y2="50"/></g>',
-  deal:'<rect x="6" y="14" width="24" height="36" rx="4" fill="rgba(255,201,60,.4)" stroke="#ffc93c" stroke-width="2"/><rect x="34" y="8" width="24" height="42" rx="4" fill="rgba(127,227,255,.35)" stroke="#7fe3ff" stroke-width="2"/><text x="46" y="34" fill="#f3f6fb" font-size="15" font-weight="700" text-anchor="middle" font-family="monospace">$</text>',
-  table:'<g stroke="#f3f6fb" stroke-width="2"><line x1="32" y1="6" x2="32" y2="58"/><line x1="6" y1="18" x2="58" y2="18"/></g><g fill="#ffc93c" font-size="10" font-weight="700" font-family="monospace" text-anchor="middle"><text x="19" y="32">2</text><text x="45" y="32">3</text><text x="19" y="46">4</text><text x="45" y="46">6</text><text x="19" y="58">6</text><text x="45" y="58">9</text></g>',
-  tape:'<g stroke="#ffc93c" stroke-width="2" fill="rgba(255,201,60,.25)"><rect x="4" y="14" width="14" height="14"/><rect x="18" y="14" width="14" height="14"/></g><g stroke="#7fe3ff" stroke-width="2" fill="rgba(127,227,255,.22)"><rect x="4" y="36" width="14" height="14"/><rect x="18" y="36" width="14" height="14"/><rect x="32" y="36" width="14" height="14"/></g><path d="M50,14 q6,0 6,6 v8 l4,4 l-4,4 v8 q0,6 -6,6" fill="none" stroke="#f3f6fb" stroke-width="2"/>',
+const ICON = {
+  ratio:
+    '<g stroke="#0a2340" stroke-width="1.5"><circle cx="12" cy="18" r="7" fill="#ffc93c"/><circle cx="28" cy="18" r="7" fill="#ffc93c"/><circle cx="44" cy="18" r="7" fill="#ffc93c"/><rect x="5" y="36" width="14" height="14" rx="3" fill="#7fe3ff"/><rect x="21" y="36" width="14" height="14" rx="3" fill="#7fe3ff"/></g><text x="54" y="48" fill="#f3f6fb" font-size="13" font-weight="700" text-anchor="middle" font-family="monospace">3:2</text>',
+  equiv:
+    '<rect x="6" y="10" width="22" height="44" rx="5" fill="hsl(157 72% 50%)" stroke="#f3f6fb" stroke-width="2"/><rect x="36" y="10" width="22" height="44" rx="5" fill="hsl(157 72% 50%)" stroke="#f3f6fb" stroke-width="2"/><text x="32" y="38" fill="#f3f6fb" font-size="14" font-weight="700" text-anchor="middle" font-family="monospace">=</text>',
+  dnl: '<g stroke="#f3f6fb" stroke-width="2.5"><line x1="4" y1="20" x2="60" y2="20"/><line x1="4" y1="44" x2="60" y2="44"/></g><g stroke="#ffc93c" stroke-width="2.5"><line x1="10" y1="14" x2="10" y2="50"/><line x1="28" y1="14" x2="28" y2="50"/><line x1="46" y1="14" x2="46" y2="50"/></g>',
+  deal: '<rect x="6" y="14" width="24" height="36" rx="4" fill="rgba(255,201,60,.4)" stroke="#ffc93c" stroke-width="2"/><rect x="34" y="8" width="24" height="42" rx="4" fill="rgba(127,227,255,.35)" stroke="#7fe3ff" stroke-width="2"/><text x="46" y="34" fill="#f3f6fb" font-size="15" font-weight="700" text-anchor="middle" font-family="monospace">$</text>',
+  table:
+    '<g stroke="#f3f6fb" stroke-width="2"><line x1="32" y1="6" x2="32" y2="58"/><line x1="6" y1="18" x2="58" y2="18"/></g><g fill="#ffc93c" font-size="10" font-weight="700" font-family="monospace" text-anchor="middle"><text x="19" y="32">2</text><text x="45" y="32">3</text><text x="19" y="46">4</text><text x="45" y="46">6</text><text x="19" y="58">6</text><text x="45" y="58">9</text></g>',
+  tape: '<g stroke="#ffc93c" stroke-width="2" fill="rgba(255,201,60,.25)"><rect x="4" y="14" width="14" height="14"/><rect x="18" y="14" width="14" height="14"/></g><g stroke="#7fe3ff" stroke-width="2" fill="rgba(127,227,255,.22)"><rect x="4" y="36" width="14" height="14"/><rect x="18" y="36" width="14" height="14"/><rect x="32" y="36" width="14" height="14"/></g><path d="M50,14 q6,0 6,6 v8 l4,4 l-4,4 v8 q0,6 -6,6" fill="none" stroke="#f3f6fb" stroke-width="2"/>',
 };
-const UNIT={saveKey:'g6u2-learn',game:'Mix Masters',icons:ICON,
-  chapters:[
-  {id:'ratios',icon:'ratio',title:'Ratios',game:{zone:'lang',name:'Ratio Language Lab'},lessons:'Lessons 1–2',blurb:'Compare two amounts with a ratio, say it in order, and see its equal groups.',steps:2},
-  {id:'equivalent',icon:'equiv',title:'Equivalent ratios',game:{zone:'equiv',name:'Recipe & Paint Shop'},lessons:'Lessons 3–5',blurb:'Make batches of a recipe, mix the same paint color, and tell when two ratios are equivalent.',steps:3},
-  {id:'double-number-lines',icon:'dnl',title:'Double number lines',game:{zone:'dnl',name:'Double Number Line Track'},lessons:'Lessons 6–9',blurb:'Line up two amounts on a double number line, find how much for one, and work with constant speed.',steps:3},
-  {id:'better-deals',icon:'deal',title:'Better deals',game:{zone:'compare',name:'Better Deal Market'},lessons:'Lessons 8–10',blurb:'Compare prices and speeds by finding the amount for one.',steps:2},
-  {id:'tables',icon:'table',title:'Tables',game:{zone:'table',name:'Table Town'},lessons:'Lessons 11–14',blurb:'Fill in tables of equivalent ratios, and go through 1 when the numbers don’t divide evenly.',steps:2},
-  {id:'part-part-whole',icon:'tape',title:'Part-part-whole',game:{zone:'ppw',name:'Tape Diagram Workshop'},lessons:'Lessons 15–16',blurb:'Split a total into equal boxes with a tape diagram, and find a whole from one part.',steps:2},
-]};
+const UNIT = {
+  saveKey: "g6u2-learn",
+  game: "Mix Masters",
+  icons: ICON,
+  chapters: [
+    {
+      id: "ratios",
+      icon: "ratio",
+      title: "Ratios",
+      game: { zone: "lang", name: "Ratio Language Lab" },
+      lessons: "Lessons 1–2",
+      blurb: "Compare two amounts with a ratio, say it in order, and see its equal groups.",
+      steps: 2,
+    },
+    {
+      id: "equivalent",
+      icon: "equiv",
+      title: "Equivalent ratios",
+      game: { zone: "equiv", name: "Recipe & Paint Shop" },
+      lessons: "Lessons 3–5",
+      blurb: "Make batches of a recipe, mix the same paint color, and tell when two ratios are equivalent.",
+      steps: 3,
+    },
+    {
+      id: "double-number-lines",
+      icon: "dnl",
+      title: "Double number lines",
+      game: { zone: "dnl", name: "Double Number Line Track" },
+      lessons: "Lessons 6–9",
+      blurb: "Line up two amounts on a double number line, find how much for one, and work with constant speed.",
+      steps: 3,
+    },
+    {
+      id: "better-deals",
+      icon: "deal",
+      title: "Better deals",
+      game: { zone: "compare", name: "Better Deal Market" },
+      lessons: "Lessons 8–10",
+      blurb: "Compare prices and speeds by finding the amount for one.",
+      steps: 2,
+    },
+    {
+      id: "tables",
+      icon: "table",
+      title: "Tables",
+      game: { zone: "table", name: "Table Town" },
+      lessons: "Lessons 11–14",
+      blurb: "Fill in tables of equivalent ratios, and go through 1 when the numbers don’t divide evenly.",
+      steps: 2,
+    },
+    {
+      id: "part-part-whole",
+      icon: "tape",
+      title: "Part-part-whole",
+      game: { zone: "ppw", name: "Tape Diagram Workshop" },
+      lessons: "Lessons 15–16",
+      blurb: "Split a total into equal boxes with a tape diagram, and find a whole from one part.",
+      steps: 2,
+    },
+  ],
+};

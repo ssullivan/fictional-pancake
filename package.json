@@ -1,12 +1,14 @@
 {
   "name": "math-games",
   "private": true,
-  "description": "Static math games. No build step: npm is only for the Playwright tests.",
+  "description": "Static math games. No build step: npm is only for the Playwright tests and Prettier.",
   "scripts": {
     "check": "node tools/check.mjs",
+    "format": "prettier --write \"**/*.{js,mjs}\"",
     "test": "playwright test"
   },
   "devDependencies": {
-    "@playwright/test": "^1.63.0"
+    "@playwright/test": "^1.63.0",
+    "prettier": "3.9.9"
   }
 }

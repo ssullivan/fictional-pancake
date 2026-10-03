@@ -21,49 +21,68 @@
 //   read TEXT            the step's text (above the widget) says it
 //   answer V             answer the quick check: type V, or pick the choice with id V
 //   feedback TEXT        the quick check's reply says it ("Nice!" when the answer was right)
-export const plain = s => String(s).replace(/<svg[^]*?<\/svg>/g, '(picture)').replace(/<[^>]*>/g, '').replace(/&amp;/g, '&').replace(/\s+/g, ' ').trim();
+export const plain = (s) =>
+  String(s)
+    .replace(/<svg[^]*?<\/svg>/g, "(picture)")
+    .replace(/<[^>]*>/g, "")
+    .replace(/&amp;/g, "&")
+    .replace(/\s+/g, " ")
+    .trim();
 
 // the quick-check line for a step
 export function quickLine(step) {
   const c = step.check;
-  if (!c) return '- No quick check.';
-  const q = t => `“${plain(t)}”`;
-  const answer = c.kind === 'num' ? `${c.answer}${c.unit ? ' ' + c.unit : ''}` : q(c.choices.find(x => x.id === c.answer).label);
-  const wrong = c.kind === 'num' ? (c.misc || []).map(([v]) => v) : c.choices.filter(x => x.id !== c.answer).map(x => q(x.label));
-  return `- Quick check: ${plain(c.q)} Answer: ${answer}.${wrong.length ? ` Mistakes it names: ${wrong.join(', ')}.` : ''}`;
+  if (!c) return "- No quick check.";
+  const q = (t) => `“${plain(t)}”`;
+  const answer =
+    c.kind === "num" ? `${c.answer}${c.unit ? " " + c.unit : ""}` : q(c.choices.find((x) => x.id === c.answer).label);
+  const wrong =
+    c.kind === "num"
+      ? (c.misc || []).map(([v]) => v)
+      : c.choices.filter((x) => x.id !== c.answer).map((x) => q(x.label));
+  return `- Quick check: ${plain(c.q)} Answer: ${answer}.${wrong.length ? ` Mistakes it names: ${wrong.join(", ")}.` : ""}`;
 }
 
 // read a checklist: the text before the first chapter, and the items of each step ('id/step' → lines)
 export function parse(text) {
-  const head = text.split(/^## /m)[0], items = new Map();
-  let chapter = null, step = null;
-  for (const line of text.split('\n')) {
+  const head = text.split(/^## /m)[0],
+    items = new Map();
+  let chapter = null,
+    step = null;
+  for (const line of text.split("\n")) {
     let m;
-    if ((m = line.match(/^## Chapter \d+: .* · `learn\/([\w-]+)\.html`/))) { chapter = m[1]; step = null; }
-    else if ((m = line.match(/^### Step (\d+):/))) { step = `${chapter}/${m[1]}`; items.set(step, []); }
-    else if (step && /^- \[[ x]\] /.test(line)) items.get(step).push(line);
+    if ((m = line.match(/^## Chapter \d+: .* · `learn\/([\w-]+)\.html`/))) {
+      chapter = m[1];
+      step = null;
+    } else if ((m = line.match(/^### Step (\d+):/))) {
+      step = `${chapter}/${m[1]}`;
+      items.set(step, []);
+    } else if (step && /^- \[[ x]\] /.test(line)) items.get(step).push(line);
   }
-  return {head, items};
+  return { head, items };
 }
 
 // the checklist as it should be, given the unit (UNIT) and each chapter's steps ({id: STEPS}), keeping the items written so far
 export function render(unit, steps, text) {
-  const {head, items} = parse(text), out = [head.trimEnd(), ''];
+  const { head, items } = parse(text),
+    out = [head.trimEnd(), ""];
   unit.chapters.forEach((c, ci) => {
-    out.push(`## Chapter ${ci + 1}: ${c.title} · \`learn/${c.id}.html\` · ${c.lessons}`, '');
+    out.push(`## Chapter ${ci + 1}: ${c.title} · \`learn/${c.id}.html\` · ${c.lessons}`, "");
     steps[c.id].forEach((s, si) => {
-      out.push(`### Step ${si + 1}: ${s.title}`, ...(items.get(`${c.id}/${si + 1}`) || []), quickLine(s), '');
+      out.push(`### Step ${si + 1}: ${s.title}`, ...(items.get(`${c.id}/${si + 1}`) || []), quickLine(s), "");
     });
   });
-  return out.join('\n');
+  return out.join("\n");
 }
 
 // what's wrong with a checklist: out of date, a step with no items, an item without a test script, or items for a step that's gone
 export function problems(unit, steps, text) {
-  const bad = [], {items} = parse(text), want = render(unit, steps, text);
-  const keys = new Set(unit.chapters.flatMap(c => steps[c.id].map((_, si) => `${c.id}/${si + 1}`)));
+  const bad = [],
+    { items } = parse(text),
+    want = render(unit, steps, text);
+  const keys = new Set(unit.chapters.flatMap((c) => steps[c.id].map((_, si) => `${c.id}/${si + 1}`)));
   for (const k of items.keys()) if (!keys.has(k)) bad.push(`items for ${k}, which isn't a step any more`);
-  if (want !== text) bad.push('headings or quick-check lines are out of date (node tools/check.mjs --fix)');
+  if (want !== text) bad.push("headings or quick-check lines are out of date (node tools/check.mjs --fix)");
   for (const k of keys) {
     const its = items.get(k) || [];
     if (!its.length) bad.push(`${k} has no checklist items`);
