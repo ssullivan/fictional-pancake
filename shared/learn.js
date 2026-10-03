@@ -20,7 +20,8 @@
    Learn.chapter(UNIT, id, steps)    on learn/<id>.html: draws the chapter, where steps are [{
        title, body,             body is HTML
        widget?: el => cleanup?, draws into el; may return a function that runs when the step is left
-       check?: {kind: 'num', q, answer, unit?, misc?: [[wrong value, message]], explain, fig?}
+       check?: {kind: 'num', q, answer, unit?, misc?: [[wrong value, message]], explain, fig?, frac?}   frac: the answer may be a
+                                fraction or mixed number (a keyboard with / and space on phones, instead of the decimal keypad)
              | {kind: 'mc', q, answer, choices: [{id, label}], why: {id: message}, explain, fig?, stack?}
    }]
    Next unlocks once a step's quick check is answered (steps without a check unlock right away). */
@@ -38,7 +39,7 @@ const Learn=(()=>{
     const q=Q(el),ans=q('a'),fb=q('fb');let tries=0,done=false;
     if(canSpeak())el.querySelector('.cq').before(sayBtn('Read the question',()=>[el.querySelector('.cq'),...ans.querySelectorAll('.choice')]));
     if(c.kind==='num'){
-      ans.innerHTML=`<form class="ans" autocomplete="off"><label class="sr" for="cin">Your answer</label><input id="cin" inputmode="decimal" placeholder="?"><span class="unit">${c.unit||''}</span><button class="btn">Check</button></form>`;
+      ans.innerHTML=`<form class="ans" autocomplete="off"><label class="sr" for="cin">Your answer</label><input id="cin" ${c.frac?'inputmode="text" placeholder="like 2 1/3"':'inputmode="decimal" placeholder="?"'}><span class="unit">${c.unit||''}</span><button class="btn">Check</button></form>`;
       ans.querySelector('form').addEventListener('submit',e=>{e.preventDefault();submit($('cin').value);});
     }else{
       ans.innerHTML=`<div class="choices${c.stack?' stack':''}">${c.choices.map(x=>`<button type="button" class="choice" data-c="${x.id}">${x.label}</button>`).join('')}</div>`;

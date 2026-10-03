@@ -1,0 +1,14 @@
+/* Grade 6 Unit 4 Learn pages: equations, pictures side by side, and worked steps. Loaded by learn.html and every page in learn/. */
+.eq{margin:0 0 10px;font:700 24px var(--mono);text-align:center}
+.eq .q{background:var(--gold);color:#1a1300;border-radius:6px;padding:0 8px}
+/* pictures side by side (pattern blocks), wrapping on a phone */
+.pbrow{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;align-items:flex-end}
+.pbrow svg{width:auto;max-height:120px}
+/* worked steps, revealed one at a time */
+.work-steps{margin:8px 0 0;padding-left:1.4em;font-size:18px;line-height:1.7}
+.work-steps li::marker{color:var(--gold);font-weight:700}
+/* two tapes, one over the other, each with a label */
+.tape-lab{margin:8px 0 2px;font:700 15px var(--mono);color:var(--dim)}
+/* a triangle's height: dashed, with a square corner */
+.tri-h{stroke:var(--cyan);stroke-width:2.5;stroke-dasharray:6 5}
+.tri-sq{fill:none;stroke:var(--cyan);stroke-width:1.5}

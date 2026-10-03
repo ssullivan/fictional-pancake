@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Fraction Workshop</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=JetBrains+Mono:wght@500;700&display=swap">
+<link rel="stylesheet" href="../../shared/theme.css?v=4796e910">
+<link rel="stylesheet" href="../../shared/game.css?v=57b7d039">
+<link rel="stylesheet" href="../../shared/figures.css?v=b9c879a9">
+<link rel="stylesheet" href="../../shared/pictures.css?v=7f680159">
+<link rel="stylesheet" href="figs.css?v=dd424c80">
+</head>
+<body>
+
+<div class="app">
+  <section id="home">
+    <a class="back" href="../">← Grade 6</a>
+    <header class="hero">
+      <p class="eyebrow">Illustrative Mathematics · Grade 6 · Unit 4 · Dividing Fractions</p>
+      <h1>Fraction <span>Workshop</span></h1>
+      <p class="lede">Run the workshop! Cut boards into pieces, fill cans part of the way, find what a whole batch takes, tile a floor, and pack crates with small cubes. Each station matches lessons from class. <a href="learn.html">New to this? Learn it first →</a></p>
+      <div class="stats">
+        <span class="pill">Points <b id="hp">0</b></span>
+        <span class="pill">Stars <b id="hs">0</b>/<span id="hsMax">24</span></span>
+      </div>
+    </header>
+    <div class="zones" id="zones"></div>
+    <section class="grownups">
+      <h2>For grown-ups</h2>
+      <div><h4>How a round works</h4><p>Each station deals 8 fresh problems (Big Build deals 10). A right answer on the first try earns 10 points. After a wrong answer, the game names the likely mistake and gives one more try for 5 points.</p></div>
+      <div><h4>Typing fractions</h4><p>Answers can be typed as a fraction (14/3), a mixed number (4 2/3), or a decimal close enough (4.67). On a phone, the answer box opens the full keyboard so the slash and space are there.</p></div>
+      <div><h4>Numbers you can do in your head</h4><p>Denominators stay at 12 or less, and the numbers met along the way stay small, so the challenge is the idea: what the groups are, what is known, and whether to multiply or divide.</p></div>
+      <div><h4>The "Show me" hint</h4><p>Hints use the pictures from class: tape diagrams cut into equal parts with the groups bracketed, a group cut into parts when part of it is known, rectangles tiled in small squares, and boxes packed with small cubes. A used hint caps that problem at 5 points.</p></div>
+      <div><h4>Mistakes it catches</h4><p>Multiplying instead of dividing, dividing the wrong way, flipping the wrong fraction (or both), reading a leftover as a fraction of a whole instead of a fraction of a group, dropping the leftover, finding one part instead of the whole, forgetting the ½ in a triangle, and mixing up a count of small cubes with the volume.</p></div>
+      <div><h4>Not covered</h4><p>Lesson 17 (Fitting Boxes into Boxes) is a hands-on project, and Lesson 12’s info gap is a partner activity, so both work better in class than as scored problems.</p></div>
+    </section>
+  </section>
+
+  <section id="play" hidden>
+    <div class="bar">
+      <button id="quit" class="ghost-btn" type="button">← Stations</button>
+      <div class="bar-mid"><div class="zn" id="zname"></div><div class="track"><div id="prog"></div></div></div>
+      <div class="bar-stats"><span class="pill" id="streak">Streak <b>0</b></span><span class="pill">Pts <b id="pts">0</b></span></div>
+    </div>
+    <article class="card">
+      <p class="eyebrow" id="qnum"></p>
+      <h2 id="prompt"></h2>
+      <div class="fig" id="fig"></div>
+      <div id="answer"></div>
+      <div id="hint" class="hintbox" hidden></div>
+      <div id="feedback" role="status" aria-live="polite"></div>
+    </article>
+  </section>
+
+  <section id="done" hidden>
+    <div class="card done">
+      <p class="eyebrow" id="dzone"></p>
+      <div class="bigstars stars" id="dstars"></div>
+      <h2 id="dtitle"></h2>
+      <p id="dmsg"></p>
+      <div class="row">
+        <button class="btn" id="again" type="button">Play again</button>
+        <button class="ghost-btn" id="tomap" type="button">Back to stations</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script src="../../shared/util.js?v=45d04a23"></script>
+<script src="../../shared/figures.js?v=778d36b6"></script>
+<script src="../../shared/pictures.js?v=0447fc09"></script>
+<script src="figs.js?v=498ab5e7"></script>
+<script src="../../shared/engine.js?v=44d597b5"></script>
+<script src="stations.js?v=e79c21bc"></script>
+<script>
+Game.init({
+  saveKey:'g6u4-save',
+  zones:ZONES,icons:ICON,
+  words:{
+    right:'Measured and cut!',
+    miss:'Not quite. Ask what the groups are and what is known, then decide whether to multiply or divide.',
+    titles:['Keep building','Good start','Solid work','Master builder!'],
+    next:'Try the next station, or take on the Big Build.',
+    stuck:'Use "Show me a hint" when you’re stuck. The tape diagrams show the groups.'
+  }
+});
+</script>
+</body>
+</html>

@@ -24,7 +24,8 @@
    })
 
    A problem from gen() is {kind, prompt, explain, hint?, fig?} plus, by kind:
-     num:  answer, unit, misc?: [[wrong value, message]]
+     num:  answer, unit, misc?: [[wrong value, message]], frac?: true when the answer may be a fraction or mixed number
+           (a keyboard with / and space on phones, instead of the decimal keypad)
      pair: answer: [x, y], labels: [x label, y label], equiv?: any equivalent ratio counts, pmisc?: [[[x, y], message]]
      mc:   answer: choice id, choices: [{id, label}], why?: {choice id: message}, stack?: one choice per row
      tap:  answer: id of the right .cand element in the figure (data-id), why?: {id: message}
@@ -92,7 +93,7 @@ const Game=(()=>{
     const hintBtn=p.hint?`<button type="button" class="link-btn" id="hintBtn">Show me a hint</button>`:'';
     if(p.kind==='num'||p.kind==='pair'){
       const fields=p.kind==='num'
-        ?`<label for="inp" class="sr">Your answer</label><input id="inp" inputmode="decimal" placeholder="?"><span class="unit">${p.unit}</span>`
+        ?`<label for="inp" class="sr">Your answer</label><input id="inp" ${p.frac?'inputmode="text" placeholder="like 2 1/3"':'inputmode="decimal" placeholder="?"'}><span class="unit">${p.unit}</span>`
         :`<span class="pairlab"><input id="inp" class="sm" inputmode="decimal" placeholder="?" aria-label="Number of ${p.labels[0]}"><small>${p.labels[0]}</small></span><span class="colon">:</span><span class="pairlab"><input id="inp2" class="sm" inputmode="decimal" placeholder="?" aria-label="Number of ${p.labels[1]}"><small>${p.labels[1]}</small></span>`;
       $('answer').innerHTML=`<form class="ans" id="af" autocomplete="off">${fields}<button class="btn" id="checkBtn">Check</button></form><div class="tools" style="margin-top:12px">${hintBtn}</div>`;
       $('af').addEventListener('submit',e=>{e.preventDefault();if(G.done)return advance();submit(p.kind==='num'?$('inp').value:[$('inp').value,$('inp2').value]);});

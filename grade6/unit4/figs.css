@@ -1,0 +1,27 @@
+/* Styles for figs.js: group tapes, one-group tapes, rectangles tiled in small squares, and boxes of small cubes. */
+/* tapes: a part in a group (a gold, b blue), the part of a group left over (p), and the rest of that group past the end (gh) */
+.gt{fill:rgba(9,32,61,.6);stroke:none}
+.gt.a{fill:rgba(255,201,60,.5)}
+.gt.b{fill:rgba(127,227,255,.42)}
+.gt.p{fill:rgba(95,224,168,.5)}
+.gt.gh{fill:none;stroke:var(--good);stroke-width:1.5;stroke-dasharray:4 4}
+.gt-part{stroke:rgba(243,246,251,.45);stroke-width:1}
+.gt-sep{stroke:var(--chalk);stroke-width:1.5}
+.gt-whole{stroke:var(--chalk);stroke-width:2.5}
+.gt-out{fill:none;stroke:var(--chalk);stroke-width:2.5}
+.gt-br{fill:none;stroke:var(--chalk);stroke-width:2}
+.gt-br.p{stroke:var(--good)}
+.frt.gn line{stroke:var(--good)}
+.frt.gn .lbl,.lbl.gn{fill:var(--good)}
+/* rectangles in small squares */
+.rg{fill:rgba(9,32,61,.6);stroke:rgba(243,246,251,.3);stroke-width:1}
+.rg.on{fill:rgba(255,201,60,.45)}
+.rg-whole{stroke:var(--chalk);stroke-width:2}
+.rg-out{fill:none;stroke:var(--chalk);stroke-width:2.5}
+/* boxes of small cubes: front, top, and right faces */
+.cb{stroke:var(--chalk);stroke-width:2.5;stroke-linejoin:round}
+.cb.f{fill:rgba(255,201,60,.4)}
+.cb.t{fill:rgba(255,201,60,.6)}
+.cb.r{fill:rgba(255,201,60,.25)}
+.cb-l{stroke:rgba(10,35,64,.55);stroke-width:1}
+.cb-w{stroke:var(--chalk);stroke-width:2}
