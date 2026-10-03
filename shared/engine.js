@@ -1,5 +1,5 @@
-/* Game engine shared by every game: a home screen of stations (zones), rounds of 8 problems (10 for the boss),
-   10 points for a first-try answer and 5 after a miss or a hint, stars saved in localStorage.
+/* Game engine shared by every game: a home screen of stations (zones), rounds of 8 problems (10 for the boss, never the same
+   one twice in a round), 10 points for a first-try answer and 5 after a miss or a hint, stars saved in localStorage.
    Needs util.js (and speak.js with readAloud). Screens and ids are in the page's HTML (#home, #play, #done); styles are in game.css.
 
    Game.init({
@@ -58,7 +58,7 @@ const Game=(()=>{
 
   function start(zid){
     const z=cfg.zones.find(q=>q.id===zid);
-    G={z,i:0,n:zid==='boss'?10:8,pts:0,streak:0};
+    G={z,i:0,n:zid==='boss'?10:8,pts:0,streak:0,seen:new Set()};
     $('zname').textContent=z.name;show('play');nextQ();
   }
   const hush=()=>{if(typeof Say!=='undefined')Say.hush();};
@@ -66,7 +66,9 @@ const Game=(()=>{
   function nextQ(){
     hush();
     if(G.i>=G.n)return finish();
-    G.p=G.z.gen();G.tries=0;G.hinted=false;G.done=false;G.marks={};
+    /* deal again when this round already had the problem (problemKey, util.js); after 20 tries, allow the repeat */
+    let k;for(let t=0;t<20;t++){G.p=G.z.gen();k=problemKey(G.p);if(!G.seen.has(k))break;}
+    G.seen.add(k);G.tries=0;G.hinted=false;G.done=false;G.marks={};
     if(cfg.onQuestion)cfg.onQuestion(G);
     renderQ();
   }

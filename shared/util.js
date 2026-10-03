@@ -5,9 +5,15 @@ const pick=a=>a[Math.floor(Math.random()*a.length)];
 /* range(n) is [0, 1, …, n-1] */
 const range=n=>[...Array(n).keys()];
 const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
-/* For generators. miscOf: wrong answers [[value, message], …], leaving out any that equal the answer or repeat.
+/* For generators. miscOf: wrong answers [[value, message], …], leaving out any that repeat an earlier value (the engine shows
+   the first match). A wrong answer must never equal the answer (tools/fuzz.mjs checks): when a mistake doesn't apply to these
+   numbers (÷ 10 for 10%), leave it out; when a wrong method lands on the answer (16 ÷ 4 for the side of a square of area 16),
+   deal other numbers.
    mcOf: an mc problem with choices a, b, c (d) in random order from [[label, message, or null for the answer], …]. */
-const miscOf=(answer,list)=>list.filter(([v],i)=>v!==answer&&list.findIndex(([w])=>w===v)===i);
+const miscOf=(answer,list)=>list.filter(([v],i)=>list.findIndex(([w])=>w===v)===i);
+/* Two problems are the same when they ask the same thing with the same worked answer and choices. The engine deals again
+   rather than repeat one in a round, and tools/fuzz.mjs checks that every station has enough different problems. */
+const problemKey=p=>[p.prompt,p.explain,...(p.choices||[]).map(c=>c.label).sort()].join('|');
 function mcOf(list,extra={}){
   const ids=shuffle(['a','b','c','d'].slice(0,Math.max(3,list.length))).slice(0,list.length),why={};let answer;
   const choices=list.map(([label,msg],i)=>{if(msg===null)answer=ids[i];else why[ids[i]]=msg;return {id:ids[i],label};}).sort((x,y)=>x.id<y.id?-1:1);

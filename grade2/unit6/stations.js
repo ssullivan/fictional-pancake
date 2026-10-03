@@ -110,7 +110,7 @@ function genParts(){
   const [big,small]=pick([['hexagon','triangle'],['hexagon','triangle'],['hexagon','rhombus'],['hexagon','trapezoid'],['trapezoid','triangle'],['rhombus','triangle']]),n2=PB[big][small];
   return {kind:'num',unit:plural(small),answer:n2,prompt:`How many ${plural(small)} fill this ${big}?`,
     fig:show=>pbFig(big,small,{show:show?true:0,s:80}),
-    misc:miscOf(n2,[1,2,3,4,6].map(v=>[v,v<n2?`That’s not enough to fill the ${big}. Picture more ${plural(small)} inside it.`:`That’s too many. They won’t all fit inside the ${big}.`])),
+    misc:miscOf(n2,[1,2,3,4,6].filter(v=>v!==n2).map(v=>[v,v<n2?`That’s not enough to fill the ${big}. Picture more ${plural(small)} inside it.`:`That’s too many. They won’t all fit inside the ${big}.`])),
     hint:`One ${small} is drawn inside the dashed ${big}. How many would fill it with no gaps?`,
     explain:`${n2} ${plural(small)} fill the ${big}.`+(big==='hexagon'?' A hexagon is 6 triangles, 3 rhombuses, or 2 trapezoids.':'')};
 }
@@ -180,7 +180,7 @@ function genCoins(){
     while(centsOf(coinList(c))>100||Object.values(c).filter(v=>v).length<2);
     const list=coinList(c),t=centsOf(list),as=(k,v)=>t-(c[k]||0)*(COINS[k].v-v);
     return {kind:'num',unit:'cents',answer:t,prompt:'How much money is this?',fig:show=>moneyFig(list,{vals:show}),
-      misc:miscOf(t,[[list.length,'That’s the number of coins. Each kind of coin is worth a different amount.'],...(c.q?[[as('q',10),'A quarter is 25¢, not 10¢.']]:[]),[as('d',5),'A dime is 10¢. The nickel is the one worth 5¢.'],[as('n',1),'A nickel is 5¢, not 1¢.'],[as('n',10),'A nickel is 5¢. The dime is the one worth 10¢.']]),
+      misc:miscOf(t,[[list.length,'That’s the number of coins. Each kind of coin is worth a different amount.'],...(c.q?[[as('q',10),'A quarter is 25¢, not 10¢.']]:[]),...(c.d?[[as('d',5),'A dime is 10¢. The nickel is the one worth 5¢.']]:[]),...(c.n?[[as('n',1),'A nickel is 5¢, not 1¢.'],[as('n',10),'A nickel is 5¢. The dime is the one worth 10¢.']]:[])]),
       hint:(c.q?'Count the quarters by 25s. ':'')+'Count dimes by 10s, then nickels by 5s, then pennies by 1s.',
       explain:`Start with the coins worth the most: ${countUp(list)}. That’s ${t}¢.`};
   }
@@ -194,12 +194,15 @@ function genCoins(){
     const [small,big]=pick([['p','n'],['p','d'],['n','d'],['n','q'],['d','B'],['q','B'],['n','B']]),n=COINS[big].v/COINS[small].v,S=COINS[small],B=COINS[big];
     return {kind:'num',unit:S.pl,answer:n,prompt:`How many <b>${S.pl}</b> make ${big==='B'?'<b>1 dollar</b>':`a <b>${B.name}</b>`}?`,
       fig:show=>moneyFig(show?[big,...Array(n).fill(small)]:[big,small],{vals:true}),
-      misc:miscOf(n,[[B.v,`${big==='B'?'A dollar':`A ${B.name}`} is ${B.v}¢. How many ${S.pl} is that?`],[S.v,`A ${S.name} is ${S.v}¢. How many make ${B.v}¢?`]]),
+      /* a penny's count is its cents, and 5 nickels make a quarter, so those mistakes give the answer there */
+      misc:miscOf(n,[...(small!=='p'?[[B.v,`${big==='B'?'A dollar':`A ${B.name}`} is ${B.v}¢. How many ${S.pl} is that?`]]:[]),...(S.v!==n?[[S.v,`A ${S.name} is ${S.v}¢. How many make ${B.v}¢?`]]:[])]),
       hint:`${big==='B'?'A dollar':`A ${B.name}`} is ${B.v}¢. Count by ${S.v}s to ${B.v}.`,
       explain:`Count by ${S.v}s: ${range(Math.min(n,5)).map(i=>S.v*(i+1)).join(', ')}${n>5?', …':''} ${B.v}. That’s ${n} ${S.pl}.`};
   }
   if(k===3){
-    const t=5*R(6,19),c=makeCents(t),list=coinList(c);
+    /* not 50¢, where what's here is also what's needed */
+    let t;do t=5*R(6,19);while(t===50);
+    const c=makeCents(t),list=coinList(c);
     return {kind:'num',unit:'cents',answer:100-t,prompt:'How much more money do you need to make <b>1 dollar</b>?',fig:show=>moneyFig(list,{vals:show}),
       misc:miscOf(100-t,[[t,'That’s how much is here. How much more to get to 100¢?'],[100,'A dollar is 100¢, but some of it is here already.'],[100-t+10,`Count the coins again: ${countUp(list)}.`],[100-t-10,`Count the coins again: ${countUp(list)}.`]]),
       hint:'A dollar is 100¢. Count the coins, then count on to 100.',
@@ -235,7 +238,9 @@ function genShop(){
   }
   const it=pick(PRIZE),p=priceOf(it);
   if(k===1){
-    const h=5*R(p/5+1,20),c=makeCents(h);
+    /* not twice the price, where what's left is the price */
+    let h;do h=5*R(p/5+1,20);while(h===2*p);
+    const c=makeCents(h);
     return {kind:'num',unit:'cents',answer:h-p,prompt:`${name} has ${h}¢. ${name} buys ${an(it[0])} ${it[0]} for ${p}¢. How much money does ${name} have left?`,
       fig:show=>tags([[it[0],`${p}¢`]])+(show?moneyFig(coinList(c),{vals:true,label:`${name}’s ${h}¢`}):''),
       misc:miscOf(h-p,[[h+p,`That’s adding. ${name} spends money, so there is less left.`],[p,`That’s the price of the ${it[0]}.`],[h,`That’s what ${name} had before buying the ${it[0]}.`]]),
@@ -250,15 +255,18 @@ function genShop(){
       hint:`Add the two prices: ${p} + ${p2}. Add the tens, then the ones.`,
       explain:`${p} + ${p2} = ${p+p2}. ${name} spends ${p+p2}¢.`};
   }
-  if(k===3){
-    const h=5*R(1,p/5-1),c=makeCents(h);
+  /* not half the price, where what's needed is what's there (a 10¢ prize has only 5¢ below half, so it gets a big prize) */
+  if(k===3&&p>10){
+    let h;do h=5*R(1,p/5-1);while(2*h===p);
+    const c=makeCents(h);
     return {kind:'num',unit:'cents',answer:p-h,prompt:`${name} has ${h}¢. ${name} wants ${an(it[0])} ${it[0]} that costs ${p}¢. How much more money does ${name} need?`,
       fig:()=>tags([[it[0],`${p}¢`]])+moneyFig(coinList(c),{label:`${name}’s ${h}¢`}),
       misc:miscOf(p-h,[[p+h,`That’s adding. ${name} needs the difference between ${h}¢ and ${p}¢.`],[p,`That’s the whole price. ${name} already has ${h}¢.`],[h,`That’s what ${name} has now.`]]),
       hint:`Count up from ${h} to ${p}.`,
       explain:`${h} + ${p-h} = ${p}, so ${name} needs ${p-h}¢ more.`};
   }
-  const g=pick(BIG),bp=R(g[1],g[2]),bh=R(1,bp-1);
+  const g=pick(BIG),bp=R(g[1],g[2]);
+  let bh;do bh=R(1,bp-1);while(2*bh===bp);
   return {kind:'num',unit:'dollars',answer:bp-bh,prompt:`${cap(an(g[0]))} ${g[0]} costs $${bp}. ${name} has $${bh}. How many more dollars does ${name} need?`,
     fig:()=>tags([[g[0],`$${bp}`]])+moneyFig(coinList({B:bh}),{label:`${name}’s $${bh}`}),
     misc:miscOf(bp-bh,[[bp+bh,`That’s adding. ${name} needs the difference.`],[bp,`That’s the whole price. ${name} already has $${bh}.`],[bh,`That’s what ${name} has now.`]]),

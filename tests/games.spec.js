@@ -1,4 +1,5 @@
-// Every station of every game, played to the end with real typing, clicks, and taps, answering each problem right.
+// Every station of every game, played to the end with real typing, clicks, and taps, answering each problem right,
+// with no problem dealt twice in the round.
 const {test, expect} = require('./fixtures');
 const {globSync, readFileSync} = require('node:fs');
 const {dirname} = require('node:path');
@@ -15,9 +16,11 @@ for (const game of games) {
       await page.goto('about:blank');
       await page.goto(`${game}/#${zone}`);
       await expect(page.locator('#play')).toBeVisible();
-      const n = zone === 'boss' ? 10 : 8;
+      const n = zone === 'boss' ? 10 : 8, seen = new Set();
       for (let i = 0; i < n; i++) {
-        const p = await page.evaluate(() => { const p = Game.state.p; return {kind: p.kind, answer: p.answer}; });
+        const p = await page.evaluate(() => { const p = Game.state.p; return {kind: p.kind, answer: p.answer, key: problemKey(p)}; });
+        expect(seen.has(p.key), `problem ${i + 1} repeats an earlier one: ${p.key.slice(0, 120)}`).toBe(false);
+        seen.add(p.key);
         if (p.kind === 'num') { await page.locator('#inp').fill(String(p.answer)); await page.locator('#inp').press('Enter'); }
         else if (p.kind === 'pair') { await page.locator('#inp').fill(String(p.answer[0])); await page.locator('#inp2').fill(String(p.answer[1])); await page.locator('#inp2').press('Enter'); }
         else if (p.kind === 'mc') await press(page.locator(`#answer .choice[data-c="${p.answer}"]`));

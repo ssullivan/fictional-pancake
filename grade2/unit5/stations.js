@@ -68,7 +68,7 @@ function genBuild(){
     const n=num3(),[h,t,o]=digits(n);
     return {kind:'num',unit:'',answer:n,prompt:'What number do the blocks show?',
       fig:()=>bigBlocks(h,t,o,{cls:{t:'b',o:'c'}},htoSay(h,t,o)),
-      misc:miscOf(n,[[h*100+o*10+t,'Tens come before ones. Count the sticks for the tens digit.'],[Number(`${h}${t||''}${o||''}`),`${!t?'There are no tens':'There are no ones'}, so that place gets a 0.`],[h+t+o,'Each big square is 100 and each stick is 10. Don’t just count the pieces.']]),
+      misc:miscOf(n,[...(t!==o?[[h*100+o*10+t,'Tens come before ones. Count the sticks for the tens digit.']]:[]),...(!t||!o?[[Number(`${h}${t||''}${o||''}`),`${!t?'There are no tens':'There are no ones'}, so that place gets a 0.`]]:[]),[h+t+o,'Each big square is 100 and each stick is 10. Don’t just count the pieces.']]),
       hint:'Big squares are hundreds. Sticks are tens. Small squares are ones.',
       explain:`${htoSay(h,t,o)} is ${n}.`};
   }
@@ -105,7 +105,7 @@ function genExpand(){
     const n=num3(),[h,t,o]=digits(n),parts=[h*100,t*10,o].filter(v=>v);
     return {kind:'num',unit:'',answer:n,prompt:`What number is <b>${parts.join(' + ')}</b>?`,
       fig:()=>bigBlocks(h,t,o,{cls:{t:'b',o:'c'}},htoSay(h,t,o)),
-      misc:miscOf(n,[[Number(parts.join('')),'Each part goes in its own place. The number has only three digits.'],[h+t+o,`The ${h} is ${h*100}. Don’t just add the digits.`],[h*100+o*10+t,'Tens come before ones.'],[Number(`${h}${t||''}${o||''}`),'A place with nothing in it still needs a 0.']]),
+      misc:miscOf(n,[[Number(parts.join('')),'Each part goes in its own place. The number has only three digits.'],[h+t+o,`The ${h} is ${h*100}. Don’t just add the digits.`],...(t!==o?[[h*100+o*10+t,'Tens come before ones.']]:[]),...(!t||!o?[[Number(`${h}${t||''}${o||''}`),'A place with nothing in it still needs a 0.']]:[])]),
       hint:`${h*100} is ${say(h,'hundreds')}, ${t*10} is ${say(t,'tens')}, and ${o} is ${say(o,'ones')}.`,
       explain:`${parts.join(' + ')} is ${htoSay(h,t,o)}: ${n}.`};
   }

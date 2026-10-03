@@ -45,9 +45,11 @@ const SQ='square units';
 
 /* ---------- Zone 1: parallelograms ---------- */
 function genPara(){
-  const b=R(4,9),h=R(3,7),s=R(1,Math.min(3,b-2)),m=pick([1,-1]),W=b+s;
+  /* not a perimeter that equals the area (base 5, height 4, slanted side 5) */
+  let b,h,s,sl;
+  do{b=R(4,9);h=R(3,7);s=R(1,Math.min(3,b-2));sl=r1(Math.hypot(s,h));}while(Math.abs(2*b+2*sl-b*h)<.011);
+  const m=pick([1,-1]),W=b+s;
   const X=x=>m>0?x:W-x;
-  const sl=r1(Math.hypot(s,h));
   const type=pick(['area','area','tap','missing']);
   const f=new Fig();
   f.poly([[X(0),h],[X(b),h],[X(W),0],[X(s),0]]);
@@ -326,6 +328,8 @@ function howMany(kind,n,what){
   return {faces:`1 ${P} base + ${n} triangles = ${c.faces} faces`,edges:`${n} edges around the base, and ${n} going up to the top: ${n} + ${n} = ${c.edges} edges`,vertices:`${n} vertices around the base, and 1 at the top: ${n} + 1 = ${c.vertices} vertices`}[what];
 }
 const MIX={faces:'That’s the number of faces',edges:'That’s the number of edges',vertices:'That’s the number of vertices'};
+/* the other two counts, as mistakes (leaving out one that is the answer too: a pyramid has as many faces as vertices) */
+const mixUps=(c,what)=>Object.keys(c).filter(w=>w!==what&&c[w]!==c[what]).map(w=>[c[w],`${MIX[w]}. Count the ${what}.`]);
 /* Figure A, Figure B, both, or neither (like the Lesson 13 practice problems): one statement about two polyhedra */
 const facesOf=s=>s.kind==='prism'?`${POLYGON[s.n]}s and rectangles`:s.n===3?'all triangles':`triangles and ${an(POLYGON[s.n])} ${POLYGON[s.n]}`;
 function statementsFor(A,B){
@@ -372,11 +376,12 @@ function genSolid(){
   if(t==='count'){
     /* count the faces, edges, or vertices in a drawing */
     const s=someSolid(),{kind,n}=s,what=pick(['faces','edges','vertices']),c=countsOf(kind,n),seen=seenOf(s);
-    const others=Object.keys(c).filter(w=>w!==what).map(w=>[c[w],`${MIX[w]}. Count the ${what}.`]);
+    /* a drawing may show every vertex: leave out the hidden-vertex mistake then */
+    const others=mixUps(c,what);
     const miss={
       faces:[[seen.faces,'That’s the faces you can see. Count the ones at the back and on the bottom too.'],[n,kind==='prism'?'Those are the rectangles around the side. Add the 2 bases.':'Those are the triangles. Add the base.']],
       edges:[[seen.edges,'Count the dashed edges at the back too.'],kind==='prism'?[2*n,`Don’t forget the ${n} edges going up the sides.`]:[n,`That’s just the edges around the base. Add the ${n} going up to the top.`]],
-      vertices:[[seen.vertices,'Count the hidden vertices at the back too.'],kind==='prism'?[n,`That’s one base. The other base has ${n} vertices too.`]:[n,'Don’t forget the vertex at the top.']],
+      vertices:[...(seen.vertices!==c.vertices?[[seen.vertices,'Count the hidden vertices at the back too.']]:[]),kind==='prism'?[n,`That’s one base. The other base has ${n} vertices too.`]:[n,'Don’t forget the vertex at the top.']],
     }[what];
     return {kind:'num',unit:what,fig:solidPic(s),answer:c[what],solid:s,
       prompt:`How many ${what} does this ${s.name} have?`,
@@ -407,7 +412,7 @@ function genSolid(){
     }[what];
     return {kind:'num',unit:what,fig:null,answer:c[what],
       prompt:`${say} How many ${what} does it have?`,
-      misc:miscOf(c[what],[...miss,...Object.keys(c).filter(w=>w!==what).map(w=>[c[w],`${MIX[w]}. Count the ${what}.`])]),
+      misc:miscOf(c[what],[...miss,...mixUps(c,what)]),
       hint:kind==='prism'?'Picture a pentagonal prism: 2 pentagons joined by 5 rectangles. Now use this base instead.':'Picture a pentagonal pyramid: 1 pentagon, and 5 triangles meeting at the top. Now use this base instead.',
       explain:`It has ${howMany(kind,n,what)}.`};
   }
@@ -470,7 +475,8 @@ function genCube(){
   const t=pick(['sq','cu','sqroot','cubeSA','cubeSA','cuberoot','units','expr']);
   const f=new Fig();
   if(t==='sq'||t==='sqroot'){
-    const n=t==='sq'?R(2,12):R(3,11);
+    /* not 2 squared (2 × 2 = 2 + 2 = 4) or the side of 16 (16 ÷ 4 = 4) */
+    let n;do n=t==='sq'?R(2,12):R(3,11);while(n===(t==='sq'?2:4));
     f.poly([[0,0],[n,0],[n,n],[0,n]]);f.lbl(n/2,n+.8,t==='sq'?n:'?',t==='sq'?'':'q');
     if(t==='sq')return {kind:'num',unit:'',fig:f,answer:n*n,
       prompt:`What is ${n}<sup>2</sup>?`,
@@ -498,7 +504,9 @@ function genCube(){
       explain:`${n} × ${n} × ${n} = ${V}, so each edge is ${n} units.`};
   }
   if(t==='cubeSA'){
-    const s=R(2,9),d=box(f,s,s,s,[s,null,null]);
+    /* not an edge of 6, where the volume (6 × 6 × 6) is also the surface area (6 · 6²) */
+    let s;do s=R(2,9);while(s===6);
+    const d=box(f,s,s,s,[s,null,null]);
     f.onHint();f.txt(s/2,d+s/2,s*s);f.txt((s+d)/2,d/2,s*s);f.txt(s+d/2,d/2+s/2,s*s);
     return {kind:'num',unit:SQ,fig:f,answer:6*s*s,
       prompt:`Find the surface area of a cube with edges of ${s} units.`,
@@ -617,7 +625,9 @@ function spotLines(s,fr){
   return null;
 }
 function makeReverse(){
-  const H=R(3,6),p=R(1,4),base=R(3,7),W=base+p,A=base*H,f=new Fig();
+  /* not when area − corner width happens to be the width too (height 3, base 3, corner 3) */
+  let H,p,base;do{H=R(3,6);p=R(1,4);base=R(3,7);}while(base*H-p===base+p);
+  const W=base+p,A=base*H,f=new Fig();
   f.poly([[0,0],[W,0],[W,H],[0,H]],'frame');f.poly([[0,H],[base,H],[W,0],[p,0]],'shape solid');
   f.lbl(-.85,H/2,H);f.lbl(p/2,-.8,p);f.lbl(W/2,H+.8,'?','q');
   f.onHint();f.poly([[0,H],[0,0],[p,0]],'fb2');f.poly([[base,H],[W,H],[W,0]],'fb2');f.line(p,0,p,H,'hgt');f.lbl(base/2,H-.8,'base','h');

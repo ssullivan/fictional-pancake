@@ -40,8 +40,14 @@ function genPics(){
   const k=R(0,3);
   if(k===0){
     /* how many a row shows, with half pictures on scales of 2 and 10 */
-    const s=pick([2,5,10]),halves=s!==5&&Math.random()<.6,[d,rows]=dataSet(R(3,4),s,s===10?8:10,halves);
-    const i=halves&&rows.some(r=>r.n%s)?pick(rows.map((r,j)=>j).filter(j=>rows[j].n%s)):R(0,rows.length-1),r=rows[i],whole=Math.floor(r.n/s),half=r.n%s;
+    /* not a row whose count is its number of pictures (half a picture of 2 is 1) */
+    const s=pick([2,5,10]),halves=s!==5&&Math.random()<.6;let d,rows,i;
+    do{
+      [d,rows]=dataSet(R(3,4),s,s===10?8:10,halves);
+      const js=range(rows.length).filter(j=>Math.ceil(rows[j].n/s)!==rows[j].n),hs=js.filter(j=>rows[j].n%s);
+      i=halves&&hs.length?pick(hs):js.length?pick(js):-1;
+    }while(i<0);
+    const r=rows[i],whole=Math.floor(r.n/s),half=r.n%s;
     const m=[[whole+(half?1:0),`That’s the number of pictures. Each picture shows ${s}.`]];
     if(half)m.push([whole*s,`Don’t forget the half picture. It shows ${half} more.`],[(whole+1)*s,`The last picture is only half, so it shows ${half}, not ${s}.`]);
     return {kind:'num',unit:d.many,answer:r.n,
@@ -63,7 +69,9 @@ function genPics(){
   }
   if(k===2){
     /* how many pictures to draw */
-    const s=pick([2,5,10]),d=pick(DATA),j=R(2,8),n=j*s,l=pick(d.rows);
+    /* never as many pictures as each one shows (5 pictures of 5), where the scale is the answer */
+    const s=pick([2,5,10]),d=pick(DATA),l=pick(d.rows);let j;do j=R(2,8);while(j===s);
+    const n=j*s;
     return {kind:'num',unit:'pictures',answer:j,
       prompt:`${d.title}: ${n} ${d.many} on ${l}. In a picture graph where each picture shows ${s}, how many pictures go in the ${l} row?`,
       fig:show=>picGraph([{label:short(l),n:show?n:0,pic:'note',c:'green'}],{scale:s,max:n,unit:pl(s,d.one,d.many),title:d.title}),
@@ -197,10 +205,12 @@ function genEquations(){
   const k=R(0,3);
   if(k===0){
     /* find the unknown: a × ? = c, ? × b = c, or a × b = ? */
-    const a=R(2,10),b=R(2,10),c=a*b,u=pick(['a','b','c']),ans=u==='a'?a:u==='b'?b:c,eq=`${u==='a'?'?':a} × ${u==='b'?'?':b} = ${u==='c'?'?':c}`;
+    /* not 2 × 2, where adding or subtracting gives the same numbers as multiplying */
+    let a,b;do{a=R(2,10);b=R(2,10);}while(a===2&&b===2);
+    const c=a*b,u=pick(['a','b','c']),ans=u==='a'?a:u==='b'?b:c,eq=`${u==='a'?'?':a} × ${u==='b'?'?':b} = ${u==='c'?'?':c}`;
     const misc=u==='c'?[[a+b,`That’s ${a} + ${b}. Multiply: ${a} groups of ${b}.`],[c-b,`That’s ${a-1} × ${b}. Count by ${b}s ${a} times.`],...(a<10?[[c+b,`That’s ${a+1} × ${b}. Count by ${b}s ${a} times.`]]:[])]
-      :u==='a'?[[c-b,`That’s ${c} − ${b}. How many ${b}s make ${c}?`],[c+b,`That’s ${c} + ${b}. How many ${b}s make ${c}?`],[b,`${b} is the other factor. How many ${b}s make ${c}?`]]
-      :[[c-a,`That’s ${c} − ${a}. ${a} groups of how many make ${c}?`],[c+a,`That’s ${c} + ${a}. ${a} groups of how many make ${c}?`],[a,`${a} is the number of groups. How many are in each?`]];
+      :u==='a'?[[c-b,`That’s ${c} − ${b}. How many ${b}s make ${c}?`],[c+b,`That’s ${c} + ${b}. How many ${b}s make ${c}?`],...(a!==b?[[b,`${b} is the other factor. How many ${b}s make ${c}?`]]:[])]
+      :[[c-a,`That’s ${c} − ${a}. ${a} groups of how many make ${c}?`],[c+a,`That’s ${c} + ${a}. ${a} groups of how many make ${c}?`],...(a!==b?[[a,`${a} is the number of groups. How many are in each?`]]:[])];
     return {kind:'num',unit:'',answer:ans,
       prompt:`What number makes this equation true? <span class="eqn">${eq}</span>`,
       fig:u==='b'?(show=>tape(a,show?b:'?',c,`Tape diagram: ${a} equal parts making ${c}`)):(show=>hopLine(b,c+b,show?a:0,{mark:u==='a'?c:null,nums:show?Infinity:1,label:u==='a'?`Number line counting by ${b}s, pointing at ${c}`:`Number line counting by ${b}s`})),
@@ -256,7 +266,8 @@ const ARRAYS=[
 ];
 function arrayStory(){
   const A=pick(ARRAYS);let r,c;
-  if(A.fix)[r,c]=pick(A.fix);else{r=R(...A.r);c=R(...A.c);}
+  /* not 2 rows of 2, where adding gives the product */
+  do{if(A.fix)[r,c]=pick(A.fix);else{r=R(...A.r);c=R(...A.c);}}while(r===2&&c===2);
   return {A,r,c,p:r*c};
 }
 function genArrays(){

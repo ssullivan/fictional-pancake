@@ -37,7 +37,9 @@ const PICKS=[
 function genConv(){
   const c=pick(CONV),type=pick(['down','down','up','up','more','cmp','pick']);
   if(type==='down'||type==='up'){
-    const n=pick(c.f>=100?[2,3,4,5,1.5,2.5]:[2,3,4,5,6,7,1.5,2.5]),m=n*c.f,down=type==='down',step=Number.isInteger(n)?1:.5;
+    /* not 1.5 yards, where adding the 3 feet gives the same as multiplying */
+    let n;do n=pick(c.f>=100?[2,3,4,5,1.5,2.5]:[2,3,4,5,6,7,1.5,2.5]);while(n+c.f===n*c.f);
+    const m=n*c.f,down=type==='down',step=Number.isInteger(n)?1:.5;
     const ticks=[];for(let t=0;t<=n+1e-9;t+=step){const last=Math.abs(t-n)<1e-9,base=t===0||t===1;
       ticks.push(down?{t,b:t*c.f,st:1,sb:base?1:(last?0:2),q:last?'b':null}:{t,b:t*c.f,st:base?1:(last?0:2),sb:base||last?1:2,q:last?'t':null});}
     const fig=dnl(c.big[1],c.small[1],ticks);
@@ -190,7 +192,8 @@ const PCTX=[
 function genStrip(){
   const type=pick(['coins','coins','dnlA','dnlA','dnlP','tape','tape']);
   if(type==='coins'){
-    let list,tot;do{list=[];const k=R(2,6);for(let i=0;i<k;i++)list.push(pick(COIN_SET));tot=list.reduce((s,c)=>s+c.v,0);}while(tot>100||tot<5);
+    /* not all pennies, where counting the coins gives the cents */
+    let list,tot;do{list=[];const k=R(2,6);for(let i=0;i<k;i++)list.push(pick(COIN_SET));tot=list.reduce((s,c)=>s+c.v,0);}while(tot>100||tot<5||tot===list.length);
     list.sort((a,b)=>b.v-a.v);
     return {kind:'num',unit:'%',answer:tot,fig:coinsFig(list),
       prompt:`What <b>percent of a dollar</b> is this?`,
@@ -207,19 +210,20 @@ function genStrip(){
     if(type==='dnlA')return {kind:'num',unit:c.u,answer:A,fig,
       prompt:`${c.whole(W)} ${c.part(P)}`,
       hint:`100% is ${W}. Each step of ${s}% is the same amount: ${W} ÷ ${100/s}.`,
-      misc:[[P,`That is the percent. The question asks for ${c.u}.`],[W+P-100,'Percents are parts of the whole. Find the amount for one step, then count steps.']],
+      /* when the whole is 100, the amount is the percent */
+      misc:W===100?[]:[[P,`That is the percent. The question asks for ${c.u}.`],[W+P-100,'Percents are parts of the whole. Find the amount for one step, then count steps.']],
       explain:`${s}% of ${W} is ${fmt(W*s/100)}. ${P}% is ${P/s} steps: ${P/s} × ${fmt(W*s/100)} = ${fmt(A)} ${c.u}.${P>100?' More than 100% means more than the whole.':''}`};
     return {kind:'num',unit:'%',answer:P,fig,
       prompt:`${c.whole(W)} ${c.have(fmt(A))} What <b>percent</b> of ${c.u==='dollars'?'the goal':'the whole'} is that?`,
       hint:`Line up the amounts with the percents. Each ${fmt(W*s/100)} ${c.u} is another ${s}%.`,
-      misc:[[A,'That is the amount. The question asks what percent it is.'],[A/W,`${fmt(A/W)} is the fraction of the whole. As a percent, multiply by 100.`]],
+      misc:[...(W!==100?[[A,'That is the amount. The question asks what percent it is.']]:[]),[A/W,`${fmt(A/W)} is the fraction of the whole. As a percent, multiply by 100.`]],
       explain:`${fmt(A)} is ${fmt(A)} ÷ ${fmt(W*s/100)} = ${P/s} steps of ${s}%, so ${P}%.`};
   }
   const n=pick([4,5,10]),m=R(1,n-1),each=pick([2,3,4,5,6,8,12,15]),W=n*each,part=m*each,P=100*m/n,c=pick(PCTX);
   if(Math.random()<.5)return {kind:'num',unit:c.u,answer:part,fig:pctTape(n,m,{W,part,qP:1,each}),
     prompt:`${c.whole(W)} ${c.part(P)}`,
     hint:`The whole tape is ${n} equal boxes, so each box is ${100/n}% and worth ${W} ÷ ${n}.`,
-    misc:[[P,'That is the percent. Find the amount.'],[each,`That is one box. ${P}% is ${m} boxes.`]],
+    misc:[[P,'That is the percent. Find the amount.'],...(m>1?[[each,`That is one box. ${P}% is ${m} boxes.`]]:[])],
     explain:`${W} ÷ ${n} = ${each} per box. ${m} boxes × ${each} = ${part} ${c.u}.`};
   return {kind:'num',unit:c.u,answer:W,fig:pctTape(n,m,{W,part,qW:1,each}),
     prompt:`${fmt(part)} ${c.u} is ${P}% of the whole. How many ${c.u} is the <b>whole</b> (100%)?`,
@@ -256,13 +260,15 @@ function genBench(){
     return {kind:'num',unit:'dollars',answer:askSale?W-x:x,
       prompt:`A ${item} costs ${money(W)}. It is on sale for <b>${P}% off</b>. ${askSale?'What is the <b>sale price</b>?':'How much money do you <b>save</b>?'}`,
       hint:`${P}% is ${BENCH[P][0]}. Find ${P}% of ${money(W)} (${BENCH[P][1]}).${askSale?' Then subtract it.':''}`,
-      misc:askSale?[[x,`That is how much you save. Subtract it from ${money(W)}.`],[W-P,`You subtracted ${P} dollars, not ${P}%. Find ${P}% of ${money(W)} first.`]]:[[W-x,`That is the sale price. The question asks how much you save.`],[W/P,`${P}% is ${BENCH[P][0]}, so ${BENCH[P][1]}.`]],
+      /* at 50% off, the savings and the sale price are the same; for 10%, ÷ 10 is right */
+      misc:askSale?[...(P!==50?[[x,`That is how much you save. Subtract it from ${money(W)}.`]]:[]),[W-P,`You subtracted ${P} dollars, not ${P}%. Find ${P}% of ${money(W)} first.`]]
+        :[...(P!==50?[[W-x,`That is the sale price. The question asks how much you save.`]]:[]),...(P!==10?[[W/P,`${P}% is ${BENCH[P][0]}, so ${BENCH[P][1]}.`]]:[])],
       explain:`${P}% of ${money(W)} is ${money(x)}.${askSale?` ${money(W)} − ${money(x)} = ${money(W-x)}.`:''}`};
   }
   return {kind:'num',unit:'',answer:x,
     prompt:`What is <b>${P}% of ${W}</b>?`,
     hint:`${P}% is ${BENCH[P][0]}, so ${BENCH[P][1]}.`,
-    misc:[[W/P,`${P}% means ${P} out of 100, which is ${BENCH[P][0]}. Use ${BENCH[P][1]}, not ÷ ${P}.`],[W*P,'Multiplying by '+P+' makes it bigger. '+P+'% is only part of the number.']],
+    misc:[...(P!==10?[[W/P,`${P}% means ${P} out of 100, which is ${BENCH[P][0]}. Use ${BENCH[P][1]}, not ÷ ${P}.`]]:[]),[W*P,'Multiplying by '+P+' makes it bigger. '+P+'% is only part of the number.']],
     explain:`${P}% = ${BENCH[P][0]}. ${W} ${BENCH[P][1]} = ${fmt(x)}.`};
 }
 
@@ -276,11 +282,14 @@ const DCTX=[
 ];
 function genDetect(){
   const c=pick(DCTX),type=pick(['part','whole','pct']);
-  const P=pick([10,15,20,25,30,35,40,45,60,65,70,75,80,90]),W=20*R(1,15),x=W*P/100;
+  /* not 75% of 300, where subtracting the percent (300 − 75) gives the answer */
+  let P,W;do{P=pick([10,15,20,25,30,35,40,45,60,65,70,75,80,90]);W=20*R(1,15);}while(W-P===W*P/100);
+  const x=W*P/100;
   const hint=`Find 10% first (the whole ÷ 10) or 1% (the whole ÷ 100), then scale up.`;
   if(type==='part')return {kind:'num',unit:c.all,answer:x,fig:pctLine(W,P,x,{askA:1}),
     prompt:`There are ${W} ${c.all} ${c.where}. ${P}% of them ${c.verb}. How many ${c.all} ${c.verb}?`,hint,
-    misc:[[W/P,`${P}% is not “divide by ${P}”. It means ${P} out of every 100.`],[W*P,`Multiply by ${P}/100, not by ${P}.`],[W-P,'Percents are parts of the whole, not an amount to subtract.']],
+    /* for 10%, ÷ 10 is right, and the whole ÷ the part is 10 */
+    misc:[...(P!==10?[[W/P,`${P}% is not “divide by ${P}”. It means ${P} out of every 100.`]]:[]),[W*P,`Multiply by ${P}/100, not by ${P}.`],[W-P,'Percents are parts of the whole, not an amount to subtract.']],
     explain:`1% of ${W} is ${fmt(W/100)}. ${P} × ${fmt(W/100)} = ${fmt(x)} ${c.all}.`};
   if(type==='whole'){
     const whole=pick([20,40,60,80,100,120,160,200]),P2=pick([5,10,20,25,30,40,50,60,75,80].filter(p=>nice2(whole*p/100)&&Number.isInteger(whole*p/100))),x2=whole*P2/100;
@@ -293,7 +302,7 @@ function genDetect(){
   return {kind:'num',unit:'%',answer:P,fig:pctLine(W,P,x,{askP:1}),
     prompt:`There are ${W} ${c.all} ${c.where}. ${fmt(x)} of them ${c.verb}. What <b>percent</b> of the ${c.all} ${c.verb}?`,
     hint:`Divide the part by the whole (${fmt(x)} ÷ ${W}), then multiply by 100.`,
-    misc:[[x/W,`${fmt(x/W)} is the part out of 1. Multiply by 100 to get the percent.`],[W/x,'Divide the part by the whole, not the whole by the part.']],
+    misc:[[x/W,`${fmt(x/W)} is the part out of 1. Multiply by 100 to get the percent.`],...(P!==10?[[W/x,'Divide the part by the whole, not the whole by the part.']]:[])],
     explain:`${fmt(x)} ÷ ${W} = ${fmt(x/W)}, and ${fmt(x/W)} × 100 = ${P}%.`};
 }
 

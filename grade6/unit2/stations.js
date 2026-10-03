@@ -66,7 +66,8 @@ const RECIPES=[
 function genEquiv(){
   const type=pick(['batch','scale','scale','color','color','yesno','missing']);
   if(type==='batch'||type==='scale'){
-    const rec=pick(RECIPES);let a=R(1,4),b=R(2,6);while(b===a)b=R(2,6);const n=R(2,5);
+    /* not 2 batches of 2, where adding (2 + 2) gives the same as multiplying */
+    const rec=pick(RECIPES);let a=R(1,4),b=R(2,6),n=R(2,5);while(b===a||type==='batch'&&n===2&&b===2){b=R(2,6);n=R(2,5);}
     const fig=show=>batchDiagram(a,b,show?n:1,rec);
     if(type==='batch')return {kind:'num',unit:rec.y[1],answer:n*b,fig,
       prompt:`One batch of ${rec.dish} uses ${pl(rec.x,a)} and ${pl(rec.y,b)}. How many ${rec.y[1]} are in <b>${n} batches</b>?`,
@@ -76,7 +77,7 @@ function genEquiv(){
     return {kind:'num',unit:rec.y[1],answer:n*b,fig,
       prompt:`A recipe for ${rec.dish} uses ${pl(rec.x,a)} for every ${pl(rec.y,b)}. Jada uses <b>${pl(rec.x,n*a)}</b>. How many ${rec.y[1]} does she need so it tastes the same?`,
       hint:`${n*a} is ${n} × ${a}, so Jada is making ${n} batches. Multiply the ${rec.y[1]} by ${n} too.`,
-      misc:[[b+(n*a-a),`You added ${n*a-a} to both amounts. To keep the same taste, <b>multiply</b> both amounts by the same number.`],[n*a*b,`${n*a} ${rec.x[1]} is ${n} batches, not ${n*a}. Divide ${n*a} by ${a} first.`]],
+      misc:[[b+(n*a-a),`You added ${n*a-a} to both amounts. To keep the same taste, <b>multiply</b> both amounts by the same number.`],...(a>1?[[n*a*b,`${n*a} ${rec.x[1]} is ${n} batches, not ${n*a}. Divide ${n*a} by ${a} first.`]]:[])],
       explain:`${n*a} ÷ ${a} = ${n} batches. ${b} × ${n} = ${n*b} ${rec.y[1]}. ${a} : ${b} and ${n*a} : ${n*b} are equivalent.`};
   }
   let a=R(1,5),b=R(1,5);while(b===a)b=R(1,5);const k=R(2,4);
@@ -215,12 +216,12 @@ function genPpw(){
     const wantA=Math.random()<.5,[n,name,other]=wantA?[a,c.A,c.B]:[b,c.B,c.A];
     return {kind:'num',unit:name,answer:k*n,fig:tapeFig(c,a,b,k,{qa:wantA,qb:!wantA,showT:1}),
       prompt:`${ratio} There are ${T} ${c.all} in all. How many are <b>${name}</b>?`,hint,
-      misc:[[k,`That is one box. The ${name} take up ${n} boxes.`],[T/2,`The two parts are not equal. Split ${T} into ${a+b} equal boxes.`],[k*(a+b-n),`That is the number of ${other}.`],[T/n,`Divide the total by the number of boxes in all (${a+b}), not by ${n}.`]],
+      misc:[...(n>1?[[k,`That is one box. The ${name} take up ${n} boxes.`]]:[]),[T/2,`The two parts are not equal. Split ${T} into ${a+b} equal boxes.`],[k*(a+b-n),`That is the number of ${other}.`],[T/n,`Divide the total by the number of boxes in all (${a+b}), not by ${n}.`]],
       explain:`${a} + ${b} = ${a+b} boxes. ${T} ÷ ${a+b} = ${k} in each box. ${n} × ${k} = ${k*n} ${name}.`};
   }
   if(type==='total')return {kind:'num',unit:c.all,answer:T,fig:tapeFig(c,a,b,k,{showA:1,qt:1}),
     prompt:`${ratio} There are ${k*a} ${c.A}. How many ${c.all} are there <b>in all</b>?`,hint,
-    misc:[[k*b,`That is only the ${c.B}. Add the ${c.A} too.`],[k*a+b,`${b} is the number of boxes, not the number of ${c.B}. Find what one box is worth first.`],[k*a*(a+b),`${k*a} is ${a} boxes. Divide by ${a} to get one box.`]],
+    misc:[[k*b,`That is only the ${c.B}. Add the ${c.A} too.`],[k*a+b,`${b} is the number of boxes, not the number of ${c.B}. Find what one box is worth first.`],...(a>1?[[k*a*(a+b),`${k*a} is ${a} boxes. Divide by ${a} to get one box.`]]:[])],
     explain:`${k*a} ÷ ${a} = ${k} in each box. ${a+b} boxes × ${k} = ${T} ${c.all}.`};
   if(type==='other')return {kind:'num',unit:c.B,answer:k*b,fig:tapeFig(c,a,b,k,{showA:1,qb:1}),
     prompt:`${ratio} There are ${k*a} ${c.A}. How many <b>${c.B}</b> are there?`,hint:`${k*a} fills ${a} boxes. Find one box, then fill ${b} boxes.`,

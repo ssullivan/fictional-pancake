@@ -199,7 +199,7 @@ function genLockers(){
   if(k===0){
     const T=pick(TOGETHER),[a,b]=T.hot?pick(T.hot):twoOf(T.t,T.max),L=lcm(a,b);
     return {kind:'num',unit:T.unit,answer:L,prompt:T.say(a,b,name),fig:show=>bothLines(a,b,show),
-      misc:miscOf(L,[[a*b,`${a} × ${b} = ${a*b} is a common multiple, but not the first one. Look for a smaller one.`],[a+b,`You added ${a} + ${b}. Find a number that is a multiple of ${a} and of ${b}.`],[Math.max(a,b),`${Math.max(a,b)} is not a multiple of ${Math.min(a,b)}.`]]),
+      misc:miscOf(L,[...(a*b!==L?[[a*b,`${a} × ${b} = ${a*b} is a common multiple, but not the first one. Look for a smaller one.`]]:[]),[a+b,`You added ${a} + ${b}. Find a number that is a multiple of ${a} and of ${b}.`],[Math.max(a,b),`${Math.max(a,b)} is not a multiple of ${Math.min(a,b)}.`]]),
       hint:`List the multiples of ${a} and of ${b}. What is the first number on both lists?`,
       explain:`${a}: ${upTo(L/a).map(i=>i*a).join(', ')}. ${b}: ${upTo(L/b).map(i=>i*b).join(', ')}. ${L} is the first common multiple of ${a} and ${b}.`};
   }

@@ -30,7 +30,7 @@ function load(game, stars) {
   // Game.stars stands in for saved progress, so generators that unlock harder problems get tested both ways
   const ctx = vm.createContext({console, Game: {stars: () => stars}});
   for (const src of srcs) vm.runInContext(readFileSync(join(ROOT, game, src), 'utf8'), ctx, {filename: join(game, src)});
-  return vm.runInContext('({zones: ZONES, icons: ICON, fmt: typeof fmt === "function" ? fmt : null})', ctx);
+  return vm.runInContext('({zones: ZONES, icons: ICON, problemKey, fmt: typeof fmt === "function" ? fmt : null})', ctx);
 }
 
 // every string a student can see for this problem, labelled
@@ -52,6 +52,14 @@ function figure(p, show) {
   return String(p.fig);
 }
 
+// how the engine matches typed numbers (its default near, and sameRatio for pairs)
+const near = (a, b) => Math.abs(a - b) < .011;
+const sameRatio = (u, v, x, y) => u > 0 && v > 0 && near(u * y, v * x);
+// A named mistake (misc, pmisc) whose wrong value is the right answer: a student making that mistake gets it right. When the
+// mistake doesn't apply to these numbers, the generator leaves it out; when a wrong method lands on the answer, it deals others.
+const mistakes = (list, isAnswer) => (list || []).filter(([v]) => isAnswer(v))
+  .map(([v, m]) => `mistake "${String(m).replace(/<[^>]*>/g, '').slice(0, 60)}" gives the right answer ${JSON.stringify(v)}`);
+
 function check(p) {
   const bad = [];
   if (!p || typeof p !== 'object') return ['gen() did not return a problem'];
@@ -63,10 +71,13 @@ function check(p) {
   if (p.kind === 'num') {
     if (!Number.isFinite(p.answer)) bad.push(`answer is ${p.answer}`);
     (p.misc || []).forEach(([v], i) => { if (!Number.isFinite(v)) bad.push(`misc[${i}] value is ${v}`); });
+    bad.push(...mistakes(p.misc, v => near(v, p.answer)));
   }
   if (p.kind === 'pair') {
     if (!Array.isArray(p.answer) || p.answer.length !== 2 || !p.answer.every(Number.isFinite)) bad.push(`pair answer is ${JSON.stringify(p.answer)}`);
     if (!Array.isArray(p.labels) || p.labels.length !== 2) bad.push('pair needs two labels');
+    const [x, y] = p.answer || [];
+    bad.push(...mistakes(p.pmisc, ([u, v]) => p.equiv ? sameRatio(u, v, x, y) : near(u, x) && near(v, y)));
   }
   if (p.kind === 'mc') {
     const ids = p.choices.map(c => c.id), labels = p.choices.map(c => c.label.replace(/\s+/g, ' ').trim());
@@ -103,17 +114,17 @@ for (const game of games) {
   const extra = existsSync(join(ROOT, game, 'checks.js')) ? (await import(join(ROOT, game, 'checks.js'))).default : {};
   if (!extra.limits) { console.log(`FAIL ${game}: no limits in checks.js`); failures++; }
   for (const stars of [0, 3]) {
-    const {zones, icons} = load(game, stars);
+    const {zones, icons, problemKey} = load(game, stars);
     for (const z of zones) {
       if (stars === 0 && !icons[z.id]) { console.log(`FAIL ${game} ${z.id}: no icon`); failures++; }
       const limits = extra.limits || {}, lim = limits[z.id] || (z.id === 'boss' && Object.keys(limits).length &&
         Object.values(limits).reduce((a, b) => ({dp: Math.max(a.dp, b.dp), nz: Math.max(a.nz, b.nz), max: Math.max(a.max, b.max)})));
       if (stars === 0 && extra.limits && !lim) { console.log(`FAIL ${game} ${z.id}: no limits in checks.js`); failures++; }
-      const seen = new Map();
+      const seen = new Map(), different = new Set();
       for (let i = 0; i < N; i++) {
         let p, bad;
         try {
-          p = z.gen(); bad = check(p);
+          p = z.gen(); bad = check(p); different.add(problemKey(p));
           if (!bad.length && lim) bad = withinLimits(p, lim);
           if (!bad.length && extra.check) bad = extra.check(p, z.id);
         }
@@ -125,6 +136,9 @@ for (const game of games) {
           seen.get(key).n++;
         }
       }
+      // the engine deals again rather than repeat a problem in a round, so a station needs plenty to deal from
+      const round = z.id === 'boss' ? 10 : 8;
+      if (different.size < 2 * round) { console.log(`FAIL ${game} ${z.id}${stars ? ' (unlocked)' : ''}: only ${different.size} different problems; a round of ${round} needs at least ${2 * round} to deal from`); failures++; }
       for (const {n, b, prompt} of seen.values()) {
         failures++;
         console.log(`FAIL ${game} ${z.id}${stars ? ' (unlocked)' : ''}: ${b}  [${n}×]\n     ${String(prompt).replace(/<[^>]*>/g, '').slice(0, 200)}`);
