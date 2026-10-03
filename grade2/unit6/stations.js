@@ -1,70 +1,81 @@
 /* Clockwork Carnival (Grade 2 Unit 6): the problem generators, station list, and icons. Loaded by index.html and by tools/fuzz.mjs.
-   Flat and solid shapes, equal parts, pattern blocks, clocks, the day bar, and money come from shared/k5.js; mcOf and miscOf from shared/util.js. */
+   Flat and solid shapes, equal parts, and pattern blocks come from shared/shapes.js; clocks, the day bar, and money from
+   shared/measure.js; mcOf and miscOf from shared/util.js. Each generator deals one of a few kinds of problem (variant), each
+   with a comment saying what it asks. */
 const KIDS=['Mai','Diego','Lin','Han','Priya','Kiran','Elena','Jada','Noah','Clare','Andre','Tyler'];
-const cap=s=>s[0].toUpperCase()+s.slice(1);
-const plural=w=>w==='rhombus'?'rhombuses':w+'s';
-/* mc choices that are pictures: build the choices from values, then draw each as "Picture A", "Picture B", … */
+/* the text with its first letter capitalized */
+const cap=text=>text[0].toUpperCase()+text.slice(1);
+/* the plural of a shape's name */
+const plural=word=>word==='rhombus'?'rhombuses':word+'s';
+/* mc choices that are pictures: build the choices from values ([[value, why], …]), then draw each as "Picture A", "Picture B", … */
 function picChoices(list,draw,extra){
-  const P=mcOf(list.map(([v,m])=>[JSON.stringify(v),m]),extra);
-  P.choices.forEach((c,i)=>{c.label=draw(JSON.parse(c.label),`Picture ${'ABCD'[i]}`);});
-  return P;
+  const problem=mcOf(list.map(([v,why])=>[JSON.stringify(v),why]),extra);
+  problem.choices.forEach((choice,i)=>{choice.label=draw(JSON.parse(choice.label),`Picture ${'ABCD'[i]}`);});
+  return problem;
 }
 
 /* ---------- Shape Tent: shapes (Lessons 1–4) ---------- */
 function genShapes(){
-  const k=R(0,4);
-  if(k===0){
-    const n=R(3,6),others=shuffle([3,4,5,6].filter(m=>m!==n)).slice(0,2),list=shuffle([n,...others]).map(m=>pick(SHAPES[m])),at=list.findIndex(s=>s.length===n),name=SHAPE_NAME[n];
+  const variant=R(0,4);
+  if(variant===0){
+    /* tap the shape with this many sides, among two with other numbers of sides */
+    const sides=R(3,6),others=shuffle([3,4,5,6].filter(m=>m!==sides)).slice(0,2),shapes=shuffle([sides,...others]).map(m=>pick(SHAPES[m])),at=shapes.findIndex(shape=>shape.length===sides),name=SHAPE_NAME[sides];
     return {kind:'tap',answer:String(at),prompt:`Tap the <b>${name}</b>.`,
-      why:Object.fromEntries(list.map((s,i)=>[String(i),`That shape has ${s.length} sides. A ${name} has ${n}.`]).filter(([i])=>i!==String(at))),
-      fig:show=>shapeRow(list.map(s=>[s,{nums:show}]),{tap:'Shape',label:'Shape'}),
-      hint:`A ${name} has ${n} sides. Count the sides of each shape.`,
-      explain:`A ${name} has ${n} sides and ${n} corners. Shape ${at+1} has ${n} sides.`};
+      why:Object.fromEntries(shapes.map((shape,i)=>[String(i),`That shape has ${shape.length} sides. A ${name} has ${sides}.`]).filter(([i])=>i!==String(at))),
+      fig:show=>shapeRow(shapes.map(shape=>[shape,{nums:show}]),{tap:'Shape',label:'Shape'}),
+      hint:`A ${name} has ${sides} sides. Count the sides of each shape.`,
+      explain:`A ${name} has ${sides} sides and ${sides} corners. Shape ${at+1} has ${sides} sides.`};
   }
-  if(k===1){
-    const n=R(3,6),s=pick(SHAPES[n].slice(1)),near=shuffle([n-1,n+1].filter(m=>m>=3&&m<=6).concat([3,4,5,6].filter(m=>Math.abs(m-n)>1))).slice(0,2);
-    return {...mcOf([[cap(SHAPE_NAME[n]),null],...near.map(m=>[cap(SHAPE_NAME[m]),`A ${SHAPE_NAME[m]} has ${m} sides. Count the sides again.`])]),
-      prompt:'What is this shape called?',fig:show=>shapeFig(s,{s:200,nums:show}),
+  if(variant===1){
+    /* name the shape (not the first, most regular, one of its kind); wrong names have one side more or fewer, then any */
+    const sides=R(3,6),shape=pick(SHAPES[sides].slice(1)),wrongSides=shuffle([sides-1,sides+1].filter(m=>m>=3&&m<=6).concat([3,4,5,6].filter(m=>Math.abs(m-sides)>1))).slice(0,2);
+    return {...mcOf([[cap(SHAPE_NAME[sides]),null],...wrongSides.map(m=>[cap(SHAPE_NAME[m]),`A ${SHAPE_NAME[m]} has ${m} sides. Count the sides again.`])]),
+      prompt:'What is this shape called?',fig:show=>shapeFig(shape,{s:200,nums:show}),
       hint:'Count the sides: 3 is a triangle, 4 is a quadrilateral, 5 is a pentagon, and 6 is a hexagon.',
-      explain:`It has ${n} sides and ${n} corners, so it’s a ${SHAPE_NAME[n]}.`};
+      explain:`It has ${sides} sides and ${sides} corners, so it’s a ${SHAPE_NAME[sides]}.`};
   }
-  if(k===2){
-    const n=R(4,6),s=pick(SHAPES[n]),w=pick(['sides','corners']);
-    return {kind:'num',unit:w,answer:n,prompt:`How many ${w} does this shape have?`,fig:show=>shapeFig(s,{s:200,nums:show}),
-      misc:[[n-1,'Count again. Start at one corner and go all the way around.'],[n+1,'Count again. Don’t count your first one twice.']],
+  if(variant===2){
+    /* count the sides or corners */
+    const sides=R(4,6),shape=pick(SHAPES[sides]),what=pick(['sides','corners']);
+    return {kind:'num',unit:what,answer:sides,prompt:`How many ${what} does this shape have?`,fig:show=>shapeFig(shape,{s:200,nums:show}),
+      misc:[[sides-1,'Count again. Start at one corner and go all the way around.'],[sides+1,'Count again. Don’t count your first one twice.']],
       hint:'Put your finger on one corner. Count each side as you go all the way around.',
-      explain:`It has ${n} sides and ${n} corners: it’s a ${SHAPE_NAME[n]}.`};
+      explain:`It has ${sides} sides and ${sides} corners: it’s a ${SHAPE_NAME[sides]}.`};
   }
-  if(k===3){
+  if(variant===3){
     /* side lengths: all the same, or a square (the same lengths and square corners) */
-    const e=R(2,5),w=e+R(1,3),h=R(2,e),t=R(2,3),square=Math.random()<.5,same=square?'rhombus':pick(['square','rhombus']);
-    const L={square:[e,e,e,e],rhombus:[e,e,e,e],rectangle:[w,h,w,h],trapezoid:[t,t+1,t+3,t+1]};
-    const kinds=square?['square','rectangle','rhombus']:[same,'rectangle','trapezoid'],order=shuffle(kinds),ans=square?'square':same;
+    const side=R(2,5),rectW=side+R(1,3),rectH=R(2,side),trapTop=R(2,3),square=Math.random()<.5,same=square?'rhombus':pick(['square','rhombus']);
+    /* each shape's side lengths, in cm */
+    const lengths={square:[side,side,side,side],rhombus:[side,side,side,side],rectangle:[rectW,rectH,rectW,rectH],trapezoid:[trapTop,trapTop+1,trapTop+3,trapTop+1]};
+    const kinds=square?['square','rectangle','rhombus']:[same,'rectangle','trapezoid'],order=shuffle(kinds),answer=square?'square':same;
+    /* why each wrong shape is wrong; {} is its letter */
     const why={rectangle:square?'Shape {} has square corners, but its sides are not all the same length.':'Shape {} has sides of two lengths.',
       rhombus:'Shape {} has sides that are all the same length, but its corners are not square corners.',trapezoid:'Shape {} has sides of different lengths.'};
-    const lab=i=>'ABC'[i];
-    return {kind:'mc',choices:order.map((q,i)=>({id:'abc'[i],label:lab(i)})),answer:'abc'[order.indexOf(ans)],
-      why:Object.fromEntries(order.map((q,i)=>[ 'abc'[i],(why[q]||'').replace('{}',lab(i))]).filter(([,m])=>m)),
+    const letter=i=>'ABC'[i];
+    return {kind:'mc',choices:order.map((kind,i)=>({id:'abc'[i],label:letter(i)})),answer:'abc'[order.indexOf(answer)],
+      why:Object.fromEntries(order.map((kind,i)=>[ 'abc'[i],(why[kind]||'').replace('{}',letter(i))]).filter(([,message])=>message)),
       prompt:square?'Which shape is a <b>square</b>?':'Which shape has <b>4 sides that are all the same length</b>?',
-      fig:()=>shapeRow(order.map(q=>[QUADS[q],{lens:L[q].map(v=>`${v} cm`),sq:true}]),{letters:true,label:'Shape'}),
+      fig:()=>shapeRow(order.map(kind=>[QUADS[kind],{lens:lengths[kind].map(v=>`${v} cm`),sq:true}]),{letters:true,label:'Shape'}),
       hint:square?'A square has 4 sides that are all the same length and 4 square corners.':'Read the side lengths of each shape. Are all 4 the same?',
-      explain:square?`Shape ${lab(order.indexOf('square'))} has 4 sides of ${e} cm and 4 square corners, so it’s a square.`:`Every side of shape ${lab(order.indexOf(same))} is ${e} cm.`};
+      explain:square?`Shape ${letter(order.indexOf('square'))} has 4 sides of ${side} cm and 4 square corners, so it’s a square.`:`Every side of shape ${letter(order.indexOf(same))} is ${side} cm.`};
   }
-  /* solid shapes: count the faces */
-  const kind=pick(['cube','cube','box','pyramid','prism']),S=SOLIDS[kind],seen=(solidFig(kind).match(/class="sf /g)||[]).length,all=S.faces.reduce((t,[n])=>t+n,0);
+  /* solid shapes: count the faces (seen: how many the drawing shows from the front) */
+  const kind=pick(['cube','cube','box','pyramid','prism']),solid=SOLIDS[kind],seen=(solidFig(kind).match(/class="sf /g)||[]).length,faces=solid.faces.reduce((total,[n])=>total+n,0);
+  /* solids with faces of two kinds: the kind to count, how many, and the mistakes */
   const TYPE={pyramid:['triangle',4,[[2,'You can see 2 triangles. There are 2 more on the back.'],[5,'That’s all the faces. How many are triangles?']]],
     prism:['rectangle',3,[[1,'You can see 1 rectangle. There are more on the bottom and the left.'],[5,'That’s all the faces. How many are rectangles?']]]};
-  const list=S.faces.map(([n,w])=>`${n} ${n>1?plural(w):w}`).join(' and ');
+  const faceList=solid.faces.map(([n,shape])=>`${n} ${n>1?plural(shape):shape}`).join(' and ');
   if(TYPE[kind]&&Math.random()<.5){
-    const [w,n,misc]=TYPE[kind];
-    return {kind:'num',unit:`${plural(w)}`,answer:n,prompt:`How many faces of this ${S.name} are <b>${plural(w)}</b>?`,fig:show=>solidFig(kind,{back:show,s:120}),
+    /* count the faces of one kind */
+    const [shape,count,misc]=TYPE[kind];
+    return {kind:'num',unit:`${plural(shape)}`,answer:count,prompt:`How many faces of this ${solid.name} are <b>${plural(shape)}</b>?`,fig:show=>solidFig(kind,{back:show,s:120}),
       misc,hint:'The dashed lines show the edges on the back. Count the faces on the back too.',
-      explain:`A ${S.name} has ${all} faces: ${list}.`};
+      explain:`A ${solid.name} has ${faces} faces: ${faceList}.`};
   }
-  return {kind:'num',unit:'faces',answer:all,prompt:`How many faces does this ${S.name} have?`,fig:show=>solidFig(kind,{back:show,s:120}),
-    misc:miscOf(all,[[seen,'That’s how many faces you can see. Some faces are on the back and the bottom.'],...(kind==='cube'||kind==='box'?[[8,'8 is the number of corners. Count the flat faces.'],[12,'12 is the number of edges. Count the flat faces.']]:[])]),
+  return {kind:'num',unit:'faces',answer:faces,prompt:`How many faces does this ${solid.name} have?`,fig:show=>solidFig(kind,{back:show,s:120}),
+    misc:miscOf(faces,[[seen,'That’s how many faces you can see. Some faces are on the back and the bottom.'],...(kind==='cube'||kind==='box'?[[8,'8 is the number of corners. Count the flat faces.'],[12,'12 is the number of edges. Count the flat faces.']]:[])]),
     hint:'Count the faces you can see. The dashed lines show edges on the back, so count the faces there too.',
-    explain:`A ${S.name} has ${all} faces: ${list}.`};
+    explain:`A ${solid.name} has ${faces} faces: ${faceList}.`};
 }
 
 /* ---------- Pie Stand: halves, thirds, and fourths (Lessons 6–9) ---------- */
@@ -72,146 +83,169 @@ const FOOD={circle:['pizza','pie','pancake','tortilla'],square:['sandwich','waff
 /* an equal way to cut this shape into n parts */
 const cutOf=(shape,n)=>shape==='circle'?'v':pick(shape==='square'?(n===2?['v','h','diag']:n===4?['v','h','grid','diag']:['v','h']):['v','h'].concat(n===4?['grid']:[]));
 function genParts(){
-  const k=R(0,4),shape=pick(['circle','circle','square','rect']),food=pick(FOOD[shape]),n=R(2,4),how=cutOf(shape,n),name=pick(KIDS);
-  if(k===0){
-    const m=pick([2,3,4].filter(v=>v!==n)),list=shuffle([{n,how,ok:1},{n,how:'uneq'},{n:m,how:cutOf(shape,m)}]),at=list.findIndex(q=>q.ok);
-    return {kind:'tap',answer:String(at),prompt:`Tap the ${food} cut into <b>${PART[n][1]}</b>.`,
-      why:Object.fromEntries(list.map((q,i)=>[String(i),q.how==='uneq'?`That one has ${n} pieces, but they are not the same size.`:`That one has ${q.n} equal pieces: ${PART[q.n][1]}.`]).filter(([i])=>i!==String(at))),
-      fig:()=>shareRow(shape,list,{tap:'Picture',label:'Picture'}),
-      hint:`${cap(PART[n][1])} means ${n} pieces that are all the same size.`,
-      explain:`Picture ${at+1} has ${n} equal pieces, so each piece is 1 ${PART[n][0]}.`};
+  const variant=R(0,4),shape=pick(['circle','circle','square','rect']),food=pick(FOOD[shape]),parts=R(2,4),how=cutOf(shape,parts),name=pick(KIDS);
+  if(variant===0){
+    /* tap the one cut into these parts: the others are cut into unequal pieces, or into a different number */
+    const otherParts=pick([2,3,4].filter(v=>v!==parts)),pictures=shuffle([{n:parts,how,ok:1},{n:parts,how:'uneq'},{n:otherParts,how:cutOf(shape,otherParts)}]),at=pictures.findIndex(picture=>picture.ok);
+    return {kind:'tap',answer:String(at),prompt:`Tap the ${food} cut into <b>${PART[parts][1]}</b>.`,
+      why:Object.fromEntries(pictures.map((picture,i)=>[String(i),picture.how==='uneq'?`That one has ${parts} pieces, but they are not the same size.`:`That one has ${picture.n} equal pieces: ${PART[picture.n][1]}.`]).filter(([i])=>i!==String(at))),
+      fig:()=>shareRow(shape,pictures,{tap:'Picture',label:'Picture'}),
+      hint:`${cap(PART[parts][1])} means ${parts} pieces that are all the same size.`,
+      explain:`Picture ${at+1} has ${parts} equal pieces, so each piece is 1 ${PART[parts][0]}.`};
   }
-  if(k===1){
-    /* mistakes: naming the part that isn't shaded, or miscounting the pieces (never "3 halves") */
-    const s=R(1,n-1),wrong=[...(s!==n-s?[[partName(n,n-s),'That’s the part that is not shaded.']]:[]),...[2,3,4].filter(v=>v!==n&&v>=s).map(v=>[partName(v,s),`Count all the pieces. There are ${n}, not ${v}.`])].slice(0,2);
-    return {...mcOf([[partName(n,s),null],...wrong]),prompt:`What part of the ${food} is shaded?`,
-      fig:()=>shareFig(shape,n,how,{shade:range(s),s:150,label:`A ${food} cut into ${n} equal pieces, ${s} shaded`}),
+  if(variant===1){
+    /* what part is shaded. Mistakes: naming the part that isn't shaded, or miscounting the pieces (never "3 halves") */
+    const shaded=R(1,parts-1),wrong=[...(shaded!==parts-shaded?[[partName(parts,parts-shaded),'That’s the part that is not shaded.']]:[]),
+      ...[2,3,4].filter(v=>v!==parts&&v>=shaded).map(v=>[partName(v,shaded),`Count all the pieces. There are ${parts}, not ${v}.`])].slice(0,2);
+    return {...mcOf([[partName(parts,shaded),null],...wrong]),prompt:`What part of the ${food} is shaded?`,
+      fig:()=>shareFig(shape,parts,how,{shade:range(shaded),s:150,label:`A ${food} cut into ${parts} equal pieces, ${shaded} shaded`}),
       hint:`Count all the equal pieces: that tells if they are halves, thirds, or fourths. Then count the shaded ones.`,
-      explain:`There are ${n} equal pieces, so each is 1 ${PART[n][0]}. ${s} ${s>1?'are':'is'} shaded: ${partName(n,s)}.`};
+      explain:`There are ${parts} equal pieces, so each is 1 ${PART[parts][0]}. ${shaded} ${shaded>1?'are':'is'} shaded: ${partName(parts,shaded)}.`};
   }
-  if(k===2){
+  if(variant===2){
+    /* how many pieces, or how many of them make the whole */
     const whole=Math.random()<.5;
-    return {kind:'num',unit:whole?PART[n][1]:'pieces',answer:n,
-      prompt:whole?`${name} cuts a ${food} into ${PART[n][1]}. How many ${PART[n][1]} make the whole ${food}?`:`${name} cuts a ${food} into ${PART[n][1]}. How many equal pieces are there?`,
-      fig:show=>shareFig(shape,show?n:1,show?how:'v',{s:150,label:show?`A ${food} cut into ${n} equal pieces`:`A whole ${food}`}),
-      misc:[2,3,4].filter(v=>v!==n).map(v=>[v,`${cap(PART[v][1])} would be ${v} pieces. ${cap(PART[n][1])} are ${n}.`]),
+    return {kind:'num',unit:whole?PART[parts][1]:'pieces',answer:parts,
+      prompt:whole?`${name} cuts a ${food} into ${PART[parts][1]}. How many ${PART[parts][1]} make the whole ${food}?`:`${name} cuts a ${food} into ${PART[parts][1]}. How many equal pieces are there?`,
+      fig:show=>shareFig(shape,show?parts:1,show?how:'v',{s:150,label:show?`A ${food} cut into ${parts} equal pieces`:`A whole ${food}`}),
+      misc:[2,3,4].filter(v=>v!==parts).map(v=>[v,`${cap(PART[v][1])} would be ${v} pieces. ${cap(PART[parts][1])} are ${parts}.`]),
       hint:'Halves are 2 equal pieces, thirds are 3, and fourths are 4.',
-      explain:`${cap(PART[n][1])} are ${n} equal pieces. ${partName(n,n)} make the whole ${food}.`};
+      explain:`${cap(PART[parts][1])} are ${parts} equal pieces. ${partName(parts,parts)} make the whole ${food}.`};
   }
-  if(k===3){
-    const [a,b]=shuffle([2,3,4]).slice(0,2),other=pick(KIDS.filter(x=>x!==name)),big=a<b?name:other,small=a<b?other:name;
-    return {...mcOf([[`${big}’s`,null],[`${small}’s`,`${small} cut more pieces, so each piece is smaller.`],['They’re the same size','Both start the same size, but one is cut into more pieces. Look at 1 piece of each.']]),
-      prompt:`${name} and ${other} each have a ${food}, the same size. ${name} cuts it into <b>${PART[a][1]}</b>. ${other} cuts it into <b>${PART[b][1]}</b>. Whose pieces are bigger?`,
-      fig:show=>shareRow(shape,[{n:a,how:'v',shade:show?[0]:[]},{n:b,how:'v',shade:show?[0]:[]}],{label:cap(food)}),
+  if(variant===3){
+    /* whose pieces are bigger: fewer pieces of the same whole */
+    const [nameParts,otherParts]=shuffle([2,3,4]).slice(0,2),other=pick(KIDS.filter(kid=>kid!==name)),bigger=nameParts<otherParts?name:other,smaller=nameParts<otherParts?other:name;
+    return {...mcOf([[`${bigger}’s`,null],[`${smaller}’s`,`${smaller} cut more pieces, so each piece is smaller.`],['They’re the same size','Both start the same size, but one is cut into more pieces. Look at 1 piece of each.']]),
+      prompt:`${name} and ${other} each have a ${food}, the same size. ${name} cuts it into <b>${PART[nameParts][1]}</b>. ${other} cuts it into <b>${PART[otherParts][1]}</b>. Whose pieces are bigger?`,
+      fig:show=>shareRow(shape,[{n:nameParts,how:'v',shade:show?[0]:[]},{n:otherParts,how:'v',shade:show?[0]:[]}],{label:cap(food)}),
       hint:'More pieces means smaller pieces. Look at 1 piece of each.',
-      explain:`${cap(PART[Math.min(a,b)][1])} are bigger than ${PART[Math.max(a,b)][1]}: fewer pieces means bigger pieces. ${big}’s pieces are bigger.`};
+      explain:`${cap(PART[Math.min(nameParts,otherParts)][1])} are bigger than ${PART[Math.max(nameParts,otherParts)][1]}: fewer pieces means bigger pieces. ${bigger}’s pieces are bigger.`};
   }
-  /* pattern blocks */
-  const [big,small]=pick([['hexagon','triangle'],['hexagon','triangle'],['hexagon','rhombus'],['hexagon','trapezoid'],['trapezoid','triangle'],['rhombus','triangle']]),n2=PB[big][small];
-  return {kind:'num',unit:plural(small),answer:n2,prompt:`How many ${plural(small)} fill this ${big}?`,
+  /* pattern blocks: how many small blocks fill a big one */
+  const [big,small]=pick([['hexagon','triangle'],['hexagon','triangle'],['hexagon','rhombus'],['hexagon','trapezoid'],['trapezoid','triangle'],['rhombus','triangle']]),fill=PB[big][small];
+  return {kind:'num',unit:plural(small),answer:fill,prompt:`How many ${plural(small)} fill this ${big}?`,
     fig:show=>pbFig(big,small,{show:show?true:0,s:80}),
-    misc:miscOf(n2,[1,2,3,4,6].filter(v=>v!==n2).map(v=>[v,v<n2?`That’s not enough to fill the ${big}. Picture more ${plural(small)} inside it.`:`That’s too many. They won’t all fit inside the ${big}.`])),
+    misc:miscOf(fill,[1,2,3,4,6].filter(v=>v!==fill).map(v=>[v,v<fill?`That’s not enough to fill the ${big}. Picture more ${plural(small)} inside it.`:`That’s too many. They won’t all fit inside the ${big}.`])),
     hint:`One ${small} is drawn inside the dashed ${big}. How many would fill it with no gaps?`,
-    explain:`${n2} ${plural(small)} fill the ${big}.`+(big==='hexagon'?' A hexagon is 6 triangles, 3 rhombuses, or 2 trapezoids.':'')};
+    explain:`${fill} ${plural(small)} fill the ${big}.`+(big==='hexagon'?' A hexagon is 6 triangles, 3 rhombuses, or 2 trapezoids.':'')};
 }
 
 /* ---------- Clock Tower: time (Lessons 11–13) ---------- */
-const pad=m=>String(m).padStart(2,'0');
-const next=h=>h%12+1,prev=h=>(h+10)%12+1;
+/* the hour after and the hour before, on a 12-hour clock */
+const next=hour=>hour%12+1,prev=hour=>(hour+10)%12+1;
 /* times of day: what, when (hours and minutes), and whether it's a.m. */
 const DAY=[['eat breakfast',[[7,0],[7,30],[8,0]],1],['get to school',[[8,0],[8,15],[8,30]],1],['play at recess',[[10,0],[10,30]],1],['watch the sun come up',[[6,0],[6,30]],1],['be sound asleep',[[1,0],[2,0],[3,0]],1],
   ['go home from school',[[3,0],[3,15],[3,30]],0],['go to soccer practice',[[4,0],[4,30],[5,0]],0],['eat dinner',[[5,30],[6,0],[6,30]],0],['go to bed',[[7,30],[8,0],[8,30]],0]];
-const when=(h,am)=>am?(h<5?'in the middle of the night':'in the morning'):(h<5?'in the afternoon':h<8?'in the evening':'at night');
+/* what part of the day an hour is, a.m. or p.m. */
+const when=(hour,am)=>am?(hour<5?'in the middle of the night':'in the morning'):(hour<5?'in the afternoon':hour<8?'in the evening':'at night');
 function genTime(){
-  const k=R(0,4),h=R(1,12),m=5*R(0,11),mm=pad(m),name=pick(KIDS);
+  /* the time on the clock: hour:minute, to 5 minutes */
+  const variant=R(0,4),hour=R(1,12),minute=5*R(0,11),name=pick(KIDS);
   /* common mistakes: the hands switched, the next hour once the hour hand is past halfway, the number the long hand points to */
-  const mistakes=[[[m/5||12,h*5%60],'The short hand shows the hour. The long hand shows the minutes.'],
-    m>=30?[[next(h),m],`The hour hand is between ${h} and ${next(h)}. It hasn’t gotten to ${next(h)} yet, so the hour is still ${h}.`]:[[prev(h),m],m?`The hour hand is a little past ${h}, so the hour is ${h}.`:`The short hand points to ${h}.`],
-    m?[[h,m/5],`The long hand points to the ${m/5}. Count by 5s: ${m/5} fives is ${m} minutes.`]:[[h,30],'The long hand points straight up to 12: that’s 0 minutes.']];
-  const wrongs=mistakes.filter(([[a,b]],i)=>!(a===h&&b===m)&&mistakes.findIndex(([[c,d]])=>c===a&&d===b)===i).slice(0,2);
-  const count=m?`The long hand points to the ${m/5}: count by 5s to ${m}.`:'The long hand points to 12: o’clock.';
-  const hourSay=m?`The short hand is between ${h} and ${next(h)}, so the hour is ${h}.`:`The short hand points to ${h}.`;
-  if(k===0)return {...mcOf([[hm(h,m),null],...wrongs.map(([[a,b],w])=>[hm(a,b),w])]),prompt:'What time does the clock show?',
-    fig:show=>clockFig(h,m,{fives:show}),hint:'The short hand shows the hour. Count by 5s to the long hand for the minutes.',explain:`${hourSay} ${count} It’s ${hm(h,m)}.`};
-  if(k===1)return {...picChoices([[[h,m],null],...wrongs.map(([t,w])=>[t,w])],([a,b],l)=>clockFig(a,b,{r:64,label:l})),prompt:`Which clock shows <b>${hm(h,m)}</b>?`,
-    hint:`The short hour hand should be at ${h}${m?` or a bit past it`:''}. The long minute hand should point to ${m/5||12}.`,explain:`${hourSay} ${count}`};
-  if(k===2){
-    const q=pick([15,30,45]),say=q===15?`quarter past ${h}`:q===30?`half past ${h}`:`quarter till ${next(h)}`,shade=q===45?[45,60]:[0,q];
-    const wrong=q===15?[[`quarter till ${h}`,`Quarter till is 15 minutes <b>before</b> the hour. ${hm(h,15)} is 15 minutes after ${h}.`],[`half past ${h}`,'Half past is 30 minutes. 15 minutes is a quarter of the way around.']]
-      :q===30?[[`half past ${next(h)}`,`The hour hand is between ${h} and ${next(h)}. It’s still ${h}-something.`],[`quarter past ${h}`,'Quarter past is 15 minutes. 30 minutes is halfway around.']]
-      :[[`quarter till ${h}`,`Quarter till ${h} is 15 minutes before ${h} o’clock. ${hm(h,45)} is 15 minutes before ${next(h)} o’clock.`],[`quarter past ${h}`,'Quarter past is 15 minutes. 45 minutes is three quarters of the way around.']];
-    if(Math.random()<.5)return {...mcOf([[cap(say),null],...wrong.map(([t,w])=>[cap(t),w])]),prompt:`What is another way to say <b>${hm(h,q)}</b>?`,
-      fig:show=>clockFig(h,q,{shade:show?shade:null}),hint:'15 minutes is a quarter of the way around the clock. 30 minutes is halfway.',explain:`${hm(h,q)} is ${say}.`};
-    const times={15:[[h,15],[prev(h),45],[h,45]],30:[[h,30],[next(h),30],[h,15]],45:[[h,45],[next(h),45],[next(h),15]]}[q];
-    const msg=[null,q===30?`Half past ${h} is 30 minutes after ${h} o’clock.`:q===15?`${hm(prev(h),45)} is quarter till ${h}. Quarter past is after ${h} o’clock.`:`Quarter till ${next(h)} is before ${next(h)} o’clock, so the hour is still ${h}.`,
-      q===30?'Half past means 30 minutes, halfway around.':q===15?'Quarter past means 15 minutes after the hour.':`${hm(next(h),15)} is quarter <b>past</b> ${next(h)}.`];
-    return {...mcOf(times.map(([a,b],i)=>[hm(a,b),msg[i]])),prompt:`It’s <b>${say}</b>. What time is it?`,
-      fig:show=>clockFig(h,q,{shade:show?shade:null}),hint:'A quarter of an hour is 15 minutes. Half an hour is 30 minutes.',explain:`${cap(say)} is ${hm(h,q)}.`};
+  const mistakes=[[[minute/5||12,hour*5%60],'The short hand shows the hour. The long hand shows the minutes.'],
+    minute>=30?[[next(hour),minute],`The hour hand is between ${hour} and ${next(hour)}. It hasn’t gotten to ${next(hour)} yet, so the hour is still ${hour}.`]
+      :[[prev(hour),minute],minute?`The hour hand is a little past ${hour}, so the hour is ${hour}.`:`The short hand points to ${hour}.`],
+    minute?[[hour,minute/5],`The long hand points to the ${minute/5}. Count by 5s: ${minute/5} fives is ${minute} minutes.`]:[[hour,30],'The long hand points straight up to 12: that’s 0 minutes.']];
+  /* two of them that aren't the right time, and aren't the same as each other */
+  const wrongs=mistakes.filter(([[h,m]],i)=>!(h===hour&&m===minute)&&mistakes.findIndex(([[h2,m2]])=>h2===h&&m2===m)===i).slice(0,2);
+  const count=minute?`The long hand points to the ${minute/5}: count by 5s to ${minute}.`:'The long hand points to 12: o’clock.';
+  const hourSay=minute?`The short hand is between ${hour} and ${next(hour)}, so the hour is ${hour}.`:`The short hand points to ${hour}.`;
+  /* read the clock */
+  if(variant===0)return {...mcOf([[hm(hour,minute),null],...wrongs.map(([[h,m],why])=>[hm(h,m),why])]),prompt:'What time does the clock show?',
+    fig:show=>clockFig(hour,minute,{fives:show}),hint:'The short hand shows the hour. Count by 5s to the long hand for the minutes.',explain:`${hourSay} ${count} It’s ${hm(hour,minute)}.`};
+  /* pick the clock that shows the time */
+  if(variant===1)return {...picChoices([[[hour,minute],null],...wrongs.map(([time,why])=>[time,why])],([h,m],label)=>clockFig(h,m,{r:64,label})),prompt:`Which clock shows <b>${hm(hour,minute)}</b>?`,
+    hint:`The short hour hand should be at ${hour}${minute?` or a bit past it`:''}. The long minute hand should point to ${minute/5||12}.`,explain:`${hourSay} ${count}`};
+  if(variant===2){
+    /* quarter past, half past, and quarter till: another way to say the time, or the time for the words */
+    const quarter=pick([15,30,45]),spoken=quarter===15?`quarter past ${hour}`:quarter===30?`half past ${hour}`:`quarter till ${next(hour)}`,shade=quarter===45?[45,60]:[0,quarter];
+    const wrong=quarter===15?[[`quarter till ${hour}`,`Quarter till is 15 minutes <b>before</b> the hour. ${hm(hour,15)} is 15 minutes after ${hour}.`],[`half past ${hour}`,'Half past is 30 minutes. 15 minutes is a quarter of the way around.']]
+      :quarter===30?[[`half past ${next(hour)}`,`The hour hand is between ${hour} and ${next(hour)}. It’s still ${hour}-something.`],[`quarter past ${hour}`,'Quarter past is 15 minutes. 30 minutes is halfway around.']]
+      :[[`quarter till ${hour}`,`Quarter till ${hour} is 15 minutes before ${hour} o’clock. ${hm(hour,45)} is 15 minutes before ${next(hour)} o’clock.`],[`quarter past ${hour}`,'Quarter past is 15 minutes. 45 minutes is three quarters of the way around.']];
+    if(Math.random()<.5)return {...mcOf([[cap(spoken),null],...wrong.map(([words,why])=>[cap(words),why])]),prompt:`What is another way to say <b>${hm(hour,quarter)}</b>?`,
+      fig:show=>clockFig(hour,quarter,{shade:show?shade:null}),hint:'15 minutes is a quarter of the way around the clock. 30 minutes is halfway.',explain:`${hm(hour,quarter)} is ${spoken}.`};
+    /* the right time first, then two mix-ups, with why each is wrong */
+    const times={15:[[hour,15],[prev(hour),45],[hour,45]],30:[[hour,30],[next(hour),30],[hour,15]],45:[[hour,45],[next(hour),45],[next(hour),15]]}[quarter];
+    const whyNot=[null,quarter===30?`Half past ${hour} is 30 minutes after ${hour} o’clock.`:quarter===15?`${hm(prev(hour),45)} is quarter till ${hour}. Quarter past is after ${hour} o’clock.`:`Quarter till ${next(hour)} is before ${next(hour)} o’clock, so the hour is still ${hour}.`,
+      quarter===30?'Half past means 30 minutes, halfway around.':quarter===15?'Quarter past means 15 minutes after the hour.':`${hm(next(hour),15)} is quarter <b>past</b> ${next(hour)}.`];
+    return {...mcOf(times.map(([h,m],i)=>[hm(h,m),whyNot[i]])),prompt:`It’s <b>${spoken}</b>. What time is it?`,
+      fig:show=>clockFig(hour,quarter,{shade:show?shade:null}),hint:'A quarter of an hour is 15 minutes. Half an hour is 30 minutes.',explain:`${cap(spoken)} is ${hm(hour,quarter)}.`};
   }
-  if(k===3){
-    const f=R(1,11);
-    return {kind:'num',unit:'minutes',answer:5*f,prompt:`The long hand points to the <b>${f}</b>. How many minutes after ${h} o’clock is it?`,
-      fig:show=>clockFig(h,5*f,{fives:show}),
-      misc:miscOf(5*f,[[f,'Each number on the clock is 5 minutes. Count by 5s.'],[5*f-5,`Count by 5s all the way to the ${f}.`],[5*f+5,`Count by 5s, and stop at the ${f}.`],[10*f,'Count by 5s, not 10s.']]),
-      hint:`Count by 5s from the 12 to the ${f}: 5, 10, 15, …`,explain:`${range(f).map(i=>5*(i+1)).join(', ')}. The long hand at ${f} means ${5*f} minutes: ${hm(h,5*f)}.`};
+  if(variant===3){
+    /* minutes after the hour, from the number the long hand points to */
+    const number=R(1,11);
+    return {kind:'num',unit:'minutes',answer:5*number,prompt:`The long hand points to the <b>${number}</b>. How many minutes after ${hour} o’clock is it?`,
+      fig:show=>clockFig(hour,5*number,{fives:show}),
+      misc:miscOf(5*number,[[number,'Each number on the clock is 5 minutes. Count by 5s.'],[5*number-5,`Count by 5s all the way to the ${number}.`],[5*number+5,`Count by 5s, and stop at the ${number}.`],[10*number,'Count by 5s, not 10s.']]),
+      hint:`Count by 5s from the 12 to the ${number}: 5, 10, 15, …`,explain:`${range(number).map(i=>5*(i+1)).join(', ')}. The long hand at ${number} means ${5*number} minutes: ${hm(hour,5*number)}.`};
   }
-  /* a.m. or p.m.: which time makes sense? */
-  const [what,times,am]=pick(DAY),[th,tm]=pick(times),sfx=a=>a?'a.m.':'p.m.';
-  let oh,om;do [oh,om]=pick(pick(DAY.filter(d=>d[2]!==am))[1]);while(oh===th&&om===tm);
-  return {...mcOf([[`${hm(th,tm)} ${sfx(am)}`,null],[`${hm(th,tm)} ${sfx(!am)}`,`${hm(th,tm)} ${sfx(!am)} is ${when(th,!am)}.`],[`${hm(oh,om)} ${sfx(!am)}`,`${hm(oh,om)} ${sfx(!am)} is ${when(oh,!am)}.`]]),
-    prompt:`Which time makes sense for ${name} to <b>${what}</b>?`,fig:show=>dayBar(show?(am?th%12:th%12+12)+tm/60:null),
+  /* a.m. or p.m.: which time makes sense? The wrong ones are the same time the other half of the day, and another
+     activity's time that's different */
+  const [what,times,am]=pick(DAY),[actHour,actMinute]=pick(times),suffix=isAm=>isAm?'a.m.':'p.m.';
+  let otherHour,otherMinute;do [otherHour,otherMinute]=pick(pick(DAY.filter(d=>d[2]!==am))[1]);while(otherHour===actHour&&otherMinute===actMinute);
+  return {...mcOf([[`${hm(actHour,actMinute)} ${suffix(am)}`,null],[`${hm(actHour,actMinute)} ${suffix(!am)}`,`${hm(actHour,actMinute)} ${suffix(!am)} is ${when(actHour,!am)}.`],
+      [`${hm(otherHour,otherMinute)} ${suffix(!am)}`,`${hm(otherHour,otherMinute)} ${suffix(!am)} is ${when(otherHour,!am)}.`]]),
+    prompt:`Which time makes sense for ${name} to <b>${what}</b>?`,fig:show=>dayBar(show?(am?actHour%12:actHour%12+12)+actMinute/60:null),
     hint:'a.m. is from midnight to noon: night and morning. p.m. is from noon to midnight: afternoon, evening, and night.',
-    explain:`People ${what.replace(/^be /,'are ')} ${when(th,am)}. ${hm(th,tm)} ${sfx(am)} is ${when(th,am)}.`};
+    explain:`People ${what.replace(/^be /,'are ')} ${when(actHour,am)}. ${hm(actHour,actMinute)} ${suffix(am)} is ${when(actHour,am)}.`};
 }
 
 /* ---------- Coin Toss: coins (Lessons 15–17) ---------- */
-/* coins from counts {q, d, n, p}, most valuable first */
-const coinList=c=>['B','q','d','n','p'].flatMap(k=>Array(c[k]||0).fill(k));
-const countUp=list=>{let t=0;return list.map(k=>t+=COINS[k].v).join(', ');};
-const coinSay=(n,k)=>`${n} ${n===1?COINS[k].name:COINS[k].pl}`;
-const coinsSay=c=>['q','d','n','p'].filter(k=>c[k]).map(k=>coinSay(c[k],k)).join(', ');
-/* coins that make t cents (a multiple of 5 from 5 to 95): quarters, then dimes, then a nickel */
-const makeCents=t=>{const q=R(0,Math.floor(t/25));let r=t-25*q;const d=R(Math.max(0,Math.floor(r/10)-1),Math.floor(r/10));r-=10*d;return {q,d,n:r/5};};
+/* coins from counts {B, q, d, n, p}, most valuable first */
+const coinList=counts=>['B','q','d','n','p'].flatMap(coin=>Array(counts[coin]||0).fill(coin));
+/* counting the coins up: "25, 35, 40" */
+const countUp=coins=>{let total=0;return coins.map(coin=>total+=COINS[coin].v).join(', ');};
+/* "1 dime", "3 nickels" */
+const coinSay=(n,coin)=>`${n} ${n===1?COINS[coin].name:COINS[coin].pl}`;
+/* "2 quarters, 1 dime" from counts */
+const coinsSay=counts=>['q','d','n','p'].filter(coin=>counts[coin]).map(coin=>coinSay(counts[coin],coin)).join(', ');
+/* coins that make `cents` (a multiple of 5 from 5 to 95): quarters, then dimes, then a nickel */
+const makeCents=cents=>{const q=R(0,Math.floor(cents/25));let rest=cents-25*q;const d=R(Math.max(0,Math.floor(rest/10)-1),Math.floor(rest/10));rest-=10*d;return {q,d,n:rest/5};};
 function genCoins(){
-  const k=R(0,4);
-  if(k<2){
-    let c;
-    do c=k?{q:R(1,3),d:R(0,2),n:R(0,1),p:R(0,4)}:{d:R(1,5),n:R(0,3),p:R(0,5)};
-    while(centsOf(coinList(c))>100||Object.values(c).filter(v=>v).length<2);
-    const list=coinList(c),t=centsOf(list),as=(k,v)=>t-(c[k]||0)*(COINS[k].v-v);
-    return {kind:'num',unit:'cents',answer:t,prompt:'How much money is this?',fig:show=>moneyFig(list,{vals:show}),
-      misc:miscOf(t,[[list.length,'That’s the number of coins. Each kind of coin is worth a different amount.'],...(c.q?[[as('q',10),'A quarter is 25¢, not 10¢.']]:[]),...(c.d?[[as('d',5),'A dime is 10¢. The nickel is the one worth 5¢.']]:[]),...(c.n?[[as('n',1),'A nickel is 5¢, not 1¢.'],[as('n',10),'A nickel is 5¢. The dime is the one worth 10¢.']]:[])]),
-      hint:(c.q?'Count the quarters by 25s. ':'')+'Count dimes by 10s, then nickels by 5s, then pennies by 1s.',
-      explain:`Start with the coins worth the most: ${countUp(list)}. That’s ${t}¢.`};
+  const variant=R(0,4);
+  if(variant<2){
+    /* count the coins: dimes, nickels, and pennies (variant 0), or with quarters too (variant 1); up to a dollar, two kinds or more */
+    let counts;
+    do counts=variant?{q:R(1,3),d:R(0,2),n:R(0,1),p:R(0,4)}:{d:R(1,5),n:R(0,3),p:R(0,5)};
+    while(centsOf(coinList(counts))>100||Object.values(counts).filter(v=>v).length<2);
+    /* ifWorth(coin, v): the total if that kind of coin were counted as v¢ each */
+    const coins=coinList(counts),cents=centsOf(coins),ifWorth=(coin,v)=>cents-(counts[coin]||0)*(COINS[coin].v-v);
+    return {kind:'num',unit:'cents',answer:cents,prompt:'How much money is this?',fig:show=>moneyFig(coins,{vals:show}),
+      misc:miscOf(cents,[[coins.length,'That’s the number of coins. Each kind of coin is worth a different amount.'],...(counts.q?[[ifWorth('q',10),'A quarter is 25¢, not 10¢.']]:[]),
+        ...(counts.d?[[ifWorth('d',5),'A dime is 10¢. The nickel is the one worth 5¢.']]:[]),...(counts.n?[[ifWorth('n',1),'A nickel is 5¢, not 1¢.'],[ifWorth('n',10),'A nickel is 5¢. The dime is the one worth 10¢.']]:[])]),
+      hint:(counts.q?'Count the quarters by 25s. ':'')+'Count dimes by 10s, then nickels by 5s, then pennies by 1s.',
+      explain:`Start with the coins worth the most: ${countUp(coins)}. That’s ${cents}¢.`};
   }
-  if(k===2){
+  if(variant===2){
     if(Math.random()<.35){
-      const ans=pick(['p','n','d','q']),list=shuffle(['p','n','d','q']).filter(x=>x!==ans).slice(0,2);
-      return {...picChoices([[ans,null],...list.map(x=>[x,`That’s a ${COINS[x].name}. It’s worth ${COINS[x].v}¢.`])],(x,l)=>moneyFig([x],{label:l})),
-        prompt:`Which coin is worth <b>${COINS[ans].v} ${COINS[ans].v>1?'cents':'cent'}</b>?`,
-        hint:'A penny is 1¢, a nickel is 5¢, a dime is 10¢, and a quarter is 25¢.',explain:`A ${COINS[ans].name} is worth ${COINS[ans].v}¢.`};
+      /* which coin is worth this much */
+      const answer=pick(['p','n','d','q']),wrong=shuffle(['p','n','d','q']).filter(coin=>coin!==answer).slice(0,2);
+      return {...picChoices([[answer,null],...wrong.map(coin=>[coin,`That’s a ${COINS[coin].name}. It’s worth ${COINS[coin].v}¢.`])],(coin,label)=>moneyFig([coin],{label})),
+        prompt:`Which coin is worth <b>${COINS[answer].v} ${COINS[answer].v>1?'cents':'cent'}</b>?`,
+        hint:'A penny is 1¢, a nickel is 5¢, a dime is 10¢, and a quarter is 25¢.',explain:`A ${COINS[answer].name} is worth ${COINS[answer].v}¢.`};
     }
-    const [small,big]=pick([['p','n'],['p','d'],['n','d'],['n','q'],['d','B'],['q','B'],['n','B']]),n=COINS[big].v/COINS[small].v,S=COINS[small],B=COINS[big];
-    return {kind:'num',unit:S.pl,answer:n,prompt:`How many <b>${S.pl}</b> make ${big==='B'?'<b>1 dollar</b>':`a <b>${B.name}</b>`}?`,
-      fig:show=>moneyFig(show?[big,...Array(n).fill(small)]:[big,small],{vals:true}),
+    /* how many of a small coin make a bigger coin or a dollar */
+    const [small,big]=pick([['p','n'],['p','d'],['n','d'],['n','q'],['d','B'],['q','B'],['n','B']]),count=COINS[big].v/COINS[small].v,smallCoin=COINS[small],bigCoin=COINS[big];
+    return {kind:'num',unit:smallCoin.pl,answer:count,prompt:`How many <b>${smallCoin.pl}</b> make ${big==='B'?'<b>1 dollar</b>':`a <b>${bigCoin.name}</b>`}?`,
+      fig:show=>moneyFig(show?[big,...Array(count).fill(small)]:[big,small],{vals:true}),
       /* a penny's count is its cents, and 5 nickels make a quarter, so those mistakes give the answer there */
-      misc:miscOf(n,[...(small!=='p'?[[B.v,`${big==='B'?'A dollar':`A ${B.name}`} is ${B.v}¢. How many ${S.pl} is that?`]]:[]),...(S.v!==n?[[S.v,`A ${S.name} is ${S.v}¢. How many make ${B.v}¢?`]]:[])]),
-      hint:`${big==='B'?'A dollar':`A ${B.name}`} is ${B.v}¢. Count by ${S.v}s to ${B.v}.`,
-      explain:`Count by ${S.v}s: ${range(Math.min(n,5)).map(i=>S.v*(i+1)).join(', ')}${n>5?', …':''} ${B.v}. That’s ${n} ${S.pl}.`};
+      misc:miscOf(count,[...(small!=='p'?[[bigCoin.v,`${big==='B'?'A dollar':`A ${bigCoin.name}`} is ${bigCoin.v}¢. How many ${smallCoin.pl} is that?`]]:[]),...(smallCoin.v!==count?[[smallCoin.v,`A ${smallCoin.name} is ${smallCoin.v}¢. How many make ${bigCoin.v}¢?`]]:[])]),
+      hint:`${big==='B'?'A dollar':`A ${bigCoin.name}`} is ${bigCoin.v}¢. Count by ${smallCoin.v}s to ${bigCoin.v}.`,
+      explain:`Count by ${smallCoin.v}s: ${range(Math.min(count,5)).map(i=>smallCoin.v*(i+1)).join(', ')}${count>5?', …':''} ${bigCoin.v}. That’s ${count} ${smallCoin.pl}.`};
   }
-  if(k===3){
-    /* not 50¢, where what's here is also what's needed */
-    let t;do t=5*R(6,19);while(t===50);
-    const c=makeCents(t),list=coinList(c);
-    return {kind:'num',unit:'cents',answer:100-t,prompt:'How much more money do you need to make <b>1 dollar</b>?',fig:show=>moneyFig(list,{vals:show}),
-      misc:miscOf(100-t,[[t,'That’s how much is here. How much more to get to 100¢?'],[100,'A dollar is 100¢, but some of it is here already.'],[100-t+10,`Count the coins again: ${countUp(list)}.`],[100-t-10,`Count the coins again: ${countUp(list)}.`]]),
+  if(variant===3){
+    /* how much more makes a dollar; not 50¢, where what's here is also what's needed */
+    let cents;do cents=5*R(6,19);while(cents===50);
+    const coins=coinList(makeCents(cents));
+    return {kind:'num',unit:'cents',answer:100-cents,prompt:'How much more money do you need to make <b>1 dollar</b>?',fig:show=>moneyFig(coins,{vals:show}),
+      misc:miscOf(100-cents,[[cents,'That’s how much is here. How much more to get to 100¢?'],[100,'A dollar is 100¢, but some of it is here already.'],[100-cents+10,`Count the coins again: ${countUp(coins)}.`],[100-cents-10,`Count the coins again: ${countUp(coins)}.`]]),
       hint:'A dollar is 100¢. Count the coins, then count on to 100.',
-      explain:`The coins make ${t}¢ (${countUp(list)}). ${t} + ${100-t} = 100, so you need ${100-t}¢ more.`};
+      explain:`The coins make ${cents}¢ (${countUp(coins)}). ${cents} + ${100-cents} = 100, so you need ${100-cents}¢ more.`};
   }
-  /* which coins make exactly a dollar? */
-  const q=R(1,3),r=100-25*q,d=R(Math.max(0,Math.ceil((r-20)/10)),Math.floor(r/10)),right={q,d,n:(r-10*d)/5};
-  const tweak=[[{...right,d:right.d-1},'short'],[{...right,n:right.n+1},'over'],[{...right,q:right.q-1,d:right.d+2},'short'],[{...right,d:right.d+1},'over']].filter(([c])=>c.d>=0&&c.q>=0&&c.n<=5&&Object.values(c).some(v=>v));
-  const wrong=shuffle(tweak).slice(0,2).map(([c])=>{const t=centsOf(coinList(c));return [coinsSay(c),`That’s ${t}¢: ${t<100?`${100-t}¢ less than`:`${t-100}¢ more than`} a dollar.`];});
+  /* which coins make exactly a dollar? The wrong ones change a coin or two, to a little short or a little over */
+  const q=R(1,3),rest=100-25*q,d=R(Math.max(0,Math.ceil((rest-20)/10)),Math.floor(rest/10)),right={q,d,n:(rest-10*d)/5};
+  const tweak=[[{...right,d:right.d-1},'short'],[{...right,n:right.n+1},'over'],[{...right,q:right.q-1,d:right.d+2},'short'],[{...right,d:right.d+1},'over']].filter(([counts])=>counts.d>=0&&counts.q>=0&&counts.n<=5&&Object.values(counts).some(v=>v));
+  const wrong=shuffle(tweak).slice(0,2).map(([counts])=>{const cents=centsOf(coinList(counts));return [coinsSay(counts),`That’s ${cents}¢: ${cents<100?`${100-cents}¢ less than`:`${cents-100}¢ more than`} a dollar.`];});
   return {...mcOf([[coinsSay(right),null],...wrong]),stack:true,prompt:'Which coins make exactly <b>1 dollar</b>?',
     fig:show=>moneyFig(show?coinList(right):['B'],{vals:true}),
     hint:'A dollar is 100¢. Count each group of coins: quarters by 25s, dimes by 10s, nickels by 5s.',
@@ -223,55 +257,60 @@ function genCoins(){
 const PRIZE=[['sticker',10,25],['pencil',25,40],['eraser',15,30],['bouncy ball',40,60],['whistle',30,50],['bookmark',20,35],['yo-yo',50,75],['toy car',60,85]];
 /* bigger things in whole dollars */
 const BIG=[['book',4,9],['kite',5,10],['puzzle',3,8],['T-shirt',8,12],['stuffed animal',6,12]];
-const priceOf=([,a,b])=>5*R(a/5,b/5);
-const an=w=>/^[aeiou]/.test(w)?'an':'a';
+/* a prize's price: a multiple of 5 from its lowest to its highest */
+const priceOf=([,lowest,highest])=>5*R(lowest/5,highest/5);
+/* "a" or "an" for a word */
+const an=word=>/^[aeiou]/.test(word)?'an':'a';
 /* price tags: list [[name, price text], …] */
-const tags=list=>svgWrap(list.length*170,90,list.map(([n,p],i)=>{const x=i*170+8;return `<path class="tag" d="M${x+22},6H${x+156}V78H${x+22}L${x},42Z"/><circle class="tagh" cx="${x+18}" cy="42" r="5"/><text class="lbl s" x="${x+90}" y="28">${n}</text><text class="lbl gd" x="${x+90}" y="56">${p}</text>`;}).join(''),'Price tags: '+list.map(([n,p])=>`${n}, ${p}`).join('; '));
+const tags=list=>svgWrap(list.length*170,90,list.map(([name,price],i)=>{const x=i*170+8;return `<path class="tag" d="M${x+22},6H${x+156}V78H${x+22}L${x},42Z"/><circle class="tagh" cx="${x+18}" cy="42" r="5"/><text class="lbl s" x="${x+90}" y="28">${name}</text><text class="lbl gd" x="${x+90}" y="56">${price}</text>`;}).join(''),'Price tags: '+list.map(([name,price])=>`${name}, ${price}`).join('; '));
 function genShop(){
-  const k=R(0,4),name=pick(KIDS);
-  if(k===0){
-    const b=R(1,4),c=makeCents(5*R(1,19)),list=coinList({B:b,...c}),t=centsOf(list),ct=t%100,n=list.length-b;
-    return {...mcOf([[amt(t),null],[`${b+ct}¢`,'A dollar bill is 100¢, not 1¢.'],[`$${b+n}`,'The coins are cents, not dollars. Only the bills are dollars.']]),
-      prompt:'How much money is this?',fig:show=>moneyFig(list,{vals:show}),
+  const variant=R(0,4),name=pick(KIDS);
+  if(variant===0){
+    /* count dollar bills and coins; the mistakes count a bill as 1¢, or every coin as a dollar */
+    const bills=R(1,4),coinCounts=makeCents(5*R(1,19)),money=coinList({B:bills,...coinCounts}),total=centsOf(money),cents=total%100,coins=money.length-bills;
+    return {...mcOf([[amt(total),null],[`${bills+cents}¢`,'A dollar bill is 100¢, not 1¢.'],[`$${bills+coins}`,'The coins are cents, not dollars. Only the bills are dollars.']]),
+      prompt:'How much money is this?',fig:show=>moneyFig(money,{vals:show}),
       hint:'Count the dollar bills first. Then count the cents.',
-      explain:`Dollars: ${b}. Cents: ${countUp(list.slice(b))}. That’s ${b} dollar${b>1?'s':''} and ${ct} cents: ${amt(t)}.`};
+      explain:`Dollars: ${bills}. Cents: ${countUp(money.slice(bills))}. That’s ${bills} dollar${bills>1?'s':''} and ${cents} cents: ${amt(total)}.`};
   }
-  const it=pick(PRIZE),p=priceOf(it);
-  if(k===1){
-    /* not twice the price, where what's left is the price */
-    let h;do h=5*R(p/5+1,20);while(h===2*p);
-    const c=makeCents(h);
-    return {kind:'num',unit:'cents',answer:h-p,prompt:`${name} has ${h}¢. ${name} buys ${an(it[0])} ${it[0]} for ${p}¢. How much money does ${name} have left?`,
-      fig:show=>tags([[it[0],`${p}¢`]])+(show?moneyFig(coinList(c),{vals:true,label:`${name}’s ${h}¢`}):''),
-      misc:miscOf(h-p,[[h+p,`That’s adding. ${name} spends money, so there is less left.`],[p,`That’s the price of the ${it[0]}.`],[h,`That’s what ${name} had before buying the ${it[0]}.`]]),
-      hint:`Take away the price: ${h} − ${p}. Or count up from ${p} to ${h}.`,
-      explain:`${h} − ${p} = ${h-p}. ${name} has ${h-p}¢ left.`};
+  const prize=pick(PRIZE),price=priceOf(prize);
+  if(variant===1){
+    /* how much is left after buying a prize; not twice the price, where what's left is the price */
+    let has;do has=5*R(price/5+1,20);while(has===2*price);
+    const coinCounts=makeCents(has);
+    return {kind:'num',unit:'cents',answer:has-price,prompt:`${name} has ${has}¢. ${name} buys ${an(prize[0])} ${prize[0]} for ${price}¢. How much money does ${name} have left?`,
+      fig:show=>tags([[prize[0],`${price}¢`]])+(show?moneyFig(coinList(coinCounts),{vals:true,label:`${name}’s ${has}¢`}):''),
+      misc:miscOf(has-price,[[has+price,`That’s adding. ${name} spends money, so there is less left.`],[price,`That’s the price of the ${prize[0]}.`],[has,`That’s what ${name} had before buying the ${prize[0]}.`]]),
+      hint:`Take away the price: ${has} − ${price}. Or count up from ${price} to ${has}.`,
+      explain:`${has} − ${price} = ${has-price}. ${name} has ${has-price}¢ left.`};
   }
-  if(k===2){
-    let it2,p2;do{it2=pick(PRIZE);p2=priceOf(it2);}while(it2===it||p+p2>100);
-    return {kind:'num',unit:'cents',answer:p+p2,prompt:`${name} buys ${an(it[0])} ${it[0]} for ${p}¢ and ${an(it2[0])} ${it2[0]} for ${p2}¢. How much does ${name} spend in all?`,
-      fig:()=>tags([[it[0],`${p}¢`],[it2[0],`${p2}¢`]]),
-      misc:miscOf(p+p2,[[Math.abs(p-p2),'That’s the difference. Add to find what both cost together.'],[p+p2+10,'Add the tens, then the ones.'],[p+p2-10,'Add the tens, then the ones. Did you make a new ten?']]),
-      hint:`Add the two prices: ${p} + ${p2}. Add the tens, then the ones.`,
-      explain:`${p} + ${p2} = ${p+p2}. ${name} spends ${p+p2}¢.`};
+  if(variant===2){
+    /* what two prizes cost together, up to a dollar */
+    let prize2,price2;do{prize2=pick(PRIZE);price2=priceOf(prize2);}while(prize2===prize||price+price2>100);
+    return {kind:'num',unit:'cents',answer:price+price2,prompt:`${name} buys ${an(prize[0])} ${prize[0]} for ${price}¢ and ${an(prize2[0])} ${prize2[0]} for ${price2}¢. How much does ${name} spend in all?`,
+      fig:()=>tags([[prize[0],`${price}¢`],[prize2[0],`${price2}¢`]]),
+      misc:miscOf(price+price2,[[Math.abs(price-price2),'That’s the difference. Add to find what both cost together.'],[price+price2+10,'Add the tens, then the ones.'],[price+price2-10,'Add the tens, then the ones. Did you make a new ten?']]),
+      hint:`Add the two prices: ${price} + ${price2}. Add the tens, then the ones.`,
+      explain:`${price} + ${price2} = ${price+price2}. ${name} spends ${price+price2}¢.`};
   }
-  /* not half the price, where what's needed is what's there (a 10¢ prize has only 5¢ below half, so it gets a big prize) */
-  if(k===3&&p>10){
-    let h;do h=5*R(1,p/5-1);while(2*h===p);
-    const c=makeCents(h);
-    return {kind:'num',unit:'cents',answer:p-h,prompt:`${name} has ${h}¢. ${name} wants ${an(it[0])} ${it[0]} that costs ${p}¢. How much more money does ${name} need?`,
-      fig:()=>tags([[it[0],`${p}¢`]])+moneyFig(coinList(c),{label:`${name}’s ${h}¢`}),
-      misc:miscOf(p-h,[[p+h,`That’s adding. ${name} needs the difference between ${h}¢ and ${p}¢.`],[p,`That’s the whole price. ${name} already has ${h}¢.`],[h,`That’s what ${name} has now.`]]),
-      hint:`Count up from ${h} to ${p}.`,
-      explain:`${h} + ${p-h} = ${p}, so ${name} needs ${p-h}¢ more.`};
+  /* how much more a prize needs; not half the price, where what's needed is what's there (a 10¢ prize has only 5¢ below half, so it gets a big prize) */
+  if(variant===3&&price>10){
+    let has;do has=5*R(1,price/5-1);while(2*has===price);
+    const coinCounts=makeCents(has);
+    return {kind:'num',unit:'cents',answer:price-has,prompt:`${name} has ${has}¢. ${name} wants ${an(prize[0])} ${prize[0]} that costs ${price}¢. How much more money does ${name} need?`,
+      fig:()=>tags([[prize[0],`${price}¢`]])+moneyFig(coinList(coinCounts),{label:`${name}’s ${has}¢`}),
+      misc:miscOf(price-has,[[price+has,`That’s adding. ${name} needs the difference between ${has}¢ and ${price}¢.`],[price,`That’s the whole price. ${name} already has ${has}¢.`],[has,`That’s what ${name} has now.`]]),
+      hint:`Count up from ${has} to ${price}.`,
+      explain:`${has} + ${price-has} = ${price}, so ${name} needs ${price-has}¢ more.`};
   }
-  const g=pick(BIG),bp=R(g[1],g[2]);
-  let bh;do bh=R(1,bp-1);while(2*bh===bp);
-  return {kind:'num',unit:'dollars',answer:bp-bh,prompt:`${cap(an(g[0]))} ${g[0]} costs $${bp}. ${name} has $${bh}. How many more dollars does ${name} need?`,
-    fig:()=>tags([[g[0],`$${bp}`]])+moneyFig(coinList({B:bh}),{label:`${name}’s $${bh}`}),
-    misc:miscOf(bp-bh,[[bp+bh,`That’s adding. ${name} needs the difference.`],[bp,`That’s the whole price. ${name} already has $${bh}.`],[bh,`That’s what ${name} has now.`]]),
-    hint:`Count up from $${bh} to $${bp}.`,
-    explain:`$${bh} + $${bp-bh} = $${bp}, so ${name} needs $${bp-bh} more.`};
+  /* how many more dollars a big thing needs; not half its price */
+  const bigThing=pick(BIG),bigPrice=R(bigThing[1],bigThing[2]);
+  let has;do has=R(1,bigPrice-1);while(2*has===bigPrice);
+  return {kind:'num',unit:'dollars',answer:bigPrice-has,prompt:`${cap(an(bigThing[0]))} ${bigThing[0]} costs $${bigPrice}. ${name} has $${has}. How many more dollars does ${name} need?`,
+    fig:()=>tags([[bigThing[0],`$${bigPrice}`]])+moneyFig(coinList({B:has}),{label:`${name}’s $${has}`}),
+    misc:miscOf(bigPrice-has,[[bigPrice+has,`That’s adding. ${name} needs the difference.`],[bigPrice,`That’s the whole price. ${name} already has $${has}.`],[has,`That’s what ${name} has now.`]]),
+    hint:`Count up from $${has} to $${bigPrice}.`,
+    explain:`$${has} + $${bigPrice-has} = $${bigPrice}, so ${name} needs $${bigPrice-has} more.`};
 }
 
 /* ---------- The Big Wheel: everything ---------- */

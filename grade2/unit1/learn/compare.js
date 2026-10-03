@@ -1,45 +1,51 @@
 /* Learn Adding, Subtracting, and Working with Data (Grade 2 Unit 1), chapter 5: Compare. Its widgets and steps; loaded by compare.html. */
+/* How many more? Steppers set the dogs and cats; a button shows the difference on the bar graph. */
 function wMore(el){
-  const q=Q(el),st={a:9,b:5};let show=false;
+  /* the steppers' values: a dogs, b cats; show: the difference is shown */
+  const q=Q(el),values={a:9,b:5};let show=false;
   el.innerHTML=`<div class="fig" data-f></div><div class="wrow">${stepper('a','Dogs')}${stepper('b','Cats')}</div><div class="wrow"><button type="button" class="btn" data-go></button></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const {a,b}=st,rows=[{label:'Dogs',n:a,c:'yellow'},{label:'Cats',n:b,c:'blue'}];q('a').textContent=a;q('b').textContent=b;
-    const d=a===b?null:a>b?[1,0]:[0,1],big=Math.max(a,b),small=Math.min(a,b),bigL=a>b?'dogs':'cats',smallL=a>b?'cats':'dogs';
-    q('f').innerHTML=barGraph(rows,{diff:d,showDiff:show,title:'Dogs and cats at the pet shelter'});
+    const {a,b}=values,rows=[{label:'Dogs',n:a,c:'yellow'},{label:'Cats',n:b,c:'blue'}];q('a').textContent=a;q('b').textContent=b;
+    /* diffBars: [taller, shorter] bar, or null when they're the same */
+    const diffBars=a===b?null:a>b?[1,0]:[0,1],more=Math.max(a,b),fewer=Math.min(a,b),moreName=a>b?'dogs':'cats',fewerName=a>b?'cats':'dogs';
+    q('f').innerHTML=barGraph(rows,{diff:diffBars,showDiff:show,title:'Dogs and cats at the pet shelter'});
     q('go').textContent=show?'Hide the difference':'Show how many more';
-    q('go').hidden=!d;
-    q('r').innerHTML=!d?`<b>${a} dogs and ${b} cats</b>: the same number, so neither has more.`:show?`<span class="ok"><b>${big} − ${small} = ${big-small}</b>, or <b>${small} + ${big-small} = ${big}</b>.</span><br>There ${big-small===1?'is':'are'} ${big-small} more ${big-small===1?bigL.slice(0,-1):bigL} than ${smallL}.`:`How many more ${bigL} than ${smallL}? Look at how much taller the ${bigL} bar is.`;
+    q('go').hidden=!diffBars;
+    q('r').innerHTML=!diffBars?`<b>${a} dogs and ${b} cats</b>: the same number, so neither has more.`:show?`<span class="ok"><b>${more} − ${fewer} = ${more-fewer}</b>, or <b>${fewer} + ${more-fewer} = ${more}</b>.</span><br>There ${more-fewer===1?'is':'are'} ${more-fewer} more ${more-fewer===1?moreName.slice(0,-1):moreName} than ${fewerName}.`:`How many more ${moreName} than ${fewerName}? Look at how much taller the ${moreName} bar is.`;
   };
-  steppers(el,st,{a:[1,10],b:[1,10]},draw);
+  steppers(el,values,{a:[1,10],b:[1,10]},draw);
   q('go').onclick=()=>{show=!show;draw();};
   draw();
 }
+/* Two tapes of stickers (a stepper for each), with the difference dashed. */
 function wTape(el){
-  const q=Q(el),st={a:12,b:7};
+  const q=Q(el),values={a:12,b:7};
   el.innerHTML=`<div class="wrow">${stepper('a','Priya')}${stepper('b','Kiran')}</div><div class="fig" data-f></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const {a,b}=st;q('a').textContent=a;q('b').textContent=b;
+    const {a,b}=values;q('a').textContent=a;q('b').textContent=b;
     q('f').innerHTML=tapes([{label:'Priya',n:a,show:a},{label:'Kiran',n:b,show:b}],{diff:a===b?null:Math.abs(a-b)});
     q('r').innerHTML=a===b?`Priya and Kiran each have <b>${a}</b> stickers. The tapes are the same length.`:`The dashed piece is the difference: <b>${Math.max(a,b)} − ${Math.min(a,b)} = ${Math.abs(a-b)}</b>.<br>${a>b?'Priya':'Kiran'} has ${Math.abs(a-b)} more sticker${Math.abs(a-b)===1?'':'s'} than ${a>b?'Kiran':'Priya'}.`;
   };
-  steppers(el,st,{a:[1,20],b:[1,20]},draw);draw();
+  steppers(el,values,{a:[1,20],b:[1,20]},draw);draw();
 }
+/* compare stories, one for each unknown: the story, its tapes [label, length, what to write], the difference to write, and the answer */
 const KINDS=[
   {id:'diff',label:'How many more?',story:'Jada has 34 books. Han has 22 books. How many more books does Jada have than Han?',rows:[['Jada',34,'34'],['Han',22,'22']],diff:'?',ans:'34 − 22 = 12, or 22 + 12 = 34. Jada has 12 more books.'},
   {id:'big',label:'Bigger one unknown',story:'Han has 22 books. Jada has 12 more books than Han. How many books does Jada have?',rows:[['Jada',34,'?'],['Han',22,'22']],diff:'12',ans:'Jada has more, so add: 22 + 12 = 34 books.'},
   {id:'small',label:'Smaller one unknown',story:'Jada has 34 books. Han has 12 fewer books than Jada. How many books does Han have?',rows:[['Jada',34,'34'],['Han',22,'?']],diff:'12',ans:'Han has fewer, so subtract: 34 − 12 = 22 books.'},
 ];
+/* Pick a kind of compare story to see its tapes; a button shows the answer. */
 function wKinds(el){
-  const q=Q(el);let k=0,shown=false;
-  el.innerHTML=seg('Kind of problem',KINDS.map((x,i)=>[i,x.label]))+`<p class="story" data-s></p><div class="fig" data-f></div><div class="wrow"><button type="button" class="btn" data-go>Show the answer</button></div><p class="readout" data-r></p>`;
+  const q=Q(el);let kindIndex=0,shown=false;
+  el.innerHTML=seg('Kind of problem',KINDS.map((kind,i)=>[i,kind.label]))+`<p class="story" data-s></p><div class="fig" data-f></div><div class="wrow"><button type="button" class="btn" data-go>Show the answer</button></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const K=KINDS[k];press(el,k);
-    q('s').textContent=K.story;
-    q('f').innerHTML=tapes(K.rows.map(([label,n,show])=>({label,n,show})),{diff:K.diff});
+    const kind=KINDS[kindIndex];press(el,kindIndex);
+    q('s').textContent=kind.story;
+    q('f').innerHTML=tapes(kind.rows.map(([label,n,show])=>({label,n,show})),{diff:kind.diff});
     q('go').hidden=shown;
-    q('r').innerHTML=shown?`<span class="ok">${K.ans}</span>`:'Where is the <b>?</b> in the tapes? That’s what the problem asks.';
+    q('r').innerHTML=shown?`<span class="ok">${kind.ans}</span>`:'Where is the <b>?</b> in the tapes? That’s what the problem asks.';
   };
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){k=+b.dataset.m;shown=false;draw();}});
+  el.addEventListener('click',e=>{const kindBtn=e.target.closest('[data-m]');if(kindBtn){kindIndex=+kindBtn.dataset.m;shown=false;draw();}});
   q('go').onclick=()=>{shown=true;draw();};
   draw();
 }

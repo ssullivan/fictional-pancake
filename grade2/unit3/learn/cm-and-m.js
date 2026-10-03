@@ -1,54 +1,71 @@
 /* Learn Measuring Length (Grade 2 Unit 3), chapter 2: Centimeters and meters. Its widgets and steps; loaded by cm-and-m.html. */
 /* an object with a 10 cm strip under it, for estimating (24 pixels per cm, like the 20 cm ruler it's measured on) */
 const estFig=(kind,len)=>svgWrap(Math.max(len,10)*24+110,90,thing(kind,22,12,len*24)+`<rect class="ref" x="22" y="56" width="240" height="20" rx="3"/><text class="lbl st" x="274" y="66">10 cm</text>`,`A ${NAME[kind]} above a strip 10 centimeters long`);
+/* objects to estimate [kind, cm], and the estimates to choose from */
 const EST=[['eraser',6],['glue',9],['pencil',17]],GUESS=[5,10,20];
+/* Estimate an object's length against a 10 cm strip, then measure it on a ruler. */
 function wEstimate(el){
-  const q=Q(el);let p=0,e=-1,shown=false;
-  el.innerHTML=seg('Object',EST.map(([k],i)=>[i,NAME[k]]))+`<div class="fig" data-f></div><div class="chips" data-c></div><div class="wrow"><button type="button" class="btn" data-go></button></div><p class="readout" data-r></p>`;
+  /* guessIndex: the estimate tapped (-1 for none); shown: it's been measured */
+  const q=Q(el);let objectIndex=0,guessIndex=-1,shown=false;
+  el.innerHTML=seg('Object',EST.map(([kind],i)=>[i,NAME[kind]]))+`<div class="fig" data-f></div><div class="chips" data-c></div><div class="wrow"><button type="button" class="btn" data-go></button></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const [k,len]=EST[p],best=GUESS.reduce((b,g)=>Math.abs(g-len)<Math.abs(b-len)?g:b);press(el,p);
-    q('f').innerHTML=shown?ruler(20,{u:24,obj:{kind:k,at:0,len}}):estFig(k,len);
-    q('c').innerHTML=GUESS.map((g,i)=>`<button type="button" class="chip" data-e="${i}" aria-pressed="${i===e}"${shown?' disabled':''}>about ${g} cm</button>`).join('');
-    q('go').disabled=e<0;q('go').textContent=shown?'Try another':'Measure it';
-    q('r').innerHTML=e<0?`About how long is the ${NAME[k]}? Use the 10 cm strip to help. Tap an estimate.`
-      :!shown?`Your estimate: <b>about ${GUESS[e]} cm</b>. Now measure it.`
-      :`It’s <b>${len} cm</b> long. You said about ${GUESS[e]} cm.<br>`+(GUESS[e]===best?`<span class="ok">Great estimate!</span>`:`<span class="dimline">About ${best} cm is closer. An estimate doesn’t have to be exact.</span>`);
+    /* best: the estimate closest to the real length */
+    const [kind,len]=EST[objectIndex],best=GUESS.reduce((closest,g)=>Math.abs(g-len)<Math.abs(closest-len)?g:closest);press(el,objectIndex);
+    q('f').innerHTML=shown?ruler(20,{u:24,obj:{kind,at:0,len}}):estFig(kind,len);
+    q('c').innerHTML=GUESS.map((g,i)=>`<button type="button" class="chip" data-e="${i}" aria-pressed="${i===guessIndex}"${shown?' disabled':''}>about ${g} cm</button>`).join('');
+    q('go').disabled=guessIndex<0;q('go').textContent=shown?'Try another':'Measure it';
+    q('r').innerHTML=guessIndex<0?`About how long is the ${NAME[kind]}? Use the 10 cm strip to help. Tap an estimate.`
+      :!shown?`Your estimate: <b>about ${GUESS[guessIndex]} cm</b>. Now measure it.`
+      :`It’s <b>${len} cm</b> long. You said about ${GUESS[guessIndex]} cm.<br>`+(GUESS[guessIndex]===best?`<span class="ok">Great estimate!</span>`:`<span class="dimline">About ${best} cm is closer. An estimate doesn’t have to be exact.</span>`);
   };
-  el.addEventListener('click',ev=>{const b=ev.target.closest('[data-m]');if(b){p=+b.dataset.m;e=-1;shown=false;draw();return;}const c=ev.target.closest('[data-e]');if(c&&!shown){e=+c.dataset.e;draw();}});
-  q('go').onclick=()=>{if(shown){p=(p+1)%EST.length;e=-1;shown=false;}else shown=true;draw();};
+  el.addEventListener('click',e=>{
+    const objectBtn=e.target.closest('[data-m]');if(objectBtn){objectIndex=+objectBtn.dataset.m;guessIndex=-1;shown=false;draw();return;}
+    const guessBtn=e.target.closest('[data-e]');if(guessBtn&&!shown){guessIndex=+guessBtn.dataset.e;draw();}
+  });
+  /* measure, or once measured, go on to the next object */
+  q('go').onclick=()=>{if(shown){objectIndex=(objectIndex+1)%EST.length;guessIndex=-1;shown=false;}else shown=true;draw();};
   draw();
 }
+/* things to measure: kind, length in cm, and the unit that fits (u) */
 const MTH=[{k:'crayon',cm:9,u:'cm'},{k:'book',cm:25,u:'cm'},{k:'rope',cm:200,u:'m'},{k:'rug',cm:300,u:'m'}];
+/* Centimeters or meters? A thing above 3 meter sticks; tap the unit that fits it. */
 function wMeters(el){
-  const q=Q(el);let p=0,e=null;
-  el.innerHTML=seg('Thing',MTH.map((t,i)=>[i,NAME[t.k]]))+`<div class="fig" data-f></div><div class="chips" data-c></div><p class="readout" data-r></p>`;
+  /* choice: 'cm' or 'm' (null before one is tapped) */
+  const q=Q(el);let thingIndex=0,choice=null;
+  el.innerHTML=seg('Thing',MTH.map((item,i)=>[i,NAME[item.k]]))+`<div class="fig" data-f></div><div class="chips" data-c></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const {k,cm,u}=MTH[p],name=NAME[k],m=cm/100;press(el,p);
-    q('f').innerHTML=svgWrap(380,90,thing(k,10,10,cm*1.2)+range(3).map(i=>`<rect class="mst ${i%2?'b':'a'}" x="${10+i*120}" y="50" width="120" height="26"/><text class="lbl s dk" x="${70+i*120}" y="63">1 meter</text>`).join(''),`A ${name} above 3 meter sticks`);
-    q('c').innerHTML=[['cm','Centimeters'],['m','Meters']].map(([id,t])=>`<button type="button" class="chip" data-e="${id}" aria-pressed="${id===e}">${t}</button>`).join('');
-    q('r').innerHTML=!e?`Would you measure the ${name} in centimeters or meters?`
-      :e===u?(u==='cm'?`<span class="ok">Yes! The ${name} is much shorter than a meter stick. It’s about <b>${cm} cm</b> long.</span>`:`<span class="ok">Yes! The ${name} is about ${m} meter sticks long: <b>${m} meters</b>.</span>`)
-      :(u==='cm'?`<span class="dimline">The ${name} is much shorter than 1 meter stick. Try centimeters.</span>`:`<span class="dimline">That’s a lot of centimeters to count! The ${name} is about ${m} meter sticks long. Try meters.</span>`);
+    const {k:kind,cm,u:unit}=MTH[thingIndex],name=NAME[kind],meters=cm/100;press(el,thingIndex);
+    /* 1.2 pixels per cm, so each meter stick is 120 wide */
+    q('f').innerHTML=svgWrap(380,90,thing(kind,10,10,cm*1.2)+range(3).map(i=>`<rect class="mst ${i%2?'b':'a'}" x="${10+i*120}" y="50" width="120" height="26"/><text class="lbl s dk" x="${70+i*120}" y="63">1 meter</text>`).join(''),`A ${name} above 3 meter sticks`);
+    q('c').innerHTML=[['cm','Centimeters'],['m','Meters']].map(([id,text])=>`<button type="button" class="chip" data-e="${id}" aria-pressed="${id===choice}">${text}</button>`).join('');
+    q('r').innerHTML=!choice?`Would you measure the ${name} in centimeters or meters?`
+      :choice===unit?(unit==='cm'?`<span class="ok">Yes! The ${name} is much shorter than a meter stick. It’s about <b>${cm} cm</b> long.</span>`:`<span class="ok">Yes! The ${name} is about ${meters} meter sticks long: <b>${meters} meters</b>.</span>`)
+      :(unit==='cm'?`<span class="dimline">The ${name} is much shorter than 1 meter stick. Try centimeters.</span>`:`<span class="dimline">That’s a lot of centimeters to count! The ${name} is about ${meters} meter sticks long. Try meters.</span>`);
   };
-  el.addEventListener('click',ev=>{const b=ev.target.closest('[data-m]');if(b){p=+b.dataset.m;e=null;draw();return;}const c=ev.target.closest('[data-e]');if(c){e=c.dataset.e;draw();}});
+  el.addEventListener('click',e=>{
+    const thingBtn=e.target.closest('[data-m]');if(thingBtn){thingIndex=+thingBtn.dataset.m;choice=null;draw();return;}
+    const unitBtn=e.target.closest('[data-e]');if(unitBtn){choice=unitBtn.dataset.e;draw();}
+  });
   draw();
 }
+/* pairs of reptiles: [button label, length in cm, name] */
 const REPS=[
   {a:['Dragon',55,'bearded dragon'],b:['Gecko',22,'leopard gecko']},
   {a:['Skink',48,'blue-tongued skink'],b:['Turtle',15,'box turtle']},
   {a:['Dragon',55,'bearded dragon'],b:['Skink',48,'blue-tongued skink']},
 ];
+/* How much longer? Two reptiles as tapes; a button shows the difference. */
 function wReptiles(el){
-  const q=Q(el);let p=0,shown=false;
+  const q=Q(el);let pairIndex=0,shown=false;
   el.innerHTML=seg('Reptiles',REPS.map(({a,b},i)=>[i,`${a[0]} and ${b[0].toLowerCase()}`]))+`<div class="fig" data-t></div><div class="wrow"><button type="button" class="btn" data-go></button></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const {a:[la,a,na],b:[lb,b,nb]}=REPS[p],d=a-b;press(el,p);
-    q('t').innerHTML=tapes([{label:la,n:a,show:a},{label:lb,n:b,show:b}],{diff:shown?d:'?'});
+    const {a:[labelA,a,nameA],b:[labelB,b,nameB]}=REPS[pairIndex],diff=a-b;press(el,pairIndex);
+    q('t').innerHTML=tapes([{label:labelA,n:a,show:a},{label:labelB,n:b,show:b}],{diff:shown?diff:'?'});
     q('go').textContent=shown?'Start over':'How much longer?';
-    q('r').innerHTML=shown?`<b>${b} + ${d} = ${a}</b>, or <b>${a} − ${b} = ${d}</b>.<br><span class="ok">The ${na} is ${d} cm longer.</span>`
-      :`A ${na} is ${a} cm long. A ${nb} is ${b} cm long.<br><span class="dimline">How much longer is the ${na}? That’s the dashed part.</span>`;
+    q('r').innerHTML=shown?`<b>${b} + ${diff} = ${a}</b>, or <b>${a} − ${b} = ${diff}</b>.<br><span class="ok">The ${nameA} is ${diff} cm longer.</span>`
+      :`A ${nameA} is ${a} cm long. A ${nameB} is ${b} cm long.<br><span class="dimline">How much longer is the ${nameA}? That’s the dashed part.</span>`;
   };
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){p=+b.dataset.m;shown=false;draw();}});
+  el.addEventListener('click',e=>{const pairBtn=e.target.closest('[data-m]');if(pairBtn){pairIndex=+pairBtn.dataset.m;shown=false;draw();}});
   q('go').onclick=()=>{shown=!shown;draw();};
   draw();
 }

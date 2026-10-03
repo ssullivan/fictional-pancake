@@ -1,44 +1,50 @@
 /* Learn Adding, Subtracting, and Working with Data (Grade 2 Unit 1), chapter 3: Picture graphs. Its widgets and steps; loaded by picture-graphs.html. */
 const COLORS=[{c:'red',label:'Red'},{c:'blue',label:'Blue'},{c:'green',label:'Green'},{c:'yellow',label:'Yellow'}];
+/* Sort a pile of sticky-note votes into a picture graph: tap a note to sort it. */
 function wSort(el){
-  const q=Q(el),PILE=['blue','red','green','blue','yellow','red','blue','green','blue','red','yellow','blue'],done=new Set();
+  /* PILE: each vote's color; sorted: the votes sorted so far */
+  const q=Q(el),PILE=['blue','red','green','blue','yellow','red','blue','green','blue','red','yellow','blue'],sorted=new Set();
   el.innerHTML=`<div class="fig" data-f></div><div class="wrow"><button type="button" class="ghost-btn" data-one>Sort one</button><button type="button" class="ghost-btn" data-clr>Start over</button></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    let o=`<text class="lbl st" x="4" y="14">${done.size<PILE.length?'Tap a vote to sort it':'All sorted!'}</text>`;
+    let markup=`<text class="lbl st" x="4" y="14">${sorted.size<PILE.length?'Tap a vote to sort it':'All sorted!'}</text>`;
     // two rows of six, each note with a 44px tap area
-    PILE.forEach((c,i)=>{const x=26+i%6*44,y=48+Math.floor(i/6)*44;if(!done.has(i))o+=`<g data-i="${i}" class="tapme"><rect class="hit" x="${x-22}" y="${y-22}" width="44" height="44"/>${PIC.note(x,y,c)}</g>`;});
-    const rows=COLORS.map(k=>({...k,pic:'note',n:[...done].filter(i=>PILE[i]===k.c).length}));
-    q('f').innerHTML=svgWrap(6*44+8,120,o,'Sticky notes to sort')+picGraph(rows,{max:6,title:'Our favorite colors'});
-    const counts=rows.map(r=>`${r.label} ${r.n}`).join(', ');
-    q('r').innerHTML=done.size===PILE.length?`<span class="ok">All ${PILE.length} votes sorted! ${counts}.</span>`:`Sorted: <b>${done.size}</b> of ${PILE.length}`;
+    PILE.forEach((color,i)=>{const x=26+i%6*44,y=48+Math.floor(i/6)*44;if(!sorted.has(i))markup+=`<g data-i="${i}" class="tapme"><rect class="hit" x="${x-22}" y="${y-22}" width="44" height="44"/>${PIC.note(x,y,color)}</g>`;});
+    const rows=COLORS.map(color=>({...color,pic:'note',n:[...sorted].filter(i=>PILE[i]===color.c).length}));
+    q('f').innerHTML=svgWrap(6*44+8,120,markup,'Sticky notes to sort')+picGraph(rows,{max:6,title:'Our favorite colors'});
+    const counts=rows.map(row=>`${row.label} ${row.n}`).join(', ');
+    q('r').innerHTML=sorted.size===PILE.length?`<span class="ok">All ${PILE.length} votes sorted! ${counts}.</span>`:`Sorted: <b>${sorted.size}</b> of ${PILE.length}`;
   };
-  q('f').addEventListener('click',e=>{const g=e.target.closest('[data-i]');if(g){done.add(+g.dataset.i);draw();}});
-  q('one').onclick=()=>{const i=PILE.findIndex((_,i)=>!done.has(i));if(i>=0){done.add(i);draw();}};
-  q('clr').onclick=()=>{done.clear();draw();};
+  q('f').addEventListener('click',e=>{const note=e.target.closest('[data-i]');if(note){sorted.add(+note.dataset.i);draw();}});
+  q('one').onclick=()=>{const next=PILE.findIndex((_,i)=>!sorted.has(i));if(next>=0){sorted.add(next);draw();}};
+  q('clr').onclick=()=>{sorted.clear();draw();};
   draw();
 }
 const WEATHER=[{label:'Sunny',n:9,pic:'sun'},{label:'Cloudy',n:7,pic:'cloud'},{label:'Rainy',n:5,pic:'rain'}];
+/* Tap a kind of weather to count its row. */
 function wReadPic(el){
-  const q=Q(el);let hi=-1;
-  el.innerHTML=`<div class="fig" data-f></div><div class="wrow">${WEATHER.map((r,i)=>`<button type="button" class="ghost-btn" data-row="${i}">${r.label}</button>`).join('')}</div><p class="readout" data-r></p>`;
+  /* picked: the row picked (-1 for none) */
+  const q=Q(el);let picked=-1;
+  el.innerHTML=`<div class="fig" data-f></div><div class="wrow">${WEATHER.map((row,i)=>`<button type="button" class="ghost-btn" data-row="${i}">${row.label}</button>`).join('')}</div><p class="readout" data-r></p>`;
   const draw=()=>{
-    q('f').innerHTML=picGraph(WEATHER,{hi,title:'Weather on school days in March',unit:'1 day'});
-    q('r').innerHTML=hi<0?'Tap a kind of weather to count its row.':`There were <b>${WEATHER[hi].n} ${WEATHER[hi].label.toLowerCase()} days</b>.`+(hi===0?' That’s the longest row: the most days.':hi===2?' That’s the shortest row: the fewest days.':'');
+    q('f').innerHTML=picGraph(WEATHER,{hi:picked,title:'Weather on school days in March',unit:'1 day'});
+    q('r').innerHTML=picked<0?'Tap a kind of weather to count its row.':`There were <b>${WEATHER[picked].n} ${WEATHER[picked].label.toLowerCase()} days</b>.`+(picked===0?' That’s the longest row: the most days.':picked===2?' That’s the shortest row: the fewest days.':'');
   };
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-row]');if(b){hi=+b.dataset.row;draw();}});
+  el.addEventListener('click',e=>{const rowBtn=e.target.closest('[data-row]');if(rowBtn){picked=+rowBtn.dataset.row;draw();}});
   draw();
 }
+/* Add the rows one at a time to find how many days in all. */
 function wTotal(el){
+  /* added: the rows added so far, in the order they were added */
   const q=Q(el),added=new Set();
-  el.innerHTML=`<div class="fig" data-f></div><div class="wrow">${WEATHER.map((r,i)=>`<button type="button" class="ghost-btn" data-row="${i}">Add ${r.label.toLowerCase()}</button>`).join('')}<button type="button" class="ghost-btn" data-clr>Start over</button></div><p class="readout" data-r></p>`;
+  el.innerHTML=`<div class="fig" data-f></div><div class="wrow">${WEATHER.map((row,i)=>`<button type="button" class="ghost-btn" data-row="${i}">Add ${row.label.toLowerCase()}</button>`).join('')}<button type="button" class="ghost-btn" data-clr>Start over</button></div><p class="readout" data-r></p>`;
   const draw=()=>{
     const order=[...added];
     q('f').innerHTML=picGraph(WEATHER,{hi:order.length?order[order.length-1]:-1,title:'Weather on school days in March',unit:'1 day'});
     el.querySelectorAll('[data-row]').forEach(b=>b.disabled=added.has(+b.dataset.row));
-    const sum=order.reduce((s,i)=>s+WEATHER[i].n,0);
+    const sum=order.reduce((total,i)=>total+WEATHER[i].n,0);
     q('r').innerHTML=!order.length?'Add each row to find how many days in all.':`<b>${order.map(i=>WEATHER[i].n).join(' + ')} = ${sum}</b>`+(order.length===WEATHER.length?`<br><span class="ok">There were ${sum} school days in all.</span>`:'');
   };
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-row]');if(b){added.add(+b.dataset.row);draw();}});
+  el.addEventListener('click',e=>{const rowBtn=e.target.closest('[data-row]');if(rowBtn){added.add(+rowBtn.dataset.row);draw();}});
   q('clr').onclick=()=>{added.clear();draw();};
   draw();
 }

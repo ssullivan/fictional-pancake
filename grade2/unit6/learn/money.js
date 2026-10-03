@@ -1,26 +1,30 @@
 /* Learn Geometry, Time, and Money (Grade 2 Unit 6), chapter 5: Money problems. Its widgets and steps; loaded by money.html. */
+/* Dollar bills and coins (a stepper for each): count the dollars, then the cents. */
 function wDollarsCents(el){
-  const q=Q(el),st={bills:2,qs:1,ds:1,ps:3};
+  const q=Q(el),values={bills:2,qs:1,ds:1,ps:3};
   el.innerHTML=`<div class="fig" data-f></div><div class="wrow">${stepper('bills','Dollar bills')}${stepper('qs','Quarters')}${stepper('ds','Dimes')}${stepper('ps','Pennies')}</div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const list=coinList(fromSteps(st)),t=centsOf(list),c=t%100,d=st.bills;Object.keys(st).forEach(k=>{q(k).textContent=st[k];});
-    q('f').innerHTML=list.length?moneyFig(list,{vals:true}):empty('No money yet');
-    q('r').innerHTML=`Dollars: <b>${d}</b>. Cents: ${c?`${countUp(list.filter(k=>k!=='B'))}, so <b>${c}</b>`:'<b>0</b>'}.<br><span class="ok"><b>${d} dollar${d===1?'':'s'} and ${c} cent${c===1?'':'s'}</b>${t?`: ${amt(t)}`:''}</span><br><span class="dimline">Count the dollars. Then count the cents.</span>`;
+    const money=coinList(fromSteps(values)),total=centsOf(money),cents=total%100,dollars=values.bills;Object.keys(values).forEach(key=>{q(key).textContent=values[key];});
+    q('f').innerHTML=money.length?moneyFig(money,{vals:true}):empty('No money yet');
+    q('r').innerHTML=`Dollars: <b>${dollars}</b>. Cents: ${cents?`${countUp(money.filter(coin=>coin!=='B'))}, so <b>${cents}</b>`:'<b>0</b>'}.<br><span class="ok"><b>${dollars} dollar${dollars===1?'':'s'} and ${cents} cent${cents===1?'':'s'}</b>${total?`: ${amt(total)}`:''}</span><br><span class="dimline">Count the dollars. Then count the cents.</span>`;
   };
-  steppers(el,st,{bills:[0,5],qs:[0,3],ds:[0,2],ps:[0,4]},draw);
+  steppers(el,values,{bills:[0,5],qs:[0,3],ds:[0,2],ps:[0,4]},draw);
   draw();
 }
+/* things to buy and their prices in cents */
 const SHOP=[['sticker',15],['pencil',30],['eraser',20],['bouncy ball',45],['whistle',35]];
+/* Spend a dollar: tap things to buy them (or put them back); what costs too much is turned off. */
 function wShop(el){
-  const q=Q(el);let got=[];
+  /* bought: the things tapped */
+  const q=Q(el);let bought=[];
   el.innerHTML=`<p class="story">You have <b>$1</b>. That’s 100¢. Tap things to buy them. Tap again to put them back.</p><div class="chips" data-c></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const t=got.reduce((s,i)=>s+SHOP[i][1],0);
-    q('c').innerHTML=SHOP.map(([n,c],i)=>`<button type="button" class="chip" data-e="${i}" aria-pressed="${got.includes(i)}"${!got.includes(i)&&t+c>100?' disabled':''}>${n}: ${c}¢</button>`).join('');
-    q('r').innerHTML=got.length?`You spent ${got.map(i=>SHOP[i][1]).join(' + ')} = <b>${t}¢</b>.<br><span class="ok">100 − ${t} = <b>${100-t}¢</b> left.</span>`+(t===100?'<br><span class="dimline">You spent the whole dollar!</span>':'')
+    const spent=bought.reduce((sum,i)=>sum+SHOP[i][1],0);
+    q('c').innerHTML=SHOP.map(([name,cents],i)=>`<button type="button" class="chip" data-e="${i}" aria-pressed="${bought.includes(i)}"${!bought.includes(i)&&spent+cents>100?' disabled':''}>${name}: ${cents}¢</button>`).join('');
+    q('r').innerHTML=bought.length?`You spent ${bought.map(i=>SHOP[i][1]).join(' + ')} = <b>${spent}¢</b>.<br><span class="ok">100 − ${spent} = <b>${100-spent}¢</b> left.</span>`+(spent===100?'<br><span class="dimline">You spent the whole dollar!</span>':'')
       :'What can you buy with 100¢?';
   };
-  el.addEventListener('click',e=>{const c=e.target.closest('[data-e]');if(!c||c.disabled)return;const i=+c.dataset.e;got=got.includes(i)?got.filter(j=>j!==i):[...got,i];draw();});
+  el.addEventListener('click',e=>{const chip=e.target.closest('[data-e]');if(!chip||chip.disabled)return;const i=+chip.dataset.e;bought=bought.includes(i)?bought.filter(j=>j!==i):[...bought,i];draw();});
   draw();
 }
 const STEPS=[

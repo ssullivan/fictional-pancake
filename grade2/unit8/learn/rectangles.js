@@ -1,71 +1,80 @@
 /* Learn Equal Groups (Grade 2 Unit 8), chapter 5: Rectangles and squares. Its widgets and steps; loaded by rectangles.html. */
-/* r rows of c square tiles, gap pixels apart (0: pushed together into a rectangle). The picture keeps the same size either way. */
-function tileFig(r,c,{gap=0,label}={}){
-  const T=40,S=14,W=c*T+(c-1)*S,H=r*T+(r-1)*S,dx=(W-c*T-(c-1)*gap)/2,dy=(H-r*T-(r-1)*gap)/2;
-  let o=range(r*c).map(n=>`<rect class="tile" x="${8+dx+n%c*(T+gap)}" y="${8+dy+Math.floor(n/c)*(T+gap)}" width="${T}" height="${T}"/>`).join('');
-  if(!gap)o+=`<rect class="rim" x="${8+dx}" y="${8+dy}" width="${c*T}" height="${r*T}"/>`;
-  return svgWrap(W+16,H+16,o,label||(gap?`${r*c} square tiles in ${pl(r,'row')} of ${c}, with gaps`:`A rectangle made of ${pl(r*c,'square')}: ${pl(r,'row')} of ${c}`));
+/* rows of cols square tiles, gap pixels apart (0: pushed together into a rectangle). The picture keeps the same size either way. */
+function tileFig(rows,cols,{gap=0,label}={}){
+  /* tiles are tileSize square; the picture is sized for the widest gap (MAX_GAP), and the tiles are centered in it */
+  const tileSize=40,MAX_GAP=14,width=cols*tileSize+(cols-1)*MAX_GAP,height=rows*tileSize+(rows-1)*MAX_GAP,
+    dx=(width-cols*tileSize-(cols-1)*gap)/2,dy=(height-rows*tileSize-(rows-1)*gap)/2;
+  let markup=range(rows*cols).map(n=>`<rect class="tile" x="${8+dx+n%cols*(tileSize+gap)}" y="${8+dy+Math.floor(n/cols)*(tileSize+gap)}" width="${tileSize}" height="${tileSize}"/>`).join('');
+  if(!gap)markup+=`<rect class="rim" x="${8+dx}" y="${8+dy}" width="${cols*tileSize}" height="${rows*tileSize}"/>`;
+  return svgWrap(width+16,height+16,markup,label||(gap?`${rows*cols} square tiles in ${pl(rows,'row')} of ${cols}, with gaps`:`A rectangle made of ${pl(rows*cols,'square')}: ${pl(rows,'row')} of ${cols}`));
 }
-/* A w × h rectangle cut into pieces: rects [[x, y, w, h]] in units of U pixels.
-   on(i): color piece i in. num(i): a number to write in piece i. tap: pieces can be tapped (data-i). */
+/* v to 2 decimal places, so pieces cut in thirds write short numbers */
 const fx=v=>+v.toFixed(2);
+/* A w × h rectangle cut into pieces: rects [[x, y, width, height]] in units of U pixels.
+   on(i): color piece i in. num(i): a number to write in piece i. tap: pieces can be tapped (data-i). */
 function pieces(w,h,rects,{U=56,on=()=>false,num=()=>null,tap=false,label}={}){
-  const o=rects.map(([x,y,a,b],i)=>{
-    const X=fx(6+x*U),Y=fx(6+y*U),n=num(i);
-    return `<g${tap?` data-i="${i}"`:''}><rect class="pc${on(i)?' on':''}" x="${X}" y="${Y}" width="${fx(a*U)}" height="${fx(b*U)}"/>`+(n!=null?`<text class="lbl dk" x="${fx(X+a*U/2)}" y="${fx(Y+b*U/2)}">${n}</text>`:'')+'</g>';
+  const markup=rects.map(([x,y,width,height],i)=>{
+    const left=fx(6+x*U),top=fx(6+y*U),n=num(i);
+    return `<g${tap?` data-i="${i}"`:''}><rect class="pc${on(i)?' on':''}" x="${left}" y="${top}" width="${fx(width*U)}" height="${fx(height*U)}"/>`+(n!=null?`<text class="lbl dk" x="${fx(left+width*U/2)}" y="${fx(top+height*U/2)}">${n}</text>`:'')+'</g>';
   }).join('');
-  return svgWrap(12+w*U,12+h*U,o,label);
+  return svgWrap(12+w*U,12+h*U,markup,label);
 }
-/* the pieces of a w × h rectangle cut into r rows and c columns */
-const cutGrid=(w,h,r,c)=>range(r*c).map(n=>[n%c*w/c,Math.floor(n/c)*h/r,w/c,h/r]);
+/* the pieces of a w × h rectangle cut into `rows` rows and `cols` columns */
+const cutGrid=(w,h,rows,cols)=>range(rows*cols).map(n=>[n%cols*w/cols,Math.floor(n/cols)*h/rows,w/cols,h/rows]);
+/* Square tiles in rows and columns (a stepper for each): push them together into a rectangle. */
 function wTiles(el){
-  const q=Q(el),st={rows:3,cols:4};let push=false;
+  /* pushed: the tiles are pushed together (and come apart when a stepper changes) */
+  const q=Q(el),values={rows:3,cols:4};let pushed=false;
   el.innerHTML=`<div class="fig" data-f></div><div class="wrow">${stepper('rows','Rows')}${stepper('cols','Columns')}<button type="button" class="btn" data-go></button></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const {rows:r,cols:c}=st;q('rows').textContent=r;q('cols').textContent=c;
-    q('go').textContent=push?'Pull them apart':'Push them together';
-    q('f').innerHTML=tileFig(r,c,{gap:push?0:14});
-    q('r').innerHTML=push?`<span class="ok">A rectangle made of ${pl(r*c,'square')}!</span><br><span class="dimline">No gaps and no overlaps. ${pl(r,'row')} of ${c}: ${addends(r,c)} = ${r*c}.</span>`
-      :`<b>${pl(r*c,'tile')}</b> in ${pl(r,'row')} of ${c}.<br><span class="dimline">Tap Push them together.</span>`;
+    const {rows,cols}=values;q('rows').textContent=rows;q('cols').textContent=cols;
+    q('go').textContent=pushed?'Pull them apart':'Push them together';
+    q('f').innerHTML=tileFig(rows,cols,{gap:pushed?0:14});
+    q('r').innerHTML=pushed?`<span class="ok">A rectangle made of ${pl(rows*cols,'square')}!</span><br><span class="dimline">No gaps and no overlaps. ${pl(rows,'row')} of ${cols}: ${addends(rows,cols)} = ${rows*cols}.</span>`
+      :`<b>${pl(rows*cols,'tile')}</b> in ${pl(rows,'row')} of ${cols}.<br><span class="dimline">Tap Push them together.</span>`;
   };
-  steppers(el,st,{rows:[1,5],cols:[1,5]},()=>{push=false;draw();});
-  q('go').onclick=()=>{push=!push;draw();};
+  steppers(el,values,{rows:[1,5],cols:[1,5]},()=>{pushed=false;draw();});
+  q('go').onclick=()=>{pushed=!pushed;draw();};
   draw();
 }
-/* cut a rectangle (CUT: [width, height]) into rows and columns until the pieces are squares */
+/* rectangles to cut: [width, height] */
 const CUT=[[4,3],[5,2],[4,2]];
+/* Cut a rectangle into rows and columns (a stepper for each) until the pieces are same-size squares. */
 function wCut(el){
-  const q=Q(el),st={rows:2,cols:2};let p=0;
+  const q=Q(el),values={rows:2,cols:2};let rectIndex=0;
   el.innerHTML=seg('Rectangle',CUT.map((_,i)=>[i,`Rectangle ${i+1}`]))+`<div class="fig" data-f></div><div class="wrow">${stepper('rows','Rows')}${stepper('cols','Columns')}</div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const [w,h]=CUT[p],{rows:r,cols:c}=st,pw=w/c,ph=h/r,sq=Math.abs(pw-ph)<1e-9;
-    q('rows').textContent=r;q('cols').textContent=c;press(el,p);
-    q('f').innerHTML=pieces(w,h,cutGrid(w,h,r,c),{U:Math.min(64,300/w),on:()=>sq,label:`A rectangle cut into ${pl(r,'row')} and ${pl(c,'column')}`+(sq?' of squares':'')});
-    q('r').innerHTML=sq?`<span class="ok">Same-size squares! ${pl(r,'row')} of ${c}: ${r*c} squares.</span>`
-      :pw>ph?`${pl(r,'row')} and ${pl(c,'column')}. These pieces are wider than they are tall.<br><span class="dimline">Try more columns, or fewer rows.</span>`
-      :`${pl(r,'row')} and ${pl(c,'column')}. These pieces are taller than they are wide.<br><span class="dimline">Try more rows, or fewer columns.</span>`;
+    /* each piece is pieceW by pieceH; they're squares when those match */
+    const [w,h]=CUT[rectIndex],{rows,cols}=values,pieceW=w/cols,pieceH=h/rows,squares=Math.abs(pieceW-pieceH)<1e-9;
+    q('rows').textContent=rows;q('cols').textContent=cols;press(el,rectIndex);
+    q('f').innerHTML=pieces(w,h,cutGrid(w,h,rows,cols),{U:Math.min(64,300/w),on:()=>squares,label:`A rectangle cut into ${pl(rows,'row')} and ${pl(cols,'column')}`+(squares?' of squares':'')});
+    q('r').innerHTML=squares?`<span class="ok">Same-size squares! ${pl(rows,'row')} of ${cols}: ${rows*cols} squares.</span>`
+      :pieceW>pieceH?`${pl(rows,'row')} and ${pl(cols,'column')}. These pieces are wider than they are tall.<br><span class="dimline">Try more columns, or fewer rows.</span>`
+      :`${pl(rows,'row')} and ${pl(cols,'column')}. These pieces are taller than they are wide.<br><span class="dimline">Try more rows, or fewer columns.</span>`;
   };
-  steppers(el,st,{rows:[1,5],cols:[1,5]},draw);
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){p=+b.dataset.m;draw();}});
+  steppers(el,values,{rows:[1,5],cols:[1,5]},draw);
+  el.addEventListener('click',e=>{const rectBtn=e.target.closest('[data-m]');if(rectBtn){rectIndex=+rectBtn.dataset.m;draw();}});
   draw();
 }
-/* tap each square of a rectangle to count it */
+/* Tap each square of a rectangle (a stepper for the rows and one for the columns) to count it. */
 function wCountSq(el){
-  const q=Q(el),st={rows:3,cols:4};let order=[];
+  /* order: the squares tapped, in order (each gets its count written in it) */
+  const q=Q(el),values={rows:3,cols:4};let order=[];
   el.innerHTML=`<div class="fig" data-f></div><div class="wrow">${stepper('rows','Rows')}${stepper('cols','Columns')}<button type="button" class="ghost-btn" data-clr>Start over</button></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const {rows:r,cols:c}=st,n=r*c;q('rows').textContent=r;q('cols').textContent=c;
-    q('f').innerHTML=pieces(c,r,cutGrid(c,r,r,c),{on:i=>order.includes(i),num:i=>order.includes(i)?order.indexOf(i)+1:null,tap:true,
-      label:`A rectangle cut into ${pl(r,'row')} of ${c} squares, ${order.length} counted`});
-    q('r').innerHTML=order.length===n?`<span class="ok"><b>${pl(n,'square')}!</b></span><br><span class="dimline">${pl(r,'row')} of ${c}: ${addends(r,c)} = ${n}.</span>`
+    const {rows,cols}=values,total=rows*cols;q('rows').textContent=rows;q('cols').textContent=cols;
+    q('f').innerHTML=pieces(cols,rows,cutGrid(cols,rows,rows,cols),{on:i=>order.includes(i),num:i=>order.includes(i)?order.indexOf(i)+1:null,tap:true,
+      label:`A rectangle cut into ${pl(rows,'row')} of ${cols} squares, ${order.length} counted`});
+    q('r').innerHTML=order.length===total?`<span class="ok"><b>${pl(total,'square')}!</b></span><br><span class="dimline">${pl(rows,'row')} of ${cols}: ${addends(rows,cols)} = ${total}.</span>`
       :order.length?`You counted <b>${order.length}</b> so far.`:'Tap each square to count it.';
   };
-  steppers(el,st,{rows:[1,5],cols:[1,5]},()=>{order=[];draw();});
-  el.addEventListener('click',e=>{const t=e.target.closest('[data-i]');if(t&&!order.includes(+t.dataset.i)){order.push(+t.dataset.i);draw();}});
+  steppers(el,values,{rows:[1,5],cols:[1,5]},()=>{order=[];draw();});
+  el.addEventListener('click',e=>{const square=e.target.closest('[data-i]');if(square&&!order.includes(+square.dataset.i)){order.push(+square.dataset.i);draw();}});
   q('clr').onclick=()=>{order=[];draw();};
   draw();
 }
-const cutPic=(rects,l)=>pieces(4,3,rects,{U:40,label:l});
+/* a 4 × 3 rectangle cut into these pieces, for a quick check's choices */
+const cutPic=(rects,label)=>pieces(4,3,rects,{U:40,label});
 /* the quick checks' figures */
 const F={
   t25:tileFig(2,5),

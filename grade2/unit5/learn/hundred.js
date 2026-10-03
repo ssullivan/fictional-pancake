@@ -1,28 +1,31 @@
 /* Learn Numbers to 1,000 (Grade 2 Unit 5), chapter 1: Make a hundred. Its widgets and steps; loaded by hundred.html. */
+/* Add tens (a stepper) until 10 of them make a hundred. */
 function wTenTens(el){
-  const q=Q(el),st={t:4};
+  const q=Q(el),values={t:4};
   el.innerHTML=`<div class="fig" data-f></div><div class="wrow">${stepper('t','Tens')}</div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const t=st.t;q('t').textContent=t;
-    q('f').innerHTML=t===10?htoFig(1,0,0,{cls:{h:'new'}},'10 tens make 1 hundred'):htoFig(0,t,0,{},`${t} tens`);
-    q('r').innerHTML=t===10?`<span class="ok"><b>10 tens make 1 hundred!</b> 10, 20, 30, … 100.</span><br><span class="dimline">A hundred is 10 tens put together.</span>`
-      :`<b>${t} ${t===1?'ten':'tens'}</b> is <b>${t*10}</b>.<br><span class="dimline">${10-t} more ${10-t===1?'ten':'tens'} to make a hundred.</span>`;
+    const tens=values.t;q('t').textContent=tens;
+    q('f').innerHTML=tens===10?htoFig(1,0,0,{cls:{h:'new'}},'10 tens make 1 hundred'):htoFig(0,tens,0,{},`${tens} tens`);
+    q('r').innerHTML=tens===10?`<span class="ok"><b>10 tens make 1 hundred!</b> 10, 20, 30, … 100.</span><br><span class="dimline">A hundred is 10 tens put together.</span>`
+      :`<b>${tens} ${tens===1?'ten':'tens'}</b> is <b>${tens*10}</b>.<br><span class="dimline">${10-tens} more ${10-tens===1?'ten':'tens'} to make a hundred.</span>`;
   };
-  steppers(el,st,{t:[0,10]},draw);
+  steppers(el,values,{t:[0,10]},draw);
   draw();
 }
 const TENSETS=[12,20,27,35,40];
+/* Pick a number of tens; a button makes hundreds from every 10 of them. */
 function wMakeHundreds(el){
-  const q=Q(el);let p=0,made=false;
-  el.innerHTML=seg('Tens',TENSETS.map((t,i)=>[i,`${t} tens`]))+`<div class="fig" data-f></div><div class="wrow"><button type="button" class="btn" data-go></button></div><p class="readout" data-r></p>`;
+  const q=Q(el);let setIndex=0,made=false;
+  el.innerHTML=seg('Tens',TENSETS.map((tens,i)=>[i,`${tens} tens`]))+`<div class="fig" data-f></div><div class="wrow"><button type="button" class="btn" data-go></button></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const t=TENSETS[p],h=Math.floor(t/10),r=t%10;press(el,p);
-    q('f').innerHTML=made?htoFig(h,r,0,{cls:{h:'new'}},`${h} hundreds and ${r} tens`):htoFig(0,t,0,{},`${t} tens`);
+    /* extra: the tens left after making hundreds */
+    const tens=TENSETS[setIndex],hundreds=Math.floor(tens/10),extra=tens%10;press(el,setIndex);
+    q('f').innerHTML=made?htoFig(hundreds,extra,0,{cls:{h:'new'}},`${hundreds} hundreds and ${extra} tens`):htoFig(0,tens,0,{},`${tens} tens`);
     q('go').textContent=made?'Break them apart':'Make hundreds';
-    q('r').innerHTML=made?`${t} tens is <b>${h} ${h===1?'hundred':'hundreds'}</b>${r?` and <b>${r} ${r===1?'ten':'tens'}</b>`:''}.<br><span class="ok"><b>${t} tens = ${t*10}</b></span>`
-      :`<b>${t} tens</b>. Every 10 tens make a hundred.<br><span class="dimline">How many hundreds can you make?</span>`;
+    q('r').innerHTML=made?`${tens} tens is <b>${hundreds} ${hundreds===1?'hundred':'hundreds'}</b>${extra?` and <b>${extra} ${extra===1?'ten':'tens'}</b>`:''}.<br><span class="ok"><b>${tens} tens = ${tens*10}</b></span>`
+      :`<b>${tens} tens</b>. Every 10 tens make a hundred.<br><span class="dimline">How many hundreds can you make?</span>`;
   };
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){p=+b.dataset.m;made=false;draw();}});
+  el.addEventListener('click',e=>{const setBtn=e.target.closest('[data-m]');if(setBtn){setIndex=+setBtn.dataset.m;made=false;draw();}});
   q('go').onclick=()=>{made=!made;draw();};
   draw();
 }

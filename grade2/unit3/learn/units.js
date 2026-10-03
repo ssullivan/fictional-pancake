@@ -1,55 +1,61 @@
 /* Learn Measuring Length (Grade 2 Unit 3), chapter 1: Units of length. Its widgets and steps; loaded by units.html. */
 /* units laid end to end: cubes (1 cm), paper clips (3 cm), erasers (5 cm) */
 const UNITK={cube:{cm:1,name:'cubes'},clip:{cm:3,name:'paper clips'},eraser:{cm:5,name:'erasers'}};
-const unitRow=(k,n,x,y,u)=>range(n).map(i=>{
-  const s=UNITK[k].cm*u,a=x+i*s;
-  return k==='cube'?`<rect class="cube a" x="${a+1}" y="${y}" width="${s-2}" height="${s-2}" rx="2"/>`
-    :k==='clip'?`<g class="clip"><rect x="${a+2}" y="${y}" width="${s-4}" height="16" rx="8"/><rect x="${a+7}" y="${y+4}" width="${s-16}" height="8" rx="4"/></g>`
-    :`<rect class="eraser" x="${a+1}" y="${y}" width="${s-2}" height="18" rx="4"/>`;
+/* `count` units of one kind end to end from x, y; u: pixels per cm */
+const unitRow=(kind,count,x,y,u)=>range(count).map(i=>{
+  const size=UNITK[kind].cm*u,left=x+i*size;
+  return kind==='cube'?`<rect class="cube a" x="${left+1}" y="${y}" width="${size-2}" height="${size-2}" rx="2"/>`
+    :kind==='clip'?`<g class="clip"><rect x="${left+2}" y="${y}" width="${size-4}" height="16" rx="8"/><rect x="${left+7}" y="${y+4}" width="${size-16}" height="8" rx="4"/></g>`
+    :`<rect class="eraser" x="${left+1}" y="${y}" width="${size-2}" height="18" rx="4"/>`;
 }).join('');
 /* an object len cm long with rows of units under it: rows [[unit, how many], …]; u: pixels per cm */
 function unitsFig(kind,len,rows,u){
-  let o=thing(kind,10,8,len*u),y=46;
-  rows.forEach(([k,n])=>{o+=unitRow(k,n,10,y,u);y+=(k==='cube'?u:18)+14;});
-  return svgWrap(20+len*u,y,o,`A ${NAME[kind]} measured with `+rows.map(([k,n])=>`${n} ${UNITK[k].name}`).join(' and '));
+  let markup=thing(kind,10,8,len*u),y=46;
+  rows.forEach(([unit,count])=>{markup+=unitRow(unit,count,10,y,u);y+=(unit==='cube'?u:18)+14;});
+  return svgWrap(20+len*u,y,markup,`A ${NAME[kind]} measured with `+rows.map(([unit,count])=>`${count} ${UNITK[unit].name}`).join(' and '));
 }
+/* The same pencil measured in cubes, paper clips, or erasers: longer units take fewer. */
 function wUnits(el){
-  const q=Q(el);let k='cube';
+  const q=Q(el);let unit='cube';
   el.innerHTML=seg('Unit',Object.keys(UNITK).map(id=>[id,UNITK[id].name.replace(/^./,c=>c.toUpperCase())]))+`<div class="fig" data-f></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const U=UNITK[k],n=15/U.cm;press(el,k);
-    q('f').innerHTML=unitsFig('pencil',15,[[k,n]],24);
-    q('r').innerHTML=`The pencil is <b>${n} ${U.name}</b> long.<br><span class="dimline">${k==='cube'?'Cubes are small, so it takes a lot of them.':k==='clip'?'A paper clip is longer than a cube, so it takes fewer.':'An eraser is the longest unit here, so it takes the fewest.'}</span>`;
+    const {name}=UNITK[unit],count=15/UNITK[unit].cm;press(el,unit);
+    q('f').innerHTML=unitsFig('pencil',15,[[unit,count]],24);
+    q('r').innerHTML=`The pencil is <b>${count} ${name}</b> long.<br><span class="dimline">${unit==='cube'?'Cubes are small, so it takes a lot of them.':unit==='clip'?'A paper clip is longer than a cube, so it takes fewer.':'An eraser is the longest unit here, so it takes the fewest.'}</span>`;
   };
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){k=b.dataset.m;draw();}});
+  el.addEventListener('click',e=>{const unitBtn=e.target.closest('[data-m]');if(unitBtn){unit=unitBtn.dataset.m;draw();}});
   draw();
 }
+/* objects to measure in cubes: [kind, cm] */
 const CUBEIT=[['crayon',9],['marker',13],['glue',10]];
+/* Line up cubes under an object (a stepper) until they reach its end. */
 function wCubes(el){
-  const q=Q(el),st={n:0};let p=0;
-  el.innerHTML=seg('Object',CUBEIT.map(([k],i)=>[i,NAME[k]]))+`<div class="fig" data-f></div><div class="wrow">${stepper('n','Cubes')}</div><p class="readout" data-r></p>`;
+  const q=Q(el),values={n:0};let objectIndex=0;
+  el.innerHTML=seg('Object',CUBEIT.map(([kind],i)=>[i,NAME[kind]]))+`<div class="fig" data-f></div><div class="wrow">${stepper('n','Cubes')}</div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const [k,len]=CUBEIT[p],n=st.n;press(el,p);q('n').textContent=n;
-    q('f').innerHTML=svgWrap(20+16*CUBE,86,thing(k,10,8,len*CUBE)+cubes(10,48,n,'a'),`A ${NAME[k]} with ${n} cubes under it`);
-    q('r').innerHTML=n===len?`<span class="ok">The ${NAME[k]} is <b>${len} cubes</b> long. Each cube is 1 centimeter, so it’s <b>${len} cm</b> long.</span>`
-      :`<b>${n}</b> cubes<br><span class="dimline">${n>len?'That goes past the end. Take some away.':n?'Not to the end yet. Add more cubes.':`Line up cubes from one end of the ${NAME[k]}. No gaps!`}</span>`;
+    const [kind,len]=CUBEIT[objectIndex],count=values.n;press(el,objectIndex);q('n').textContent=count;
+    q('f').innerHTML=svgWrap(20+16*CUBE,86,thing(kind,10,8,len*CUBE)+cubes(10,48,count,'a'),`A ${NAME[kind]} with ${count} cubes under it`);
+    q('r').innerHTML=count===len?`<span class="ok">The ${NAME[kind]} is <b>${len} cubes</b> long. Each cube is 1 centimeter, so it’s <b>${len} cm</b> long.</span>`
+      :`<b>${count}</b> cubes<br><span class="dimline">${count>len?'That goes past the end. Take some away.':count?'Not to the end yet. Add more cubes.':`Line up cubes from one end of the ${NAME[kind]}. No gaps!`}</span>`;
   };
-  steppers(el,st,{n:[0,16]},draw);
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){p=+b.dataset.m;st.n=0;draw();}});
+  steppers(el,values,{n:[0,16]},draw);
+  el.addEventListener('click',e=>{const objectBtn=e.target.closest('[data-m]');if(objectBtn){objectIndex=+objectBtn.dataset.m;values.n=0;draw();}});
   draw();
 }
+/* objects to measure on a ruler: [kind, cm] */
 const RULEIT=[['pencil',7],['crayon',9],['glue',5]];
+/* Slide an object along a ruler (a stepper): it's still as long, counted from where it starts. */
 function wRuler(el){
-  const q=Q(el),st={at:0};let p=0;
-  el.innerHTML=seg('Object',RULEIT.map(([k],i)=>[i,NAME[k]]))+`<div class="fig" data-f></div><div class="wrow">${stepper('at','Start at')}</div><p class="readout" data-r></p>`;
+  const q=Q(el),values={at:0};let objectIndex=0;
+  el.innerHTML=seg('Object',RULEIT.map(([kind],i)=>[i,NAME[kind]]))+`<div class="fig" data-f></div><div class="wrow">${stepper('at','Start at')}</div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const [k,len]=RULEIT[p],a=st.at,b=a+len;press(el,p);q('at').textContent=a;
-    q('f').innerHTML=ruler(15,{obj:{kind:k,at:a,len},span:true});
-    q('r').innerHTML=a===0?`It starts at <b>0</b> and ends at <b>${b}</b>.<br><span class="ok">The ${NAME[k]} is <b>${len} cm</b> long.</span><br><span class="dimline">Now slide it so it starts at another number.</span>`
-      :`It starts at <b>${a}</b> and ends at <b>${b}</b>. Is it ${b} cm long? No!<br><span class="ok">Count the spaces, or subtract: <b>${b} − ${a} = ${len} cm</b>.</span>`;
+    const [kind,len]=RULEIT[objectIndex],start=values.at,end=start+len;press(el,objectIndex);q('at').textContent=start;
+    q('f').innerHTML=ruler(15,{obj:{kind,at:start,len},span:true});
+    q('r').innerHTML=start===0?`It starts at <b>0</b> and ends at <b>${end}</b>.<br><span class="ok">The ${NAME[kind]} is <b>${len} cm</b> long.</span><br><span class="dimline">Now slide it so it starts at another number.</span>`
+      :`It starts at <b>${start}</b> and ends at <b>${end}</b>. Is it ${end} cm long? No!<br><span class="ok">Count the spaces, or subtract: <b>${end} − ${start} = ${len} cm</b>.</span>`;
   };
-  steppers(el,st,{at:[0,6]},draw);
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){p=+b.dataset.m;st.at=0;draw();}});
+  steppers(el,values,{at:[0,6]},draw);
+  el.addEventListener('click',e=>{const objectBtn=e.target.closest('[data-m]');if(objectBtn){objectIndex=+objectBtn.dataset.m;values.at=0;draw();}});
   draw();
 }
 /* the quick checks' figures */

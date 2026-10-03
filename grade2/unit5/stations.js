@@ -1,198 +1,233 @@
 /* Dragon Duel (Grade 2 Unit 5): the problem generators, station list, and icons. Loaded by index.html and by tools/fuzz.mjs.
-   Base-ten diagrams, number names, place-value charts, and number lines come from shared/k5.js; mcOf and miscOf from shared/util.js. */
+   Base-ten diagrams, number names, and place-value charts come from shared/blocks.js, number lines from shared/numlines.js,
+   and mcOf and miscOf from shared/util.js. Each generator deals one of a few kinds of problem (variant), each with a comment
+   saying what it asks. A number's digits are hundreds, tens, and ones. */
 const place=['hundreds','tens','ones'];
-const say=(n,w)=>`${n} ${n===1?w.replace(/s$/,''):w}`;
-const htoSay=(h,t,o)=>`${say(h,'hundreds')}, ${say(t,'tens')}, ${say(o,'ones')}`;
+/* n and the place word for it: "1 hundred", "3 tens" (word is the plural) */
+const say=(n,word)=>`${n} ${n===1?word.replace(/s$/,''):word}`;
+/* "3 hundreds, 4 tens, 1 one" */
+const htoSay=(hundreds,tens,ones)=>`${say(hundreds,'hundreds')}, ${say(tens,'tens')}, ${say(ones,'ones')}`;
 /* a three-digit number; zero: its tens or ones digit is 0 */
 function num3(zero=Math.random()<.35){
-  const h=R(1,9);let t=R(1,9),o=R(1,9);
-  if(zero){if(Math.random()<.5)t=0;else o=0;}
-  return h*100+t*10+o;
+  const hundreds=R(1,9);let tens=R(1,9),ones=R(1,9);
+  if(zero){if(Math.random()<.5)tens=0;else ones=0;}
+  return hundreds*100+tens*10+ones;
 }
 
 /* blocks drawn bigger than the Learn page's: twice as wide, up to 560 pixels */
-const zoom=svg=>svg.replace(/max-width:([\d.]+)px/,(m,w)=>`max-width:${Math.min(2*w,560)}px`);
-const bigBlocks=(...a)=>zoom(htoFig(...a));
+const zoom=svg=>svg.replace(/max-width:([\d.]+)px/,(match,width)=>`max-width:${Math.min(2*width,560)}px`);
+const bigBlocks=(...args)=>zoom(htoFig(...args));
 
-/* t tens in groups of 10 (3 groups to a row); show: outline each full group, which makes a hundred */
-function tenGroups(t,show){
-  const GW=10*(BT+4)+4,GH=FW+10;let m='';
-  range(Math.ceil(t/10)).forEach(g=>{
-    const n=Math.min(10,t-g*10),x=8+g%3*(GW+14),y=8+Math.floor(g/3)*(GH+12);
-    range(n).forEach(i=>{m+=stick(x+4+i*(BT+4),y+5);});
-    if(show&&n===10)m+=`<rect class="grp10" x="${x}" y="${y}" width="${GW}" height="${GH}" rx="6"/>`;
+/* `tens` tens in groups of 10 (3 groups to a row); show: outline each full group, which makes a hundred */
+function tenGroups(tens,show){
+  /* each group of 10 sticks is groupW by groupH */
+  const groupW=10*(BT+4)+4,groupH=FW+10;let markup='';
+  range(Math.ceil(tens/10)).forEach(group=>{
+    const sticks=Math.min(10,tens-group*10),x=8+group%3*(groupW+14),y=8+Math.floor(group/3)*(groupH+12);
+    range(sticks).forEach(i=>{markup+=stick(x+4+i*(BT+4),y+5);});
+    if(show&&sticks===10)markup+=`<rect class="grp10" x="${x}" y="${y}" width="${groupW}" height="${groupH}" rx="6"/>`;
   });
-  const cols=Math.min(3,Math.ceil(t/10)),rows=Math.ceil(t/30);
-  return zoom(svgWrap(16+cols*GW+(cols-1)*14,16+rows*GH+(rows-1)*12,m,`${t} tens`));
+  const cols=Math.min(3,Math.ceil(tens/10)),rows=Math.ceil(tens/30);
+  return zoom(svgWrap(16+cols*groupW+(cols-1)*14,16+rows*groupH+(rows-1)*12,markup,`${tens} tens`));
 }
 
 /* ---------- Tower of Tens: make a hundred (Lessons 1–2) ---------- */
 function genHundred(){
-  const k=R(0,3);
-  if(k===0){
-    const t=pick([3,4,6,7,8,9]);
-    return {kind:'num',unit:'more tens',answer:10-t,prompt:`Here are ${t} tens. How many more tens make a hundred?`,
-      fig:show=>show?zoom(svgWrap(10*(BT+4)+24,FW+16,range(10).map(i=>stick(8+i*(BT+4)+Math.floor(i/5)*5,8,i<t?'':'ghost')).join(''),`${t} tens and ${10-t} more to make a hundred`)):bigBlocks(0,t,0,{},`${t} tens`),
-      misc:miscOf(10-t,[[t,`That’s how many tens there are now. How many more make 10 tens?`],[(10-t)*10,`That’s ${(10-t)*10} ones. How many tens is that?`],[10,'10 tens is the whole hundred. Some are already here.']]),
-      hint:`A hundred is 10 tens. The dashed sticks are the missing tens. Count on from ${t} to 10.`,
-      explain:`${t} tens and ${10-t} more tens make 10 tens. 10 tens is a hundred.`};
+  const variant=R(0,3);
+  if(variant===0){
+    /* how many more tens make a hundred; the hint draws the missing tens dashed */
+    const tens=pick([3,4,6,7,8,9]);
+    return {kind:'num',unit:'more tens',answer:10-tens,prompt:`Here are ${tens} tens. How many more tens make a hundred?`,
+      fig:show=>show?zoom(svgWrap(10*(BT+4)+24,FW+16,range(10).map(i=>stick(8+i*(BT+4)+Math.floor(i/5)*5,8,i<tens?'':'ghost')).join(''),`${tens} tens and ${10-tens} more to make a hundred`)):bigBlocks(0,tens,0,{},`${tens} tens`),
+      misc:miscOf(10-tens,[[tens,`That’s how many tens there are now. How many more make 10 tens?`],[(10-tens)*10,`That’s ${(10-tens)*10} ones. How many tens is that?`],[10,'10 tens is the whole hundred. Some are already here.']]),
+      hint:`A hundred is 10 tens. The dashed sticks are the missing tens. Count on from ${tens} to 10.`,
+      explain:`${tens} tens and ${10-tens} more tens make 10 tens. 10 tens is a hundred.`};
   }
-  if(k===1){
-    const h=R(2,9),t=h*10;
-    return {kind:'num',unit:'hundreds',answer:h,prompt:`How many hundreds can you make with ${t} tens?`,
-      fig:show=>tenGroups(t,show),
-      misc:miscOf(h,[[t,'That’s the number of tens. Every 10 tens make 1 hundred.'],[t*10,`${t*10} is the number. How many hundreds is that?`]]),
+  if(variant===1){
+    /* how many hundreds a number of tens makes */
+    const hundreds=R(2,9),tens=hundreds*10;
+    return {kind:'num',unit:'hundreds',answer:hundreds,prompt:`How many hundreds can you make with ${tens} tens?`,
+      fig:show=>tenGroups(tens,show),
+      misc:miscOf(hundreds,[[tens,'That’s the number of tens. Every 10 tens make 1 hundred.'],[tens*10,`${tens*10} is the number. How many hundreds is that?`]]),
       hint:'Circle groups of 10 tens. Each group is a hundred.',
-      explain:`Every 10 tens make a hundred. ${t} tens make ${h} hundreds: ${h*100}.`};
+      explain:`Every 10 tens make a hundred. ${tens} tens make ${hundreds} hundreds: ${hundreds*100}.`};
   }
-  if(k===2){
-    const h=R(2,9);
-    return {kind:'num',unit:'tens',answer:h*10,prompt:`How many tens are in ${h*100}?`,
-      fig:()=>bigBlocks(h,0,0,{},`${h} hundreds`),
-      misc:miscOf(h*10,[[h,`${h} is how many hundreds. Each hundred is 10 tens.`],[h*100,`${h*100} is the number. How many tens is that?`]]),
+  if(variant===2){
+    /* how many tens are in some hundreds */
+    const hundreds=R(2,9);
+    return {kind:'num',unit:'tens',answer:hundreds*10,prompt:`How many tens are in ${hundreds*100}?`,
+      fig:()=>bigBlocks(hundreds,0,0,{},`${hundreds} hundreds`),
+      misc:miscOf(hundreds*10,[[hundreds,`${hundreds} is how many hundreds. Each hundred is 10 tens.`],[hundreds*100,`${hundreds*100} is the number. How many tens is that?`]]),
       hint:'Each hundred is 10 tens. Count by tens for each hundred: 10, 20, …',
-      explain:`${h} hundreds is ${h} groups of 10 tens: ${h*10} tens.`};
+      explain:`${hundreds} hundreds is ${hundreds} groups of 10 tens: ${hundreds*10} tens.`};
   }
-  let t=R(11,39);if(t%10===0)t++;const h=Math.floor(t/10),r=t%10;
-  return {kind:'num',unit:'',answer:t*10,prompt:`What number do ${t} tens make?`,
-    fig:show=>tenGroups(t,show),
-    misc:miscOf(t*10,[[t,`That’s the number of tens. Each ten is worth 10.`],[h*100+r,`${r} tens is ${r*10}, not ${r}.`]]),
-    hint:`Make hundreds: ${t} tens is ${say(h,'hundreds')} and ${say(r,'tens')}.`,
-    explain:`${t} tens is ${say(h,'hundreds')} and ${say(r,'tens')}: ${h*100} + ${r*10} = ${t*10}.`};
+  /* what number some tens make (not a whole number of hundreds); extra: the tens left after the hundreds */
+  let tens=R(11,39);if(tens%10===0)tens++;const hundreds=Math.floor(tens/10),extra=tens%10;
+  return {kind:'num',unit:'',answer:tens*10,prompt:`What number do ${tens} tens make?`,
+    fig:show=>tenGroups(tens,show),
+    misc:miscOf(tens*10,[[tens,`That’s the number of tens. Each ten is worth 10.`],[hundreds*100+extra,`${extra} tens is ${extra*10}, not ${extra}.`]]),
+    hint:`Make hundreds: ${tens} tens is ${say(hundreds,'hundreds')} and ${say(extra,'tens')}.`,
+    explain:`${tens} tens is ${say(hundreds,'hundreds')} and ${say(extra,'tens')}: ${hundreds*100} + ${extra*10} = ${tens*10}.`};
 }
 
 /* ---------- Block Forge: three-digit numbers (Lessons 3–4) ---------- */
 function genBuild(){
-  const k=R(0,3);
-  if(k===0){
-    const n=num3(),[h,t,o]=digits(n);
+  const variant=R(0,3);
+  if(variant===0){
+    /* what number the blocks show */
+    const n=num3(),[hundreds,tens,ones]=digits(n);
     return {kind:'num',unit:'',answer:n,prompt:'What number do the blocks show?',
-      fig:()=>bigBlocks(h,t,o,{cls:{t:'b',o:'c'}},htoSay(h,t,o)),
-      misc:miscOf(n,[...(t!==o?[[h*100+o*10+t,'Tens come before ones. Count the sticks for the tens digit.']]:[]),...(!t||!o?[[Number(`${h}${t||''}${o||''}`),`${!t?'There are no tens':'There are no ones'}, so that place gets a 0.`]]:[]),[h+t+o,'Each big square is 100 and each stick is 10. Don’t just count the pieces.']]),
+      fig:()=>bigBlocks(hundreds,tens,ones,{cls:{t:'b',o:'c'}},htoSay(hundreds,tens,ones)),
+      misc:miscOf(n,[...(tens!==ones?[[hundreds*100+ones*10+tens,'Tens come before ones. Count the sticks for the tens digit.']]:[]),
+        ...(!tens||!ones?[[Number(`${hundreds}${tens||''}${ones||''}`),`${!tens?'There are no tens':'There are no ones'}, so that place gets a 0.`]]:[]),
+        [hundreds+tens+ones,'Each big square is 100 and each stick is 10. Don’t just count the pieces.']]),
       hint:'Big squares are hundreds. Sticks are tens. Small squares are ones.',
-      explain:`${htoSay(h,t,o)} is ${n}.`};
+      explain:`${htoSay(hundreds,tens,ones)} is ${n}.`};
   }
-  if(k===1){
-    const n=Math.random()<.6?num3(true):R(1,9)*100+R(11,19),[h,t,o]=digits(n),r=n%100;
-    const swap=h*100+o*10+t,long=Number(`${h}00${r}`);
-    return {...mcOf([[String(n),null],[String(swap===n?n+100*(h<9?1:-1):swap),swap===n?'Look at the hundreds.':(r>10&&r<20?`${numWords(swap)} is not the same as ${numWords(n)}. Look at the tens.`:`That’s ${numWords(swap)}. Check which digit is tens and which is ones.`)],[long.toLocaleString('en-US'),`${numWords(h*100)} is ${h*100}. The number only needs three digits: ${h} hundreds, ${t} tens, ${o} ones.`]]),
-      prompt:`Which number is <b>${numWords(n)}</b>?`,fig:()=>bigBlocks(h,t,o,{cls:{t:'b',o:'c'}},'Base-ten blocks'),
-      hint:`Say it in parts: ${numWords(h*100)}, then ${numWords(r)}.`,
-      explain:`${numWords(n)} is ${htoSay(h,t,o)}: ${n}.`};
+  if(variant===1){
+    /* which number goes with its name; the wrong ones swap the tens and ones, or write the hundreds out in full (400 + 13 as 40013) */
+    const n=Math.random()<.6?num3(true):R(1,9)*100+R(11,19),[hundreds,tens,ones]=digits(n),rest=n%100;
+    const swapped=hundreds*100+ones*10+tens,writtenOut=Number(`${hundreds}00${rest}`);
+    return {...mcOf([[String(n),null],[String(swapped===n?n+100*(hundreds<9?1:-1):swapped),swapped===n?'Look at the hundreds.':(rest>10&&rest<20?`${numWords(swapped)} is not the same as ${numWords(n)}. Look at the tens.`:`That’s ${numWords(swapped)}. Check which digit is tens and which is ones.`)],
+        [writtenOut.toLocaleString('en-US'),`${numWords(hundreds*100)} is ${hundreds*100}. The number only needs three digits: ${hundreds} hundreds, ${tens} tens, ${ones} ones.`]]),
+      prompt:`Which number is <b>${numWords(n)}</b>?`,fig:()=>bigBlocks(hundreds,tens,ones,{cls:{t:'b',o:'c'}},'Base-ten blocks'),
+      hint:`Say it in parts: ${numWords(hundreds*100)}, then ${numWords(rest)}.`,
+      explain:`${numWords(n)} is ${htoSay(hundreds,tens,ones)}: ${n}.`};
   }
-  if(k===2){
-    let n=num3(false);const [h,t,o]=digits(n);
-    const others=[[h*100+o*10+t,'Look at the sticks. They show the tens.'],[o*100+t*10+h,'Look at the big squares. They show the hundreds.'],[t<9?n+10:n-10,'Count the sticks. Each one is a ten.'],[h<9?n+100:n-100,'Count the big squares. Each one is a hundred.']];
-    const picks=others.filter(([v],i)=>v!==n&&others.findIndex(([w])=>w===v)===i).slice(0,2);
-    const pic=(v,i)=>{const [a,b,c]=digits(v);return htoFig(a,b,c,{cls:{t:'b',o:'c'}},`Picture ${i}`);};
-    const P=mcOf([[n,null],...picks]);
-    P.choices.forEach((c,i)=>{c.label=pic(+c.label,'ABC'[i]);});
-    return {...P,prompt:`Which blocks show <b>${n}</b>?`,
-      hint:`${n} is ${htoSay(h,t,o)}.`,
-      explain:`${n} is ${htoSay(h,t,o)}.`};
+  if(variant===2){
+    /* which blocks show the number: the wrong ones swap places or are off by a ten or a hundred (two different ones) */
+    let n=num3(false);const [hundreds,tens,ones]=digits(n);
+    const others=[[hundreds*100+ones*10+tens,'Look at the sticks. They show the tens.'],[ones*100+tens*10+hundreds,'Look at the big squares. They show the hundreds.'],
+      [tens<9?n+10:n-10,'Count the sticks. Each one is a ten.'],[hundreds<9?n+100:n-100,'Count the big squares. Each one is a hundred.']];
+    const wrongs=others.filter(([v],i)=>v!==n&&others.findIndex(([w])=>w===v)===i).slice(0,2);
+    /* the blocks for v, labelled Picture A, B, or C */
+    const blocksOf=(v,letter)=>{const [a,b,c]=digits(v);return htoFig(a,b,c,{cls:{t:'b',o:'c'}},`Picture ${letter}`);};
+    const problem=mcOf([[n,null],...wrongs]);
+    problem.choices.forEach((choice,i)=>{choice.label=blocksOf(+choice.label,'ABC'[i]);});
+    return {...problem,prompt:`Which blocks show <b>${n}</b>?`,
+      hint:`${n} is ${htoSay(hundreds,tens,ones)}.`,
+      explain:`${n} is ${htoSay(hundreds,tens,ones)}.`};
   }
-  const n=num3(false),i=R(0,2),d=digits(n)[i];
-  return {...mcOf(place.map((w,j)=>[`${say(d,w)} (${d*[100,10,1][j]})`,j===i?null:`The ${d} is in the ${place[i]} place, not the ${w} place.`])),
-    prompt:`In <b>${n}</b>, what does the <b>${d}</b> mean?`,stack:true,fig:()=>pvChart([['',n]],i),
+  /* what a digit means, by its place */
+  const n=num3(false),at=R(0,2),digit=digits(n)[at];
+  return {...mcOf(place.map((word,j)=>[`${say(digit,word)} (${digit*[100,10,1][j]})`,j===at?null:`The ${digit} is in the ${place[at]} place, not the ${word} place.`])),
+    prompt:`In <b>${n}</b>, what does the <b>${digit}</b> mean?`,stack:true,fig:()=>pvChart([['',n]],at),
     hint:'The first digit is hundreds, then tens, then ones.',
-    explain:`In ${n}, the ${d} is in the ${place[i]} place, so it means ${say(d,place[i])}: ${d*[100,10,1][i]}.`};
+    explain:`In ${n}, the ${digit} is in the ${place[at]} place, so it means ${say(digit,place[at])}: ${digit*[100,10,1][at]}.`};
 }
 
 /* ---------- Spell Scrolls: expanded form (Lessons 5–6) ---------- */
 function genExpand(){
-  const k=R(0,2);
-  if(k===0){
-    const n=num3(),[h,t,o]=digits(n),parts=[h*100,t*10,o].filter(v=>v);
+  const variant=R(0,2);
+  if(variant===0){
+    /* what number the expanded form makes */
+    const n=num3(),[hundreds,tens,ones]=digits(n),parts=[hundreds*100,tens*10,ones].filter(v=>v);
     return {kind:'num',unit:'',answer:n,prompt:`What number is <b>${parts.join(' + ')}</b>?`,
-      fig:()=>bigBlocks(h,t,o,{cls:{t:'b',o:'c'}},htoSay(h,t,o)),
-      misc:miscOf(n,[[Number(parts.join('')),'Each part goes in its own place. The number has only three digits.'],[h+t+o,`The ${h} is ${h*100}. Don’t just add the digits.`],...(t!==o?[[h*100+o*10+t,'Tens come before ones.']]:[]),...(!t||!o?[[Number(`${h}${t||''}${o||''}`),'A place with nothing in it still needs a 0.']]:[])]),
-      hint:`${h*100} is ${say(h,'hundreds')}, ${t*10} is ${say(t,'tens')}, and ${o} is ${say(o,'ones')}.`,
-      explain:`${parts.join(' + ')} is ${htoSay(h,t,o)}: ${n}.`};
+      fig:()=>bigBlocks(hundreds,tens,ones,{cls:{t:'b',o:'c'}},htoSay(hundreds,tens,ones)),
+      misc:miscOf(n,[[Number(parts.join('')),'Each part goes in its own place. The number has only three digits.'],[hundreds+tens+ones,`The ${hundreds} is ${hundreds*100}. Don’t just add the digits.`],
+        ...(tens!==ones?[[hundreds*100+ones*10+tens,'Tens come before ones.']]:[]),...(!tens||!ones?[[Number(`${hundreds}${tens||''}${ones||''}`),'A place with nothing in it still needs a 0.']]:[])]),
+      hint:`${hundreds*100} is ${say(hundreds,'hundreds')}, ${tens*10} is ${say(tens,'tens')}, and ${ones} is ${say(ones,'ones')}.`,
+      explain:`${parts.join(' + ')} is ${htoSay(hundreds,tens,ones)}: ${n}.`};
   }
-  if(k===1){
-    const n=num3(false),[h,t,o]=digits(n),i=R(0,1),val=[h*100,t*10][i];
-    const eq=i?`${n} = ${h*100} + <span class="q">?</span> + ${o}`:`${n} = <span class="q">?</span> + ${t*10} + ${o}`;
-    return {kind:'num',unit:'',answer:val,prompt:`What goes in the box? <span class="eqn">${eq}</span>`,
-      fig:()=>bigBlocks(h,t,o,{cls:{t:'b',o:'c'}},htoSay(h,t,o)),
-      misc:miscOf(val,[[[h,t][i],`The ${[h,t][i]} is in the ${place[i]} place, so it’s worth ${val}.`],[[t*10,h*100][i],'Check which part is missing.']]),
-      hint:`What is the ${[h,t][i]} in ${n} worth?`,
-      explain:`${n} = ${h*100} + ${t*10} + ${o}. The missing part is ${val}.`};
+  if(variant===1){
+    /* the missing part of the expanded form: the hundreds (at 0) or the tens (at 1) */
+    const n=num3(false),[hundreds,tens,ones]=digits(n),at=R(0,1),part=[hundreds*100,tens*10][at];
+    const eq=at?`${n} = ${hundreds*100} + <span class="q">?</span> + ${ones}`:`${n} = <span class="q">?</span> + ${tens*10} + ${ones}`;
+    return {kind:'num',unit:'',answer:part,prompt:`What goes in the box? <span class="eqn">${eq}</span>`,
+      fig:()=>bigBlocks(hundreds,tens,ones,{cls:{t:'b',o:'c'}},htoSay(hundreds,tens,ones)),
+      misc:miscOf(part,[[[hundreds,tens][at],`The ${[hundreds,tens][at]} is in the ${place[at]} place, so it’s worth ${part}.`],[[tens*10,hundreds*100][at],'Check which part is missing.']]),
+      hint:`What is the ${[hundreds,tens][at]} in ${n} worth?`,
+      explain:`${n} = ${hundreds*100} + ${tens*10} + ${ones}. The missing part is ${part}.`};
   }
-  /* another way to make the number: break a hundred into 10 tens, or a ten into 10 ones */
-  const n=R(2,9)*100+R(1,8)*10+R(1,8),[h,t,o]=digits(n),ten=Math.random()<.4;
-  const right=ten?[h,t-1,o+10]:[h-1,t+10,o],
-    wrong=ten?[[[h,t,o+10],`${o+10} ones is ${o+10}. That makes ${n+10}, not ${n}.`],[[h-1,t,o+10],`That’s missing a hundred: ${n-90}.`]]
-      :[[[h,t+10,o],`${t+10} tens is ${(t+10)*10}. ${h*100} + ${(t+10)*10} + ${o} is ${n+100}, not ${n}.`],t===o?[[h-1,t,o],`That’s missing a hundred: ${n-100}.`]:[[h,o,t],`That’s ${h*100+o*10+t}. The tens and ones got switched.`]];
-  return {...mcOf([[htoSay(...right),null],...wrong.map(([d,m])=>[htoSay(...d),m])]),stack:true,
+  /* another way to make the number: break a hundred into 10 tens, or a ten into 10 ones (breakTen) */
+  const n=R(2,9)*100+R(1,8)*10+R(1,8),[hundreds,tens,ones]=digits(n),breakTen=Math.random()<.4;
+  const right=breakTen?[hundreds,tens-1,ones+10]:[hundreds-1,tens+10,ones],
+    wrong=breakTen?[[[hundreds,tens,ones+10],`${ones+10} ones is ${ones+10}. That makes ${n+10}, not ${n}.`],[[hundreds-1,tens,ones+10],`That’s missing a hundred: ${n-90}.`]]
+      :[[[hundreds,tens+10,ones],`${tens+10} tens is ${(tens+10)*10}. ${hundreds*100} + ${(tens+10)*10} + ${ones} is ${n+100}, not ${n}.`],
+        tens===ones?[[hundreds-1,tens,ones],`That’s missing a hundred: ${n-100}.`]:[[hundreds,ones,tens],`That’s ${hundreds*100+ones*10+tens}. The tens and ones got switched.`]];
+  return {...mcOf([[htoSay(...right),null],...wrong.map(([placeDigits,why])=>[htoSay(...placeDigits),why])]),stack:true,
     prompt:`Which is another way to make <b>${n}</b>?`,
-    fig:show=>bigBlocks(...(show?right:[h,t,o]),{cls:{t:'b',o:'c'},tr:show&&!ten?10:0},show?htoSay(...right):htoSay(h,t,o)),
-    hint:ten?'Break a ten into 10 ones. The number stays the same.':'Break a hundred into 10 tens. The number stays the same.',
-    explain:ten?`Break a ten: ${htoSay(...right)}. ${h*100} + ${(t-1)*10} + ${o+10} = ${n}.`:`Break a hundred: ${htoSay(...right)}. ${(h-1)*100} + ${(t+10)*10} + ${o} = ${n}.`};
+    fig:show=>bigBlocks(...(show?right:[hundreds,tens,ones]),{cls:{t:'b',o:'c'},tr:show&&!breakTen?10:0},show?htoSay(...right):htoSay(hundreds,tens,ones)),
+    hint:breakTen?'Break a ten into 10 ones. The number stays the same.':'Break a hundred into 10 tens. The number stays the same.',
+    explain:breakTen?`Break a ten: ${htoSay(...right)}. ${hundreds*100} + ${(tens-1)*10} + ${ones+10} = ${n}.`:`Break a hundred: ${htoSay(...right)}. ${(hundreds-1)*100} + ${(tens+10)*10} + ${ones} = ${n}.`};
 }
 
 /* ---------- Number Bridge: the number line to 1,000 (Lessons 8–9) ---------- */
-/* a number line with a tick every `by`, numbered at lo, the middle, and hi */
-const bridge=(lo,by,o={})=>numLine(lo,lo+10*by,{u:52/by,step:by,big:5*by,ls:'',end:true,...o});
+/* a number line from lo with a tick every `by`, 10 ticks long, numbered at lo, the middle, and the end; options go to numLine */
+const bridge=(lo,by,options={})=>numLine(lo,lo+10*by,{u:52/by,step:by,big:5*by,ls:'',end:true,...options});
 function genLine(){
-  const k=R(0,2),big=Math.random()<.35,by=big?100:10,lo=big?0:R(1,9)*100,j=pick([1,2,3,4,6,7,8,9]),v=lo+j*by,mid=lo+5*by;
-  const count=`Count by ${by}s from ${lo}: ${range(Math.min(j,5)).map(i=>lo+(i+1)*by).join(', ')}${j>5?', …':'.'}`+(j>5?` Or count on from ${mid}.`:'');
-  if(k===0){
+  /* a line counting by hundreds from 0 (byHundreds) or by tens from a hundred; v is `ticks` ticks past lo */
+  const variant=R(0,2),byHundreds=Math.random()<.35,by=byHundreds?100:10,lo=byHundreds?0:R(1,9)*100,ticks=pick([1,2,3,4,6,7,8,9]),v=lo+ticks*by,mid=lo+5*by;
+  /* counting to v: by the ticks from lo, and on from the middle when v is past it */
+  const count=`Count by ${by}s from ${lo}: ${range(Math.min(ticks,5)).map(i=>lo+(i+1)*by).join(', ')}${ticks>5?', …':'.'}`+(ticks>5?` Or count on from ${mid}.`:'');
+  if(variant===0){
+    /* tap where v goes */
     const why=Object.fromEntries(range(11).map(i=>lo+i*by).filter(w=>w!==v).map(w=>[String(w),`That tick is ${w}. ${w<v?'Go farther right.':'Go back to the left.'}`]));
     return {kind:'tap',answer:String(v),why,prompt:`Tap where <b>${v}</b> goes on the number line.`,
       fig:(show,done)=>bridge(lo,by,{tap:'cand',pts:done?[{v,cls:'b',t:v}]:[],label:`A number line from ${lo} to ${lo+10*by} with a tick every ${by}`}),
       hint:`The ticks count by ${by}s. `+count,
-      explain:`${v} is ${j} ticks past ${lo}. `+count};
+      explain:`${v} is ${ticks} ticks past ${lo}. `+count};
   }
-  if(k===1){
+  if(variant===1){
+    /* what number the dot is at */
     return {kind:'num',unit:'',answer:v,prompt:`The ticks count by ${by}s. What number is the dot at?`,
       fig:()=>bridge(lo,by,{pts:[{v,cls:'b',t:'?'}],label:`A number line from ${lo} to ${lo+10*by} with a tick every ${by}, and a dot`}),
-      misc:miscOf(v,[[lo+j*(big?10:1),`Each space is ${by} here, not ${big?10:1}.`],[lo+(j+1)*by,'Count the spaces, not the tick marks.'],[lo+(j-1)*by,'Count every space up to the dot.']]),
+      misc:miscOf(v,[[lo+ticks*(byHundreds?10:1),`Each space is ${by} here, not ${byHundreds?10:1}.`],[lo+(ticks+1)*by,'Count the spaces, not the tick marks.'],[lo+(ticks-1)*by,'Count every space up to the dot.']]),
       hint:count,
-      explain:`The dot is ${j} spaces past ${lo}. `+count};
+      explain:`The dot is ${ticks} spaces past ${lo}. `+count};
   }
-  /* between which hundreds? */
-  const n=num3(),lo2=Math.floor(n/100)*100,hi2=lo2+100,near=n-lo2<=50?lo2:hi2,t0=Math.floor(n/10)*10;
-  return {...mcOf([[`${lo2} and ${hi2}`,null],[`${lo2-100} and ${lo2}`,`${n} has ${say(lo2/100,'hundreds')}, so it comes after ${lo2}.`],[`${t0} and ${t0+10}`,`Those are tens. Find the hundreds ${n} is between.`]]),
+  /* between which hundreds? (nearer: the closer one; tenBelow: the ten below n, for a wrong choice) */
+  const n=num3(),hundredBelow=Math.floor(n/100)*100,hundredAbove=hundredBelow+100,nearer=n-hundredBelow<=50?hundredBelow:hundredAbove,tenBelow=Math.floor(n/10)*10;
+  return {...mcOf([[`${hundredBelow} and ${hundredAbove}`,null],[`${hundredBelow-100} and ${hundredBelow}`,`${n} has ${say(hundredBelow/100,'hundreds')}, so it comes after ${hundredBelow}.`],
+      [`${tenBelow} and ${tenBelow+10}`,`Those are tens. Find the hundreds ${n} is between.`]]),
     prompt:`Between which two hundreds is <b>${n}</b>?`,
-    fig:show=>numLine(Math.max(0,lo2-100),Math.min(1000,hi2+100),{u:.9,step:100,big:100,ls:'',end:true,pts:show?[{v:n,cls:'b',t:n}]:[],label:'A number line counting by hundreds'}),
-    hint:`${n} has ${say(lo2/100,'hundreds')}. What comes after ${lo2}?`,
-    explain:`${n} is more than ${lo2} and less than ${hi2}, so it’s between ${lo2} and ${hi2}. It’s closer to ${near}.`};
+    fig:show=>numLine(Math.max(0,hundredBelow-100),Math.min(1000,hundredAbove+100),{u:.9,step:100,big:100,ls:'',end:true,pts:show?[{v:n,cls:'b',t:n}]:[],label:'A number line counting by hundreds'}),
+    hint:`${n} has ${say(hundredBelow/100,'hundreds')}. What comes after ${hundredBelow}?`,
+    explain:`${n} is more than ${hundredBelow} and less than ${hundredAbove}, so it’s between ${hundredBelow} and ${hundredAbove}. It’s closer to ${nearer}.`};
 }
 
 /* ---------- Knight’s Challenge: compare and order (Lessons 10–12) ---------- */
-/* two different three-digit numbers that are easy to mix up */
+/* two different three-digit numbers that are easy to mix up: the tens and ones swapped, a different ones or tens digit,
+   or a hundreds digit one away (in either order) */
 function pair(){
-  const n=num3(false),[h,t,o]=digits(n),k=R(0,3);
-  let m=k===0?h*100+o*10+t:k===1?h*100+t*10+((o+R(1,8))%10):k===2?h*100+((t+R(1,8))%10)*10+o:((h+R(0,1)*2-1+9)%9||9)*100+R(0,9)*10+R(0,9);
-  if(m===n)m=n<990?n+10:n-10;
-  return Math.random()<.5?[n,m]:[m,n];
+  const n=num3(false),[hundreds,tens,ones]=digits(n),how=R(0,3);
+  let other=how===0?hundreds*100+ones*10+tens:how===1?hundreds*100+tens*10+((ones+R(1,8))%10):how===2?hundreds*100+((tens+R(1,8))%10)*10+ones
+    :((hundreds+R(0,1)*2-1+9)%9||9)*100+R(0,9)*10+R(0,9);
+  if(other===n)other=n<990?n+10:n-10;
+  return Math.random()<.5?[n,other]:[other,n];
 }
-const firstDiff=(a,b)=>{const da=digits(a),db=digits(b);return da.findIndex((d,i)=>d!==db[i]);};
+/* the first place (0 hundreds, 1 tens, 2 ones) where a and b have different digits */
+const firstDiff=(a,b)=>{const digitsA=digits(a),digitsB=digits(b);return digitsA.findIndex((d,i)=>d!==digitsB[i]);};
 function genCompare(){
-  const k=R(0,2);
-  if(k===0){
-    const eq=Math.random()<.15,[a,b]=pair(),[x,y]=eq?[a,a]:[a,b],[h,t,o]=digits(x),i=firstDiff(x,y);
-    const left=eq?`${h*100} + ${t*10} + ${o}`:String(x),rel=x>y?'>':x<y?'<':'=';
+  const variant=R(0,2);
+  if(variant===0){
+    /* which comparison is true; sometimes (equal) the left side is the number's expanded form, so they're the same */
+    const equal=Math.random()<.15,[a,b]=pair(),[x,y]=equal?[a,a]:[a,b],[hundreds,tens,ones]=digits(x),at=firstDiff(x,y);
+    const left=equal?`${hundreds*100} + ${tens*10} + ${ones}`:String(x),rel=x>y?'>':x<y?'<':'=';
     const words={'>':'is greater than','<':'is less than','=':'is equal to'};
-    return {...mcOf(['>','<','='].map(s=>[`${left} ${s} ${y}`,s===rel?null:s==='='?'The numbers are different. Look at each place.':eq?`${left} is ${x}, the same number.`:`Look at the ${place[i]}: ${digits(x)[i]} ${place[i]} is ${x>y?'more':'less'} than ${digits(y)[i]} ${place[i]}. The open side faces the bigger number.`])),
+    return {...mcOf(['>','<','='].map(sign=>[`${left} ${sign} ${y}`,sign===rel?null:sign==='='?'The numbers are different. Look at each place.':equal?`${left} is ${x}, the same number.`
+        :`Look at the ${place[at]}: ${digits(x)[at]} ${place[at]} is ${x>y?'more':'less'} than ${digits(y)[at]} ${place[at]}. The open side faces the bigger number.`])),
       prompt:'Which is true?',fig:()=>pvChart([['',x],['',y]]),
-      hint:eq?`Add the parts: ${left} = ?`:'Start with the hundreds. If they’re the same, look at the tens, then the ones.',
-      explain:eq?`${left} = ${x}, so the two are equal.`:`${x} ${words[rel]} ${y}: `+(i?`same ${i===1?'hundreds':'hundreds and tens'}, and `:'')+`${digits(x)[i]} ${place[i]} ${x>y?'>':'<'} ${digits(y)[i]} ${place[i]}.`};
+      hint:equal?`Add the parts: ${left} = ?`:'Start with the hundreds. If they’re the same, look at the tens, then the ones.',
+      explain:equal?`${left} = ${x}, so the two are equal.`:`${x} ${words[rel]} ${y}: `+(at?`same ${at===1?'hundreds':'hundreds and tens'}, and `:'')+`${digits(x)[at]} ${place[at]} ${x>y?'>':'<'} ${digits(y)[at]} ${place[at]}.`};
   }
+  /* three numbers, two of them easy to mix up, and the same numbers in order */
   const [a,b]=pair();let c=num3();while(c===a||c===b)c=num3();
-  const L=[a,b,c],s=[...L].sort((p,q)=>p-q);
-  if(k===1){
-    const most=Math.random()<.5,ans=most?s[2]:s[0],w=most?'greatest':'least';
-    return {...mcOf(L.map(v=>[String(v),v===ans?null:`Compare ${v} and ${ans} place by place, starting with hundreds. ${ans} is ${most?'greater':'less'}.`])),
-      prompt:`Which number is <b>${w}</b>?`,fig:()=>pvChart(L.map(v=>['',v])),
+  const numbers=[a,b,c],sorted=[...numbers].sort((p,q)=>p-q);
+  if(variant===1){
+    /* which is greatest, or least */
+    const greatest=Math.random()<.5,answer=greatest?sorted[2]:sorted[0],word=greatest?'greatest':'least';
+    return {...mcOf(numbers.map(v=>[String(v),v===answer?null:`Compare ${v} and ${answer} place by place, starting with hundreds. ${answer} is ${greatest?'greater':'less'}.`])),
+      prompt:`Which number is <b>${word}</b>?`,fig:()=>pvChart(numbers.map(v=>['',v])),
       hint:'Look at the hundreds first. The most hundreds is greatest, and the fewest is least.',
-      explain:`In order: ${s.join(' < ')}. The ${w} is ${ans}.`};
+      explain:`In order: ${sorted.join(' < ')}. The ${word} is ${answer}.`};
   }
-  const swap=[s[1],s[0],s[2]],rev=[...s].reverse();
-  return {...mcOf([[s.join(', '),null],[swap.join(', '),`Compare ${s[0]} and ${s[1]}: ${s[0]} is less, so it comes first.`],[rev.join(', '),'That goes from greatest to least. Start with the smallest.']]),
-    prompt:'Which list goes from <b>least to greatest</b>?',stack:true,fig:()=>pvChart(L.map(v=>['',v])),
+  /* which list goes from least to greatest: the wrong ones swap the first two, or go backward */
+  const swapped=[sorted[1],sorted[0],sorted[2]],backward=[...sorted].reverse();
+  return {...mcOf([[sorted.join(', '),null],[swapped.join(', '),`Compare ${sorted[0]} and ${sorted[1]}: ${sorted[0]} is less, so it comes first.`],[backward.join(', '),'That goes from greatest to least. Start with the smallest.']]),
+    prompt:'Which list goes from <b>least to greatest</b>?',stack:true,fig:()=>pvChart(numbers.map(v=>['',v])),
     hint:'Find the least number first. Then the next. Compare hundreds, then tens, then ones.',
-    explain:`${s[0]} < ${s[1]} < ${s[2]}, so the list is ${s.join(', ')}.`};
+    explain:`${sorted[0]} < ${sorted[1]} < ${sorted[2]}, so the list is ${sorted.join(', ')}.`};
 }
 
 /* ---------- The Dragon’s Lair: everything ---------- */

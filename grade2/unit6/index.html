@@ -90,13 +90,14 @@
 <script src="../../shared/measure.js?v=43f60160"></script>
 <script src="../../shared/speak.js?v=05cb8b2d"></script>
 <script src="../../shared/engine.js?v=f20ed8cf"></script>
-<script src="stations.js?v=776ff67a"></script>
+<script src="stations.js?v=ab287f08"></script>
 <script>
 /* the Ferris wheel in the final round: one car lights up for each right answer */
-let lit=0;
-function drawRide(G,hit){
-  const ride=$('ride');ride.hidden=G.z.id!=='boss';if(ride.hidden)return;
-  ride.innerHTML=`<svg viewBox="0 0 64 64" role="img" aria-label="${lit} of 10 cars lit">${wheel(lit)}</svg><div><b>${lit} of 10 cars lit</b><p>${lit===10?'Every car is lit. What a ride!':hit?'Right! Another car lights up.':'Answer right to light up a car.'}</p></div>`;
+let cars=0;
+/* the Ferris wheel beside a boss problem (hidden at the other stations); hit: the last answer was right */
+function drawRide(state,hit){
+  const ride=$('ride');ride.hidden=state.z.id!=='boss';if(ride.hidden)return;
+  ride.innerHTML=`<svg viewBox="0 0 64 64" role="img" aria-label="${cars} of 10 cars lit">${wheel(cars)}</svg><div><b>${cars} of 10 cars lit</b><p>${cars===10?'Every car is lit. What a ride!':hit?'Right! Another car lights up.':'Answer right to light up a car.'}</p></div>`;
   ride.classList.toggle('hit',!!hit);
 }
 Game.init({
@@ -110,8 +111,9 @@ Game.init({
     stuck:'Tap “Show me a hint” when you’re stuck. It shows how to think about it.',
     tap:'Tap your answer in the picture.'
   },
-  onQuestion:G=>{if(G.i===0)lit=0;drawRide(G,false);},
-  onAnswer:(G,ok)=>{if(ok)lit++;drawRide(G,ok);}
+  /* the wheel goes dark at the start of a round */
+  onQuestion:state=>{if(state.i===0)cars=0;drawRide(state,false);},
+  onAnswer:(state,ok)=>{if(ok)cars++;drawRide(state,ok);}
 });
 </script>
 </body>

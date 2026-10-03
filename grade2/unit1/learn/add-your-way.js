@@ -1,28 +1,33 @@
 /* Learn Adding, Subtracting, and Working with Data (Grade 2 Unit 1), chapter 2: Add your way. Its widgets and steps; loaded by add-your-way.html. */
+/* Make a ten: a button moves blue counters into the first ten-frame until it's full. */
 function wMakeTen(el){
-  const q=Q(el),PAIRS=[[9,5],[8,6],[7,5],[8,7]];let p=0,moved=false;
+  /* moved: the blue counters have moved over */
+  const q=Q(el),PAIRS=[[9,5],[8,6],[7,5],[8,7]];let pairIndex=0,moved=false;
   el.innerHTML=seg('Numbers',PAIRS.map(([a,b],i)=>[i,`${a} + ${b}`]))+`<div class="fig" data-f></div><div class="wrow"><button type="button" class="btn" data-go></button></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const [a,b]=PAIRS[p],need=10-a;press(el,p);
+    /* need: how many the first frame needs to make 10 */
+    const [a,b]=PAIRS[pairIndex],need=10-a;press(el,pairIndex);
     const cells=moved?[...cellsOf([a,'a'],[need,'b moved']),...cellsOf([b-need,'b'])]:[...cellsOf([a,'a'],[need,null]),...cellsOf([b,'b'])];
     q('f').innerHTML=tenFrames(cells,{label:moved?`10 in the first frame and ${b-need} in the second`:`${a} yellow in the first frame and ${b} blue in the second`});
     q('go').textContent=moved?'Move them back':`Move ${need} to make a ten`;
     q('r').innerHTML=moved?`<span class="ok"><b>${a} + ${b} = 10 + ${b-need} = ${a+b}</b></span><br><span class="dimline">${need} blue moved over to fill the first frame. ${b-need} are left.</span>`:`<b>${a} + ${b}</b><br><span class="dimline">The first frame needs ${need} more to make a ten.</span>`;
   };
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){p=+b.dataset.m;moved=false;draw();}});
+  el.addEventListener('click',e=>{const pairBtn=e.target.closest('[data-m]');if(pairBtn){pairIndex=+pairBtn.dataset.m;moved=false;draw();}});
   q('go').onclick=()=>{moved=!moved;draw();};
   draw();
 }
+/* Doubles and one more: two rows of cubes, the same length or one longer (a stepper sets the length). */
 function wDoubles(el){
-  const q=Q(el),st={n:6};let more=false;
+  /* the stepper's value: n cubes in the top row; plusOne: the bottom row has one more */
+  const q=Q(el),values={n:6};let plusOne=false;
   el.innerHTML=`<div class="wrow">${stepper('n','Cubes')}</div>`+seg('Kind',[['d','Double'],['m','One more']])+`<div class="fig" data-f></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const {n}=st,m=more?n+1:n;q('n').textContent=n;press(el,more?'m':'d');
-    q('f').innerHTML=svgWrap(10*CUBE+8,2*CUBE+12,cubes(4,4,n,'a')+cubes(4,CUBE+8,m,'b')+(more?`<rect class="extra" x="${4+n*CUBE-2}" y="${CUBE+6}" width="${CUBE+2}" height="${CUBE+2}" rx="5"/>`:''),`${n} yellow cubes above ${m} blue cubes`);
-    q('r').innerHTML=more?`<b>${n} + ${m} = ${n+m}</b><br><span class="dimline">${n} + ${n} = ${2*n}, and 1 more makes ${n+m}.</span>`:`<b>${n} + ${n} = ${2*n}</b><br><span class="dimline">A double: two rows the same length.</span>`;
+    const {n}=values,bottom=plusOne?n+1:n;q('n').textContent=n;press(el,plusOne?'m':'d');
+    q('f').innerHTML=svgWrap(10*CUBE+8,2*CUBE+12,cubes(4,4,n,'a')+cubes(4,CUBE+8,bottom,'b')+(plusOne?`<rect class="extra" x="${4+n*CUBE-2}" y="${CUBE+6}" width="${CUBE+2}" height="${CUBE+2}" rx="5"/>`:''),`${n} yellow cubes above ${bottom} blue cubes`);
+    q('r').innerHTML=plusOne?`<b>${n} + ${bottom} = ${n+bottom}</b><br><span class="dimline">${n} + ${n} = ${2*n}, and 1 more makes ${n+bottom}.</span>`:`<b>${n} + ${n} = ${2*n}</b><br><span class="dimline">A double: two rows the same length.</span>`;
   };
-  steppers(el,st,{n:[1,9]},draw);
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){more=b.dataset.m==='m';draw();}});
+  steppers(el,values,{n:[1,9]},draw);
+  el.addEventListener('click',e=>{const kindBtn=e.target.closest('[data-m]');if(kindBtn){plusOne=kindBtn.dataset.m==='m';draw();}});
   draw();
 }
 /* this chapter's quick-check figures (common.js has the shared ones) */

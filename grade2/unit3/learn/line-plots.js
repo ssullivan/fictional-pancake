@@ -1,48 +1,60 @@
 /* Learn Measuring Length (Grade 2 Unit 3), chapter 5: Line plots. Its widgets and steps; loaded by line-plots.html. */
+/* pencils and crayons as {length: how many}, and the leaves' lengths one by one */
 const PENCILS={3:1,4:2,5:2,6:4,7:3,8:1},CRAYONS={5:1,6:3,7:2,8:5,9:2},LEAVES=[5,7,4,5,6,5,7,3];
+/* Tap a length on the pencils' line plot to count its Xs. */
 function wReadPlot(el){
-  const q=Q(el);let v=null;
+  /* picked: the length tapped (null before one is) */
+  const q=Q(el);let picked=null;
   el.innerHTML=`<p class="story">Our class measured our pencils. Each X is one pencil.</p><div class="fig" data-f></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const n=PENCILS[v]||0;
-    q('f').innerHTML=lineplot(PENCILS,3,8,{mark:v,tap:true});
-    q('r').innerHTML=v===null?'Tap a number on the line plot.':`<b>${n} ${n===1?'pencil is':'pencils are'} ${v} inches long.</b><br><span class="dimline">Count the Xs above ${v}.</span>`;
+    const count=PENCILS[picked]||0;
+    q('f').innerHTML=lineplot(PENCILS,3,8,{mark:picked,tap:true});
+    q('r').innerHTML=picked===null?'Tap a number on the line plot.':`<b>${count} ${count===1?'pencil is':'pencils are'} ${picked} inches long.</b><br><span class="dimline">Count the Xs above ${picked}.</span>`;
   };
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-v]');if(b){v=+b.dataset.v;draw();}});
+  el.addEventListener('click',e=>{const spot=e.target.closest('[data-v]');if(spot){picked=+spot.dataset.v;draw();}});
   draw();
 }
+/* Make a line plot: tap each leaf's length in turn to add its X. */
 function wMakePlot(el){
-  const q=Q(el);let i=0,c={},miss=null;
+  /* placed: how many leaves have their X; counts: the Xs so far; miss: the last wrong tap */
+  const q=Q(el);let placed=0,counts={},miss=null;
   el.innerHTML=`<p class="story">We measured 8 leaves, in inches.</p><div class="chips" data-c></div><div class="fig" data-f></div><div class="wrow"><button type="button" class="ghost-btn" data-clr>Start over</button></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const done=i===LEAVES.length;
-    q('c').innerHTML=LEAVES.map((n,j)=>`<span class="chip${j<i?' done':j===i?' cur':''}">${n} in</span>`).join('');
-    q('f').innerHTML=lineplot(c,3,8,{tap:!done});
+    const done=placed===LEAVES.length;
+    q('c').innerHTML=LEAVES.map((n,j)=>`<span class="chip${j<placed?' done':j===placed?' cur':''}">${n} in</span>`).join('');
+    q('f').innerHTML=lineplot(counts,3,8,{tap:!done});
     q('r').innerHTML=done?`<span class="ok">You made a line plot! ${LEAVES.length} leaves, ${LEAVES.length} Xs.</span>`
-      :miss!==null?`<span class="no">That’s ${miss}.</span> This leaf is <b>${LEAVES[i]} inches</b>. Find ${LEAVES[i]} on the line.`
-      :`Next leaf: <b>${LEAVES[i]} inches</b>. Tap ${LEAVES[i]} on the line plot.`;
+      :miss!==null?`<span class="no">That’s ${miss}.</span> This leaf is <b>${LEAVES[placed]} inches</b>. Find ${LEAVES[placed]} on the line.`
+      :`Next leaf: <b>${LEAVES[placed]} inches</b>. Tap ${LEAVES[placed]} on the line plot.`;
   };
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-v]');if(!b||i>=LEAVES.length)return;const v=+b.dataset.v;if(v===LEAVES[i]){c[v]=(c[v]||0)+1;i++;miss=null;}else miss=v;draw();});
-  q('clr').onclick=()=>{i=0;c={};miss=null;draw();};
+  el.addEventListener('click',e=>{
+    const spot=e.target.closest('[data-v]');if(!spot||placed>=LEAVES.length)return;
+    const v=+spot.dataset.v;if(v===LEAVES[placed]){counts[v]=(counts[v]||0)+1;placed++;miss=null;}else miss=v;
+    draw();
+  });
+  q('clr').onclick=()=>{placed=0;counts={};miss=null;draw();};
   draw();
 }
+/* questions the pencils' line plot answers: what to mark on it, and the answer */
 const ASKS=[
   {label:'Longest',mark:8,say:'The longest pencil is <b>8 inches</b>. It’s the X farthest to the right.'},
   {label:'Shortest',mark:3,say:'The shortest pencil is <b>3 inches</b>. It’s the X farthest to the left.'},
   {label:'Most pencils',mark:6,say:'<b>6 inches</b> has the most Xs: 4 pencils are 6 inches long.'},
   {label:'How much longer?',diff:[3,8],say:'From 3 to 8 is <b>5 inches</b>. 8 − 3 = 5, so the longest pencil is 5 inches longer than the shortest.'},
 ];
+/* Pick a question to see the line plot answer it. */
 function wSays(el){
-  const q=Q(el);let k=0;
-  el.innerHTML=seg('Question',ASKS.map((a,i)=>[i,a.label]))+`<div class="fig" data-f></div><p class="readout" data-r></p>`;
+  const q=Q(el);let askIndex=0;
+  el.innerHTML=seg('Question',ASKS.map((ask,i)=>[i,ask.label]))+`<div class="fig" data-f></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const A=ASKS[k];press(el,k);
-    q('f').innerHTML=lineplot(PENCILS,3,8,{mark:A.mark??null,diff:A.diff||null});
-    q('r').innerHTML=`<span class="ok">${A.say}</span>`;
+    const ask=ASKS[askIndex];press(el,askIndex);
+    q('f').innerHTML=lineplot(PENCILS,3,8,{mark:ask.mark??null,diff:ask.diff||null});
+    q('r').innerHTML=`<span class="ok">${ask.say}</span>`;
   };
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){k=+b.dataset.m;draw();}});
+  el.addEventListener('click',e=>{const askBtn=e.target.closest('[data-m]');if(askBtn){askIndex=+askBtn.dataset.m;draw();}});
   draw();
 }
+/* a line plot of ribbons from 2 to 5 inches, for a quick check's choices */
 const ribbon=(counts,label)=>lineplot(counts,2,5,{u:44,label});
 /* the quick checks' figures */
 const F={

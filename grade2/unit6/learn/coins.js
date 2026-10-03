@@ -1,42 +1,47 @@
 /* Learn Geometry, Time, and Money (Grade 2 Unit 6), chapter 4: Coins. Its widgets and steps; loaded by coins.html. */
+/* Dimes, nickels, and pennies (a stepper for each), counted biggest first. */
 function wPND(el){
-  const q=Q(el),st={ds:2,ns:1,ps:3};
+  /* the steppers' values: how many dimes, nickels, and pennies */
+  const q=Q(el),values={ds:2,ns:1,ps:3};
   el.innerHTML=`<div class="fig" data-f></div><div class="wrow">${stepper('ds','Dimes')}${stepper('ns','Nickels')}${stepper('ps','Pennies')}</div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const list=coinList(fromSteps(st)),t=centsOf(list);Object.keys(st).forEach(k=>{q(k).textContent=st[k];});
-    q('f').innerHTML=list.length?moneyFig(list,{vals:true}):empty('No coins yet');
-    q('r').innerHTML=t?`Count by 10s, then 5s, then 1s: ${countUp(list)}.<br><span class="ok"><b>${t}¢</b></span>`+(st.ds&&st.ns?'<br><span class="dimline">A dime is smaller than a nickel, but it’s worth more!</span>':'')
+    const coins=coinList(fromSteps(values)),cents=centsOf(coins);Object.keys(values).forEach(key=>{q(key).textContent=values[key];});
+    q('f').innerHTML=coins.length?moneyFig(coins,{vals:true}):empty('No coins yet');
+    q('r').innerHTML=cents?`Count by 10s, then 5s, then 1s: ${countUp(coins)}.<br><span class="ok"><b>${cents}¢</b></span>`+(values.ds&&values.ns?'<br><span class="dimline">A dime is smaller than a nickel, but it’s worth more!</span>':'')
       :'A dime is 10¢, a nickel is 5¢, and a penny is 1¢. Add some coins.';
   };
-  steppers(el,st,{ds:[0,5],ns:[0,4],ps:[0,5]},draw);
+  steppers(el,values,{ds:[0,5],ns:[0,4],ps:[0,5]},draw);
   draw();
 }
+/* Quarters (a stepper), counted by 25s up to a dollar. */
 function wQuarter(el){
-  const q=Q(el),st={q:2};
+  const q=Q(el),values={q:2};
   el.innerHTML=`<div class="fig" data-f></div><div class="wrow">${stepper('q','Quarters')}</div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const n=st.q;q('q').textContent=n;
-    q('f').innerHTML=n?moneyFig(coinList({q:n}),{vals:true}):empty('No quarters yet');
-    q('r').innerHTML=n===4?'Count by 25s: 25, 50, 75, 100.<br><span class="ok"><b>4 quarters is 100¢. That’s 1 dollar!</b></span>'
-      :n?`Count by 25s: ${countUp(coinList({q:n}))}.<br><span class="ok"><b>${n*25}¢</b></span><br><span class="dimline">${4-n} more ${4-n>1?'quarters make':'quarter makes'} a dollar.</span>`
+    const quarters=values.q;q('q').textContent=quarters;
+    q('f').innerHTML=quarters?moneyFig(coinList({q:quarters}),{vals:true}):empty('No quarters yet');
+    q('r').innerHTML=quarters===4?'Count by 25s: 25, 50, 75, 100.<br><span class="ok"><b>4 quarters is 100¢. That’s 1 dollar!</b></span>'
+      :quarters?`Count by 25s: ${countUp(coinList({q:quarters}))}.<br><span class="ok"><b>${quarters*25}¢</b></span><br><span class="dimline">${4-quarters} more ${4-quarters>1?'quarters make':'quarter makes'} a dollar.</span>`
       :'A quarter is worth 25¢. Add some quarters.';
   };
-  steppers(el,st,{q:[0,4]},draw);
+  steppers(el,values,{q:[0,4]},draw);
   draw();
 }
+/* Make a dollar: tap coins to add them until there's 100¢ (a coin that would go past it is turned off). */
 function wDollar(el){
-  const q=Q(el);let list=[];
-  el.innerHTML=`<p class="story">Make a dollar: 100¢. Add coins until you get there.</p><div class="wrow">${['q','d','n','p'].map(k=>`<button type="button" class="ghost-btn" data-add="${k}">+ ${COINS[k].name}</button>`).join('')}<button type="button" class="ghost-btn" data-clr>Start over</button></div><div class="fig" data-f></div><p class="readout" data-r></p>`;
+  /* coins: the coins added, in the order they were tapped */
+  const q=Q(el);let coins=[];
+  el.innerHTML=`<p class="story">Make a dollar: 100¢. Add coins until you get there.</p><div class="wrow">${['q','d','n','p'].map(coin=>`<button type="button" class="ghost-btn" data-add="${coin}">+ ${COINS[coin].name}</button>`).join('')}<button type="button" class="ghost-btn" data-clr>Start over</button></div><div class="fig" data-f></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const t=centsOf(list);
-    el.querySelectorAll('[data-add]').forEach(b=>{b.disabled=t+COINS[b.dataset.add].v>100||list.length>=20;});
-    const sorted=['q','d','n','p'].flatMap(k=>list.filter(c=>c===k));
-    q('f').innerHTML=list.length?moneyFig(sorted):empty('No coins yet');
-    q('r').innerHTML=t===100?`<span class="ok"><b>You made a dollar!</b> ${countUp(sorted)}. 100¢ = $1.</span><br><span class="dimline">Start over and find another way.</span>`
-      :t?`<b>${t}¢</b> so far. <b>${100-t}¢</b> more to make a dollar.`:'Tap a coin to add it.';
+    const cents=centsOf(coins);
+    el.querySelectorAll('[data-add]').forEach(b=>{b.disabled=cents+COINS[b.dataset.add].v>100||coins.length>=20;});
+    const sorted=['q','d','n','p'].flatMap(kind=>coins.filter(coin=>coin===kind));
+    q('f').innerHTML=coins.length?moneyFig(sorted):empty('No coins yet');
+    q('r').innerHTML=cents===100?`<span class="ok"><b>You made a dollar!</b> ${countUp(sorted)}. 100¢ = $1.</span><br><span class="dimline">Start over and find another way.</span>`
+      :cents?`<b>${cents}¢</b> so far. <b>${100-cents}¢</b> more to make a dollar.`:'Tap a coin to add it.';
   };
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-add]');if(b&&!b.disabled){list.push(b.dataset.add);draw();}});
-  q('clr').onclick=()=>{list=[];draw();};
+  el.addEventListener('click',e=>{const addBtn=e.target.closest('[data-add]');if(addBtn&&!addBtn.disabled){coins.push(addBtn.dataset.add);draw();}});
+  q('clr').onclick=()=>{coins=[];draw();};
   draw();
 }
 const STEPS=[

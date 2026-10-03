@@ -1,29 +1,37 @@
 /* Learn Numbers to 1,000 (Grade 2 Unit 5), chapter 3: Expanded form. Its widgets and steps; loaded by expanded-form.html. */
 const EXP=[342,508,760];
+/* A number in expanded form: tap a part to light up its blocks (the others fade). */
 function wExpanded(el){
-  const q=Q(el);let p=0,k=-1;
+  /* partIndex: the part tapped (0 hundreds, 1 tens, 2 ones; −1 for none) */
+  const q=Q(el);let numberIndex=0,partIndex=-1;
   el.innerHTML=seg('Number',EXP.map((n,i)=>[i,n]))+`<div class="chips" data-c></div><div class="fig" data-f></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const n=EXP[p],[h,t,o]=digits(n),parts=[h*100,t*10,o],dim=i=>k>=0&&k!==i?' fade':'';press(el,p);
-    q('c').innerHTML=parts.map((v,i)=>v?`<button type="button" class="chip" data-e="${i}" aria-pressed="${i===k}">${v}</button>`:'').join('');
-    q('f').innerHTML=htoFig(h,t,o,{cls:{h:dim(0),t:'b'+dim(1),o:'c'+dim(2)}},`${n} in base-ten blocks`);
-    q('r').innerHTML=`<b>${n} = ${parts.filter(v=>v).join(' + ')}</b><br><span class="dimline">`+(k<0?'Tap each part to find its blocks.':`${parts[k]} is ${[h,t,o][k]} ${['hundreds','tens','ones'][k]}.`)+`</span>`;
+    /* fade(i): the class that fades place i's blocks when another part is tapped */
+    const n=EXP[numberIndex],[hundreds,tens,ones]=digits(n),parts=[hundreds*100,tens*10,ones],fade=i=>partIndex>=0&&partIndex!==i?' fade':'';press(el,numberIndex);
+    q('c').innerHTML=parts.map((v,i)=>v?`<button type="button" class="chip" data-e="${i}" aria-pressed="${i===partIndex}">${v}</button>`:'').join('');
+    q('f').innerHTML=htoFig(hundreds,tens,ones,{cls:{h:fade(0),t:'b'+fade(1),o:'c'+fade(2)}},`${n} in base-ten blocks`);
+    q('r').innerHTML=`<b>${n} = ${parts.filter(v=>v).join(' + ')}</b><br><span class="dimline">`+(partIndex<0?'Tap each part to find its blocks.':`${parts[partIndex]} is ${[hundreds,tens,ones][partIndex]} ${['hundreds','tens','ones'][partIndex]}.`)+`</span>`;
   };
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){p=+b.dataset.m;k=-1;draw();return;}const c=e.target.closest('[data-e]');if(c){k=+c.dataset.e;draw();}});
+  el.addEventListener('click',e=>{
+    const numberBtn=e.target.closest('[data-m]');if(numberBtn){numberIndex=+numberBtn.dataset.m;partIndex=-1;draw();return;}
+    const partBtn=e.target.closest('[data-e]');if(partBtn){partIndex=+partBtn.dataset.e;draw();}
+  });
   draw();
 }
+/* Another way to make 342: break a hundred into 10 tens (up to twice). */
 function wTrade(el){
-  const q=Q(el);let b=0;
+  /* broken: how many hundreds are broken into tens */
+  const q=Q(el);let broken=0;
   el.innerHTML=`<p class="story">342 is 3 hundreds, 4 tens, and 2 ones. Is there another way to make 342?</p><div class="fig" data-f></div><div class="wrow"><button type="button" class="btn" data-go></button><button type="button" class="ghost-btn" data-clr>Start over</button></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const h=3-b,t=4+10*b;
-    q('f').innerHTML=htoFig(h,t,2,{cls:{t:'b',o:'c'},tr:10*b},`${h} hundreds, ${t} tens, and 2 ones`);
-    q('go').disabled=b>=2;q('clr').disabled=!b;
+    const hundreds=3-broken,tens=4+10*broken;
+    q('f').innerHTML=htoFig(hundreds,tens,2,{cls:{t:'b',o:'c'},tr:10*broken},`${hundreds} hundreds, ${tens} tens, and 2 ones`);
+    q('go').disabled=broken>=2;q('clr').disabled=!broken;
     q('go').textContent='Break a hundred into 10 tens';
-    q('r').innerHTML=`<b>${h} hundred${h===1?'':'s'}, ${t} tens, 2 ones</b><br><span class="ok">${h*100} + ${t*10} + 2 = 342</span>`+(b?`<br><span class="dimline">The green tens came from a hundred. Same number, different blocks!</span>`:'');
+    q('r').innerHTML=`<b>${hundreds} hundred${hundreds===1?'':'s'}, ${tens} tens, 2 ones</b><br><span class="ok">${hundreds*100} + ${tens*10} + 2 = 342</span>`+(broken?`<br><span class="dimline">The green tens came from a hundred. Same number, different blocks!</span>`:'');
   };
-  q('go').onclick=()=>{b++;draw();};
-  q('clr').onclick=()=>{b=0;draw();};
+  q('go').onclick=()=>{broken++;draw();};
+  q('clr').onclick=()=>{broken=0;draw();};
   draw();
 }
 const STEPS=[

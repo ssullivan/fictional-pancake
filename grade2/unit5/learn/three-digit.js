@@ -1,25 +1,29 @@
 /* Learn Numbers to 1,000 (Grade 2 Unit 5), chapter 2: Three-digit numbers. Its widgets and steps; loaded by three-digit.html. */
+/* Build a number from hundreds, tens, and ones (a stepper for each), and see its name. */
 function wBuild(el){
-  const q=Q(el),st={h:2,t:3,o:5};
+  /* the steppers' values: h hundreds, t tens, o ones */
+  const q=Q(el),values={h:2,t:3,o:5};
   el.innerHTML=`<div class="fig" data-f></div><div class="wrow">${stepper('h','Hundreds')}${stepper('t','Tens')}${stepper('o','Ones')}</div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const {h,t,o}=st,n=h*100+t*10+o;['h','t','o'].forEach(k=>{q(k).textContent=st[k];});
+    const {h:hundreds,t:tens,o:ones}=values,n=hundreds*100+tens*10+ones;['h','t','o'].forEach(key=>{q(key).textContent=values[key];});
     q('f').innerHTML=numBlocks(n);
-    q('r').innerHTML=`${h} hundred${h===1?'':'s'}, ${t} ten${t===1?'':'s'}, ${o} one${o===1?'':'s'}<br><span class="ok"><b>${n}</b>: ${numWords(n)}</span>`+(h&&(!t||!o)?`<br><span class="dimline">${!t&&!o?'No tens and no ones: write 0 in both places.':!t?'No tens: write 0 in the tens place.':'No ones: write 0 in the ones place.'}</span>`:'');
+    q('r').innerHTML=`${hundreds} hundred${hundreds===1?'':'s'}, ${tens} ten${tens===1?'':'s'}, ${ones} one${ones===1?'':'s'}<br><span class="ok"><b>${n}</b>: ${numWords(n)}</span>`
+      +(hundreds&&(!tens||!ones)?`<br><span class="dimline">${!tens&&!ones?'No tens and no ones: write 0 in both places.':!tens?'No tens: write 0 in the tens place.':'No ones: write 0 in the ones place.'}</span>`:'');
   };
-  steppers(el,st,{h:[1,9],t:[0,9],o:[0,9]},draw);
+  steppers(el,values,{h:[1,9],t:[0,9],o:[0,9]},draw);
   draw();
 }
 const NAMES=[406,460,517,830];
+/* A number's name, place-value chart, and blocks. */
 function wNames(el){
-  const q=Q(el);let p=0;
+  const q=Q(el);let numberIndex=0;
   el.innerHTML=seg('Number',NAMES.map((n,i)=>[i,n]))+`<p class="eq" data-w></p><div data-c></div><div class="fig" data-f></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const n=NAMES[p],[h,t,o]=digits(n);press(el,p);
+    const n=NAMES[numberIndex],[hundreds,tens,ones]=digits(n);press(el,numberIndex);
     q('w').textContent=numWords(n);q('c').innerHTML=pvChart([['',n]]);q('f').innerHTML=numBlocks(n);
-    q('r').innerHTML=`<b>${numWords(n)}</b> is ${h} hundreds, ${t} tens, and ${o} ones: <b>${n}</b>.`+(!t||!o?`<br><span class="dimline">There are no ${!t?'tens':'ones'}, so that place gets a 0.</span>`:'');
+    q('r').innerHTML=`<b>${numWords(n)}</b> is ${hundreds} hundreds, ${tens} tens, and ${ones} ones: <b>${n}</b>.`+(!tens||!ones?`<br><span class="dimline">There are no ${!tens?'tens':'ones'}, so that place gets a 0.</span>`:'');
   };
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){p=+b.dataset.m;draw();}});
+  el.addEventListener('click',e=>{const numberBtn=e.target.closest('[data-m]');if(numberBtn){numberIndex=+numberBtn.dataset.m;draw();}});
   draw();
 }
 /* the quick checks' figures */

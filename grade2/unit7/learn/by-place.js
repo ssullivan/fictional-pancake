@@ -1,6 +1,9 @@
 /* Learn Adding and Subtracting within 1,000 (Grade 2 Unit 7), chapter 2: Add and subtract by place. Its widgets and steps; loaded by by-place.html. */
+/* Add by place with blocks (no new tens or hundreds). */
 const wByPlaceAdd=addW([[342,235],[416,253],[530,264]]);
+/* Subtract by place with blocks (nothing to break). */
 const wByPlaceSub=subW([[578,235],[694,352],[865,431]]);
+/* 785 − 342 three ways: by place, counting back, and counting on. */
 const wSubWays=waysW('785 − 342',443,[
   {label:'By place',fig:byPlace(['700 − 300 = <b>400</b>','80 − 40 = <b>40</b>','5 − 2 = <b>3</b>','400 + 40 + 3 = <b>443</b>']),say:'Take away the hundreds, the tens, and the ones. Then put the parts back together.'},
   {label:'Count back',fig:jumps(785,[-300,-40,-2]),say:'Start at 785. Jump back 3 hundreds, then 4 tens, then 2 ones. You land on 443.'},

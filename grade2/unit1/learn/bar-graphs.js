@@ -1,56 +1,67 @@
 /* Learn Adding, Subtracting, and Working with Data (Grade 2 Unit 1), chapter 4: Bar graphs. Its widgets and steps; loaded by bar-graphs.html. */
+/* Make a bar graph from a table: tap in each column to set its bar (tapping the top again takes one off). */
 function wBuildBar(el){
-  const q=Q(el),h=SNACKS.map(()=>0);
-  el.innerHTML=`<table class="tally"><caption>Snacks our class chose</caption><tr><th>Snack</th><th>Students</th></tr>${SNACKS.map(s=>`<tr><td>${s.label}</td><td>${s.n}</td></tr>`).join('')}</table><div class="fig" data-f></div><p class="readout" data-r></p>`;
+  /* heights: where each bar ends */
+  const q=Q(el),heights=SNACKS.map(()=>0);
+  el.innerHTML=`<table class="tally"><caption>Snacks our class chose</caption><tr><th>Snack</th><th>Students</th></tr>${SNACKS.map(snack=>`<tr><td>${snack.label}</td><td>${snack.n}</td></tr>`).join('')}</table><div class="fig" data-f></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    q('f').innerHTML=barGraph(SNACKS.map((s,i)=>({...s,n:h[i]})),{edit:true,title:'Tap in each column to set its bar'});
-    const right=h.filter((v,i)=>v===SNACKS[i].n).length;
+    q('f').innerHTML=barGraph(SNACKS.map((snack,i)=>({...snack,n:heights[i]})),{edit:true,title:'Tap in each column to set its bar'});
+    const right=heights.filter((v,i)=>v===SNACKS[i].n).length;
     q('r').innerHTML=right===SNACKS.length?'<span class="ok">Your bar graph matches the table!</span>':`Bars that match the table: <b>${right}</b> of ${SNACKS.length}`;
   };
-  q('f').addEventListener('click',e=>{const t=e.target.closest('[data-r]');if(t){const r=+t.dataset.r,v=+t.dataset.v;h[r]=h[r]===v?v-1:v;draw();}});
+  /* a tap target says which bar (data-r) and how high (data-v) */
+  q('f').addEventListener('click',e=>{const target=e.target.closest('[data-r]');if(target){const bar=+target.dataset.r,v=+target.dataset.v;heights[bar]=heights[bar]===v?v-1:v;draw();}});
   draw();
 }
 const BOOKS=[{label:'Mai',n:4,c:'green'},{label:'Diego',n:7,c:'blue'},{label:'Elena',n:5,c:'red'}];
+/* Tap a snack to read its bar. */
 function wReadBar(el){
-  const q=Q(el);let hi=-1;
-  el.innerHTML=`<div class="fig" data-f></div><div class="wrow">${SNACKS.map((s,i)=>`<button type="button" class="ghost-btn" data-row="${i}">${s.label}</button>`).join('')}</div><p class="readout" data-r></p>`;
+  /* picked: the bar picked (-1 for none) */
+  const q=Q(el);let picked=-1;
+  el.innerHTML=`<div class="fig" data-f></div><div class="wrow">${SNACKS.map((snack,i)=>`<button type="button" class="ghost-btn" data-row="${i}">${snack.label}</button>`).join('')}</div><p class="readout" data-r></p>`;
   const draw=()=>{
-    q('f').innerHTML=barGraph(SNACKS,{hi,title:'Snacks our class chose'});
-    q('r').innerHTML=hi<0?'Tap a snack to read its bar.':`Follow the top of the ${SNACKS[hi].label.toLowerCase()} bar across to the numbers: <b>${SNACKS[hi].n} students</b> chose ${SNACKS[hi].label.toLowerCase()}.`;
+    q('f').innerHTML=barGraph(SNACKS,{hi:picked,title:'Snacks our class chose'});
+    q('r').innerHTML=picked<0?'Tap a snack to read its bar.':`Follow the top of the ${SNACKS[picked].label.toLowerCase()} bar across to the numbers: <b>${SNACKS[picked].n} students</b> chose ${SNACKS[picked].label.toLowerCase()}.`;
   };
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-row]');if(b){hi=+b.dataset.row;draw();}});
+  el.addEventListener('click',e=>{const snackBtn=e.target.closest('[data-row]');if(snackBtn){picked=+snackBtn.dataset.row;draw();}});
   draw();
 }
 const PETS=[{label:'Dogs',n:7,pic:'dot',c:'yellow'},{label:'Cats',n:5,pic:'dot',c:'blue'},{label:'Fish',n:3,pic:'dot',c:'green'}];
+/* The same data as a picture graph or a bar graph. */
 function wTwoGraphs(el){
-  const q=Q(el);let m='pic';
+  /* kind: 'pic' or 'bar' */
+  const q=Q(el);let kind='pic';
   el.innerHTML=seg('Graph',[['pic','Picture graph'],['bar','Bar graph']])+`<div class="fig" data-f></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    press(el,m);
-    q('f').innerHTML=m==='pic'?picGraph(PETS,{title:'Pets our class has',unit:'1 pet'}):barGraph(PETS,{max:8,title:'Pets our class has'});
-    q('r').innerHTML=`Both graphs show <b>7 dogs, 5 cats, and 3 fish</b>. ${m==='pic'?'Here you count the pictures.':'Here you read where each bar stops.'}`;
+    press(el,kind);
+    q('f').innerHTML=kind==='pic'?picGraph(PETS,{title:'Pets our class has',unit:'1 pet'}):barGraph(PETS,{max:8,title:'Pets our class has'});
+    q('r').innerHTML=`Both graphs show <b>7 dogs, 5 cats, and 3 fish</b>. ${kind==='pic'?'Here you count the pictures.':'Here you read where each bar stops.'}`;
   };
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){m=b.dataset.m;draw();}});
+  el.addEventListener('click',e=>{const kindBtn=e.target.closest('[data-m]');if(kindBtn){kind=kindBtn.dataset.m;draw();}});
   draw();
 }
+/* questions about the snacks graph: the question, the bar to light up (-1 for none), and the answer */
 const ASK=[
   {q:'How many students chose yogurt?',hi:2,a:'8 students. Read the top of the yogurt bar.'},
   {q:'Which snack did the fewest students choose?',hi:1,a:'Crackers: the shortest bar, 3 students.'},
   {q:'How many students chose apples or carrots?',hi:-1,a:'6 + 5 = 11 students. Add the two bars.'},
   {q:'Which snack tastes the best?',hi:-1,a:'The graph can’t answer that. It only shows how many students chose each snack.'},
 ];
+/* Tap a question to see whether the graph can answer it. */
 function wAsk(el){
-  const q=Q(el);let k=-1;
-  el.innerHTML=`<div class="fig" data-f></div><div class="chips">${ASK.map((a,i)=>`<button type="button" class="chip" data-a="${i}">${a.q}</button>`).join('')}</div><p class="readout" data-r></p>`;
+  /* asked: the question tapped (-1 for none) */
+  const q=Q(el);let asked=-1;
+  el.innerHTML=`<div class="fig" data-f></div><div class="chips">${ASK.map((ask,i)=>`<button type="button" class="chip" data-a="${i}">${ask.q}</button>`).join('')}</div><p class="readout" data-r></p>`;
   const draw=()=>{
-    el.querySelectorAll('[data-a]').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.a===k));
-    q('f').innerHTML=barGraph(SNACKS,{hi:k<0?-1:ASK[k].hi,title:'Snacks our class chose'});
-    q('r').innerHTML=k<0?'Tap a question. Can the graph answer it?':ASK[k].a;
+    el.querySelectorAll('[data-a]').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.a===asked));
+    q('f').innerHTML=barGraph(SNACKS,{hi:asked<0?-1:ASK[asked].hi,title:'Snacks our class chose'});
+    q('r').innerHTML=asked<0?'Tap a question. Can the graph answer it?':ASK[asked].a;
   };
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(b){k=+b.dataset.a;draw();}});
+  el.addEventListener('click',e=>{const question=e.target.closest('[data-a]');if(question){asked=+question.dataset.a;draw();}});
   draw();
 }
-const petBars=ns=>barGraph(PETS.map((p,i)=>({...p,n:ns[i]})),{max:8});
+/* a bar graph of PETS with these counts, for a quick check's choices */
+const petBars=counts=>barGraph(PETS.map((pet,i)=>({...pet,n:counts[i]})),{max:8});
 /* this chapter's quick-check figures (common.js has the shared ones) */
 Object.assign(F,{
   books:barGraph(BOOKS,{title:'Books read this week'}),

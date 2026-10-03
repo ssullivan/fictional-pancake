@@ -1,61 +1,70 @@
 /* Learn Geometry, Time, and Money (Grade 2 Unit 6), chapter 2: Halves, thirds, and fourths. Its widgets and steps; loaded by halves-thirds-fourths.html. */
+/* pattern blocks, and how many of each fill a hexagon */
 const FILL=[['triangle',6],['rhombus',3],['trapezoid',2]];
+/* Fill a hexagon with pattern blocks (a stepper adds them). */
 function wBlocks(el){
-  const q=Q(el),st={n:1};let p=0;
-  el.innerHTML=seg('Blocks',FILL.map(([b],i)=>[i,b[0].toUpperCase()+b.slice(1)+(b==='rhombus'?'es':'s')]))+`<div class="fig" data-f></div><div class="wrow">${stepper('n','Blocks')}</div><p class="readout" data-r></p>`;
-  const lim={n:[1,6]};
+  const q=Q(el),values={n:1};let blockIndex=0;
+  el.innerHTML=seg('Blocks',FILL.map(([block],i)=>[i,block[0].toUpperCase()+block.slice(1)+(block==='rhombus'?'es':'s')]))+`<div class="fig" data-f></div><div class="wrow">${stepper('n','Blocks')}</div><p class="readout" data-r></p>`;
+  /* the stepper goes up to what fills the hexagon */
+  const limits={n:[1,6]};
   const draw=()=>{
-    const [b,max]=FILL[p],n=st.n,pl=b==='rhombus'?'rhombuses':b+'s';press(el,p);q('n').textContent=n;
-    q('f').innerHTML=pbFig('hexagon',b,{show:n,s:90});
-    q('r').innerHTML=n===max?`<span class="ok"><b>${max} ${pl}</b> make a hexagon!</span><br><span class="dimline">Try another kind of block.</span>`
-      :`<b>${n} ${n>1?pl:b}</b>. Tap + to fill the hexagon.`;
+    const [block,fill]=FILL[blockIndex],count=values.n,plural=block==='rhombus'?'rhombuses':block+'s';press(el,blockIndex);q('n').textContent=count;
+    q('f').innerHTML=pbFig('hexagon',block,{show:count,s:90});
+    q('r').innerHTML=count===fill?`<span class="ok"><b>${fill} ${plural}</b> make a hexagon!</span><br><span class="dimline">Try another kind of block.</span>`
+      :`<b>${count} ${count>1?plural:block}</b>. Tap + to fill the hexagon.`;
   };
-  steppers(el,st,lim,draw);
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){p=+b.dataset.m;st.n=1;lim.n[1]=FILL[p][1];draw();}});
+  steppers(el,values,limits,draw);
+  el.addEventListener('click',e=>{const blockBtn=e.target.closest('[data-m]');if(blockBtn){blockIndex=+blockBtn.dataset.m;values.n=1;limits.n[1]=FILL[blockIndex][1];draw();}});
   draw();
 }
+/* Cut a circle or rectangle into halves, thirds, or fourths, and tap parts to color them in. */
 function wShare(el){
-  const q=Q(el);let shape='circle',n=2,on=[];
+  /* parts: how many equal parts; colored: the parts tapped */
+  const q=Q(el);let shape='circle',parts=2,colored=[];
   el.innerHTML=seg('Shape',[['circle','Circle'],['rect','Rectangle']])+`<div class="chips" data-c></div><div class="fig" data-f></div><p class="readout" data-r></p>`;
   const draw=()=>{
     press(el,shape);
-    q('c').innerHTML=[2,3,4].map(k=>`<button type="button" class="chip" data-e="${k}" aria-pressed="${k===n}">${PART[k][1][0].toUpperCase()+PART[k][1].slice(1)}</button>`).join('');
-    q('f').innerHTML=shareFig(shape,n,'v',{shade:on,tap:true,s:170});
-    const k=on.length,w=shape==='rect'?'rectangle':'circle';
-    q('r').innerHTML=`${n} equal parts. Each part is <b>1 ${PART[n][0]}</b> of the ${w}.<br>`+(!k?'<span class="dimline">Tap a part to color it in.</span>'
-      :k===n?`<span class="ok"><b>${partName(n,n)}</b> make the whole ${w}!</span>`:`<span class="ok"><b>${partName(n,k)}</b> colored in.</span>`);
+    q('c').innerHTML=[2,3,4].map(n=>`<button type="button" class="chip" data-e="${n}" aria-pressed="${n===parts}">${PART[n][1][0].toUpperCase()+PART[n][1].slice(1)}</button>`).join('');
+    q('f').innerHTML=shareFig(shape,parts,'v',{shade:colored,tap:true,s:170});
+    const count=colored.length,shapeName=shape==='rect'?'rectangle':'circle';
+    q('r').innerHTML=`${parts} equal parts. Each part is <b>1 ${PART[parts][0]}</b> of the ${shapeName}.<br>`+(!count?'<span class="dimline">Tap a part to color it in.</span>'
+      :count===parts?`<span class="ok"><b>${partName(parts,parts)}</b> make the whole ${shapeName}!</span>`:`<span class="ok"><b>${partName(parts,count)}</b> colored in.</span>`);
   };
   el.addEventListener('click',e=>{
-    const b=e.target.closest('[data-m]');if(b){shape=b.dataset.m;on=[];draw();return;}
-    const c=e.target.closest('[data-e]');if(c){n=+c.dataset.e;on=[];draw();return;}
-    const d=e.target.closest('[data-i]');if(d){const i=+d.dataset.i;on=on.includes(i)?on.filter(j=>j!==i):[...on,i];draw();}
+    const shapeBtn=e.target.closest('[data-m]');if(shapeBtn){shape=shapeBtn.dataset.m;colored=[];draw();return;}
+    const partsBtn=e.target.closest('[data-e]');if(partsBtn){parts=+partsBtn.dataset.e;colored=[];draw();return;}
+    const part=e.target.closest('[data-i]');if(part){const i=+part.dataset.i;colored=colored.includes(i)?colored.filter(j=>j!==i):[...colored,i];draw();}
   });
   draw();
 }
+/* ways to cut a square into 4 pieces, and their button labels */
 const CUTS=[['grid','Squares'],['v','Strips'],['diag','Triangles'],['uneq','Uneven']];
+/* Fourths cut different ways are still fourths; uneven pieces aren't. */
 function wSameSize(el){
-  const q=Q(el);let c='grid';
+  const q=Q(el);let cut='grid';
   el.innerHTML=seg('Cut',CUTS)+`<div class="fig" data-f></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    press(el,c);
-    q('f').innerHTML=shareFig('square',4,c,{shade:[0,2],s:180});
-    q('r').innerHTML=c==='uneq'?'<span class="no">4 pieces, but they are not the same size.</span> These are <b>not</b> fourths.<br><span class="dimline">Fourths have to be equal.</span>'
+    press(el,cut);
+    q('f').innerHTML=shareFig('square',4,cut,{shade:[0,2],s:180});
+    q('r').innerHTML=cut==='uneq'?'<span class="no">4 pieces, but they are not the same size.</span> These are <b>not</b> fourths.<br><span class="dimline">Fourths have to be equal.</span>'
       :`4 equal pieces: each one is <b>1 fourth</b> of the square.<br><span class="dimline">Try the other cuts. The pieces look different, but each is still 1 fourth of the same square.</span>`;
   };
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){c=b.dataset.m;draw();}});
+  el.addEventListener('click',e=>{const cutBtn=e.target.closest('[data-m]');if(cutBtn){cut=cutBtn.dataset.m;draw();}});
   draw();
 }
+/* Cut a granola bar into equal pieces (a stepper), then eat them one at a time. */
 function wWhole(el){
-  const q=Q(el),st={n:2};let k=0;
+  /* eaten: how many pieces are eaten (back to 0 when the pieces change) */
+  const q=Q(el),values={n:2};let eaten=0;
   el.innerHTML=`<p class="story">Cut a granola bar into equal pieces. Then eat them one at a time!</p><div class="fig" data-f></div><div class="wrow">${stepper('n','Pieces')}<button type="button" class="btn" data-go>Eat a piece</button></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const n=st.n;q('n').textContent=n;q('go').disabled=k>=n;
-    q('f').innerHTML=shareFig('rect',n,'v',{shade:range(k),s:120,label:`A granola bar cut into ${n} equal pieces, ${k} eaten`});
-    q('r').innerHTML=(k===n?`<span class="ok">You ate the whole thing! <b>${partName(n,n)}</b> make 1 whole bar.</span>`:`Each piece is <b>1 ${PART[n][0]}</b>.${k?` You ate <b>${partName(n,k)}</b>.`:''}`)
+    const pieces=values.n;q('n').textContent=pieces;q('go').disabled=eaten>=pieces;
+    q('f').innerHTML=shareFig('rect',pieces,'v',{shade:range(eaten),s:120,label:`A granola bar cut into ${pieces} equal pieces, ${eaten} eaten`});
+    q('r').innerHTML=(eaten===pieces?`<span class="ok">You ate the whole thing! <b>${partName(pieces,pieces)}</b> make 1 whole bar.</span>`:`Each piece is <b>1 ${PART[pieces][0]}</b>.${eaten?` You ate <b>${partName(pieces,eaten)}</b>.`:''}`)
       +`<br><span class="dimline">More pieces means smaller pieces. 1 fourth is less than 1 third, and 1 third is less than 1 half.</span>`;
   };
-  steppers(el,st,{n:[2,4]},()=>{k=0;draw();});
-  q('go').onclick=()=>{k++;draw();};
+  steppers(el,values,{n:[2,4]},()=>{eaten=0;draw();});
+  q('go').onclick=()=>{eaten++;draw();};
   draw();
 }
 const STEPS=[

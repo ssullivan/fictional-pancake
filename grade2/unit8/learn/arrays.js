@@ -1,53 +1,61 @@
 /* Learn Equal Groups (Grade 2 Unit 8), chapter 3: Arrays. Its widgets and steps; loaded by arrays.html. */
-/* counters at [column, row] spots (fractions allowed), for pictures that aren't arrays */
-function spots(pts,label){
-  const W=Math.max(...pts.map(p=>p[0]))+1,H=Math.max(...pts.map(p=>p[1]))+1;
-  const G=ARRAY.g,AP=ARRAY.pad;
-  return svgWrap(2*AP+W*G,2*AP+H*G,pts.map(([x,y])=>ctr(AP+G/2+x*G,AP+G/2+y*G,'a',16)).join(''),label);
+/* counters at [column, row] spots (fractions allowed), for pictures that aren't arrays; spaced like arrayFig's */
+function spots(points,label){
+  const cols=Math.max(...points.map(point=>point[0]))+1,rows=Math.max(...points.map(point=>point[1]))+1;
+  const gap=ARRAY.g,pad=ARRAY.pad;
+  return svgWrap(2*pad+cols*gap,2*pad+rows*gap,points.map(([x,y])=>ctr(pad+gap/2+x*gap,pad+gap/2+y*gap,'a',16)).join(''),label);
 }
+/* An array (a stepper for the rows and one for the columns), said both ways. */
 function wArray(el){
-  const q=Q(el),st={rows:3,cols:4};
+  const q=Q(el),values={rows:3,cols:4};
   el.innerHTML=`<div class="fig" data-f></div><div class="wrow">${stepper('rows','Rows')}${stepper('cols','Columns')}</div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const {rows:r,cols:c}=st;q('rows').textContent=r;q('cols').textContent=c;
-    q('f').innerHTML=arrayFig(r,c);
-    q('r').innerHTML=`<b>${pl(r,'row')} of ${c}</b>: ${c} in each row.<br><span class="dimline">${pl(c,'column')} of ${r}: ${r} in each column. ${r*c} in all.</span>`;
+    const {rows,cols}=values;q('rows').textContent=rows;q('cols').textContent=cols;
+    q('f').innerHTML=arrayFig(rows,cols);
+    q('r').innerHTML=`<b>${pl(rows,'row')} of ${cols}</b>: ${cols} in each row.<br><span class="dimline">${pl(cols,'column')} of ${rows}: ${rows} in each column. ${rows*cols} in all.</span>`;
   };
-  steppers(el,st,{rows:[1,5],cols:[1,5]},draw);draw();
+  steppers(el,values,{rows:[1,5],cols:[1,5]},draw);draw();
 }
-/* tap a counter to see its row and column */
+/* arrays as [rows, columns] */
 const RC=[[3,4],[2,5],[4,3],[5,5]];
+/* Tap a counter in an array to see its row and column. */
 function wRowsCols(el){
-  const q=Q(el);let p=0,hi=null;
-  el.innerHTML=seg('Array',RC.map(([r,c],i)=>[i,`${r} rows of ${c}`]))+`<div class="fig" data-f></div><p class="readout" data-r></p>`;
+  /* picked: the counter tapped as [row, column] (null before one is) */
+  const q=Q(el);let arrayIndex=0,picked=null;
+  el.innerHTML=seg('Array',RC.map(([rows,cols],i)=>[i,`${rows} rows of ${cols}`]))+`<div class="fig" data-f></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const [r,c]=RC[p];press(el,p);
-    q('f').innerHTML=arrayFig(r,c,{hi,tap:true,label:`An array: ${r} rows with ${c} in each row. Tap a counter.`});
-    q('r').innerHTML=!hi?`${r} rows of ${c}. Tap any counter.`
-      :`This counter is in <b>row ${hi[0]+1}</b> and <b>column ${hi[1]+1}</b>.<br><span class="dimline">Its row goes across and has ${c}. Its column goes up and down and has ${r}.</span>`;
+    const [rows,cols]=RC[arrayIndex];press(el,arrayIndex);
+    q('f').innerHTML=arrayFig(rows,cols,{hi:picked,tap:true,label:`An array: ${rows} rows with ${cols} in each row. Tap a counter.`});
+    q('r').innerHTML=!picked?`${rows} rows of ${cols}. Tap any counter.`
+      :`This counter is in <b>row ${picked[0]+1}</b> and <b>column ${picked[1]+1}</b>.<br><span class="dimline">Its row goes across and has ${cols}. Its column goes up and down and has ${rows}.</span>`;
   };
   el.addEventListener('click',e=>{
-    const m=e.target.closest('[data-m]'),t=e.target.closest('[data-i]');
-    if(m){p=+m.dataset.m;hi=null;draw();}
-    else if(t){const c=RC[p][1];hi=[Math.floor(t.dataset.i/c),t.dataset.i%c];draw();}
+    const arrayBtn=e.target.closest('[data-m]'),counter=e.target.closest('[data-i]');
+    if(arrayBtn){arrayIndex=+arrayBtn.dataset.m;picked=null;draw();}
+    /* counters are numbered across each row */
+    else if(counter){const cols=RC[arrayIndex][1];picked=[Math.floor(counter.dataset.i/cols),counter.dataset.i%cols];draw();}
   });
   draw();
 }
-/* count an array one row or one column at a time, with a running total */
+/* arrays to count, as [rows, columns] */
 const CNT=[[3,5],[4,2],[2,4],[5,3]];
+/* Count an array one row or one column at a time, with a running total. */
 function wCount(el){
-  const q=Q(el);let p=0,mode=null,k=0;
-  el.innerHTML=seg('Array',CNT.map(([r,c],i)=>[i,`${r} rows of ${c}`]))+`<div class="fig" data-f></div><div class="wrow"><button type="button" class="btn" data-br>Count a row</button><button type="button" class="btn" data-bc>Count a column</button></div><p class="readout" data-r></p>`;
+  /* mode: 'r' counting rows, 'c' columns (null before either); counted: how many so far */
+  const q=Q(el);let arrayIndex=0,mode=null,counted=0;
+  el.innerHTML=seg('Array',CNT.map(([rows,cols],i)=>[i,`${rows} rows of ${cols}`]))+`<div class="fig" data-f></div><div class="wrow"><button type="button" class="btn" data-br>Count a row</button><button type="button" class="btn" data-bc>Count a column</button></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const [r,c]=CNT[p],n=mode==='r'?r:c,each=mode==='r'?c:r,w=mode==='r'?'row':'column';press(el,p);
-    q('f').innerHTML=arrayFig(r,c,mode?{band:mode,k,sum:true}:{});
-    q('r').innerHTML=!mode?`${r} rows of ${c}. Count them by rows or by columns.`
-      :`Count by ${w}s: <b>${range(k).map(i=>each*(i+1)).join(', ')}</b>`
-        +(k===n?`<br><span class="ok">${r*c} in all: ${pl(n,w)} of ${each}.</span>`:`<br><span class="dimline">Each ${w} has ${each}. Tap Count a ${w} again.</span>`);
+    /* lines: how many rows or columns there are to count; each: how many are in one; word: 'row' or 'column' */
+    const [rows,cols]=CNT[arrayIndex],lines=mode==='r'?rows:cols,each=mode==='r'?cols:rows,word=mode==='r'?'row':'column';press(el,arrayIndex);
+    q('f').innerHTML=arrayFig(rows,cols,mode?{band:mode,k:counted,sum:true}:{});
+    q('r').innerHTML=!mode?`${rows} rows of ${cols}. Count them by rows or by columns.`
+      :`Count by ${word}s: <b>${range(counted).map(i=>each*(i+1)).join(', ')}</b>`
+        +(counted===lines?`<br><span class="ok">${rows*cols} in all: ${pl(lines,word)} of ${each}.</span>`:`<br><span class="dimline">Each ${word} has ${each}. Tap Count a ${word} again.</span>`);
   };
-  const go=m=>()=>{if(mode!==m||k===(m==='r'?CNT[p][0]:CNT[p][1])){mode=m;k=1;}else k++;draw();};
-  q('br').onclick=go('r');q('bc').onclick=go('c');
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){p=+b.dataset.m;mode=null;k=0;draw();}});
+  /* a button counts one more of its kind, or starts over when switching kinds or after the last */
+  const countBy=kind=>()=>{if(mode!==kind||counted===(kind==='r'?CNT[arrayIndex][0]:CNT[arrayIndex][1])){mode=kind;counted=1;}else counted++;draw();};
+  q('br').onclick=countBy('r');q('bc').onclick=countBy('c');
+  el.addEventListener('click',e=>{const arrayBtn=e.target.closest('[data-m]');if(arrayBtn){arrayIndex=+arrayBtn.dataset.m;mode=null;counted=0;draw();}});
   draw();
 }
 /* the quick checks' figures */

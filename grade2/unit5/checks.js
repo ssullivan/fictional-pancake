@@ -1,8 +1,9 @@
 /* Dragon Duel: limits and real-world checks for tools/fuzz.mjs. Per station: dp = most decimal places, nz = most
    nonzero digits, max = largest value, for the answer and every number in the prompt. */
-const L = {dp: 0, nz: 3, max: 1000};
+const LIMITS = {dp: 0, nz: 3, max: 1000};
 module.exports = {
-  limits: {hundred: L, build: L, expand: L, line: L, compare: L, boss: L},
+  limits: {hundred: LIMITS, build: LIMITS, expand: LIMITS, line: LIMITS, compare: LIMITS, boss: LIMITS},
+  // what's wrong with problem p in the real world (an empty list when nothing is)
   check(p) {
     const text = [p.prompt, ...(p.choices || []).map(c => c.label)].join(' ').replace(/<[^>]*>/g, ' '), bad = [];
     // another way to make a number breaks at most one hundred or one ten

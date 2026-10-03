@@ -1,6 +1,9 @@
 /* Learn Adding and Subtracting within 1,000 (Grade 2 Unit 7), chapter 4: Add three-digit numbers. Its widgets and steps; loaded by add.html. */
+/* Put the blocks together, making a new ten and a new hundred. */
 const wBoth=addW([[367,258],[178,145],[459,376]]);
+/* the stages of 298 + 135, for its blocks */
 const S298=addStages(298,135);
+/* 298 + 135 three ways: make a hundred, by place, and with blocks. */
 const wAddWays=waysW('298 + 135',433,[
   {label:'Make a hundred',fig:jumps(298,[2,100,30,3]),say:'298 is close to 300. Jump 2 to get to 300. 135 is 2 and 133, so jump 133 more: 100, then 30, then 3.'},
   {label:'By place',fig:byPlace(['200 + 100 = <b>300</b>','90 + 30 = <b>120</b>','8 + 5 = <b>13</b>','300 + 120 + 13 = <b>433</b>']),say:'Add the hundreds, the tens, and the ones. Then add the parts.'},

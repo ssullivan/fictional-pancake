@@ -1,24 +1,28 @@
 /* Learn Adding and Subtracting within 1,000 (Grade 2 Unit 7), chapter 3: Make a new ten or hundred. Its widgets and steps; loaded by new-ten.html. */
+/* Put the blocks together, making a new ten. */
 const wNewTen=addW([[347,125],[268,217],[456,38]]);
-/* add ones and tens, and trade 10 of them for 1 of the next place */
+/* Add ones and tens (buttons), and trade 10 of them for 1 of the next place. */
 function wTradeUp(el){
-  const q=Q(el);let h,t,o,said;
-  const reset=()=>{h=['a','a'];t=cellsOf([7,'a']);o=cellsOf([6,'a']);said='';};
+  /* hundreds, tens, ones: each block's class, as the mat takes them; said: what the last trade did */
+  const q=Q(el);let hundreds,tens,ones,said;
+  const reset=()=>{hundreds=['a','a'];tens=cellsOf([7,'a']);ones=cellsOf([6,'a']);said='';};
   el.innerHTML=`<div class="fig" data-f></div><div class="wrow"><button type="button" class="ghost-btn" data-po>+ 1 one</button><button type="button" class="ghost-btn" data-pt>+ 1 ten</button><button type="button" class="btn" data-mt>Trade 10 ones for a ten</button><button type="button" class="btn" data-mh>Trade 10 tens for a hundred</button><button type="button" class="ghost-btn" data-clr>Start over</button></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const H=h.length,T=t.length,O=o.length,n=100*H+10*T+O;
-    q('f').innerHTML=mat([{h,t,o}],`${cnt(H,0)}, ${cnt(T,1)}, and ${cnt(O,2)}`,{h:5,t:10,o:10});
-    q('po').disabled=O>=10||n>=999;q('pt').disabled=T>=10||n+10>999;q('mt').disabled=O<10;q('mh').disabled=T<10;
-    q('r').innerHTML=`<b>${cnt(H,0)}, ${cnt(T,1)}, and ${cnt(O,2)}</b> is ${H*100} + ${T*10} + ${O} = <b>${n}</b>.<br>`
-      +(O>=10?'<span class="dimline">10 ones! Trade them for 1 ten.</span>':T>=10?'<span class="dimline">10 tens! Trade them for 1 hundred.</span>':said?`<span class="ok">${said}</span>`:'<span class="dimline">Add ones or tens until you have 10.</span>');
+    const hundredsCount=hundreds.length,tensCount=tens.length,onesCount=ones.length,n=100*hundredsCount+10*tensCount+onesCount;
+    q('f').innerHTML=mat([{h:hundreds,t:tens,o:ones}],`${cnt(hundredsCount,0)}, ${cnt(tensCount,1)}, and ${cnt(onesCount,2)}`,{h:5,t:10,o:10});
+    /* adding stops at 10 of a place, and before 999 */
+    q('po').disabled=onesCount>=10||n>=999;q('pt').disabled=tensCount>=10||n+10>999;q('mt').disabled=onesCount<10;q('mh').disabled=tensCount<10;
+    q('r').innerHTML=`<b>${cnt(hundredsCount,0)}, ${cnt(tensCount,1)}, and ${cnt(onesCount,2)}</b> is ${hundredsCount*100} + ${tensCount*10} + ${onesCount} = <b>${n}</b>.<br>`
+      +(onesCount>=10?'<span class="dimline">10 ones! Trade them for 1 ten.</span>':tensCount>=10?'<span class="dimline">10 tens! Trade them for 1 hundred.</span>':said?`<span class="ok">${said}</span>`:'<span class="dimline">Add ones or tens until you have 10.</span>');
   };
-  q('po').onclick=()=>{o=[...o,'a'];said='';draw();};
-  q('pt').onclick=()=>{t=[...t,'a'];said='';draw();};
-  q('mt').onclick=()=>{o=o.slice(10);t=[...t,'new'];said='10 ones became 1 ten. Same number, fewer blocks!';draw();};
-  q('mh').onclick=()=>{t=t.slice(10);h=[...h,'new'];said='10 tens became 1 hundred. Same number, fewer blocks!';draw();};
+  q('po').onclick=()=>{ones=[...ones,'a'];said='';draw();};
+  q('pt').onclick=()=>{tens=[...tens,'a'];said='';draw();};
+  q('mt').onclick=()=>{ones=ones.slice(10);tens=[...tens,'new'];said='10 ones became 1 ten. Same number, fewer blocks!';draw();};
+  q('mh').onclick=()=>{tens=tens.slice(10);hundreds=[...hundreds,'new'];said='10 tens became 1 hundred. Same number, fewer blocks!';draw();};
   q('clr').onclick=()=>{reset();draw();};
   reset();draw();
 }
+/* Put the blocks together, making a new hundred. */
 const wNewHundred=addW([[263,152],[381,145],[574,62]]);
 /* the quick checks' figures */
 const F={

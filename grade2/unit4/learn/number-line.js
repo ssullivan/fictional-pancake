@@ -1,24 +1,27 @@
 /* Learn Addition and Subtraction on the Number Line (Grade 2 Unit 4), chapter 1: Numbers on the number line. Its widgets and steps; loaded by number-line.html. */
-/* A number line drawn wrong, for "which one is right?": labels at positions xs (0..1 across the line) */
-function badLine(labels,xs,label){
-  const W=300,X=18,Y=26;
-  let o=`<line class="axis" x1="${X}" y1="${Y}" x2="${W-X}" y2="${Y}"/>`;
-  labels.forEach((t,i)=>{const x=X+xs[i]*(W-2*X);o+=`<line class="tick" x1="${x}" y1="${Y-8}" x2="${x}" y2="${Y+8}"/><text class="lbl" x="${x}" y="${Y+24}">${t}</text>`;});
-  return svgWrap(W,Y+36,o,label);
+/* A number line drawn right or wrong, for "which one is right?": tick labels at positions (0..1 across the line) */
+function badLine(labels,positions,label){
+  const width=300,left=18,lineY=26;
+  let markup=`<line class="axis" x1="${left}" y1="${lineY}" x2="${width-left}" y2="${lineY}"/>`;
+  labels.forEach((text,i)=>{const x=left+positions[i]*(width-2*left);markup+=`<line class="tick" x1="${x}" y1="${lineY-8}" x2="${x}" y2="${lineY+8}"/><text class="lbl" x="${x}" y="${lineY+24}">${text}</text>`;});
+  return svgWrap(width,lineY+36,markup,label);
 }
+/* n positions spread evenly from 0 to 1 */
 const even=n=>range(n).map(i=>i/(n-1));
+/* A dot on a number line from 0 to 20 (a stepper moves it): its number is how many lengths it is from 0. */
 function wLength(el){
-  const q=Q(el),st={n:6};
+  const q=Q(el),values={n:6};
   el.innerHTML=`<div class="fig" data-f></div><div class="wrow">${stepper('n','Number')}</div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const n=st.n;q('n').textContent=n;
+    const n=values.n;q('n').textContent=n;
     q('f').innerHTML=numLine(0,20,{u:30,ls:'',end:true,lab:()=>true,arrows:n?[{a:0,b:n}]:[],pts:[{v:n}],label:`A number line from 0 to 20 with a dot at ${n}`});
     q('r').innerHTML=n?`The dot is at <b>${n}</b>. It is <b>${n} ${n>1?'lengths':'length'}</b> from 0.<br><span class="dimline">${n>1?`Each space is 1 length. Count them: ${n>6?`1, 2, 3, … ${n}`:range(n).map(i=>i+1).join(', ')}.`:'One space from 0 is 1.'}</span>`
       :'The dot is at <b>0</b>. That’s where we start. Tap <b>+</b> to move it.';
   };
-  steppers(el,st,{n:[0,20]},draw);
+  steppers(el,values,{n:[0,20]},draw);
   draw();
 }
+/* what makes a number line: a picture (fig) and what it says */
 const FEAT=[
   {label:'Equal spaces',f:()=>numLine(0,10,{u:40,ls:'',end:true,lab:()=>true,hops:range(10).map(i=>({a:i,b:i+1,t:1})),label:'A number line from 0 to 10 with a jump of 1 in every space'}),
     say:'Every space is the <b>same length</b>: 1. That’s how we know where each number goes.'},
@@ -27,25 +30,28 @@ const FEAT=[
   {label:'Keeps going',f:()=>numLine(40,50,{u:40,ls:'',end:true,lab:()=>true,label:'A number line from 40 to 50 with an arrow at the end'}),
     say:'The <b>arrow</b> means the line keeps going, past 100 and more. A number line can show just a part, like 40 to 50.'},
 ];
+/* Pick a feature to see it on a number line. */
 function wFeatures(el){
-  const q=Q(el);let k=0;
-  el.innerHTML=seg('Feature',FEAT.map((f,i)=>[i,f.label]))+`<div class="fig" data-f></div><p class="readout" data-r></p>`;
-  const draw=()=>{press(el,k);q('f').innerHTML=FEAT[k].f();q('r').innerHTML=FEAT[k].say;};
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){k=+b.dataset.m;draw();}});
+  const q=Q(el);let featureIndex=0;
+  el.innerHTML=seg('Feature',FEAT.map((feature,i)=>[i,feature.label]))+`<div class="fig" data-f></div><p class="readout" data-r></p>`;
+  const draw=()=>{press(el,featureIndex);q('f').innerHTML=FEAT[featureIndex].f();q('r').innerHTML=FEAT[featureIndex].say;};
+  el.addEventListener('click',e=>{const featureBtn=e.target.closest('[data-m]');if(featureBtn){featureIndex=+featureBtn.dataset.m;draw();}});
   draw();
 }
-/* tap a tick with no number: the readout counts on from the ten before it */
+/* Tap a tick with no number: the readout counts on from the ten before it, or back from the ten after. */
 function wTicks(el){
-  const q=Q(el);let v=null;
+  /* picked: the tick tapped (null before one is) */
+  const q=Q(el);let picked=null;
   el.innerHTML=`<p class="story">Only the tens have numbers. Tap any tick mark.</p><div class="fig" data-f></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    q('f').innerHTML=line(30,50,{u:26,lab:v=>v%10===0,tap:true,pts:v===null?[]:[{v,t:v}],label:'A number line from 30 to 50; only 30, 40, and 50 have numbers'});
-    if(v===null){q('r').innerHTML='Which number goes there?';return;}
-    const t=Math.floor(v/10)*10,o=v-t;
-    q('r').innerHTML=!o?`<span class="ok">That’s <b>${v}</b>. It has its number already!</span>`
-      :`<span class="ok">That tick is <b>${v}</b>.</span><br><span class="dimline">`+(o<=5?`Count on from ${t}: ${range(o).map(i=>t+i+1).join(', ')}.`:`Count back from ${t+10}: ${range(10-o).map(i=>t+9-i).join(', ')}.`)+`</span>`;
+    q('f').innerHTML=line(30,50,{u:26,lab:v=>v%10===0,tap:true,pts:picked===null?[]:[{v:picked,t:picked}],label:'A number line from 30 to 50; only 30, 40, and 50 have numbers'});
+    if(picked===null){q('r').innerHTML='Which number goes there?';return;}
+    /* tenBefore and past: the ten before the tick, and how far past it the tick is */
+    const tenBefore=Math.floor(picked/10)*10,past=picked-tenBefore;
+    q('r').innerHTML=!past?`<span class="ok">That’s <b>${picked}</b>. It has its number already!</span>`
+      :`<span class="ok">That tick is <b>${picked}</b>.</span><br><span class="dimline">`+(past<=5?`Count on from ${tenBefore}: ${range(past).map(i=>tenBefore+i+1).join(', ')}.`:`Count back from ${tenBefore+10}: ${range(10-past).map(i=>tenBefore+9-i).join(', ')}.`)+`</span>`;
   };
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-v]');if(b){v=+b.dataset.v;draw();}});
+  el.addEventListener('click',e=>{const tick=e.target.closest('[data-v]');if(tick){picked=+tick.dataset.v;draw();}});
   draw();
 }
 /* the quick checks' figures */

@@ -1,53 +1,64 @@
 /* Learn Adding and Subtracting within 100 (Grade 2 Unit 2), chapter 5: Story problems. Its widgets and steps; loaded by story-problems.html. */
+/* stories with the whole, a part, or the start unknown: the tape's parts [length, what to write], the total to write, and the answer */
 const WHERE=[
   {label:'Whole unknown',story:'Andre has 36 red cubes and 25 blue cubes. How many cubes does Andre have?',parts:[[36,'36'],[25,'25']],total:'?',ans:'The whole is missing, so add the parts: 36 + 25 = 61 cubes.'},
   {label:'Part unknown',story:'Lin had 70 crayons. Some crayons broke. Now Lin has 45 crayons that aren’t broken. How many crayons broke?',parts:[[45,'45'],[25,'?']],total:'70',ans:'A part is missing: 45 + ? = 70, or 70 − 45 = 25 crayons.'},
   {label:'Start unknown',story:'Noah had some stickers. Noah got 24 more stickers. Now Noah has 60. How many stickers did Noah have at first?',parts:[[36,'?'],[24,'24']],total:'60',ans:'The start is missing: ? + 24 = 60, or 60 − 24 = 36 stickers.'},
 ];
+/* Pick a kind of story to see where the unknown is in its tape; a button shows the answer. */
 function wWhere(el){
-  const q=Q(el);let k=0,shown=false;
-  el.innerHTML=seg('Kind of story',WHERE.map((x,i)=>[i,x.label]))+`<p class="story" data-s></p><div class="fig" data-f></div><div class="wrow"><button type="button" class="btn" data-go>Show the answer</button></div><p class="readout" data-r></p>`;
+  const q=Q(el);let storyIndex=0,shown=false;
+  el.innerHTML=seg('Kind of story',WHERE.map((story,i)=>[i,story.label]))+`<p class="story" data-s></p><div class="fig" data-f></div><div class="wrow"><button type="button" class="btn" data-go>Show the answer</button></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const K=WHERE[k];press(el,k);
-    q('s').textContent=K.story;
-    q('f').innerHTML=partWhole(K.parts.map(([n,show])=>({n,show,hi:show==='?'})),K.total);
+    const story=WHERE[storyIndex];press(el,storyIndex);
+    q('s').textContent=story.story;
+    q('f').innerHTML=partWhole(story.parts.map(([n,show])=>({n,show,hi:show==='?'})),story.total);
     q('go').hidden=shown;
-    q('r').innerHTML=shown?`<span class="ok">${K.ans}</span>`:'Which number in the story is the whole? Which are parts?';
+    q('r').innerHTML=shown?`<span class="ok">${story.ans}</span>`:'Which number in the story is the whole? Which are parts?';
   };
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){k=+b.dataset.m;shown=false;draw();}});
+  el.addEventListener('click',e=>{const storyBtn=e.target.closest('[data-m]');if(storyBtn){storyIndex=+storyBtn.dataset.m;shown=false;draw();}});
   q('go').onclick=()=>{shown=true;draw();};
   draw();
 }
+/* stories with two equations that match: the tape, the answer (a), and a check */
 const EQS=[
   {story:'Some ducks were in the pond. 25 more ducks came. Now there are 60 ducks. How many ducks were in the pond at first?',eqs:['? + 25 = 60','60 − 25 = ?'],parts:[[35,'?'],[25,'25']],total:'60',a:35,check:'35 + 25 = 60'},
   {story:'Elena had 82 pages to read. Elena read some pages. Now Elena has 40 pages left. How many pages did Elena read?',eqs:['82 − ? = 40','40 + ? = 82'],parts:[[40,'40'],[42,'?']],total:'82',a:42,check:'82 − 42 = 40'},
 ];
+/* Tap an equation to see it solve the story; both match. */
 function wEquations(el){
-  const q=Q(el);let k=0,e=-1;
+  /* eqIndex: the equation tapped (-1 for none) */
+  const q=Q(el);let storyIndex=0,eqIndex=-1;
   el.innerHTML=seg('Story',EQS.map((_,i)=>[i,`Story ${i+1}`]))+`<p class="story" data-s></p><div class="fig" data-f></div><div class="chips" data-c></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const K=EQS[k];press(el,k);
-    q('s').textContent=K.story;
-    q('f').innerHTML=partWhole(K.parts.map(([n,show])=>({n,show})),K.total);
-    q('c').innerHTML=K.eqs.map((x,i)=>`<button type="button" class="chip" data-e="${i}" aria-pressed="${i===e}">${x}</button>`).join('');
-    q('r').innerHTML=e<0?'Tap an equation. Does it match the story?':`<b>${K.eqs[e].replace('?',`<span class="ok">${K.a}</span>`)}</b><br><span class="dimline">It matches the story. Both equations give ${K.a}. Check: ${K.check}.</span>`;
+    const story=EQS[storyIndex];press(el,storyIndex);
+    q('s').textContent=story.story;
+    q('f').innerHTML=partWhole(story.parts.map(([n,show])=>({n,show})),story.total);
+    q('c').innerHTML=story.eqs.map((eq,i)=>`<button type="button" class="chip" data-e="${i}" aria-pressed="${i===eqIndex}">${eq}</button>`).join('');
+    q('r').innerHTML=eqIndex<0?'Tap an equation. Does it match the story?':`<b>${story.eqs[eqIndex].replace('?',`<span class="ok">${story.a}</span>`)}</b><br><span class="dimline">It matches the story. Both equations give ${story.a}. Check: ${story.check}.</span>`;
   };
-  el.addEventListener('click',ev=>{const b=ev.target.closest('[data-m]');if(b){k=+b.dataset.m;e=-1;draw();return;}const c=ev.target.closest('[data-e]');if(c){e=+c.dataset.e;draw();}});
+  el.addEventListener('click',e=>{
+    const storyBtn=e.target.closest('[data-m]');if(storyBtn){storyIndex=+storyBtn.dataset.m;eqIndex=-1;draw();return;}
+    const eqBtn=e.target.closest('[data-e]');if(eqBtn){eqIndex=+eqBtn.dataset.e;draw();}
+  });
   draw();
 }
+/* A two-step story, one step at a time: a button steps through it and starts over. */
 function wTwoStep(el){
-  const q=Q(el);let n=0;
+  /* step: 0 before the first step, then 1 and 2 */
+  const q=Q(el);let step=0;
   el.innerHTML=`<p class="story">Kiran has 28 stickers. Kiran gets 15 more stickers. Then Kiran gives 20 stickers to Mai. How many stickers does Kiran have now?</p><div class="fig" data-f></div><div class="wrow"><button type="button" class="btn" data-go></button></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    q('f').innerHTML=n===0?partWhole([{n:28,show:'28'},{n:15,show:'15'}],'?','28 and 15 make the whole')
-      :partWhole([{n:28,show:'28'},{n:15,show:'15'}],'43','28 and 15 make 43')+partWhole([{n:20,show:'20'},{n:23,show:n>1?'23':'?',hi:true}],'43','43 is 20 and a part left');
-    q('go').textContent=n===0?'Step 1: gets more':n===1?'Step 2: gives some away':'Start over';
-    q('r').innerHTML=n===0?'This story has two steps. What happens first?':n===1?`Step 1: <b>28 + 15 = 43</b> stickers.<br><span class="dimline">Now Kiran gives 20 away. What’s left?</span>`:`Step 1: <b>28 + 15 = 43</b>. Step 2: <b>43 − 20 = 23</b>.<br><span class="ok">Kiran has 23 stickers now.</span>`;
+    q('f').innerHTML=step===0?partWhole([{n:28,show:'28'},{n:15,show:'15'}],'?','28 and 15 make the whole')
+      :partWhole([{n:28,show:'28'},{n:15,show:'15'}],'43','28 and 15 make 43')+partWhole([{n:20,show:'20'},{n:23,show:step>1?'23':'?',hi:true}],'43','43 is 20 and a part left');
+    q('go').textContent=step===0?'Step 1: gets more':step===1?'Step 2: gives some away':'Start over';
+    q('r').innerHTML=step===0?'This story has two steps. What happens first?':step===1?`Step 1: <b>28 + 15 = 43</b> stickers.<br><span class="dimline">Now Kiran gives 20 away. What’s left?</span>`:`Step 1: <b>28 + 15 = 43</b>. Step 2: <b>43 − 20 = 23</b>.<br><span class="ok">Kiran has 23 stickers now.</span>`;
   };
-  q('go').onclick=()=>{n=(n+1)%3;draw();};
+  q('go').onclick=()=>{step=(step+1)%3;draw();};
   draw();
 }
-const apples=(p,total,label)=>partWhole(p.map(([n,show])=>({n,show})),total,label);
+/* a tape with these parts ([length, what to write]) and total, for a quick check's choices */
+const apples=(parts,total,label)=>partWhole(parts.map(([n,show])=>({n,show})),total,label);
 /* the quick checks' figures */
 const F={
   diego:partWhole([{n:27,show:'?'},{n:18,show:'18'}],'45','Some marbles and 18 more make 45'),

@@ -1,35 +1,40 @@
 /* Learn Adding and Subtracting within 100 (Grade 2 Unit 2), chapter 2: Subtract your way. Its widgets and steps; loaded by subtract-your-way.html. */
 const TAKES=[[58,23],[76,41],[49,26]];
+/* Take away tens and ones from a number's blocks, one at a time (buttons). */
 function wTakeAway(el){
-  const q=Q(el);let p=0,t=0,u=0;
+  /* tensOut and onesOut: how many are crossed out */
+  const q=Q(el);let problemIndex=0,tensOut=0,onesOut=0;
   el.innerHTML=seg('Numbers',TAKES.map(([a,b],i)=>[i,`${a} − ${b}`]))+`<div class="fig" data-f></div><div class="wrow"><button type="button" class="ghost-btn" data-bt>Take away 1 ten</button><button type="button" class="ghost-btn" data-bu>Take away 1 one</button><button type="button" class="ghost-btn" data-clr>Start over</button></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const [a,b]=TAKES[p],gone=10*t+u;press(el,p);
-    q('f').innerHTML=bpic([{n:a,opt:{outT:t,outO:u}}],`${a} in blocks with ${t} tens and ${u} ones crossed out`);
-    q('bt').disabled=t>=tensOf(a);q('bu').disabled=u>=a%10;
-    q('r').innerHTML=gone===b?`<span class="ok">You took away ${tensOf(b)} tens and ${b%10} ones. <b>${a} − ${b} = ${a-b}</b>.</span>`:gone>b||t>tensOf(b)||u>b%10?`That’s more than ${b}. <span class="dimline">Start over. ${b} is ${tensOf(b)} tens and ${b%10} ones.</span>`:`Taken away: <b>${gone}</b> of ${b}<br><span class="dimline">${b} is ${tensOf(b)} tens and ${b%10} ones. ${a-gone} blocks are left.</span>`;
+    const [a,b]=TAKES[problemIndex],gone=10*tensOut+onesOut;press(el,problemIndex);
+    q('f').innerHTML=bpic([{n:a,opt:{outT:tensOut,outO:onesOut}}],`${a} in blocks with ${tensOut} tens and ${onesOut} ones crossed out`);
+    q('bt').disabled=tensOut>=tensOf(a);q('bu').disabled=onesOut>=a%10;
+    q('r').innerHTML=gone===b?`<span class="ok">You took away ${tensOf(b)} tens and ${b%10} ones. <b>${a} − ${b} = ${a-b}</b>.</span>`:gone>b||tensOut>tensOf(b)||onesOut>b%10?`That’s more than ${b}. <span class="dimline">Start over. ${b} is ${tensOf(b)} tens and ${b%10} ones.</span>`:`Taken away: <b>${gone}</b> of ${b}<br><span class="dimline">${b} is ${tensOf(b)} tens and ${b%10} ones. ${a-gone} blocks are left.</span>`;
   };
-  q('bt').onclick=()=>{t++;draw();};q('bu').onclick=()=>{u++;draw();};
-  q('clr').onclick=()=>{t=u=0;draw();};
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){p=+b.dataset.m;t=u=0;draw();}});
+  q('bt').onclick=()=>{tensOut++;draw();};q('bu').onclick=()=>{onesOut++;draw();};
+  q('clr').onclick=()=>{tensOut=onesOut=0;draw();};
+  el.addEventListener('click',e=>{const problemBtn=e.target.closest('[data-m]');if(problemBtn){problemIndex=+problemBtn.dataset.m;tensOut=onesOut=0;draw();}});
   draw();
 }
+/* three ways to find 63 − 18 on an open number line: where to start, the jumps, and what they say */
 const WAYS=[
   {id:'back',label:'Get to a ten first',start:63,moves:[-3,-5,-10],say:'Take away 3 to get to 60. 3 + 5 = 8, so take away 5 more: 55. Then take away the ten: 45.'},
   {id:'tens',label:'Tens first',start:63,moves:[-10,-3,-5],say:'Take away the ten: 53. Take away 3 to get to 50, then 5 more: 45.'},
   {id:'up',label:'Add up from 18',start:18,moves:[2,40,3],say:'Count up from 18: 2 gets to 20, 40 gets to 60, and 3 more is 63. 2 + 40 + 3 = 45.'},
 ];
+/* Pick a way to find 63 − 18 and make its jumps one at a time. */
 function wWays(el){
-  const q=Q(el);let k=0,n=0;
-  el.innerHTML=`<p class="eq">63 − 18 = <b class="q">?</b></p>`+seg('Way',WAYS.map((w,i)=>[i,w.label]))+`<div class="fig" data-f></div><div class="wrow"><button type="button" class="btn" data-go></button></div><p class="readout" data-r></p>`;
+  /* jumpsMade: how many of the way's jumps are drawn */
+  const q=Q(el);let wayIndex=0,jumpsMade=0;
+  el.innerHTML=`<p class="eq">63 − 18 = <b class="q">?</b></p>`+seg('Way',WAYS.map((way,i)=>[i,way.label]))+`<div class="fig" data-f></div><div class="wrow"><button type="button" class="btn" data-go></button></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const W=WAYS[k],done=n===W.moves.length;press(el,k);
-    q('f').innerHTML=jumps(W.start,W.moves,n);
+    const way=WAYS[wayIndex],done=jumpsMade===way.moves.length;press(el,wayIndex);
+    q('f').innerHTML=jumps(way.start,way.moves,jumpsMade);
     q('go').textContent=done?'Start over':'Next jump';
-    q('r').innerHTML=done?`<span class="ok">${W.say}</span><br>Every way gets <b>63 − 18 = 45</b>.`:n?`<span class="dimline">Keep going.</span>`:k===2?'Start at 18 and count up to 63. How far did you go?':'There are only 3 ones in 63, but 18 has 8 ones. Take away in smaller parts.';
+    q('r').innerHTML=done?`<span class="ok">${way.say}</span><br>Every way gets <b>63 − 18 = 45</b>.`:jumpsMade?`<span class="dimline">Keep going.</span>`:wayIndex===2?'Start at 18 and count up to 63. How far did you go?':'There are only 3 ones in 63, but 18 has 8 ones. Take away in smaller parts.';
   };
-  q('go').onclick=()=>{n=n===WAYS[k].moves.length?0:n+1;draw();};
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){k=+b.dataset.m;n=0;draw();}});
+  q('go').onclick=()=>{jumpsMade=jumpsMade===WAYS[wayIndex].moves.length?0:jumpsMade+1;draw();};
+  el.addEventListener('click',e=>{const wayBtn=e.target.closest('[data-m]');if(wayBtn){wayIndex=+wayBtn.dataset.m;jumpsMade=0;draw();}});
   draw();
 }
 /* the quick checks' figures */

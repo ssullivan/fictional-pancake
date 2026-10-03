@@ -1,21 +1,23 @@
 /* Learn Measuring Length (Grade 2 Unit 3), chapter 4: Length stories. Its widgets and steps; loaded by length-stories.html. */
-/* A number line from 0 to max with arrows above it (see numLine in shared/k5.js) */
+/* A number line from 0 to max with arrows above it (see numLine in shared/numlines.js) */
 const lenLine=(max,arrows,shown,label)=>numLine(0,max,{arrows,shown,label});
-/* one kind of silk story at a time: pick a story, then show the ? on the number line */
-const silkStories=(list,prompt)=>el=>{
-  const q=Q(el);let k=0,shown=false;
-  el.innerHTML=seg('Story',list.map((x,i)=>[i,x.label]))+`<p class="story" data-s></p><div class="fig" data-f></div><div class="wrow"><button type="button" class="btn" data-go></button></div><p class="readout" data-r></p>`;
+/* A widget for one kind of silk story at a time: pick a story, then show the ? on the number line.
+   stories: [{label, story, max, arrows, eq, ans}]; prompt: what to say before the ? is shown. */
+const silkStories=(stories,prompt)=>el=>{
+  const q=Q(el);let storyIndex=0,shown=false;
+  el.innerHTML=seg('Story',stories.map((story,i)=>[i,story.label]))+`<p class="story" data-s></p><div class="fig" data-f></div><div class="wrow"><button type="button" class="btn" data-go></button></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const K=list[k];press(el,k);
-    q('s').textContent=K.story;
-    q('f').innerHTML=lenLine(K.max,K.arrows,shown,K.label+': a number line in inches');
+    const story=stories[storyIndex];press(el,storyIndex);
+    q('s').textContent=story.story;
+    q('f').innerHTML=lenLine(story.max,story.arrows,shown,story.label+': a number line in inches');
     q('go').textContent=shown?'Start over':'Find the ?';
-    q('r').innerHTML=shown?`<b>${K.eq}</b><br><span class="ok">${K.ans}</span>`:prompt;
+    q('r').innerHTML=shown?`<b>${story.eq}</b><br><span class="ok">${story.ans}</span>`:prompt;
   };
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){k=+b.dataset.m;shown=false;draw();}});
+  el.addEventListener('click',e=>{const storyBtn=e.target.closest('[data-m]');if(storyBtn){storyIndex=+storyBtn.dataset.m;shown=false;draw();}});
   q('go').onclick=()=>{shown=!shown;draw();};
   draw();
 };
+/* stories that put lengths together */
 const JOIN=[
   {label:'Necklace',story:'Mai has a piece of silk 18 inches long and a piece 7 inches long. Mai ties them together to make a necklace. How long is the necklace?',max:30,
     arrows:[{a:0,b:18},{a:18,b:25},{a:0,b:25,lv:1,q:true}],eq:'18 + 7 = 25',ans:'The necklace is 25 inches long.'},
@@ -24,6 +26,7 @@ const JOIN=[
   {label:'Headband',story:'Jada ties a 12-inch piece of silk to a 9-inch piece to make a headband. How long is the headband?',max:25,
     arrows:[{a:0,b:12},{a:12,b:21},{a:0,b:21,lv:1,q:true}],eq:'12 + 9 = 21',ans:'The headband is 21 inches long.'},
 ];
+/* stories that take away or compare lengths */
 const LEFT=[
   {label:'Cut some off',story:'Elena has 30 inches of silk. Elena cuts off 7 inches for a bracelet. How much silk is left?',max:30,
     arrows:[{a:0,b:30,lv:2},{a:30,b:23,lv:1},{a:0,b:23,q:true}],eq:'30 − 7 = 23',ans:'23 inches of silk are left.'},

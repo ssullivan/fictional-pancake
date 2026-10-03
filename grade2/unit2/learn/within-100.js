@@ -1,21 +1,24 @@
 /* Learn Adding and Subtracting within 100 (Grade 2 Unit 2), chapter 4: Add and subtract within 100. Its widgets and steps; loaded by within-100.html. */
+/* [a, b, op]: two that make or break a ten and two that don't */
 const MIXED=[[36,27,'+'],[36,23,'+'],[64,28,'−'],[64,23,'−']];
+/* Add or subtract with blocks: does adding make a new ten, or does subtracting need to break one? */
 function wNewOrBreak(el){
-  const q=Q(el);let p=0,shown=false;
+  const q=Q(el);let problemIndex=0,shown=false;
   el.innerHTML=seg('Problem',MIXED.map(([a,b,op],i)=>[i,`${a} ${op} ${b}`]))+`<div class="fig" data-f></div><div class="wrow"><button type="button" class="btn" data-go></button></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const [a,b,op]=MIXED[p],add=op==='+',oa=a%10,ob=b%10;press(el,p);
-    if(add){
+    const [a,b,op]=MIXED[problemIndex],adding=op==='+',onesA=a%10,onesB=b%10;press(el,problemIndex);
+    if(adding){
       q('f').innerHTML=addBlocks(a,b,shown);
-      q('r').innerHTML=!shown?`<b>${a} + ${b}</b><br><span class="dimline">Will the ones make a new ten?</span>`:oa+ob>=10?`Ones: ${oa} + ${ob} = ${oa+ob}. That’s <b>a new ten</b> and ${oa+ob-10} ones.<br><span class="ok"><b>${a} + ${b} = ${a+b}</b></span>`:`Ones: ${oa} + ${ob} = ${oa+ob}. No new ten this time.<br><span class="ok"><b>${a} + ${b} = ${a+b}</b></span>`;
+      q('r').innerHTML=!shown?`<b>${a} + ${b}</b><br><span class="dimline">Will the ones make a new ten?</span>`:onesA+onesB>=10?`Ones: ${onesA} + ${onesB} = ${onesA+onesB}. That’s <b>a new ten</b> and ${onesA+onesB-10} ones.<br><span class="ok"><b>${a} + ${b} = ${a+b}</b></span>`:`Ones: ${onesA} + ${onesB} = ${onesA+onesB}. No new ten this time.<br><span class="ok"><b>${a} + ${b} = ${a+b}</b></span>`;
     }else{
-      const brk=shown&&oa<ob,T=tensOf(a)-(brk?1:0),U=oa+(brk?10:0);
-      q('f').innerHTML=bpic([{t:T,u:U,opt:shown?{traded:brk?10:0,outT:tensOf(b),outO:ob}:{}}],shown?`${a} with ${b} crossed out`:`${a} in blocks`);
-      q('r').innerHTML=!shown?`<b>${a} − ${b}</b><br><span class="dimline">Are there enough ones to take away ${ob}?</span>`:oa<ob?`Only ${oa} ones, so <b>break a ten</b>: now there are ${U} ones. Take away ${ob}.<br><span class="ok"><b>${a} − ${b} = ${a-b}</b></span>`:`${oa} ones is enough to take away ${ob}. No ten to break.<br><span class="ok"><b>${a} − ${b} = ${a-b}</b></span>`;
+      /* a ten is broken when there aren't enough ones */
+      const brokeTen=shown&&onesA<onesB,tensNow=tensOf(a)-(brokeTen?1:0),onesNow=onesA+(brokeTen?10:0);
+      q('f').innerHTML=bpic([{t:tensNow,u:onesNow,opt:shown?{traded:brokeTen?10:0,outT:tensOf(b),outO:onesB}:{}}],shown?`${a} with ${b} crossed out`:`${a} in blocks`);
+      q('r').innerHTML=!shown?`<b>${a} − ${b}</b><br><span class="dimline">Are there enough ones to take away ${onesB}?</span>`:onesA<onesB?`Only ${onesA} ones, so <b>break a ten</b>: now there are ${onesNow} ones. Take away ${onesB}.<br><span class="ok"><b>${a} − ${b} = ${a-b}</b></span>`:`${onesA} ones is enough to take away ${onesB}. No ten to break.<br><span class="ok"><b>${a} − ${b} = ${a-b}</b></span>`;
     }
-    q('go').textContent=shown?'Start over':add?'Put them together':'Take it away';
+    q('go').textContent=shown?'Start over':adding?'Put them together':'Take it away';
   };
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){p=+b.dataset.m;shown=false;draw();}});
+  el.addEventListener('click',e=>{const problemBtn=e.target.closest('[data-m]');if(problemBtn){problemIndex=+problemBtn.dataset.m;shown=false;draw();}});
   q('go').onclick=()=>{shown=!shown;draw();};
   draw();
 }

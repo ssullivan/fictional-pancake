@@ -94,12 +94,13 @@ table.pv{margin:0 auto}
 <script src="../../shared/numlines.js?v=a53a0796"></script>
 <script src="../../shared/speak.js?v=05cb8b2d"></script>
 <script src="../../shared/engine.js?v=f20ed8cf"></script>
-<script src="stations.js?v=914133ad"></script>
+<script src="stations.js?v=a7b8a486"></script>
 <script>
 /* the dragon's hearts in the final round: one knocked off for each right answer */
 let hits=0;
-function drawFoe(G,hit){
-  const foe=$('foe');foe.hidden=G.z.id!=='boss';if(foe.hidden)return;
+/* the dragon beside a boss problem (hidden at the other stations); hit: the last answer was right */
+function drawFoe(state,hit){
+  const foe=$('foe');foe.hidden=state.z.id!=='boss';if(foe.hidden)return;
   foe.innerHTML=`<svg viewBox="0 0 64 64" aria-hidden="true">${DRAGON}</svg><div><div class="hearts" role="img" aria-label="The dragon has ${10-hits} of 10 hearts left">${range(10).map(i=>`<span class="${i<10-hits?'':'gone'}">♥</span>`).join('')}</div><p>${hits===10?'You beat the dragon!':hit?'Hit! The dragon loses a heart.':'Answer right to knock off a heart.'}</p></div>`;
   foe.classList.toggle('hit',!!hit);
 }
@@ -114,8 +115,9 @@ Game.init({
     stuck:'Tap “Show me a hint” when you’re stuck. It shows how to think about it.',
     tap:'Tap your answer on the number line.'
   },
-  onQuestion:G=>{if(G.i===0)hits=0;drawFoe(G,false);},
-  onAnswer:(G,ok)=>{if(ok)hits++;drawFoe(G,ok);}
+  /* the dragon's hearts come back at the start of a round */
+  onQuestion:state=>{if(state.i===0)hits=0;drawFoe(state,false);},
+  onAnswer:(state,ok)=>{if(ok)hits++;drawFoe(state,ok);}
 });
 </script>
 </body>

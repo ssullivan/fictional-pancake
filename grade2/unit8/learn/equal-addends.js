@@ -1,34 +1,38 @@
 /* Learn Equal Groups (Grade 2 Unit 8), chapter 4: Equal addends. Its widgets and steps; loaded by equal-addends.html. */
-/* an array and its equation, adding the rows (and, with 'c' in modes, the columns) */
+/* A widget: an array and its equation, adding the rows (and, with 'c' in modes, the columns). */
 const eqW=modes=>el=>{
-  const q=Q(el),st={rows:3,cols:4},seen=new Set();let m=modes[0];
+  /* seen: the ways shown so far; mode: 'r' rows or 'c' columns */
+  const q=Q(el),values={rows:3,cols:4},seen=new Set();let mode=modes[0];
   el.innerHTML=(modes.length>1?seg('Add',[['r','Add the rows'],['c','Add the columns']]):'')+`<div class="fig" data-f></div><div class="wrow">${stepper('rows','Rows')}${stepper('cols','Columns')}</div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const {rows:r,cols:c}=st,n=m==='r'?r:c,each=m==='r'?c:r,w=m==='r'?'row':'column';seen.add(m);
-    q('rows').textContent=r;q('cols').textContent=c;if(modes.length>1)press(el,m);
-    q('f').innerHTML=arrayFig(r,c,{band:m});
-    q('r').innerHTML=`<b>${addends(n,each)} = ${r*c}</b><br><span class="dimline">${pl(n,w)} of ${each}. Each ${w} is one addend.</span>`
-      +(seen.size>1?`<br><span class="ok">By rows or by columns, it’s ${r*c} in all.</span>`:'');
+    /* lines: how many addends; each: what each one is */
+    const {rows,cols}=values,lines=mode==='r'?rows:cols,each=mode==='r'?cols:rows,word=mode==='r'?'row':'column';seen.add(mode);
+    q('rows').textContent=rows;q('cols').textContent=cols;if(modes.length>1)press(el,mode);
+    q('f').innerHTML=arrayFig(rows,cols,{band:mode});
+    q('r').innerHTML=`<b>${addends(lines,each)} = ${rows*cols}</b><br><span class="dimline">${pl(lines,word)} of ${each}. Each ${word} is one addend.</span>`
+      +(seen.size>1?`<br><span class="ok">By rows or by columns, it’s ${rows*cols} in all.</span>`:'');
   };
-  steppers(el,st,{rows:[2,5],cols:[2,5]},draw);
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){m=b.dataset.m;draw();}});
+  steppers(el,values,{rows:[2,5],cols:[2,5]},draw);
+  el.addEventListener('click',e=>{const modeBtn=e.target.closest('[data-m]');if(modeBtn){mode=modeBtn.dataset.m;draw();}});
   draw();
 };
-/* build the array for an equation. BUILD: [addend, how many of them] */
+/* equations to build arrays for: [addend, how many of them] */
 const BUILD=[[3,4],[5,2],[2,5],[4,3]];
+/* Build the array for an equation (a stepper for the rows and one for the columns); its rows or its columns can match. */
 function wBuild(el){
-  const q=Q(el),st={rows:2,cols:2};let p=0;
-  el.innerHTML=seg('Equation',BUILD.map(([a,n],i)=>[i,addends(n,a)]))+`<div class="fig" data-f></div><div class="wrow">${stepper('rows','Rows')}${stepper('cols','Columns')}</div><p class="readout" data-r></p>`;
+  const q=Q(el),values={rows:2,cols:2};let eqIndex=0;
+  el.innerHTML=seg('Equation',BUILD.map(([addend,count],i)=>[i,addends(count,addend)]))+`<div class="fig" data-f></div><div class="wrow">${stepper('rows','Rows')}${stepper('cols','Columns')}</div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const [a,n]=BUILD[p],{rows:r,cols:c}=st,eq=`${addends(n,a)} = ${a*n}`,byR=r===n&&c===a,byC=c===n&&r===a;
-    q('rows').textContent=r;q('cols').textContent=c;press(el,p);
-    q('f').innerHTML=arrayFig(r,c,{band:byC&&!byR?'c':'r'});
-    q('r').innerHTML=byR?`<span class="ok">Yes! ${pl(n,'row')} of ${a}: <b>${eq}</b>.</span>`
-      :byC?`<span class="ok">Yes! ${pl(n,'column')} of ${a}: <b>${eq}</b>.</span><br><span class="dimline">Columns work too.</span>`
-      :`Your array: ${pl(r,'row')} of ${c}. Make one that shows <b>${addends(n,a)}</b>.<br><span class="dimline">Each ${a} is one row. How many ${a}s are there?</span>`;
+    /* byRows: each row is one addend; byCols: each column is */
+    const [addend,count]=BUILD[eqIndex],{rows,cols}=values,eq=`${addends(count,addend)} = ${addend*count}`,byRows=rows===count&&cols===addend,byCols=cols===count&&rows===addend;
+    q('rows').textContent=rows;q('cols').textContent=cols;press(el,eqIndex);
+    q('f').innerHTML=arrayFig(rows,cols,{band:byCols&&!byRows?'c':'r'});
+    q('r').innerHTML=byRows?`<span class="ok">Yes! ${pl(count,'row')} of ${addend}: <b>${eq}</b>.</span>`
+      :byCols?`<span class="ok">Yes! ${pl(count,'column')} of ${addend}: <b>${eq}</b>.</span><br><span class="dimline">Columns work too.</span>`
+      :`Your array: ${pl(rows,'row')} of ${cols}. Make one that shows <b>${addends(count,addend)}</b>.<br><span class="dimline">Each ${addend} is one row. How many ${addend}s are there?</span>`;
   };
-  steppers(el,st,{rows:[1,5],cols:[1,5]},draw);
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){p=+b.dataset.m;draw();}});
+  steppers(el,values,{rows:[1,5],cols:[1,5]},draw);
+  el.addEventListener('click',e=>{const eqBtn=e.target.closest('[data-m]');if(eqBtn){eqIndex=+eqBtn.dataset.m;draw();}});
   draw();
 }
 /* the quick checks' figures */

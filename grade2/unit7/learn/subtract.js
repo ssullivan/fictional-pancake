@@ -1,25 +1,30 @@
 /* Learn Adding and Subtracting within 1,000 (Grade 2 Unit 7), chapter 5: Subtract three-digit numbers. Its widgets and steps; loaded by subtract.html. */
+/* Subtract with blocks, breaking a ten. */
 const wBreakTen=subW([[352,128],[574,249],[690,315]],'t');
+/* Subtract with blocks, breaking a hundred. */
 const wBreakHundred=subW([[527,253],[416,182],[635,271]],'h');
+/* problems to think about before subtracting: a − b, the place to light up (hi, −1 for none), and what to notice */
 const THINK=[
   {a:645,b:328,hi:2,say:'Ones: 5 is less than 8, so <b>break a ten</b>. After that there are 3 tens, and that’s enough to take away 2 tens.'},
   {a:645,b:382,hi:1,say:'Ones: 5 is enough to take away 2. Tens: 4 is less than 8, so <b>break a hundred</b>.'},
   {a:645,b:321,hi:-1,say:'5 ones is enough for 1 one. 4 tens is enough for 2 tens. 6 hundreds is enough for 3 hundreds. <b>Nothing to break!</b>'},
   {a:503,b:498,hi:-1,say:'503 and 498 are very close. <b>Count on</b> instead: 498 + 2 = 500, and 3 more is 503. 2 + 3 = 5.'},
 ];
+/* Look before subtracting: will it need a broken ten or hundred, or are the numbers close? A button shows what to notice. */
 function wThink(el){
-  const q=Q(el);let p=0,shown=false;
+  const q=Q(el);let problemIndex=0,shown=false;
   el.innerHTML=seg('Problem',THINK.map(({a,b},i)=>[i,`${a} − ${b}`]))+`<div data-c></div><div class="wrow"><button type="button" class="btn" data-go>Show me</button></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const {a,b,hi,say}=THINK[p];press(el,p);
+    const {a,b,hi,say}=THINK[problemIndex];press(el,problemIndex);
     q('c').innerHTML=pvChart([['',a],['−',b]],shown?hi:-1);
     q('go').hidden=shown;
     q('r').innerHTML=shown?`${say}<br><span class="ok"><b>${a} − ${b} = ${a-b}</b></span>`:'Look at each place. Will you need to break a ten? A hundred? Or are the numbers close?';
   };
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){p=+b.dataset.m;shown=false;draw();}});
+  el.addEventListener('click',e=>{const problemBtn=e.target.closest('[data-m]');if(problemBtn){problemIndex=+problemBtn.dataset.m;shown=false;draw();}});
   q('go').onclick=()=>{shown=true;draw();};
   draw();
 }
+/* Subtract with blocks, breaking a ten and a hundred. */
 const wBreakBoth=subW([[432,158],[523,268],[400,125]],'th');
 /* the quick checks' figures */
 const F={

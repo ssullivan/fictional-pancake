@@ -1,40 +1,47 @@
 /* Learn Adding and Subtracting within 1,000 (Grade 2 Unit 7), chapter 1: Count on and count back. Its widgets and steps; loaded by count-on-and-back.html. */
-/* One jump at a time on an open number line. list: [{a, moves, label}]; intro(P) shows before the first jump, done(P, end) after the last. */
-const jumpW=(list,intro,done)=>el=>{
-  const q=Q(el);let p=0,k=0;
-  el.innerHTML=seg('Problem',list.map((x,i)=>[i,x.label]))+`<div class="fig" data-f></div><div class="wrow"><button type="button" class="btn" data-go></button></div><p class="readout" data-r></p>`;
+/* One jump at a time on an open number line. problems: [{a, moves, label}]; intro(problem) shows before the first jump,
+   done(problem, end) after the last. */
+const jumpW=(problems,intro,done)=>el=>{
+  /* jumpsMade: how many of the problem's jumps are drawn */
+  const q=Q(el);let problemIndex=0,jumpsMade=0;
+  el.innerHTML=seg('Problem',problems.map((problem,i)=>[i,problem.label]))+`<div class="fig" data-f></div><div class="wrow"><button type="button" class="btn" data-go></button></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const P=list[p],n=P.moves.length;let v=P.a;press(el,p);
-    q('f').innerHTML=jumps(P.a,P.moves,k);
-    const lines=P.moves.slice(0,k).map(d=>{const s=`${v} ${d>0?'+':'−'} ${Math.abs(d)} = ${v+d}`;v+=d;return `<b>${s}</b>`;});
-    q('go').textContent=k<n?(k?'Next jump':'Jump!'):'Start over';
-    q('r').innerHTML=k?lines.join('<br>')+(k===n?'<br>'+done(P,v):''):intro(P);
+    const problem=problems[problemIndex],count=problem.moves.length;let at=problem.a;press(el,problemIndex);
+    q('f').innerHTML=jumps(problem.a,problem.moves,jumpsMade);
+    /* each jump so far as an equation */
+    const lines=problem.moves.slice(0,jumpsMade).map(move=>{const eq=`${at} ${move>0?'+':'−'} ${Math.abs(move)} = ${at+move}`;at+=move;return `<b>${eq}</b>`;});
+    q('go').textContent=jumpsMade<count?(jumpsMade?'Next jump':'Jump!'):'Start over';
+    q('r').innerHTML=jumpsMade?lines.join('<br>')+(jumpsMade===count?'<br>'+done(problem,at):''):intro(problem);
   };
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){p=+b.dataset.m;k=0;draw();}});
-  q('go').onclick=()=>{k=k<list[p].moves.length?k+1:0;draw();};
+  el.addEventListener('click',e=>{const problemBtn=e.target.closest('[data-m]');if(problemBtn){problemIndex=+problemBtn.dataset.m;jumpsMade=0;draw();}});
+  q('go').onclick=()=>{jumpsMade=jumpsMade<problems[problemIndex].moves.length?jumpsMade+1:0;draw();};
   draw();
 };
 const HOPS=[{a:245,moves:[100,30,2],label:'245 + 132'},{a:468,moves:[-200,-20,-5],label:'468 − 225'},{a:327,moves:[200,50],label:'327 + 250'}];
-const wHops=jumpW(HOPS,P=>{const d=P.moves.reduce((s,m)=>s+m,0);return `${P.label}: start at <b>${P.a}</b>.<br><span class="dimline">${Math.abs(d)} is ${partsOf(Math.abs(d))}. Jump ${d>0?'on':'back'} by hundreds, then tens, then ones.</span>`;},
-  (P,end)=>`<span class="ok">${P.label} = ${end}</span>`);
-/* + and − 10 or 100, staying inside three-digit numbers and never going past a 9 or a 0 */
+/* Count on or back by hundreds, then tens, then ones. */
+const wHops=jumpW(HOPS,problem=>{const sum=problem.moves.reduce((total,move)=>total+move,0);return `${problem.label}: start at <b>${problem.a}</b>.<br><span class="dimline">${Math.abs(sum)} is ${partsOf(Math.abs(sum))}. Jump ${sum>0?'on':'back'} by hundreds, then tens, then ones.</span>`;},
+  (problem,end)=>`<span class="ok">${problem.label} = ${end}</span>`);
+/* + and − 10 or 100 (buttons), staying inside three-digit numbers and never going past a 9 or a 0: only one digit changes. */
 function wMore(el){
-  const q=Q(el);let n=347,prev=null,d=0;
+  /* before: the number before the last change; change: how much it changed (0 before the first) */
+  const q=Q(el);let n=347,before=null,change=0;
   const moves=[-100,-10,10,100];
-  el.innerHTML=`<div data-c></div><div class="fig" data-f></div><div class="wrow">${moves.map(m=>`<button type="button" class="ghost-btn" data-add="${m}">${m>0?'+':'−'} ${Math.abs(m)}</button>`).join('')}</div><p class="readout" data-r></p>`;
+  el.innerHTML=`<div data-c></div><div class="fig" data-f></div><div class="wrow">${moves.map(move=>`<button type="button" class="ghost-btn" data-add="${move}">${move>0?'+':'−'} ${Math.abs(move)}</button>`).join('')}</div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const [h,t]=digits(n),ch=d?(Math.abs(d)===100?0:1):-1;
-    q('c').innerHTML=pvChart([['',n]],ch);q('f').innerHTML=numBlocks(n);
-    el.querySelectorAll('[data-add]').forEach(b=>{const m=+b.dataset.add;b.disabled=m===100?h>=9:m===-100?h<=1:m===10?t>=9:t<=0;});
-    q('r').innerHTML=!d?'Tap a button. Which digit changes?'
-      :`<b>${Math.abs(d)} ${d>0?'more':'less'} than ${prev} is ${n}.</b><br><span class="dimline">Only the ${PL[ch]} digit changed: ${cnt(digits(prev)[ch],ch)} to ${cnt(digits(n)[ch],ch)}.</span>`;
+    /* changed: the place that changed (0 hundreds, 1 tens; −1 before the first change) */
+    const [hundreds,tens]=digits(n),changed=change?(Math.abs(change)===100?0:1):-1;
+    q('c').innerHTML=pvChart([['',n]],changed);q('f').innerHTML=numBlocks(n);
+    el.querySelectorAll('[data-add]').forEach(b=>{const move=+b.dataset.add;b.disabled=move===100?hundreds>=9:move===-100?hundreds<=1:move===10?tens>=9:tens<=0;});
+    q('r').innerHTML=!change?'Tap a button. Which digit changes?'
+      :`<b>${Math.abs(change)} ${change>0?'more':'less'} than ${before} is ${n}.</b><br><span class="dimline">Only the ${PL[changed]} digit changed: ${cnt(digits(before)[changed],changed)} to ${cnt(digits(n)[changed],changed)}.</span>`;
   };
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-add]');if(b&&!b.disabled){d=+b.dataset.add;prev=n;n+=d;draw();}});
+  el.addEventListener('click',e=>{const moveBtn=e.target.closest('[data-add]');if(moveBtn&&!moveBtn.disabled){change=+moveBtn.dataset.add;before=n;n+=change;draw();}});
   draw();
 }
 const GAPS=[{a:196,moves:[4,200,3],label:'403 − 196'},{a:480,moves:[20,20],label:'520 − 480'},{a:350,moves:[50,200,10],label:'610 − 350'}];
-const wGaps=jumpW(GAPS,P=>{const b=P.moves.reduce((s,m)=>s+m,P.a);return `How far is it from <b>${P.a}</b> to <b>${b}</b>?<br><span class="dimline">Count on from ${P.a}. Stop at the next hundred on the way.</span>`;},
-  (P,end)=>`Add up the jumps: <b>${P.moves.join(' + ')} = ${end-P.a}</b>.<br><span class="ok">${end} − ${P.a} = ${end-P.a}</span>`);
+/* Subtract by counting on from the smaller number, stopping at the next hundred. */
+const wGaps=jumpW(GAPS,problem=>{const end=problem.moves.reduce((total,move)=>total+move,problem.a);return `How far is it from <b>${problem.a}</b> to <b>${end}</b>?<br><span class="dimline">Count on from ${problem.a}. Stop at the next hundred on the way.</span>`;},
+  (problem,end)=>`Add up the jumps: <b>${problem.moves.join(' + ')} = ${end-problem.a}</b>.<br><span class="ok">${end} − ${problem.a} = ${end-problem.a}</span>`);
 /* the quick checks' figures */
 const F={
   hops356:jumps(356,[200,10,3],3,true),

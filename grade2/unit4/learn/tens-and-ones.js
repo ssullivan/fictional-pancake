@@ -1,23 +1,30 @@
 /* Learn Addition and Subtraction on the Number Line (Grade 2 Unit 4), chapter 4: Jump by tens and ones. Its widgets and steps; loaded by tens-and-ones.html. */
-/* One jump at a time. list: [{a, steps, label}]; steps are signed (+10, +10, +3, …). */
-const jumper=(list,say)=>el=>{
-  const q=Q(el);let p=0,k=0;
-  el.innerHTML=seg('Problem',list.map((x,i)=>[i,x.label]))+`<div class="fig" data-f></div><div class="wrow"><button type="button" class="btn" data-go></button></div><p class="readout" data-r></p>`;
+/* A widget that makes one jump at a time. problems: [{a, steps, label}]; steps are signed (+10, +10, +3, …).
+   say(problem): what to say before the first jump. */
+const jumper=(problems,say)=>el=>{
+  /* jumpsMade: how many of the problem's jumps are drawn */
+  const q=Q(el);let problemIndex=0,jumpsMade=0;
+  el.innerHTML=seg('Problem',problems.map((problem,i)=>[i,problem.label]))+`<div class="fig" data-f></div><div class="wrow"><button type="button" class="btn" data-go></button></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const P=list[p],hs=hopsFrom(P.a,P.steps),end=P.a+P.steps.reduce((s,n)=>s+n,0),at=k?hs[k-1].b:P.a,[lo,hi]=around(P.a,end);press(el,p);
-    q('f').innerHTML=line(lo,hi,{lab:v=>v%10===0,hops:hs.slice(0,k),pts:[{v:P.a,t:P.a},...(k?[{v:at,cls:'b',t:at}]:[])],label:`${P.label} on a number line`+(k?`: jumps ${hs.slice(0,k).map(h=>h.t).join(', ')} to ${at}`:'')});
-    q('go').textContent=k<hs.length?(k?'Next jump':'Jump!'):'Start over';
-    q('r').innerHTML=!k?say(P):`${hs.slice(0,k).map(h=>`<b>${h.a} ${h.t[0]} ${h.t.slice(1)} = ${h.b}</b>`).join('<br>')}`+(k===hs.length?`<br><span class="ok">${P.label} = ${end}</span>`:'');
+    /* at: where the last jump landed */
+    const problem=problems[problemIndex],hops=hopsFrom(problem.a,problem.steps),end=problem.a+problem.steps.reduce((sum,n)=>sum+n,0),
+      at=jumpsMade?hops[jumpsMade-1].b:problem.a,[lo,hi]=around(problem.a,end);press(el,problemIndex);
+    q('f').innerHTML=line(lo,hi,{lab:v=>v%10===0,hops:hops.slice(0,jumpsMade),pts:[{v:problem.a,t:problem.a},...(jumpsMade?[{v:at,cls:'b',t:at}]:[])],label:`${problem.label} on a number line`+(jumpsMade?`: jumps ${hops.slice(0,jumpsMade).map(hop=>hop.t).join(', ')} to ${at}`:'')});
+    q('go').textContent=jumpsMade<hops.length?(jumpsMade?'Next jump':'Jump!'):'Start over';
+    /* each jump as an equation: its label's sign, then its size */
+    q('r').innerHTML=!jumpsMade?say(problem):`${hops.slice(0,jumpsMade).map(hop=>`<b>${hop.a} ${hop.t[0]} ${hop.t.slice(1)} = ${hop.b}</b>`).join('<br>')}`+(jumpsMade===hops.length?`<br><span class="ok">${problem.label} = ${end}</span>`:'');
   };
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){p=+b.dataset.m;k=0;draw();}});
-  q('go').onclick=()=>{k=k<list[p].steps.length?k+1:0;draw();};
+  el.addEventListener('click',e=>{const problemBtn=e.target.closest('[data-m]');if(problemBtn){problemIndex=+problemBtn.dataset.m;jumpsMade=0;draw();}});
+  q('go').onclick=()=>{jumpsMade=jumpsMade<problems[problemIndex].steps.length?jumpsMade+1:0;draw();};
   draw();
 };
+/* jumping by tens, then ones */
 const TENS=[
   {a:34,steps:[10,10,3],label:'34 + 23'},
   {a:56,steps:[10,10,10,1],label:'56 + 31'},
   {a:78,steps:[-10,-10,-5],label:'78 − 25'},
 ];
+/* jumping to the next ten first */
 const TOTEN=[
   {a:28,steps:[2,5],label:'28 + 7'},
   {a:57,steps:[3,5],label:'57 + 8'},
