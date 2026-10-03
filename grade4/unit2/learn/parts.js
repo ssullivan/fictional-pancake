@@ -1,35 +1,37 @@
 /* Learn Fraction Equivalence and Comparison (Grade 4 Unit 2), chapter 1: Parts of a whole. Its widgets and steps; loaded by parts.html. */
-/* shade parts of one whole */
+/* Shade parts of one whole cut into d equal parts; a stepper sets how many are shaded. */
 function wParts(el){
-  const q=Q(el),st={sh:3},lim={sh:[0,8]};let d=8;
+  /* the stepper's value: sh shaded parts, at most d */
+  const q=Q(el),values={sh:3},limits={sh:[0,8]};let d=8;
   el.innerHTML=seg('Equal parts',DEN.map(v=>[v,PART[v][1]]))+`<div class="fig" data-f></div><div class="wrow">${stepper('sh','Shaded parts')}</div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const k=st.sh;press(el,d);q('sh').textContent=k;
-    q('f').innerHTML=strips([{d,k}]);
+    const shaded=values.sh;press(el,d);q('sh').textContent=shaded;
+    q('f').innerHTML=strips([{d,k:shaded}]);
     q('r').innerHTML=`1 whole is cut into <b>${d}</b> equal parts, so each part is ${fr(1,d)}.<br>`
-      +(k?`${k} ${k===1?'part is':'parts are'} shaded: <b>${fr(k,d)}</b>, or ${partName(d,k)}.`+(k===d?` <span class="ok">All ${d} parts: ${fr(d,d)} is 1 whole.</span>`:'')
+      +(shaded?`${shaded} ${shaded===1?'part is':'parts are'} shaded: <b>${fr(shaded,d)}</b>, or ${partName(d,shaded)}.`+(shaded===d?` <span class="ok">All ${d} parts: ${fr(d,d)} is 1 whole.</span>`:'')
         :`No parts are shaded yet: ${fr(0,d)}.`)
       +`<br><span class="dimline">The bottom number says how many equal parts make 1 whole. The top number counts the parts.</span>`;
   };
-  steppers(el,st,lim,draw);
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){d=+b.dataset.m;lim.sh[1]=d;st.sh=Math.min(st.sh,d);draw();}});
+  steppers(el,values,limits,draw);
+  el.addEventListener('click',e=>{const denBtn=e.target.closest('[data-m]');if(denBtn){d=+denBtn.dataset.m;limits.sh[1]=d;values.sh=Math.min(values.sh,d);draw();}});
   draw();
 }
-/* keep shading past 1 whole */
+/* the denominators to choose from when shading past 1 */
 const WD=[2,3,4,6];
+/* Keep shading past 1 whole, up to 3 wholes. */
 function wWholes(el){
-  const q=Q(el),st={sh:5},lim={sh:[0,12]};let d=4;
+  const q=Q(el),values={sh:5},limits={sh:[0,12]};let d=4;
   el.innerHTML=seg('Equal parts',WD.map(v=>[v,PART[v][1]]))+`<div class="fig" data-f></div><div class="wrow">${stepper('sh','Shaded parts')}</div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const k=st.sh,W=Math.floor(k/d),r=k%d;press(el,d);q('sh').textContent=k;
-    q('f').innerHTML=strips([{d,k}],{wholes:3,stack:true});
-    q('r').innerHTML=`<b>${fr(k,d)}</b>: ${partName(d,k)}. `+(k<d?`That’s less than 1 whole.`
-      :k===d?`<span class="ok">That’s exactly 1 whole.</span>`
-      :`<span class="ok">That’s more than 1: ${W} whole${W>1?'s':''}${r?` and ${fr(r,d)} more`:''}.</span>`)
+    const shaded=values.sh,wholes=Math.floor(shaded/d),rest=shaded%d;press(el,d);q('sh').textContent=shaded;
+    q('f').innerHTML=strips([{d,k:shaded}],{wholes:3,stack:true});
+    q('r').innerHTML=`<b>${fr(shaded,d)}</b>: ${partName(d,shaded)}. `+(shaded<d?`That’s less than 1 whole.`
+      :shaded===d?`<span class="ok">That’s exactly 1 whole.</span>`
+      :`<span class="ok">That’s more than 1: ${wholes} whole${wholes>1?'s':''}${rest?` and ${fr(rest,d)} more`:''}.</span>`)
       +`<br><span class="dimline">Every ${d} ${PART[d][1]} make 1 whole.</span>`;
   };
-  steppers(el,st,lim,draw);
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){d=+b.dataset.m;lim.sh[1]=3*d;st.sh=Math.min(st.sh,3*d);draw();}});
+  steppers(el,values,limits,draw);
+  el.addEventListener('click',e=>{const denBtn=e.target.closest('[data-m]');if(denBtn){d=+denBtn.dataset.m;limits.sh[1]=3*d;values.sh=Math.min(values.sh,3*d);draw();}});
   draw();
 }
 /* the quick checks' figures */

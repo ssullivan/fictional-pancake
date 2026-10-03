@@ -1,16 +1,19 @@
 /* Learn Factors and Multiples (Grade 4 Unit 1), chapter 2: Factor pairs. Its widgets and steps; loaded by factor-pairs.html. */
+/* how many tiles each choice has */
 const RECTN=[12,18,24];
+/* Put n tiles in equal rows: a stepper sets the rows, and rows with none left over make a factor pair. */
 function wRows(el){
-  const q=Q(el),st={rows:1},lim={rows:[1,RECTN[0]]};let n=RECTN[0];
+  /* the stepper's value and its limits: at most one row per tile */
+  const q=Q(el),values={rows:1},limits={rows:[1,RECTN[0]]};let n=RECTN[0];
   el.innerHTML=seg('Tiles',RECTN.map(v=>[v,`${v} tiles`]))+`<div class="fig" data-f></div><div class="wrow">${stepper('rows','Rows')}</div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const r=st.rows,c=Math.floor(n/r),left=n%r;press(el,n);q('rows').textContent=r;
-    q('f').innerHTML=tiles(r,n);
-    q('r').innerHTML=!left?`<span class="ok"><b>${r} × ${c} = ${n}</b>. ${r} and ${c} are a <b>factor pair</b> of ${n}.</span><br><span class="dimline">Try another number of rows.</span>`
-      :`${r} rows of ${c} is ${r*c}, with <b>${left}</b> left over.<br><span class="dimline">${r} rows don’t work, so ${r} is not a factor of ${n}.</span>`;
+    const rows=values.rows,perRow=Math.floor(n/rows),left=n%rows;press(el,n);q('rows').textContent=rows;
+    q('f').innerHTML=tiles(rows,n);
+    q('r').innerHTML=!left?`<span class="ok"><b>${rows} × ${perRow} = ${n}</b>. ${rows} and ${perRow} are a <b>factor pair</b> of ${n}.</span><br><span class="dimline">Try another number of rows.</span>`
+      :`${rows} rows of ${perRow} is ${rows*perRow}, with <b>${left}</b> left over.<br><span class="dimline">${rows} rows don’t work, so ${rows} is not a factor of ${n}.</span>`;
   };
-  steppers(el,st,lim,draw);
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){n=+b.dataset.m;st.rows=1;lim.rows[1]=n;draw();}});
+  steppers(el,values,limits,draw);
+  el.addEventListener('click',e=>{const tilesBtn=e.target.closest('[data-m]');if(tilesBtn){n=+tilesBtn.dataset.m;values.rows=1;limits.rows[1]=n;draw();}});
   draw();
 }
 /* the quick checks' figures */

@@ -2,49 +2,56 @@
 /* thousands as small blocks: 10 make a ten-thousand bar, 10 bars a hundred-thousand square, 10 squares a million.
    Level i is drawn as 10 of level i − 1, every other one blue. */
 const LEVELS=[{v:1000,name:'one thousand'},{v:10000,name:'ten thousand'},{v:100000,name:'one hundred thousand'},{v:1000000,name:'one million'}];
-const blk=(x,y,s,cls)=>`<rect class="hg ${cls}" x="${x}" y="${y}" width="${s}" height="${s}"/>`;
-const bar=(x,y,s,cls)=>range(10).map(i=>blk(x+i*s,y,s,cls)).join('');
-const sheet=(x,y,s,cls)=>range(10).map(r=>bar(x,y+r*s,s,cls)).join('');
+/* one block `size` square at x, y; a bar of 10 blocks; a sheet of 10 bars */
+const blk=(x,y,size,cls)=>`<rect class="hg ${cls}" x="${x}" y="${y}" width="${size}" height="${size}"/>`;
+const bar=(x,y,size,cls)=>range(10).map(i=>blk(x+i*size,y,size,cls)).join('');
+const sheet=(x,y,size,cls)=>range(10).map(row=>bar(x,y+row*size,size,cls)).join('');
+/* level i of LEVELS (svg): 1 block, or 10 of the level before */
 function thousandsFig(i){
-  const c=j=>j%2?'b':'a';let o='',w,h;
-  if(i===0){o=blk(10,10,60,'a');w=h=80;}
-  else if(i===1){o=range(10).map(j=>blk(10+j*30,10,30,c(j))).join('');w=320;h=50;}
-  else if(i===2){o=range(10).map(j=>bar(10,10+j*22,22,c(j))).join('');w=240;h=240;}
-  else{o=range(10).map(j=>sheet(10+j%5*96,10+Math.floor(j/5)*96,8.8,c(j))).join('');w=490;h=204;}
-  return svgWrap(w,h,o,i?`10 groups of ${commas(LEVELS[i-1].v)}: ${commas(LEVELS[i].v)}`:'1 block: 1,000');
+  const colorOf=j=>j%2?'b':'a';let markup,width,height;
+  if(i===0){markup=blk(10,10,60,'a');width=height=80;}
+  else if(i===1){markup=range(10).map(j=>blk(10+j*30,10,30,colorOf(j))).join('');width=320;height=50;}
+  else if(i===2){markup=range(10).map(j=>bar(10,10+j*22,22,colorOf(j))).join('');width=240;height=240;}
+  /* a million: 10 sheets in two rows of 5 */
+  else{markup=range(10).map(j=>sheet(10+j%5*96,10+Math.floor(j/5)*96,8.8,colorOf(j))).join('');width=490;height=204;}
+  return svgWrap(width,height,markup,i?`10 groups of ${commas(LEVELS[i-1].v)}: ${commas(LEVELS[i].v)}`:'1 block: 1,000');
 }
+/* Make 10 of them, again and again: a thousand, ten thousand, a hundred thousand, a million. */
 function wTen(el){
-  const q=Q(el);let i=0;
+  const q=Q(el);let level=0;
   el.innerHTML=`<div class="fig" data-f></div><div class="wrow"><button type="button" class="btn" data-go>Make 10 of them</button><button type="button" class="ghost-btn" data-clr>Start over</button></div><p class="eq" data-e></p><p class="readout" data-r></p>`;
   const draw=()=>{
-    const L=LEVELS[i];q('go').disabled=i===LEVELS.length-1;
-    q('f').innerHTML=thousandsFig(i);
-    q('e').innerHTML=i?`10 × ${commas(LEVELS[i-1].v)} = ${commas(L.v)}`:'1,000';
-    q('r').innerHTML=!i?`Each block is <b>1,000</b>: one thousand. Make 10 of them.`
-      :`<span class="ok">10 ${LEVELS[i-1].name.replace(/^one /,'')}s make <b>${commas(L.v)}</b>: ${L.name}.</span>`
-        +`<br><span class="dimline">10 times as many: one more 0.${i<LEVELS.length-1?' Make 10 again.':''}</span>`;
+    const now=LEVELS[level];q('go').disabled=level===LEVELS.length-1;
+    q('f').innerHTML=thousandsFig(level);
+    q('e').innerHTML=level?`10 × ${commas(LEVELS[level-1].v)} = ${commas(now.v)}`:'1,000';
+    q('r').innerHTML=!level?`Each block is <b>1,000</b>: one thousand. Make 10 of them.`
+      :`<span class="ok">10 ${LEVELS[level-1].name.replace(/^one /,'')}s make <b>${commas(now.v)}</b>: ${now.name}.</span>`
+        +`<br><span class="dimline">10 times as many: one more 0.${level<LEVELS.length-1?' Make 10 again.':''}</span>`;
   };
-  q('go').onclick=()=>{if(i<LEVELS.length-1)i++;draw();};
-  q('clr').onclick=()=>{i=0;draw();};
+  q('go').onclick=()=>{if(level<LEVELS.length-1)level++;draw();};
+  q('clr').onclick=()=>{level=0;draw();};
   draw();
 }
-/* tap a digit to see what it's worth; the number in words and in expanded form */
+/* the numbers to read */
 const NUMS=[305020,47600,800009,303030];
+/* n in expanded form: "300,000 + 5,000 + 20" */
 const expanded=n=>WIDE.filter(e=>digitAt(n,e)).map(e=>commas(digitAt(n,e)*10**e)).join(' + ');
+/* Tap a digit in a place-value chart to see what it's worth, with the number in words and in expanded form. */
 function wPlace(el){
-  const q=Q(el);let p=0,e=null;
+  /* place: the place tapped, as a power of 10 (null before one is) */
+  const q=Q(el);let numberIndex=0,place=null;
   el.innerHTML=seg('Number',NUMS.map((v,i)=>[i,commas(v)]))+`<div data-c></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const v=NUMS[p];press(el,p);
-    q('c').innerHTML=pvChart([['',v]],-1,{places:WIDE,tap:true});
-    if(e!==null)q('c').querySelector(`[data-e="${e}"]`).setAttribute('aria-pressed','true');
-    const d=e===null?0:digitAt(v,e);
-    q('r').innerHTML=(e===null?'Tap a digit to see what it’s worth.':`The ${d} is in the <b>${PLACE[e].toLowerCase()}</b> place, so it’s worth ${d} ${PL[e][d===1?0:1]}: <b>${commas(d*10**e)}</b>.`)
-      +`<br><b>${commas(v)}</b>: ${numWords(v)}.<br><span class="dimline">Expanded: ${expanded(v)}.</span>`;
+    const n=NUMS[numberIndex];press(el,numberIndex);
+    q('c').innerHTML=pvChart([['',n]],-1,{places:WIDE,tap:true});
+    if(place!==null)q('c').querySelector(`[data-e="${place}"]`).setAttribute('aria-pressed','true');
+    const digit=place===null?0:digitAt(n,place);
+    q('r').innerHTML=(place===null?'Tap a digit to see what it’s worth.':`The ${digit} is in the <b>${PLACE[place].toLowerCase()}</b> place, so it’s worth ${digit} ${PL[place][digit===1?0:1]}: <b>${commas(digit*10**place)}</b>.`)
+      +`<br><b>${commas(n)}</b>: ${numWords(n)}.<br><span class="dimline">Expanded: ${expanded(n)}.</span>`;
   };
-  el.addEventListener('click',ev=>{
-    const b=ev.target.closest('[data-m]');if(b){p=+b.dataset.m;e=null;draw();return;}
-    const t=ev.target.closest('[data-e]');if(t){e=+t.dataset.e;draw();}
+  el.addEventListener('click',e=>{
+    const numberBtn=e.target.closest('[data-m]');if(numberBtn){numberIndex=+numberBtn.dataset.m;place=null;draw();return;}
+    const digitBtn=e.target.closest('[data-e]');if(digitBtn){place=+digitBtn.dataset.e;draw();}
   });
   draw();
 }

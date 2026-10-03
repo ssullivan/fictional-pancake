@@ -1,36 +1,38 @@
 /* Learn Extending Operations to Fractions (Grade 4 Unit 3), chapter 1: Equal groups of unit fractions. Its widgets and steps; loaded by equal-groups.html. */
-/* n groups of 1/d: each group is one part, every other one blue */
+/* the unit fractions 1/d to choose from */
 const UD=[2,3,4,5,6,8,10,12];
+/* n groups of 1/d (a stepper sets n): each group is one part, every other one blue. */
 function wUnit(el){
-  const q=Q(el),st={n:3},lim={n:[1,8]};let d=4;
+  const q=Q(el),values={n:3},limits={n:[1,8]};let d=4;
   el.innerHTML=seg('Each group is',UD.map(v=>[v,fr(1,v)]))+`<div class="fig" data-f></div><div class="wrow">${stepper('n','Groups')}</div><p class="eq" data-e></p><p class="readout" data-r></p>`;
   const draw=()=>{
-    const n=st.n;press(el,d);q('n').textContent=n;
+    const n=values.n;press(el,d);q('n').textContent=n;
     q('f').innerHTML=strips([{d,k:n,grp:1}],{wholes:2,empty:true,label:`${n} group${n>1?'s':''} of 1/${d}: ${n} ${PART[d][n>1?1:0]} shaded`});
     q('e').innerHTML=`${n} × ${fr(1,d)} = ${frMix(n,d)}`;
     q('r').innerHTML=`${n} group${n>1?'s':''} of ${fr(1,d)} is <b>${partName(d,n)}</b>. ${vsWhole(n,d)}`
       +`<br><span class="dimline">Each group is 1 ${PART[d][0]}, so the number of groups is the top number: ${n} × ${fr(1,d)} = ${fr(n,d)}.</span>`;
   };
-  steppers(el,st,lim,draw);
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){d=+b.dataset.m;lim.n[1]=2*d;st.n=Math.min(st.n,2*d);draw();}});
+  steppers(el,values,limits,draw);
+  el.addEventListener('click',e=>{const denBtn=e.target.closest('[data-m]');if(denBtn){d=+denBtn.dataset.m;limits.n[1]=2*d;values.n=Math.min(values.n,2*d);draw();}});
   draw();
 }
 /* "a fifth", "an eighth" */
 const aPart=d=>(PART[d][0][0]==='e'?'an ':'a ')+PART[d][0];
-/* hops of 1/d on a number line, with the products so far: 1 × 1/5, 2 × 1/5, … */
+/* the hop sizes 1/d to choose from */
 const PD=[3,4,5,6];
+/* Hops of 1/d on a number line (a stepper sets how many), with the products so far: 1 × 1/5, 2 × 1/5, … */
 function wPattern(el){
-  const q=Q(el),st={n:2},lim={n:[1,10]};let d=5;
+  const q=Q(el),values={n:2},limits={n:[1,10]};let d=5;
   el.innerHTML=seg('Hops of',PD.map(v=>[v,fr(1,v)]))+`<div class="fig" data-f></div><div class="wrow">${stepper('n','Hops')}</div><div class="chips" data-c></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const n=st.n;press(el,d);q('n').textContent=n;
+    const n=values.n;press(el,d);q('n').textContent=n;
     q('f').innerHTML=fracLine([{d,hops:n,pts:[{k:n}]}],{wholes:2,label:`Number line from 0 to 2 in ${PART[d][1]}, with ${n} hops of 1/${d} landing on ${n}/${d}`});
     q('c').innerHTML=range(n).map(i=>`<span class="chip${i===n-1?' cur':''}">${i+1} × ${fr(1,d)} = ${fr(i+1,d)}</span>`).join('');
     q('r').innerHTML=`<b>${n} × ${fr(1,d)} = ${fr(n,d)}</b>: ${n} hop${n>1?'s':''} of ${fr(1,d)} from 0. ${vsWhole(n,d)}`
       +`<br><span class="dimline">One more hop adds 1 to the top number. The bottom number stays ${d}: every hop is still ${aPart(d)}.</span>`;
   };
-  steppers(el,st,lim,draw);
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){d=+b.dataset.m;lim.n[1]=2*d;st.n=Math.min(st.n,2*d);draw();}});
+  steppers(el,values,limits,draw);
+  el.addEventListener('click',e=>{const denBtn=e.target.closest('[data-m]');if(denBtn){d=+denBtn.dataset.m;limits.n[1]=2*d;values.n=Math.min(values.n,2*d);draw();}});
   draw();
 }
 /* the quick checks' figures */

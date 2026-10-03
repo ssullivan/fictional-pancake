@@ -1,36 +1,49 @@
 /* Learn Fraction Equivalence and Comparison (Grade 4 Unit 2), chapter 4: Equivalent fractions. Its widgets and steps; loaded by equivalent.html. */
-/* shade a second strip to match the first */
+/* the fractions to match */
 const TOP=[[1,2],[2,3],[3,4]];
+/* Shade a second strip, in parts you choose, to match the first. */
 function wMatch(el){
-  const q=Q(el),st={sh:0},lim={sh:[0,8]};let t=2,d=8;
+  /* the stepper's value: sh shaded parts, at most d; topIndex: the fraction to match; d: the second strip's parts */
+  const q=Q(el),values={sh:0},limits={sh:[0,8]};let topIndex=2,d=8;
   el.innerHTML=`<div data-top>${seg('Match',TOP.map((f,i)=>[i,frA(f)]))}</div><div class="fig" data-f></div><div data-bot>${seg('Equal parts',DEN.map(v=>[v,PART[v][1]]))}</div><div class="wrow">${stepper('sh','Shaded parts')}</div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const [a,b]=TOP[t],k=st.sh,s=sign([k,d],[a,b]),lo=Math.floor(a*d/b);press(q('top'),t);press(q('bot'),d);q('sh').textContent=k;
-    q('f').innerHTML=strips([{d:b,k:a,lab:[a,b]},{d,k,cls:'b',lab:[k,d]}]);
-    q('r').innerHTML=s==='='?`<span class="ok">Same amount! <b>${fr(k,d)} = ${fr(a,b)}</b>. They are <b>equivalent</b> fractions.</span>`
-      :`${fr(k,d)} is ${s==='<'?'less':'more'} than ${fr(a,b)}. Shade ${s==='<'?'more':'fewer'} ${PART[d][1]}.`
-        +(a*d%b?`<br><span class="dimline">${cap(PART[d][1])} can’t make exactly ${fr(a,b)}: ${partName(d,lo)} ${lo===1?'is':'are'} too little and ${partName(d,lo+1)} too much.</span>`:'');
+    /* below: the most parts of d that stay under a/b */
+    const [a,b]=TOP[topIndex],shaded=values.sh,vsTop=sign([shaded,d],[a,b]),below=Math.floor(a*d/b);press(q('top'),topIndex);press(q('bot'),d);q('sh').textContent=shaded;
+    q('f').innerHTML=strips([{d:b,k:a,lab:[a,b]},{d,k:shaded,cls:'b',lab:[shaded,d]}]);
+    q('r').innerHTML=vsTop==='='?`<span class="ok">Same amount! <b>${fr(shaded,d)} = ${fr(a,b)}</b>. They are <b>equivalent</b> fractions.</span>`
+      :`${fr(shaded,d)} is ${vsTop==='<'?'less':'more'} than ${fr(a,b)}. Shade ${vsTop==='<'?'more':'fewer'} ${PART[d][1]}.`
+        +(a*d%b?`<br><span class="dimline">${cap(PART[d][1])} can’t make exactly ${fr(a,b)}: ${partName(d,below)} ${below===1?'is':'are'} too little and ${partName(d,below+1)} too much.</span>`:'');
   };
-  steppers(el,st,lim,draw);
-  el.addEventListener('click',e=>{const h=segHit(e,['top','bot']);if(!h)return;if(h[0]==='top')t=+h[1];else{d=+h[1];lim.sh[1]=d;st.sh=Math.min(st.sh,d);}draw();});
+  steppers(el,values,limits,draw);
+  el.addEventListener('click',e=>{
+    const [row,id]=segHit(e,['top','bot'])||[];if(!row)return;
+    if(row==='top')topIndex=+id;else{d=+id;limits.sh[1]=d;values.sh=Math.min(values.sh,d);}
+    draw();
+  });
   draw();
 }
-/* two number lines: tap a tick, see what lines up with it */
+/* pairs of denominators for the two number lines */
 const LINES=[[4,8],[3,6],[3,12],[5,10]];
+/* Two number lines: tap a tick on either one to see what lines up with it on the other. */
 function wLines(el){
-  const q=Q(el);let p=0,sel=null;
+  /* picked: the tick tapped, {r: which line (0 or 1), k: how many parts from 0} */
+  const q=Q(el);let pairIndex=0,picked=null;
   el.innerHTML=seg('Number lines',LINES.map(([a,b],i)=>[i,`${PART[a][1]} and ${PART[b][1]}`]))+`<div class="fig" data-f></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const [d1,d2]=LINES[p],D=[d1,d2];press(el,p);
-    /* the selected point in the other line's parts, when a tick is there */
-    const at=r=>sel&&sel.k*D[r]%D[sel.r]===0?sel.k*D[r]/D[sel.r]:null,on=r=>at(r)===null?[]:[{k:at(r),cls:r?'b':''}];
-    q('f').innerHTML=fracLine([{d:d1,tap:true,labs:true,pts:on(0)},{d:d2,tap:true,labs:true,pts:on(1)}],{marks:sel?[{v:sel.k/D[sel.r],t:''}]:[],label:`Number lines from 0 to 1 in ${PART[d1][1]} and in ${PART[d2][1]}`});
-    if(!sel){q('r').innerHTML='Tap a tick mark on either line.';return;}
-    const o=1-sel.r,ko=at(o),me=[sel.k,D[sel.r]],lo=Math.floor(sel.k*D[o]/D[sel.r]);
-    q('r').innerHTML=ko===null?`${frA(me)} is between ${fr(lo,D[o])} and ${fr(lo+1,D[o])}. No tick for ${PART[D[o]][1]} lands on it.`
-      :`<span class="ok"><b>${frA(me)} = ${fr(ko,D[o])}</b>: they are at the same point, so they are equivalent.</span><br><span class="dimline">Each ${PART[d1][0]} is ${partName(d2,d2/d1)}.</span>`;
+    const [d1,d2]=LINES[pairIndex],dens=[d1,d2];press(el,pairIndex);
+    /* the picked point in line r's parts, when a tick is there (null when it isn't) */
+    const at=r=>picked&&picked.k*dens[r]%dens[picked.r]===0?picked.k*dens[r]/dens[picked.r]:null,dotOn=r=>at(r)===null?[]:[{k:at(r),cls:r?'b':''}];
+    q('f').innerHTML=fracLine([{d:d1,tap:true,labs:true,pts:dotOn(0)},{d:d2,tap:true,labs:true,pts:dotOn(1)}],{marks:picked?[{v:picked.k/dens[picked.r],t:''}]:[],label:`Number lines from 0 to 1 in ${PART[d1][1]} and in ${PART[d2][1]}`});
+    if(!picked){q('r').innerHTML='Tap a tick mark on either line.';return;}
+    /* other: the line not tapped; kOther: the point in its parts; below: its tick just under the point */
+    const other=1-picked.r,kOther=at(other),tapped=[picked.k,dens[picked.r]],below=Math.floor(picked.k*dens[other]/dens[picked.r]);
+    q('r').innerHTML=kOther===null?`${frA(tapped)} is between ${fr(below,dens[other])} and ${fr(below+1,dens[other])}. No tick for ${PART[dens[other]][1]} lands on it.`
+      :`<span class="ok"><b>${frA(tapped)} = ${fr(kOther,dens[other])}</b>: they are at the same point, so they are equivalent.</span><br><span class="dimline">Each ${PART[d1][0]} is ${partName(d2,d2/d1)}.</span>`;
   };
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){p=+b.dataset.m;sel=null;draw();return;}const t=e.target.closest('[data-v]');if(t){sel={r:+t.dataset.r,k:+t.dataset.v};draw();}});
+  el.addEventListener('click',e=>{
+    const pairBtn=e.target.closest('[data-m]');if(pairBtn){pairIndex=+pairBtn.dataset.m;picked=null;draw();return;}
+    const tick=e.target.closest('[data-v]');if(tick){picked={r:+tick.dataset.r,k:+tick.dataset.v};draw();}
+  });
   draw();
 }
 /* the quick checks' figures */

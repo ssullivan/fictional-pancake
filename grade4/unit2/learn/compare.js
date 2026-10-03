@@ -1,58 +1,70 @@
 /* Learn Fraction Equivalence and Comparison (Grade 4 Unit 2), chapter 6: Compare and order fractions. Its widgets and steps; loaded by compare.html. */
-/* pick <, =, or >, then see why: one pair for each way to compare */
+/* one pair for each way to compare */
 const WAYS=[[[5,8],[3,8]],[[2,6],[2,4]],[[3,8],[4,6]],[[5,6],[7,8]]];
+/* Pick <, =, or > for a pair of fractions, then see their strips and why. */
 function wWays(el){
-  const q=Q(el);let p=0,pick=null;
+  /* choice: the sign picked (null before one is) */
+  const q=Q(el);let pairIndex=0,choice=null;
   el.innerHTML=seg('Fractions',WAYS.map(([a,b],i)=>[i,`${frA(a)} and ${frA(b)}`]))+`<div class="chips" data-c></div><div class="fig" data-f></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const [a,b]=WAYS[p],c=cmpWhy(a,b);press(el,p);
-    q('c').innerHTML=['<','=','>'].map(s=>`<button type="button" class="chip" data-s="${s}" aria-pressed="${s===pick}">${frA(a)} ${SYM[s]} ${frA(b)}</button>`).join('');
-    q('f').hidden=!pick;q('f').innerHTML=pick?strips([{d:a[1],k:a[0],lab:a},{d:b[1],k:b[0],cls:'b',lab:b}]):'';
-    q('r').innerHTML=!pick?`Which is true? Think first, then tap.`
-      :(pick===c.s?`<span class="ok">Yes!</span> `:`<span class="no">Not quite.</span> `)+`<b>${c.how}.</b> ${c.why}`;
-  };
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){p=+b.dataset.m;pick=null;draw();return;}const s=e.target.closest('[data-s]');if(s){pick=s.dataset.s;draw();}});
-  draw();
-}
-/* split the parts of each fraction until the denominators match */
-const CD=[[[2,3],[5,6]],[[3,4],[5,8]],[[5,6],[3,4]],[[2,5],[3,10]]];
-function wCommon(el){
-  const q=Q(el),st={a:1,b:1},lim={a:[1,1],b:[1,1]};let p=0;
-  el.innerHTML=seg('Fractions',CD.map(([a,b],i)=>[i,`${frA(a)} and ${frA(b)}`]))+`<div class="fig" data-f></div><div class="wrow" data-w></div><p class="readout" data-r></p>`;
-  const draw=()=>{
-    const [[na,da],[nb,db]]=CD[p],A=[na*st.a,da*st.a],B=[nb*st.b,db*st.b];press(el,p);q('a').textContent=st.a;q('b').textContent=st.b;
-    q('f').innerHTML=strips([{d:A[1],k:A[0],lab:A},{d:B[1],k:B[0],cls:'b',lab:B}]);
-    q('r').innerHTML=A[1]!==B[1]?`${cap(PART[A[1]][1])} and ${PART[B[1]][1]} are different sizes. Split the parts until both strips have the same parts.`
-      :`<span class="ok">Both are in ${PART[A[1]][1]}!</span> ${A[0]} ${PART[A[1]][1]} ${sign(A,B)==='='?'is the same as':sign(A,B)==='<'?'is less than':'is more than'} ${B[0]}.<br><b>${frA(A)} ${SYM[sign(A,B)]} ${frA(B)}</b>, so <b>${fr(na,da)} ${SYM[sign(A,B)]} ${fr(nb,db)}</b>.`;
-  };
-  const pick=i=>{
-    p=i;const [[na,da],[nb,db]]=CD[p];st.a=st.b=1;lim.a[1]=maxSplit(da);lim.b[1]=maxSplit(db);
-    q('w').innerHTML=stepper('a',`Split each part of ${na}/${da} into`)+stepper('b',`Split each part of ${nb}/${db} into`);
-  };
-  steppers(el,st,lim,draw);
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){pick(+b.dataset.m);draw();}});
-  pick(0);draw();
-}
-/* tap fractions from least to greatest; each goes onto the number line */
-const ORDER=[[[5,8],[1,3],[7,8],[1,10]],[[2,3],[1,4],[5,12],[7,8]],[[1,2],[5,6],[3,10],[1,5]]];
-function wOrder(el){
-  const q=Q(el);let p=0,done=[],miss=null;
-  el.innerHTML=seg('Set',ORDER.map((_,i)=>[i,`Set ${i+1}`]))+`<div class="chips" data-c></div><div class="fig" data-f></div><div class="wrow"><button type="button" class="ghost-btn" data-clr>Start over</button></div><p class="readout" data-r></p>`;
-  const draw=()=>{
-    const S=ORDER[p],left=S.filter(f=>!done.includes(f)),least=left.reduce((m,f)=>sign(f,m)==='<'?f:m,left[0]);press(el,p);
-    q('c').innerHTML=S.map((f,i)=>`<button type="button" class="chip${done.includes(f)?' found':''}" data-t="${i}"${done.includes(f)?' disabled':''}>${frA(f)}</button>`).join('');
-    q('f').innerHTML=fracLine([{d:1}],{marks:done.map(f=>({v:f[0]/f[1],t:f})),label:'Number line from 0 to 1'+(done.length?', with '+done.map(([n,d])=>`${n}/${d}`).join(', '):'')});
-    q('r').innerHTML=(miss?`<span class="no">${frA(miss)} isn’t the least one left.</span> ${cmpWhy(least,miss).why}<br>`:'')
-      +(!left.length?`<span class="ok">In order: <b>${done.map(frA).join(', ')}</b>.</span>`:done.length?`Next: which is the least of the rest?`:`Tap the fractions from least to greatest.`);
+    const [a,b]=WAYS[pairIndex],compared=cmpWhy(a,b);press(el,pairIndex);
+    q('c').innerHTML=['<','=','>'].map(s=>`<button type="button" class="chip" data-s="${s}" aria-pressed="${s===choice}">${frA(a)} ${SYM[s]} ${frA(b)}</button>`).join('');
+    q('f').hidden=!choice;q('f').innerHTML=choice?strips([{d:a[1],k:a[0],lab:a},{d:b[1],k:b[0],cls:'b',lab:b}]):'';
+    q('r').innerHTML=!choice?`Which is true? Think first, then tap.`
+      :(choice===compared.s?`<span class="ok">Yes!</span> `:`<span class="no">Not quite.</span> `)+`<b>${compared.how}.</b> ${compared.why}`;
   };
   el.addEventListener('click',e=>{
-    const b=e.target.closest('[data-m]');if(b){p=+b.dataset.m;done=[];miss=null;draw();return;}
-    const t=e.target.closest('[data-t]');if(!t||t.disabled)return;
-    const S=ORDER[p],f=S[+t.dataset.t],left=S.filter(x=>!done.includes(x));
-    if(left.every(x=>sign(f,x)!=='>')){done.push(f);miss=null;}else miss=f;
+    const pairBtn=e.target.closest('[data-m]');if(pairBtn){pairIndex=+pairBtn.dataset.m;choice=null;draw();return;}
+    const signBtn=e.target.closest('[data-s]');if(signBtn){choice=signBtn.dataset.s;draw();}
+  });
+  draw();
+}
+/* pairs with different denominators that a common denominator compares */
+const CD=[[[2,3],[5,6]],[[3,4],[5,8]],[[5,6],[3,4]],[[2,5],[3,10]]];
+/* Split the parts of each fraction (a stepper for each) until the denominators match, then compare. */
+function wCommon(el){
+  /* the steppers' values: how many pieces each part of the first (a) and second (b) is split into, and their limits */
+  const q=Q(el),values={a:1,b:1},limits={a:[1,1],b:[1,1]};let pairIndex=0;
+  el.innerHTML=seg('Fractions',CD.map(([a,b],i)=>[i,`${frA(a)} and ${frA(b)}`]))+`<div class="fig" data-f></div><div class="wrow" data-w></div><p class="readout" data-r></p>`;
+  const draw=()=>{
+    /* splitA and splitB: the two fractions as split */
+    const [[na,da],[nb,db]]=CD[pairIndex],splitA=[na*values.a,da*values.a],splitB=[nb*values.b,db*values.b];press(el,pairIndex);q('a').textContent=values.a;q('b').textContent=values.b;
+    q('f').innerHTML=strips([{d:splitA[1],k:splitA[0],lab:splitA},{d:splitB[1],k:splitB[0],cls:'b',lab:splitB}]);
+    q('r').innerHTML=splitA[1]!==splitB[1]?`${cap(PART[splitA[1]][1])} and ${PART[splitB[1]][1]} are different sizes. Split the parts until both strips have the same parts.`
+      :`<span class="ok">Both are in ${PART[splitA[1]][1]}!</span> ${splitA[0]} ${PART[splitA[1]][1]} ${sign(splitA,splitB)==='='?'is the same as':sign(splitA,splitB)==='<'?'is less than':'is more than'} ${splitB[0]}.<br><b>${frA(splitA)} ${SYM[sign(splitA,splitB)]} ${frA(splitB)}</b>, so <b>${fr(na,da)} ${SYM[sign(splitA,splitB)]} ${fr(nb,db)}</b>.`;
+  };
+  /* a new pair: unsplit, and steppers that split each part only as far as DEN goes */
+  const choosePair=i=>{
+    pairIndex=i;const [[na,da],[nb,db]]=CD[pairIndex];values.a=values.b=1;limits.a[1]=maxSplit(da);limits.b[1]=maxSplit(db);
+    q('w').innerHTML=stepper('a',`Split each part of ${na}/${da} into`)+stepper('b',`Split each part of ${nb}/${db} into`);
+  };
+  steppers(el,values,limits,draw);
+  el.addEventListener('click',e=>{const pairBtn=e.target.closest('[data-m]');if(pairBtn){choosePair(+pairBtn.dataset.m);draw();}});
+  choosePair(0);draw();
+}
+/* sets of fractions to put in order */
+const ORDER=[[[5,8],[1,3],[7,8],[1,10]],[[2,3],[1,4],[5,12],[7,8]],[[1,2],[5,6],[3,10],[1,5]]];
+/* Tap fractions from least to greatest; each goes onto the number line, and a wrong tap says why. */
+function wOrder(el){
+  /* placed: the fractions in order so far; miss: the last wrong tap */
+  const q=Q(el);let setIndex=0,placed=[],miss=null;
+  el.innerHTML=seg('Set',ORDER.map((_,i)=>[i,`Set ${i+1}`]))+`<div class="chips" data-c></div><div class="fig" data-f></div><div class="wrow"><button type="button" class="ghost-btn" data-clr>Start over</button></div><p class="readout" data-r></p>`;
+  const draw=()=>{
+    const set=ORDER[setIndex],left=set.filter(f=>!placed.includes(f)),least=left.reduce((min,f)=>sign(f,min)==='<'?f:min,left[0]);press(el,setIndex);
+    q('c').innerHTML=set.map((f,i)=>`<button type="button" class="chip${placed.includes(f)?' found':''}" data-t="${i}"${placed.includes(f)?' disabled':''}>${frA(f)}</button>`).join('');
+    q('f').innerHTML=fracLine([{d:1}],{marks:placed.map(f=>({v:f[0]/f[1],t:f})),label:'Number line from 0 to 1'+(placed.length?', with '+placed.map(([n,d])=>`${n}/${d}`).join(', '):'')});
+    q('r').innerHTML=(miss?`<span class="no">${frA(miss)} isn’t the least one left.</span> ${cmpWhy(least,miss).why}<br>`:'')
+      +(!left.length?`<span class="ok">In order: <b>${placed.map(frA).join(', ')}</b>.</span>`:placed.length?`Next: which is the least of the rest?`:`Tap the fractions from least to greatest.`);
+  };
+  el.addEventListener('click',e=>{
+    const setBtn=e.target.closest('[data-m]');if(setBtn){setIndex=+setBtn.dataset.m;placed=[];miss=null;draw();return;}
+    const chip=e.target.closest('[data-t]');if(!chip||chip.disabled)return;
+    /* right when it's no more than any fraction left */
+    const set=ORDER[setIndex],f=set[+chip.dataset.t],left=set.filter(x=>!placed.includes(x));
+    if(left.every(x=>sign(f,x)!=='>')){placed.push(f);miss=null;}else miss=f;
     draw();
   });
-  q('clr').onclick=()=>{done=[];miss=null;draw();};
+  q('clr').onclick=()=>{placed=[];miss=null;draw();};
   draw();
 }
 /* the quick checks' figures */

@@ -1,22 +1,29 @@
 /* Learn Extending Operations to Fractions (Grade 4 Unit 3), chapter 5: Line plots with fractions. Its widgets and steps; loaded by line-plots.html. */
-/* beetles from the school garden, in eighths of an inch */
-const BEETLES=[5,3,4,6,4,7,5,4],beetlePlot=(counts,o={})=>lineplot(counts,0,8,{d:8,unit:'inches',...o});
-const countOf=list=>list.reduce((c,v)=>(c[v]=(c[v]||0)+1,c),{});
+/* beetles from the school garden, in eighths of an inch, and a line plot of them (counts: {eighths: how many}; options go to lineplot) */
+const BEETLES=[5,3,4,6,4,7,5,4],beetlePlot=(counts,options={})=>lineplot(counts,0,8,{d:8,unit:'inches',...options});
+/* how many times each value is in the list: {value: count} */
+const countOf=values=>values.reduce((counts,v)=>(counts[v]=(counts[v]||0)+1,counts),{});
+/* Make the line plot: tap each beetle's length in turn to add its X. */
 function wMake(el){
-  const q=Q(el);let i=0,c={},miss=null;
+  /* placed: how many beetles have their X; counts: the Xs so far; miss: the last wrong tap */
+  const q=Q(el);let placed=0,counts={},miss=null;
   el.innerHTML=`<p class="story">We measured 8 beetles in the school garden, to the nearest ${fr(1,8)} inch.</p><div class="chips" data-c></div><div class="fig" data-f></div><div class="wrow"><button type="button" class="ghost-btn" data-clr>Start over</button></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const done=i===BEETLES.length,v=BEETLES[i];
-    q('c').innerHTML=BEETLES.map((n,j)=>`<span class="chip${j<i?' done':j===i?' cur':''}">${fr(n,8)} in</span>`).join('');
-    q('f').innerHTML=beetlePlot(c,{tap:!done});
+    const done=placed===BEETLES.length,length=BEETLES[placed];
+    q('c').innerHTML=BEETLES.map((n,j)=>`<span class="chip${j<placed?' done':j===placed?' cur':''}">${fr(n,8)} in</span>`).join('');
+    q('f').innerHTML=beetlePlot(counts,{tap:!done});
     q('r').innerHTML=done?`<span class="ok">You made a line plot! ${BEETLES.length} beetles, ${BEETLES.length} Xs.</span>`
-      :(miss!==null?`<span class="no">That’s ${miss%8?fr(miss,8):miss/8}.</span> `:'')+`This beetle is <b>${fr(v,8)} inch</b> long. Tap ${fr(v,8)} on the line plot.`;
+      :(miss!==null?`<span class="no">That’s ${miss%8?fr(miss,8):miss/8}.</span> `:'')+`This beetle is <b>${fr(length,8)} inch</b> long. Tap ${fr(length,8)} on the line plot.`;
   };
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-v]');if(!b||i>=BEETLES.length)return;const v=+b.dataset.v;if(v===BEETLES[i]){c[v]=(c[v]||0)+1;i++;miss=null;}else miss=v;draw();});
-  q('clr').onclick=()=>{i=0;c={};miss=null;draw();};
+  el.addEventListener('click',e=>{
+    const spot=e.target.closest('[data-v]');if(!spot||placed>=BEETLES.length)return;
+    const v=+spot.dataset.v;if(v===BEETLES[placed]){counts[v]=(counts[v]||0)+1;placed++;miss=null;}else miss=v;
+    draw();
+  });
+  q('clr').onclick=()=>{placed=0;counts={};miss=null;draw();};
   draw();
 }
-/* questions the line plot answers, with adding, subtracting, and equal groups */
+/* questions the line plot answers, with adding, subtracting, and equal groups: what to mark on it, and the answer */
 const ASKS=[
   {label:'Longest',mark:7,say:`The longest beetle is <b>${fr(7,8)} inch</b>. It’s the X farthest to the right.`},
   {label:'Shortest',mark:3,say:`The shortest beetle is <b>${fr(3,8)} inch</b>. It’s the X farthest to the left.`},
@@ -24,17 +31,19 @@ const ASKS=[
   {label:'How much longer?',diff:[3,7],say:`From ${fr(3,8)} to ${fr(7,8)} is <b>${fr(4,8)} inch</b>. ${fr(7,8)} − ${fr(3,8)} = ${fr(4,8)}, so the longest beetle is ${fr(4,8)} inch longer than the shortest.`},
   {label:'In a row',mark:4,say:`The 3 beetles that are ${fr(4,8)} inch long, nose to tail: 3 × ${fr(4,8)} = <b>${fr(12,8)} inches</b>. That’s 1 ${fr(4,8)} inches.`},
 ];
+/* Pick a question to see the line plot answer it. */
 function wAsk(el){
-  const q=Q(el);let k=0;
-  el.innerHTML=seg('Question',ASKS.map((a,i)=>[i,a.label]))+`<div class="fig" data-f></div><p class="readout" data-r></p>`;
+  const q=Q(el);let askIndex=0;
+  el.innerHTML=seg('Question',ASKS.map((ask,i)=>[i,ask.label]))+`<div class="fig" data-f></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const A=ASKS[k];press(el,k);
-    q('f').innerHTML=beetlePlot(countOf(BEETLES),{mark:A.mark??null,diff:A.diff||null});
-    q('r').innerHTML=`<span class="ok">${A.say}</span>`;
+    const ask=ASKS[askIndex];press(el,askIndex);
+    q('f').innerHTML=beetlePlot(countOf(BEETLES),{mark:ask.mark??null,diff:ask.diff||null});
+    q('r').innerHTML=`<span class="ok">${ask.say}</span>`;
   };
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){k=+b.dataset.m;draw();}});
+  el.addEventListener('click',e=>{const askBtn=e.target.closest('[data-m]');if(askBtn){askIndex=+askBtn.dataset.m;draw();}});
   draw();
 }
+/* a line plot of bean seeds, in fourths of an inch, for a quick check's choices */
 const seeds=(counts,label)=>lineplot(counts,0,4,{d:4,u:52,label});
 /* the quick checks' figures */
 const F={

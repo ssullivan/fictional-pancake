@@ -1,35 +1,39 @@
 /* Learn Fraction Equivalence and Comparison (Grade 4 Unit 2), chapter 5: Multiply or divide to find equivalent fractions. Its widgets and steps; loaded by multiply-divide.html. */
-/* split every part into n: multiply the top and bottom by n */
+/* the fractions to split */
 const TIMES=[[1,2],[2,3],[3,4],[2,5],[5,6]];
+/* Split every part into n (a stepper): that multiplies the top and bottom by n. */
 function wTimes(el){
-  const q=Q(el),st={n:2},lim={n:[1,6]};let p=2;
+  const q=Q(el),values={n:2},limits={n:[1,6]};let fracIndex=2;
   el.innerHTML=seg('Fraction',TIMES.map((f,i)=>[i,frA(f)]))+`<div class="fig" data-f></div><div class="wrow">${stepper('n','Split each part into')}</div><p class="eq" data-e></p><p class="readout" data-r></p>`;
   const draw=()=>{
-    const [a,b]=TIMES[p],n=st.n;press(el,p);q('n').textContent=n;
+    const [a,b]=TIMES[fracIndex],n=values.n;press(el,fracIndex);q('n').textContent=n;
     q('f').innerHTML=strips([{d:b,k:a,lab:[a,b]},{d:b*n,k:a*n,cls:'b',lab:[a*n,b*n]}]);
     q('e').innerHTML=`${fr(a,b)} = ${fr(`${a} × ${n}`,`${b} × ${n}`)} = ${fr(a*n,b*n)}`;
     q('r').innerHTML=n===1?'Not split yet. Tap + to split every part.'
       :`Every part is split into ${n}, so there are ${n} times as many parts (${b} × ${n} = ${b*n}), and ${n} times as many are shaded (${a} × ${n} = ${a*n}).<br><span class="ok">Same amount: <b>${fr(a,b)} = ${fr(a*n,b*n)}</b>.</span>`;
   };
-  const pick=i=>{p=i;lim.n[1]=maxSplit(TIMES[p][1]);st.n=Math.min(st.n,lim.n[1]);};
-  steppers(el,st,lim,draw);
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){pick(+b.dataset.m);draw();}});
-  pick(p);draw();
+  /* a new fraction: the stepper splits only as far as DEN goes */
+  const chooseFraction=i=>{fracIndex=i;limits.n[1]=maxSplit(TIMES[fracIndex][1]);values.n=Math.min(values.n,limits.n[1]);};
+  steppers(el,values,limits,draw);
+  el.addEventListener('click',e=>{const fracBtn=e.target.closest('[data-m]');if(fracBtn){chooseFraction(+fracBtn.dataset.m);draw();}});
+  chooseFraction(fracIndex);draw();
 }
-/* group parts together: divide the top and bottom by the size of the groups */
+/* the fractions to group, and the group sizes to try */
 const GROUP=[[6,12],[8,10],[9,12],[4,8]],GS=[2,3,4,6];
+/* Put the parts in equal groups: a group size that works for the top and bottom divides both. */
 function wGroup(el){
-  const q=Q(el);let p=0,g=null;
+  /* groupSize: the size picked (null before one is) */
+  const q=Q(el);let fracIndex=0,groupSize=null;
   el.innerHTML=`<div data-top>${seg('Fraction',GROUP.map((f,i)=>[i,frA(f)]))}</div><div class="fig" data-f></div><div data-bot>${seg('Groups of',GS.map(v=>[v,`Groups of ${v}`]))}</div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const [a,b]=GROUP[p],ok=g&&b%g===0&&a%g===0;press(q('top'),p);press(q('bot'),g);
-    q('f').innerHTML=strips([{d:b,k:a,lab:[a,b]}].concat(ok?[{d:b/g,k:a/g,cls:'g',lab:[a/g,b/g]}]:[]));
+    const [a,b]=GROUP[fracIndex],g=groupSize,works=g&&b%g===0&&a%g===0;press(q('top'),fracIndex);press(q('bot'),g);
+    q('f').innerHTML=strips([{d:b,k:a,lab:[a,b]}].concat(works?[{d:b/g,k:a/g,cls:'g',lab:[a/g,b/g]}]:[]));
     q('r').innerHTML=!g?`Put the parts in equal groups. Which group sizes work for both ${a} and ${b}?`
       :b%g?`<span class="no">${b} parts don’t make equal groups of ${g}.</span> ${g} is not a factor of ${b}.`
       :a%g?`<span class="no">The ${b} parts make groups of ${g}, but the ${a} shaded parts don’t.</span> ${g} is not a factor of ${a}.`
       :`${b} parts make ${b/g} groups of ${g}, and the ${a} shaded parts make ${a/g} groups.<br><span class="ok">${fr(a,b)} = ${fr(`${a} ÷ ${g}`,`${b} ÷ ${g}`)} = <b>${fr(a/g,b/g)}</b></span>`;
   };
-  el.addEventListener('click',e=>{const h=segHit(e,['top','bot']);if(!h)return;if(h[0]==='top'){p=+h[1];g=null;}else g=+h[1];draw();});
+  el.addEventListener('click',e=>{const [row,id]=segHit(e,['top','bot'])||[];if(!row)return;if(row==='top'){fracIndex=+id;groupSize=null;}else groupSize=+id;draw();});
   draw();
 }
 const STEPS=[

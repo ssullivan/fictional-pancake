@@ -1,32 +1,36 @@
 /* Learn Fraction Equivalence and Comparison (Grade 4 Unit 2), chapter 2: Sizes of parts. Its widgets and steps; loaded by sizes.html. */
-/* two fractions with the same denominator or the same numerator */
+/* pairs with the same denominator or the same numerator */
 const SAME=[[[3,8],[5,8]],[[2,3],[2,5]],[[4,6],[4,12]],[[3,4],[3,10]]];
+/* Two fractions with the same denominator or the same numerator, as strips, and how they compare. */
 function wSame(el){
-  const q=Q(el);let p=0;
+  const q=Q(el);let pairIndex=0;
   el.innerHTML=seg('Fractions',SAME.map(([a,b],i)=>[i,`${frA(a)} and ${frA(b)}`]))+`<div class="fig" data-f></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const [a,b]=SAME[p],c=cmpWhy(a,b);press(el,p);
+    const [a,b]=SAME[pairIndex],compared=cmpWhy(a,b);press(el,pairIndex);
     q('f').innerHTML=strips([{d:a[1],k:a[0],lab:a},{d:b[1],k:b[0],cls:'b',lab:b}]);
-    q('r').innerHTML=`<b>${c.how}.</b> ${c.why}`;
+    q('r').innerHTML=`<b>${compared.how}.</b> ${compared.why}`;
   };
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){p=+b.dataset.m;draw();}});
+  el.addEventListener('click',e=>{const pairBtn=e.target.closest('[data-m]');if(pairBtn){pairIndex=+pairBtn.dataset.m;draw();}});
   draw();
 }
-/* split every part in 2, again and again */
+/* families of denominators, each twice the one before */
 const FAM=[[2,4,8],[3,6,12],[5,10]];
+/* Split every part in 2, again and again: twice as many parts, each half as big. */
 function wSplit(el){
-  const q=Q(el);let f=0,i=0;
-  el.innerHTML=seg('Start with',FAM.map((F,j)=>[j,F.map(d=>PART[d][1]).join(', ')]))+`<div class="fig" data-f></div><div class="wrow"><button type="button" class="btn" data-go>Split each part in 2</button><button type="button" class="ghost-btn" data-clr>Start over</button></div><p class="readout" data-r></p>`;
+  /* splits: how many times the parts have been split */
+  const q=Q(el);let familyIndex=0,splits=0;
+  el.innerHTML=seg('Start with',FAM.map((family,j)=>[j,family.map(d=>PART[d][1]).join(', ')]))+`<div class="fig" data-f></div><div class="wrow"><button type="button" class="btn" data-go>Split each part in 2</button><button type="button" class="ghost-btn" data-clr>Start over</button></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const F=FAM[f],d0=F[0],d=F[i];press(el,f);q('go').disabled=i===F.length-1;
-    q('f').innerHTML=strips(F.slice(0,i+1).map((e,j)=>({d:e,k:e/d0,cls:['','b','g'][j]})),{label:F.slice(0,i+1).map(e=>`A strip in ${PART[e][1]}, with ${partName(e,e/d0)} shaded`).join('. ')});
-    q('r').innerHTML=!i?`1 whole cut into ${d0} equal parts: <b>${PART[d0][1]}</b>. One part is ${fr(1,d0)}.<br><span class="dimline">Split each part in 2.</span>`
-      :`Each ${PART[F[i-1]][0]} split in 2 makes <b>${PART[d][1]}</b>: twice as many parts, each half as big.<br><span class="ok">${partName(d,d/d0)} make ${partName(d0,1)}: ${fr(d/d0,d)} = ${fr(1,d0)}.</span>`
-        +(i===F.length-1?'':`<br><span class="dimline">Split again.</span>`);
+    /* first: the family's first denominator; d: the one now */
+    const family=FAM[familyIndex],first=family[0],d=family[splits];press(el,familyIndex);q('go').disabled=splits===family.length-1;
+    q('f').innerHTML=strips(family.slice(0,splits+1).map((den,j)=>({d:den,k:den/first,cls:['','b','g'][j]})),{label:family.slice(0,splits+1).map(den=>`A strip in ${PART[den][1]}, with ${partName(den,den/first)} shaded`).join('. ')});
+    q('r').innerHTML=!splits?`1 whole cut into ${first} equal parts: <b>${PART[first][1]}</b>. One part is ${fr(1,first)}.<br><span class="dimline">Split each part in 2.</span>`
+      :`Each ${PART[family[splits-1]][0]} split in 2 makes <b>${PART[d][1]}</b>: twice as many parts, each half as big.<br><span class="ok">${partName(d,d/first)} make ${partName(first,1)}: ${fr(d/first,d)} = ${fr(1,first)}.</span>`
+        +(splits===family.length-1?'':`<br><span class="dimline">Split again.</span>`);
   };
-  q('go').onclick=()=>{if(i<FAM[f].length-1)i++;draw();};
-  q('clr').onclick=()=>{i=0;draw();};
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){f=+b.dataset.m;i=0;draw();}});
+  q('go').onclick=()=>{if(splits<FAM[familyIndex].length-1)splits++;draw();};
+  q('clr').onclick=()=>{splits=0;draw();};
+  el.addEventListener('click',e=>{const familyBtn=e.target.closest('[data-m]');if(familyBtn){familyIndex=+familyBtn.dataset.m;splits=0;draw();}});
   draw();
 }
 /* the quick checks' figures */

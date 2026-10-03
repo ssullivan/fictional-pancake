@@ -1,15 +1,18 @@
 /* Learn Factors and Multiples (Grade 4 Unit 1), chapter 5: Factors and multiples together. Its widgets and steps; loaded by factors-and-multiples.html. */
+/* pairs [a, b] to ask: is a a factor of b? */
 const FM=[[6,42],[8,50],[9,72],[7,40]];
+/* Hop by a toward b: landing on b means a is a factor of b and b a multiple of a. */
 function wFM(el){
-  const q=Q(el);let p=0;
+  const q=Q(el);let pairIndex=0;
   el.innerHTML=seg('Numbers',FM.map(([a,b],i)=>[i,`${a} and ${b}`]))+`<div class="fig" data-f></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const [a,b]=FM[p],k=Math.floor(b/a),yes=b%a===0,m=(k+(yes?0:1))*a;press(el,p);
-    q('f').innerHTML=hopLine(a,m,m/a,{mark:b});
-    q('r').innerHTML=yes?`Hops of ${a} land on ${b}: <b>${a} × ${k} = ${b}</b>.<br><span class="ok">${a} is a <b>factor</b> of ${b}, and ${b} is a <b>multiple</b> of ${a}.</span><br><span class="dimline">${k} is a factor of ${b} too.</span>`
-      :`Hops of ${a} land on ${k*a} and ${(k+1)*a}, and skip ${b}.<br><span class="no">${a} is not a factor of ${b}, and ${b} is not a multiple of ${a}.</span>`;
+    /* hops: whole hops of a that fit in b; the line runs to b, or to the first multiple past it */
+    const [a,b]=FM[pairIndex],hops=Math.floor(b/a),lands=b%a===0,lineEnd=(hops+(lands?0:1))*a;press(el,pairIndex);
+    q('f').innerHTML=hopLine(a,lineEnd,lineEnd/a,{mark:b});
+    q('r').innerHTML=lands?`Hops of ${a} land on ${b}: <b>${a} × ${hops} = ${b}</b>.<br><span class="ok">${a} is a <b>factor</b> of ${b}, and ${b} is a <b>multiple</b> of ${a}.</span><br><span class="dimline">${hops} is a factor of ${b} too.</span>`
+      :`Hops of ${a} land on ${hops*a} and ${(hops+1)*a}, and skip ${b}.<br><span class="no">${a} is not a factor of ${b}, and ${b} is not a multiple of ${a}.</span>`;
   };
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){p=+b.dataset.m;draw();}});
+  el.addEventListener('click',e=>{const pairBtn=e.target.closest('[data-m]');if(pairBtn){pairIndex=+pairBtn.dataset.m;draw();}});
   draw();
 }
 const STEPS=[

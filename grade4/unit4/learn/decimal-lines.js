@@ -1,24 +1,30 @@
 /* Learn From Hundredths to Hundred-thousands (Grade 4 Unit 4), chapter 2: Decimals on number lines. Its widgets and steps; loaded by decimal-lines.html. */
-/* a number line in hundredths from lo to hi (lo and hi in hundredths), a tick every `step`; pts: [{v, t}] */
-const decLine=(lo,hi,step,o={})=>numLine(lo,hi,{u:380/((hi-lo)/step)/step,step,big:step===10?50:5,lab:v=>step===10||v%5===0,fmt:dS,...o});
-/* tap a tick: the whole line in tenths, or zoom in to hundredths between two tenths */
+/* a number line in hundredths from lo to hi (lo and hi in hundredths), a tick every `step`, about 380 pixels long; options go to numLine */
+const decLine=(lo,hi,step,options={})=>numLine(lo,hi,{u:380/((hi-lo)/step)/step,step,big:step===10?50:5,lab:v=>step===10||v%5===0,fmt:dS,...options});
+/* the whole line in tenths, or zoomed in to hundredths between two tenths */
 const VIEWS=[{name:'0 to 1',lo:0,hi:100,step:10},{name:'0.3 to 0.4',lo:30,hi:40,step:1},{name:'0.6 to 0.7',lo:60,hi:70,step:1}];
+/* Tap a tick on a decimal number line to name it. */
 function wLine(el){
-  const q=Q(el);let p=0,k=null;
-  el.innerHTML=seg('Number line',VIEWS.map((v,i)=>[i,v.name]))+`<div class="fig" data-f></div><p class="readout" data-r></p>`;
+  /* k: the tick tapped, in hundredths (null before one is) */
+  const q=Q(el);let viewIndex=0,k=null;
+  el.innerHTML=seg('Number line',VIEWS.map((view,i)=>[i,view.name]))+`<div class="fig" data-f></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const V=VIEWS[p];press(el,p);
-    q('f').innerHTML=decLine(V.lo,V.hi,V.step,{tap:true,pts:k===null?[]:[{v:k,t:dS(k)}],label:`Number line from ${dS(V.lo)} to ${dS(V.hi)}, a tick every ${V.step===10?'tenth':'hundredth'}`+(k===null?'':`, with a point at ${dS(k)}`)});
-    const t=Math.floor(k/10),h=k%10;
-    q('r').innerHTML=k===null?`Each tick is ${V.step===10?`1 tenth: 0.1`:`1 hundredth: 0.01`}. Tap a tick mark.`
+    const view=VIEWS[viewIndex];press(el,viewIndex);
+    q('f').innerHTML=decLine(view.lo,view.hi,view.step,{tap:true,pts:k===null?[]:[{v:k,t:dS(k)}],label:`Number line from ${dS(view.lo)} to ${dS(view.hi)}, a tick every ${view.step===10?'tenth':'hundredth'}`+(k===null?'':`, with a point at ${dS(k)}`)});
+    const tenths=Math.floor(k/10),hundredths=k%10;
+    q('r').innerHTML=k===null?`Each tick is ${view.step===10?`1 tenth: 0.1`:`1 hundredth: 0.01`}. Tap a tick mark.`
       :k%100===0?`<b>${dS(k)}</b>: ${k?'1 whole, or 10 tenths.':'zero.'}`
-      :`<b>${dS(k)}</b>: ${t} ${PART[10][t===1?0:1]}${h?` and ${h} ${PART[100][h===1?0:1]}`:''}, or ${fr(k,100)}.`+(h?'':` <span class="dimline">That’s also ${(k/100).toFixed(2)}.</span>`);
+      :`<b>${dS(k)}</b>: ${tenths} ${PART[10][tenths===1?0:1]}${hundredths?` and ${hundredths} ${PART[100][hundredths===1?0:1]}`:''}, or ${fr(k,100)}.`+(hundredths?'':` <span class="dimline">That’s also ${(k/100).toFixed(2)}.</span>`);
   };
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){p=+b.dataset.m;k=null;draw();return;}const t=e.target.closest('[data-v]');if(t){k=+t.dataset.v;draw();}});
+  el.addEventListener('click',e=>{
+    const viewBtn=e.target.closest('[data-m]');if(viewBtn){viewIndex=+viewBtn.dataset.m;k=null;draw();return;}
+    const tick=e.target.closest('[data-v]');if(tick){k=+tick.dataset.v;draw();}
+  });
   draw();
 }
-/* compare decimals and fractions, in hundredths on two grids */
+/* a number for wSign: v hundredths, written t */
 const vt=(v,t)=>({v,t});
+/* Pick <, =, or > for decimals and fractions, then see both in hundredths on two grids. */
 const wCmp=wSign([[vt(60,'0.6'),vt(58,'0.58')],[vt(40,'0.4'),vt(40,'0.40')],[vt(70,'0.7'),vt(75,fr(3,4))],[vt(9,'0.09'),vt(10,'0.1')]],{
   show:(a,b)=>`<div class="picrow">${hundredGrid(cellsOf([a.v,'a']),{label:`${a.v} hundredths`})}${hundredGrid(cellsOf([b.v,'b']),{label:`${b.v} hundredths`})}</div>`,
   why:(a,b)=>`Write both in hundredths: ${a.t} is ${a.v} hundredths and ${b.t} is ${b.v} hundredths.`

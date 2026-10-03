@@ -1,32 +1,41 @@
 /* Learn Factors and Multiples (Grade 4 Unit 1), chapter 1: Multiples. Its widgets and steps; loaded by multiples.html. */
+/* the numbers to count by */
 const HOPN=[2,3,4,5,6,7,8,9];
+/* Hop by n on a number line; a stepper adds hops, and each landing is a multiple of n. */
 function wHops(el){
-  const q=Q(el),st={hops:0};let n=3;
+  const q=Q(el),values={hops:0};let n=3;
   el.innerHTML=seg('Count by',HOPN.map(v=>[v,`by ${v}s`]))+`<div class="fig" data-f></div><div class="wrow">${stepper('hops','Hops')}</div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const k=st.hops;press(el,n);q('hops').textContent=k;
-    q('f').innerHTML=hopLine(n,10*n,k);
-    q('r').innerHTML=k?`<b>${k} × ${n} = ${k*n}</b>, so ${k*n} is a multiple of ${n}.<br><span class="dimline">Multiples of ${n} so far: ${list(range(k).map(i=>(i+1)*n))}</span>`
+    const hops=values.hops;press(el,n);q('hops').textContent=hops;
+    q('f').innerHTML=hopLine(n,10*n,hops);
+    q('r').innerHTML=hops?`<b>${hops} × ${n} = ${hops*n}</b>, so ${hops*n} is a multiple of ${n}.<br><span class="dimline">Multiples of ${n} so far: ${list(range(hops).map(i=>(i+1)*n))}</span>`
       :`Start at 0. Tap + to hop by ${n}s.`;
   };
-  steppers(el,st,{hops:[0,10]},draw);
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){n=+b.dataset.m;st.hops=0;draw();}});
+  steppers(el,values,{hops:[0,10]},draw);
+  el.addEventListener('click',e=>{const countBtn=e.target.closest('[data-m]');if(countBtn){n=+countBtn.dataset.m;values.hops=0;draw();}});
   draw();
 }
+/* numbers to count by (n), and the numbers (t) to ask about */
 const TARGET=[{n:4,t:[18,20,30]},{n:6,t:[34,36,40]},{n:7,t:[27,28,45]},{n:9,t:[45,50,54]}];
+/* Is t a multiple of n? Hops of n either land on t or jump over it. */
 function wIsMultiple(el){
-  const q=Q(el);let p=0,t=null;
+  /* target: the number asked about (null before a question is tapped) */
+  const q=Q(el);let countIndex=0,target=null;
   el.innerHTML=seg('Count by',TARGET.map(({n},i)=>[i,`by ${n}s`]))+`<div class="chips" data-c></div><div class="fig" data-f></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const {n,t:T}=TARGET[p];press(el,p);
-    q('c').innerHTML=T.map(v=>`<button type="button" class="chip" data-t="${v}" aria-pressed="${v===t}">Is ${v} a multiple of ${n}?</button>`).join('');
-    if(t===null){q('f').innerHTML=hopLine(n,10*n,10);q('r').innerHTML=`Tap a question. Do the hops of ${n} land on the number?`;return;}
-    const k=Math.floor(t/n),yes=t%n===0;
-    q('f').innerHTML=hopLine(n,(k+1)*n,yes?k:k+1,{mark:t});
-    q('r').innerHTML=yes?`<span class="ok">Yes! ${k} hops of ${n} land right on ${t}: <b>${k} × ${n} = ${t}</b>.</span><br>${t} is a multiple of ${n}.`
-      :`<span class="no">No.</span> Hops of ${n} land on <b>${k*n}</b> and <b>${(k+1)*n}</b>, and ${t} is in between.<br><span class="dimline">${t} is not a multiple of ${n}.</span>`;
+    const {n,t:targets}=TARGET[countIndex];press(el,countIndex);
+    q('c').innerHTML=targets.map(v=>`<button type="button" class="chip" data-t="${v}" aria-pressed="${v===target}">Is ${v} a multiple of ${n}?</button>`).join('');
+    if(target===null){q('f').innerHTML=hopLine(n,10*n,10);q('r').innerHTML=`Tap a question. Do the hops of ${n} land on the number?`;return;}
+    /* hops: whole hops of n that fit in the target; when they don't land on it, one more hops past it */
+    const hops=Math.floor(target/n),lands=target%n===0;
+    q('f').innerHTML=hopLine(n,(hops+1)*n,lands?hops:hops+1,{mark:target});
+    q('r').innerHTML=lands?`<span class="ok">Yes! ${hops} hops of ${n} land right on ${target}: <b>${hops} × ${n} = ${target}</b>.</span><br>${target} is a multiple of ${n}.`
+      :`<span class="no">No.</span> Hops of ${n} land on <b>${hops*n}</b> and <b>${(hops+1)*n}</b>, and ${target} is in between.<br><span class="dimline">${target} is not a multiple of ${n}.</span>`;
   };
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){p=+b.dataset.m;t=null;draw();return;}const c=e.target.closest('[data-t]');if(c){t=+c.dataset.t;draw();}});
+  el.addEventListener('click',e=>{
+    const countBtn=e.target.closest('[data-m]');if(countBtn){countIndex=+countBtn.dataset.m;target=null;draw();return;}
+    const question=e.target.closest('[data-t]');if(question){target=+question.dataset.t;draw();}
+  });
   draw();
 }
 /* the quick checks' figures */

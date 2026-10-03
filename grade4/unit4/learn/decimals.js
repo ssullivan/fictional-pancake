@@ -1,39 +1,42 @@
 /* Learn From Hundredths to Hundred-thousands (Grade 4 Unit 4), chapter 1: Decimals. Its widgets and steps; loaded by decimals.html. */
+/* a hundred grid with k squares shaded */
 const grid=(k,cls='a',label)=>hundredGrid(cellsOf([k,cls]),{label:label||`A hundred grid with ${k} of 100 squares shaded: ${dS(k)}`});
-/* tenths and hundredths on a hundred grid, written as a fraction and a decimal */
+/* Tenths and hundredths on a hundred grid (a stepper for each), written as a fraction and a decimal. */
 function wDec(el){
-  const q=Q(el),st={t:4,h:7},lim={t:[0,9],h:[0,9]};
+  const q=Q(el),values={t:4,h:7},limits={t:[0,9],h:[0,9]};
   el.innerHTML=`<div class="fig" data-f></div><div class="wrow">${stepper('t','Tenths')}${stepper('h','Hundredths')}</div><div data-c></div><p class="eq" data-e></p><p class="readout" data-r></p>`;
   const draw=()=>{
-    const {t,h}=st,k=10*t+h;q('t').textContent=t;q('h').textContent=h;
-    q('f').innerHTML=hundredGrid(cellsOf([10*t,'a'],[h,'b']),{label:`A hundred grid with ${t} columns and ${h} more squares shaded: ${k} of 100`});
+    const {t:tenths,h:hundredths}=values,k=10*tenths+hundredths;q('t').textContent=tenths;q('h').textContent=hundredths;
+    q('f').innerHTML=hundredGrid(cellsOf([10*tenths,'a'],[hundredths,'b']),{label:`A hundred grid with ${tenths} columns and ${hundredths} more squares shaded: ${k} of 100`});
     q('c').innerHTML=pvChart([['',k/100]],-1,{places:[0,-1,-2]});
     q('e').innerHTML=`${fr(k,100)} = ${(k/100).toFixed(2)}`;
-    q('r').innerHTML=`${t} ${PART[10][t===1?0:1]} and ${h} ${PART[100][h===1?0:1]} is <b>${k} ${PART[100][k===1?0:1]}</b>: ${(k/100).toFixed(2)}, said “${numWords(k)} ${PART[100][k===1?0:1]}.”`
+    q('r').innerHTML=`${tenths} ${PART[10][tenths===1?0:1]} and ${hundredths} ${PART[100][hundredths===1?0:1]} is <b>${k} ${PART[100][k===1?0:1]}</b>: ${(k/100).toFixed(2)}, said “${numWords(k)} ${PART[100][k===1?0:1]}.”`
       +`<br><span class="dimline">The first digit after the decimal point counts tenths. The next one counts hundredths.</span>`;
   };
-  steppers(el,st,lim,draw);
+  steppers(el,values,limits,draw);
   draw();
 }
-/* tap each one that is the same amount as the target */
+/* a target t in hundredths, and ways to write numbers [as written, in hundredths] to test against it */
 const SAMES=[{t:50,ex:[['0.50',50],['0.05',5],[fr(5,10),50],[fr(50,100),50],[fr(5,100),5]]},{t:30,ex:[['0.03',3],['0.30',30],[fr(3,100),3],[fr(3,10),30],[fr(30,100),30]]},{t:80,ex:[[fr(80,100),80],['0.08',8],['0.80',80],[fr(8,10),80],['0.18',18]]}];
+/* Tap each one that is the same amount as the target, to see it on a grid beside the target's. */
 function wSame(el){
-  const q=Q(el);let p=0,sel=null,found=[];
+  /* picked: the one tapped last; found: the right ones tapped so far */
+  const q=Q(el);let targetIndex=0,picked=null,found=[];
   el.innerHTML=seg('Same as',SAMES.map(({t},i)=>[i,dS(t)]))+`<div class="chips" data-c></div><div class="fig picrow" data-f></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const {t,ex}=SAMES[p],right=ex.filter(([,v])=>v===t).length;press(el,p);
-    q('c').innerHTML=ex.map(([l],i)=>`<button type="button" class="chip${found.includes(i)?' found':''}" data-t="${i}" aria-pressed="${i===sel}">${l}</button>`).join('');
-    q('f').innerHTML=grid(t)+(sel===null?'':grid(ex[sel][1],'b'));
-    if(sel===null){q('r').innerHTML=`Which of these are the same amount as ${dS(t)}? Tap one to see it on a grid.`;return;}
-    const [l,v]=ex[sel];
-    q('r').innerHTML=(v===t?`<span class="ok">Yes! ${l} is ${v} hundredths, and ${dS(t)} is ${t} hundredths too.</span>`
-      :`<span class="no">${l} is ${v} hundredths, but ${dS(t)} is ${t} hundredths.</span>`)
-      +`<br><span class="dimline">`+(found.length===right?`You found all ${right}. A 0 at the end of a decimal doesn’t change it: ${dS(t)} = ${(t/100).toFixed(2)}.`:`Found ${found.length} of ${right}.`)+`</span>`;
+    const {t:target,ex}=SAMES[targetIndex],right=ex.filter(([,v])=>v===target).length;press(el,targetIndex);
+    q('c').innerHTML=ex.map(([written],i)=>`<button type="button" class="chip${found.includes(i)?' found':''}" data-t="${i}" aria-pressed="${i===picked}">${written}</button>`).join('');
+    q('f').innerHTML=grid(target)+(picked===null?'':grid(ex[picked][1],'b'));
+    if(picked===null){q('r').innerHTML=`Which of these are the same amount as ${dS(target)}? Tap one to see it on a grid.`;return;}
+    const [written,v]=ex[picked];
+    q('r').innerHTML=(v===target?`<span class="ok">Yes! ${written} is ${v} hundredths, and ${dS(target)} is ${target} hundredths too.</span>`
+      :`<span class="no">${written} is ${v} hundredths, but ${dS(target)} is ${target} hundredths.</span>`)
+      +`<br><span class="dimline">`+(found.length===right?`You found all ${right}. A 0 at the end of a decimal doesn’t change it: ${dS(target)} = ${(target/100).toFixed(2)}.`:`Found ${found.length} of ${right}.`)+`</span>`;
   };
   el.addEventListener('click',e=>{
-    const b=e.target.closest('[data-m]');if(b){p=+b.dataset.m;sel=null;found=[];draw();return;}
-    const c=e.target.closest('[data-t]');if(!c)return;
-    sel=+c.dataset.t;if(SAMES[p].ex[sel][1]===SAMES[p].t&&!found.includes(sel))found.push(sel);
+    const targetBtn=e.target.closest('[data-m]');if(targetBtn){targetIndex=+targetBtn.dataset.m;picked=null;found=[];draw();return;}
+    const chip=e.target.closest('[data-t]');if(!chip)return;
+    picked=+chip.dataset.t;if(SAMES[targetIndex].ex[picked][1]===SAMES[targetIndex].t&&!found.includes(picked))found.push(picked);
     draw();
   });
   draw();

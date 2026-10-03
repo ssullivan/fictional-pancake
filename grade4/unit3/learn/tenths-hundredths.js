@@ -1,32 +1,34 @@
 /* Learn Extending Operations to Fractions (Grade 4 Unit 3), chapter 6: Tenths and hundredths. Its widgets and steps; loaded by tenths-hundredths.html. */
-/* shade tenths, one column each, and count them in hundredths */
+/* Shade tenths on a hundred grid, one column each (a stepper), and count them in hundredths. */
 function wTenths(el){
-  const q=Q(el),st={t:3},lim={t:[0,10]};
+  const q=Q(el),values={t:3},limits={t:[0,10]};
   el.innerHTML=`<div class="fig" data-f></div><div class="wrow">${stepper('t','Tenths')}</div><p class="eq" data-e></p><p class="readout" data-r></p>`;
   const draw=()=>{
-    const t=st.t;q('t').textContent=t;
-    q('f').innerHTML=hundredGrid(cellsOf([10*t,'a']),{label:`A hundred grid with ${t} of 10 columns shaded: ${10*t} of 100 squares`});
-    q('e').innerHTML=`${fr(t,10)} = ${fr(10*t,100)}`+(t===10?' = 1':'');
-    q('r').innerHTML=`${partName(10,t)} ${t===1?'is':'are'} <b>${partName(100,10*t)}</b>.`+(t===10?' <span class="ok">All 10 tenths make 1 whole: 100 hundredths.</span>':'')
-      +`<br><span class="dimline">Each column is 1 tenth of the square, and it’s made of 10 hundredths. ${t} × 10 = ${10*t}.</span>`;
+    const tenths=values.t;q('t').textContent=tenths;
+    q('f').innerHTML=hundredGrid(cellsOf([10*tenths,'a']),{label:`A hundred grid with ${tenths} of 10 columns shaded: ${10*tenths} of 100 squares`});
+    q('e').innerHTML=`${fr(tenths,10)} = ${fr(10*tenths,100)}`+(tenths===10?' = 1':'');
+    q('r').innerHTML=`${partName(10,tenths)} ${tenths===1?'is':'are'} <b>${partName(100,10*tenths)}</b>.`+(tenths===10?' <span class="ok">All 10 tenths make 1 whole: 100 hundredths.</span>':'')
+      +`<br><span class="dimline">Each column is 1 tenth of the square, and it’s made of 10 hundredths. ${tenths} × 10 = ${10*tenths}.</span>`;
   };
-  steppers(el,st,lim,draw);
+  steppers(el,values,limits,draw);
   draw();
 }
-/* a/10 + b/100: write the tenths as hundredths, then add */
+/* sums a/10 + b/100 */
 const TH=[[3,25],[6,7],[4,45],[2,8]];
+/* a/10 + b/100: a button writes the tenths as hundredths, and then they add. */
 function wAddTH(el){
-  const q=Q(el);let p=0,rw=false;
+  /* rewritten: the tenths are written as hundredths */
+  const q=Q(el);let sumIndex=0,rewritten=false;
   el.innerHTML=seg('Add',TH.map(([a,b],i)=>[i,`${fr(a,10)} + ${fr(b,100)}`]))+`<div class="fig" data-f></div><div class="wrow"><button type="button" class="btn" data-go>Write the tenths as hundredths</button></div><p class="eq" data-e></p><p class="readout" data-r></p>`;
   const draw=()=>{
-    const [a,b]=TH[p],s=10*a+b;press(el,p);q('go').disabled=rw;
+    const [a,b]=TH[sumIndex],sum=10*a+b;press(el,sumIndex);q('go').disabled=rewritten;
     q('f').innerHTML=hundredGrid(cellsOf([10*a,'a'],[b,'b']),{label:`A hundred grid with ${a} tenths shaded gold and ${b} hundredths shaded blue`});
-    q('e').innerHTML=`${fr(a,10)} + ${fr(b,100)} = `+(rw?`${fr(10*a,100)} + ${fr(b,100)} = <b>${fr(s,100)}</b>`:'?');
-    q('r').innerHTML=!rw?`Tenths and hundredths are different sizes, so you can’t just add ${a} + ${b}. Write the ${PART[10][a>1?1:0]} as hundredths first.`
-      :`<span class="ok">${partName(10,a)} ${a===1?'is':'are'} ${partName(100,10*a)}. ${10*a} + ${b} = ${s}, so the sum is <b>${partName(100,s)}</b>.</span>`;
+    q('e').innerHTML=`${fr(a,10)} + ${fr(b,100)} = `+(rewritten?`${fr(10*a,100)} + ${fr(b,100)} = <b>${fr(sum,100)}</b>`:'?');
+    q('r').innerHTML=!rewritten?`Tenths and hundredths are different sizes, so you can’t just add ${a} + ${b}. Write the ${PART[10][a>1?1:0]} as hundredths first.`
+      :`<span class="ok">${partName(10,a)} ${a===1?'is':'are'} ${partName(100,10*a)}. ${10*a} + ${b} = ${sum}, so the sum is <b>${partName(100,sum)}</b>.</span>`;
   };
-  q('go').onclick=()=>{rw=true;draw();};
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){p=+b.dataset.m;rw=false;draw();}});
+  q('go').onclick=()=>{rewritten=true;draw();};
+  el.addEventListener('click',e=>{const sumBtn=e.target.closest('[data-m]');if(sumBtn){sumIndex=+sumBtn.dataset.m;rewritten=false;draw();}});
   draw();
 }
 /* the quick checks' figures */

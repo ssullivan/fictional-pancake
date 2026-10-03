@@ -1,41 +1,45 @@
 /* Learn Extending Operations to Fractions (Grade 4 Unit 3), chapter 2: Equal groups of any fraction. Its widgets and steps; loaded by any-fraction.html. */
-/* n groups of a/d: each group is a parts, every other group blue */
+/* the fractions a/d each group can be */
 const GF=[[2,3],[3,4],[2,5],[3,8],[3,10]];
+/* n groups of a/d (a stepper sets n): each group is a parts, every other group blue. */
 function wGroups(el){
-  const q=Q(el),st={n:3},lim={n:[1,4]};let p=1;
+  const q=Q(el),values={n:3},limits={n:[1,4]};let fracIndex=1;
   el.innerHTML=seg('Each group is',GF.map(([a,d],i)=>[i,fr(a,d)]))+`<div class="fig" data-f></div><div class="wrow">${stepper('n','Groups')}</div><p class="eq" data-e></p><p class="readout" data-r></p>`;
   const draw=()=>{
-    const [a,d]=GF[p],n=st.n,k=n*a;press(el,p);q('n').textContent=n;
-    q('f').innerHTML=strips([{d,k,grp:a}],{wholes:Math.ceil(4*a/d),empty:true,label:`${n} group${n>1?'s':''} of ${a}/${d}: ${k} ${PART[d][1]} shaded, every other group blue`});
-    q('e').innerHTML=`${n} × ${fr(a,d)} = ${fr(`${n} × ${a}`,d)} = ${frMix(k,d)}`;
-    q('r').innerHTML=`${n} group${n>1?'s':''} of ${partName(d,a)} is <b>${partName(d,k)}</b>. ${vsWhole(k,d)}`
-      +`<br><span class="dimline">Multiply the number of groups by the top number: ${n} × ${a} = ${k}. The parts are still ${PART[d][1]}.</span>`;
+    const [a,d]=GF[fracIndex],n=values.n,parts=n*a;press(el,fracIndex);q('n').textContent=n;
+    q('f').innerHTML=strips([{d,k:parts,grp:a}],{wholes:Math.ceil(4*a/d),empty:true,label:`${n} group${n>1?'s':''} of ${a}/${d}: ${parts} ${PART[d][1]} shaded, every other group blue`});
+    q('e').innerHTML=`${n} × ${fr(a,d)} = ${fr(`${n} × ${a}`,d)} = ${frMix(parts,d)}`;
+    q('r').innerHTML=`${n} group${n>1?'s':''} of ${partName(d,a)} is <b>${partName(d,parts)}</b>. ${vsWhole(parts,d)}`
+      +`<br><span class="dimline">Multiply the number of groups by the top number: ${n} × ${a} = ${parts}. The parts are still ${PART[d][1]}.</span>`;
   };
-  steppers(el,st,lim,draw);
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){p=+b.dataset.m;draw();}});
+  steppers(el,values,limits,draw);
+  el.addEventListener('click',e=>{const fracBtn=e.target.closest('[data-m]');if(fracBtn){fracIndex=+fracBtn.dataset.m;draw();}});
   draw();
 }
-/* tap the ones that make the same amount: n × m/d, where n × m is the target's top number */
+/* a target t (N/d), and expressions n × m/d to test: the right ones have n × m = N */
 const SAMEX=[{t:[6,8],ex:[[6,1],[3,2],[3,3],[2,3],[2,4]]},{t:[8,5],ex:[[8,1],[6,2],[4,2],[2,4],[4,4]]},{t:[10,12],ex:[[10,1],[4,3],[5,2],[2,5],[5,5]]}];
+/* Tap the expressions that make the same amount as the target, to see each one's groups under it. */
 function wSame(el){
-  const q=Q(el);let p=0,sel=null,found=[];
+  /* picked: the expression tapped last; found: the right ones tapped so far */
+  const q=Q(el);let targetIndex=0,picked=null,found=[];
   el.innerHTML=seg('Make',SAMEX.map(({t},i)=>[i,fr(...t)]))+`<div class="chips" data-c></div><div class="fig" data-f></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const {t:[N,d],ex}=SAMEX[p],right=ex.filter(([n,m])=>n*m===N),W=Math.ceil(Math.max(N,...ex.map(([n,m])=>n*m))/d);press(el,p);
-    q('c').innerHTML=ex.map(([n,m],i)=>`<button type="button" class="chip${found.includes(i)?' found':''}" data-t="${i}" aria-pressed="${i===sel}">${n} × ${fr(m,d)}</button>`).join('');
+    /* wholes: enough strips for the target and every expression */
+    const {t:[N,d],ex}=SAMEX[targetIndex],right=ex.filter(([n,m])=>n*m===N),wholes=Math.ceil(Math.max(N,...ex.map(([n,m])=>n*m))/d);press(el,targetIndex);
+    q('c').innerHTML=ex.map(([n,m],i)=>`<button type="button" class="chip${found.includes(i)?' found':''}" data-t="${i}" aria-pressed="${i===picked}">${n} × ${fr(m,d)}</button>`).join('');
     const rows=[{d,k:N,lab:[N,d]}];
-    if(sel!==null){const [n,m]=ex[sel];rows.push({d,k:n*m,grp:m,cls:'g'});}
-    q('f').innerHTML=strips(rows,{wholes:W,label:`${N}/${d}`+(sel===null?'':`, and ${ex[sel][0]} groups of ${ex[sel][1]}/${d} under it`)});
-    if(sel===null){q('r').innerHTML=`Which of these make ${fr(N,d)}? Tap one to see its groups.`;return;}
-    const [n,m]=ex[sel],k=n*m,all=found.length===right.length;
-    q('r').innerHTML=(k===N?`<span class="ok">Yes! ${n} groups of ${partName(d,m)} is ${partName(d,k)}: <b>${n} × ${fr(m,d)} = ${fr(N,d)}</b>.</span>`
-      :`<span class="no">${n} groups of ${partName(d,m)} is ${partName(d,k)}: ${n} × ${fr(m,d)} = ${fr(k,d)}, not ${fr(N,d)}.</span>`)
+    if(picked!==null){const [n,m]=ex[picked];rows.push({d,k:n*m,grp:m,cls:'g'});}
+    q('f').innerHTML=strips(rows,{wholes,label:`${N}/${d}`+(picked===null?'':`, and ${ex[picked][0]} groups of ${ex[picked][1]}/${d} under it`)});
+    if(picked===null){q('r').innerHTML=`Which of these make ${fr(N,d)}? Tap one to see its groups.`;return;}
+    const [n,m]=ex[picked],parts=n*m,all=found.length===right.length;
+    q('r').innerHTML=(parts===N?`<span class="ok">Yes! ${n} groups of ${partName(d,m)} is ${partName(d,parts)}: <b>${n} × ${fr(m,d)} = ${fr(N,d)}</b>.</span>`
+      :`<span class="no">${n} groups of ${partName(d,m)} is ${partName(d,parts)}: ${n} × ${fr(m,d)} = ${fr(parts,d)}, not ${fr(N,d)}.</span>`)
       +`<br><span class="dimline">`+(all?`You found all ${right.length}: ${right.map(([n,m])=>`${n} × ${m}`).join(', ')}. Each makes ${N}.`:`Found ${found.length} of ${right.length}. The number of groups times the top number must make ${N}.`)+`</span>`;
   };
   el.addEventListener('click',e=>{
-    const b=e.target.closest('[data-m]');if(b){p=+b.dataset.m;sel=null;found=[];draw();return;}
-    const c=e.target.closest('[data-t]');if(!c)return;
-    sel=+c.dataset.t;const [n,m]=SAMEX[p].ex[sel];if(n*m===SAMEX[p].t[0]&&!found.includes(sel))found.push(sel);
+    const targetBtn=e.target.closest('[data-m]');if(targetBtn){targetIndex=+targetBtn.dataset.m;picked=null;found=[];draw();return;}
+    const chip=e.target.closest('[data-t]');if(!chip)return;
+    picked=+chip.dataset.t;const [n,m]=SAMEX[targetIndex].ex[picked];if(n*m===SAMEX[targetIndex].t[0]&&!found.includes(picked))found.push(picked);
     draw();
   });
   draw();

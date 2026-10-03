@@ -1,34 +1,37 @@
 /* Learn Extending Operations to Fractions (Grade 4 Unit 3), chapter 3: Add fractions. Its widgets and steps; loaded by add.html. */
-/* break a fraction into two parts: the first g parts gold, the rest blue */
+/* the fractions to break apart */
 const WHOLE=[[5,6],[7,8],[4,5],[6,10]];
+/* Break n/d into two parts: a stepper sets how many of the parts are gold, and the rest are blue. */
 function wSplit(el){
-  const q=Q(el),st={g:2},lim={g:[1,4]};let p=0;
+  /* the stepper's value: g gold parts, leaving at least 1 blue */
+  const q=Q(el),values={g:2},limits={g:[1,4]};let fracIndex=0;
   el.innerHTML=seg('Fraction',WHOLE.map(([n,d],i)=>[i,fr(n,d)]))+`<div class="fig" data-f></div><div class="wrow">${stepper('g','Gold parts')}</div><p class="eq" data-e></p><p class="readout" data-r></p>`;
   const draw=()=>{
-    const [n,d]=WHOLE[p],g=st.g;press(el,p);q('g').textContent=g;
-    q('f').innerHTML=strips([{d,k:n,grp:[g,n-g],lab:[n,d]}],{label:`${n}/${d}: ${g} ${PART[d][g>1?1:0]} gold and ${n-g} blue`});
-    q('e').innerHTML=`${fr(n,d)} = ${fr(g,d)} + ${fr(n-g,d)}`;
-    q('r').innerHTML=`${partName(d,g)} and ${partName(d,n-g)} make ${partName(d,n)}: ${g} + ${n-g} = ${n}.`
+    const [n,d]=WHOLE[fracIndex],gold=values.g;press(el,fracIndex);q('g').textContent=gold;
+    q('f').innerHTML=strips([{d,k:n,grp:[gold,n-gold],lab:[n,d]}],{label:`${n}/${d}: ${gold} ${PART[d][gold>1?1:0]} gold and ${n-gold} blue`});
+    q('e').innerHTML=`${fr(n,d)} = ${fr(gold,d)} + ${fr(n-gold,d)}`;
+    q('r').innerHTML=`${partName(d,gold)} and ${partName(d,n-gold)} make ${partName(d,n)}: ${gold} + ${n-gold} = ${n}.`
       +`<br><span class="dimline">In unit fractions: ${fr(n,d)} = ${range(n).map(()=>fr(1,d)).join(' + ')}</span>`;
   };
-  steppers(el,st,lim,draw);
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){p=+b.dataset.m;lim.g[1]=WHOLE[p][0]-1;st.g=Math.min(st.g,lim.g[1]);draw();}});
+  steppers(el,values,limits,draw);
+  el.addEventListener('click',e=>{const fracBtn=e.target.closest('[data-m]');if(fracBtn){fracIndex=+fracBtn.dataset.m;limits.g[1]=WHOLE[fracIndex][0]-1;values.g=Math.min(values.g,limits.g[1]);draw();}});
   draw();
 }
-/* a/d + b/d: gold jumps, then blue jumps, on a number line to 2 */
+/* the denominators to add in */
 const AD=[3,4,5,6,8,10];
+/* a/d + b/d on a number line to 2: a gold hops, then b blue hops (a stepper for each). */
 function wAdd(el){
-  const q=Q(el),st={a:3,b:2},lim={a:[1,5],b:[1,5]};let d=5;
+  const q=Q(el),values={a:3,b:2},limits={a:[1,5],b:[1,5]};let d=5;
   el.innerHTML=seg('Parts',AD.map(v=>[v,PART[v][1]]))+`<div class="fig" data-f></div><div class="wrow">${stepper('a','First')}${stepper('b','Add')}</div><p class="eq" data-e></p><p class="readout" data-r></p>`;
   const draw=()=>{
-    const {a,b}=st,s=a+b;press(el,d);q('a').textContent=a;q('b').textContent=b;
-    q('f').innerHTML=fracLine([{d,hops:[[0,a],[a,s,'q']],pts:[{k:s}]}],{wholes:2,label:`Number line from 0 to 2 in ${PART[d][1]}: ${a} gold hops, then ${b} blue hops, landing on ${s}/${d}`});
-    q('e').innerHTML=`${fr(a,d)} + ${fr(b,d)} = ${frMix(s,d)}`;
-    q('r').innerHTML=`${partName(d,a)} and ${partName(d,b)} more is <b>${partName(d,s)}</b>. ${vsWhole(s,d)}`
-      +`<br><span class="dimline">Add the top numbers: ${a} + ${b} = ${s}. The bottom number stays ${d}: the parts are still ${PART[d][1]}.</span>`;
+    const {a,b}=values,sum=a+b;press(el,d);q('a').textContent=a;q('b').textContent=b;
+    q('f').innerHTML=fracLine([{d,hops:[[0,a],[a,sum,'q']],pts:[{k:sum}]}],{wholes:2,label:`Number line from 0 to 2 in ${PART[d][1]}: ${a} gold hops, then ${b} blue hops, landing on ${sum}/${d}`});
+    q('e').innerHTML=`${fr(a,d)} + ${fr(b,d)} = ${frMix(sum,d)}`;
+    q('r').innerHTML=`${partName(d,a)} and ${partName(d,b)} more is <b>${partName(d,sum)}</b>. ${vsWhole(sum,d)}`
+      +`<br><span class="dimline">Add the top numbers: ${a} + ${b} = ${sum}. The bottom number stays ${d}: the parts are still ${PART[d][1]}.</span>`;
   };
-  steppers(el,st,lim,draw);
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){d=+b.dataset.m;lim.a[1]=lim.b[1]=d;st.a=Math.min(st.a,d);st.b=Math.min(st.b,d);draw();}});
+  steppers(el,values,limits,draw);
+  el.addEventListener('click',e=>{const denBtn=e.target.closest('[data-m]');if(denBtn){d=+denBtn.dataset.m;limits.a[1]=limits.b[1]=d;values.a=Math.min(values.a,d);values.b=Math.min(values.b,d);draw();}});
   draw();
 }
 /* the quick checks' figures */

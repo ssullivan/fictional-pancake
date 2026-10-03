@@ -1,40 +1,51 @@
 /* Learn Factors and Multiples (Grade 4 Unit 1), chapter 4: Common multiples and lockers. Its widgets and steps; loaded by common-multiples.html. */
+/* the pairs of numbers to find common multiples of */
 const TWO=[[3,4],[4,6],[5,10],[6,8]];
+/* Color the multiples of a and of b on a chart to 100; with both on, the green squares are the common multiples. */
 function wCommon(el){
-  const q=Q(el);let p=0,on={a:true,b:false};
+  /* shown: which of the two numbers' multiples are colored */
+  const q=Q(el);let pairIndex=0,shown={a:true,b:false};
   el.innerHTML=seg('Numbers',TWO.map(([a,b],i)=>[i,`${a} and ${b}`]))+`<div class="chips" data-c></div><div class="fig" data-f></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const [a,b]=TWO[p],both=range(100).map(i=>i+1).filter(v=>v%a===0&&v%b===0);press(el,p);
-    q('c').innerHTML=[['a',a],['b',b]].map(([k,v])=>`<button type="button" class="chip" data-s="${k}" aria-pressed="${on[k]}">Multiples of ${v}</button>`).join('');
-    q('f').innerHTML=chart(100,v=>{const x=on.a&&v%a===0,y=on.b&&v%b===0;return x&&y?'ab':x?'a':y?'b':'';},{label:`Numbers 1 to 100, showing multiples of ${on.a?a:''}${on.a&&on.b?' and ':''}${on.b?b:''}`});
-    q('r').innerHTML=on.a&&on.b?`<span class="ok">Green squares are multiples of both: <b>${list(both)}</b>.</span><br>These are <b>common multiples</b> of ${a} and ${b}. The first one is <b>${both[0]}</b>.`
-      :`${on.a?`Gold is multiples of ${a}. `:''}${on.b?`Blue is multiples of ${b}. `:''}<span class="dimline">Turn on both to see the numbers that are multiples of ${a} and ${b}.</span>`;
+    const [a,b]=TWO[pairIndex],both=range(100).map(i=>i+1).filter(v=>v%a===0&&v%b===0);press(el,pairIndex);
+    q('c').innerHTML=[['a',a],['b',b]].map(([key,v])=>`<button type="button" class="chip" data-s="${key}" aria-pressed="${shown[key]}">Multiples of ${v}</button>`).join('');
+    q('f').innerHTML=chart(100,v=>{const ofA=shown.a&&v%a===0,ofB=shown.b&&v%b===0;return ofA&&ofB?'ab':ofA?'a':ofB?'b':'';},{label:`Numbers 1 to 100, showing multiples of ${shown.a?a:''}${shown.a&&shown.b?' and ':''}${shown.b?b:''}`});
+    q('r').innerHTML=shown.a&&shown.b?`<span class="ok">Green squares are multiples of both: <b>${list(both)}</b>.</span><br>These are <b>common multiples</b> of ${a} and ${b}. The first one is <b>${both[0]}</b>.`
+      :`${shown.a?`Gold is multiples of ${a}. `:''}${shown.b?`Blue is multiples of ${b}. `:''}<span class="dimline">Turn on both to see the numbers that are multiples of ${a} and ${b}.</span>`;
   };
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){p=+b.dataset.m;on={a:true,b:false};draw();return;}const s=e.target.closest('[data-s]');if(s){on[s.dataset.s]=!on[s.dataset.s];draw();}});
+  el.addEventListener('click',e=>{
+    const pairBtn=e.target.closest('[data-m]');if(pairBtn){pairIndex=+pairBtn.dataset.m;shown={a:true,b:false};draw();return;}
+    const chip=e.target.closest('[data-s]');if(chip){shown[chip.dataset.s]=!shown[chip.dataset.s];draw();}
+  });
   draw();
 }
+/* The Locker Problem: student k changes every kth locker. Step through the students, and tap a locker to see who changed it. */
 function wLockers(el){
-  const q=Q(el);let s=0,sel=null,open=[];
+  /* students: how many have gone; picked: the locker tapped; open[v]: locker v is open */
+  const q=Q(el);let students=0,picked=null,open=[];
   el.innerHTML=`<div class="fig" data-f></div><div class="wrow"><button type="button" class="btn" data-go></button><button type="button" class="ghost-btn" data-end>All the rest</button><button type="button" class="ghost-btn" data-clr>Start over</button></div><p class="readout" data-r></p>`;
+  /* the lockers student k changes: the multiples of k up to 20 */
   const touched=k=>range(Math.floor(20/k)).map(i=>(i+1)*k);
   const draw=()=>{
-    q('f').innerHTML=lockers(open,{hi:s&&s<20?touched(s):[],sel});
-    q('go').textContent=s<20?`Student ${s+1} goes`:'Everyone is done';q('go').disabled=s===20;q('end').disabled=s===20;
-    let r=!s?'All 20 lockers are closed. Student 1 opens every locker. Student 2 changes every 2nd locker, student 3 every 3rd, and so on.'
-      :s<20?`Student ${s} changed lockers <b>${list(touched(s))}</b>. <span class="dimline">(the multiples of ${s})</span>`
+    q('f').innerHTML=lockers(open,{hi:students&&students<20?touched(students):[],sel:picked});
+    q('go').textContent=students<20?`Student ${students+1} goes`:'Everyone is done';q('go').disabled=students===20;q('end').disabled=students===20;
+    let readout=!students?'All 20 lockers are closed. Student 1 opens every locker. Student 2 changes every 2nd locker, student 3 every 3rd, and so on.'
+      :students<20?`Student ${students} changed lockers <b>${list(touched(students))}</b>. <span class="dimline">(the multiples of ${students})</span>`
       :`<span class="ok">All 20 students are done. Open lockers: <b>${list(range(20).map(i=>i+1).filter(v=>open[v]))}</b>.</span>`;
-    if(sel!==null){
-      const by=factors(sel).filter(f=>f<=s);
-      r+=`<br>Locker ${sel}: `+(by.length?`changed by student${by.length>1?'s':''} ${list(by)}`:'no one has changed it yet')
-        +(s===20?`. That’s ${by.length} changes, the factors of ${sel}, so it ends <b>${by.length%2?'open':'closed'}</b>.`:'.');
-    }else r+=`<br><span class="dimline">Tap a locker to see who changed it.</span>`;
-    q('r').innerHTML=r;
+    /* a picked locker was changed by the students whose numbers are its factors */
+    if(picked!==null){
+      const by=factors(picked).filter(f=>f<=students);
+      readout+=`<br>Locker ${picked}: `+(by.length?`changed by student${by.length>1?'s':''} ${list(by)}`:'no one has changed it yet')
+        +(students===20?`. That’s ${by.length} changes, the factors of ${picked}, so it ends <b>${by.length%2?'open':'closed'}</b>.`:'.');
+    }else readout+=`<br><span class="dimline">Tap a locker to see who changed it.</span>`;
+    q('r').innerHTML=readout;
   };
-  const step=()=>{s++;touched(s).forEach(v=>{open[v]=!open[v];});};
-  q('go').onclick=()=>{if(s<20)step();draw();};
-  q('end').onclick=()=>{while(s<20)step();draw();};
-  q('clr').onclick=()=>{s=0;sel=null;open=[];draw();};
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-v]');if(b){sel=+b.dataset.v;draw();}});
+  /* the next student goes */
+  const step=()=>{students++;touched(students).forEach(v=>{open[v]=!open[v];});};
+  q('go').onclick=()=>{if(students<20)step();draw();};
+  q('end').onclick=()=>{while(students<20)step();draw();};
+  q('clr').onclick=()=>{students=0;picked=null;open=[];draw();};
+  el.addEventListener('click',e=>{const locker=e.target.closest('[data-v]');if(locker){picked=+locker.dataset.v;draw();}});
   draw();
 }
 /* the quick checks' figures */

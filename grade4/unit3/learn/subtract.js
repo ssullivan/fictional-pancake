@@ -1,42 +1,46 @@
 /* Learn Extending Operations to Fractions (Grade 4 Unit 3), chapter 4: Subtract fractions. Its widgets and steps; loaded by subtract.html. */
-/* a/d − b/d: shade a parts, cross out the last b */
+/* the denominators to subtract in */
 const SD=[4,5,6,8,10];
+/* a/d − b/d: shade a parts and cross out the last b (a stepper for each; b stays at most a). */
 function wTake(el){
-  const q=Q(el),st={a:5,b:2},lim={a:[1,6],b:[0,5]};let d=6;
+  const q=Q(el),values={a:5,b:2},limits={a:[1,6],b:[0,5]};let d=6;
   el.innerHTML=seg('Parts',SD.map(v=>[v,PART[v][1]]))+`<div class="fig" data-f></div><div class="wrow">${stepper('a','Start with')}${stepper('b','Take away')}</div><p class="eq" data-e></p><p class="readout" data-r></p>`;
   const draw=()=>{
-    lim.b[1]=st.a;st.b=Math.min(st.b,st.a);
-    const {a,b}=st,r=a-b;press(el,d);q('a').textContent=a;q('b').textContent=b;
+    limits.b[1]=values.a;values.b=Math.min(values.b,values.a);
+    const {a,b}=values,left=a-b;press(el,d);q('a').textContent=a;q('b').textContent=b;
     q('f').innerHTML=strips([{d,k:a,out:b}],{label:`${a} ${PART[d][a>1?1:0]}, with ${b} crossed out`});
-    q('e').innerHTML=`${fr(a,d)} − ${fr(b,d)} = ${fr(r,d)}`;
-    q('r').innerHTML=(!b?`Nothing taken away yet: still ${partName(d,a)}.`:`Take ${partName(d,b)} away from ${partName(d,a)}: <b>${partName(d,r)}</b> ${r===1?'is':'are'} left.`+(r?'':' Nothing is left.'))
-      +`<br><span class="dimline">Subtract the top numbers: ${a} − ${b} = ${r}. The parts are still ${PART[d][1]}.</span>`;
+    q('e').innerHTML=`${fr(a,d)} − ${fr(b,d)} = ${fr(left,d)}`;
+    q('r').innerHTML=(!b?`Nothing taken away yet: still ${partName(d,a)}.`:`Take ${partName(d,b)} away from ${partName(d,a)}: <b>${partName(d,left)}</b> ${left===1?'is':'are'} left.`+(left?'':' Nothing is left.'))
+      +`<br><span class="dimline">Subtract the top numbers: ${a} − ${b} = ${left}. The parts are still ${PART[d][1]}.</span>`;
   };
-  steppers(el,st,lim,draw);
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){d=+b.dataset.m;lim.a[1]=d;st.a=Math.min(st.a,d);draw();}});
+  steppers(el,values,limits,draw);
+  el.addEventListener('click',e=>{const denBtn=e.target.closest('[data-m]');if(denBtn){d=+denBtn.dataset.m;limits.a[1]=d;values.a=Math.min(values.a,d);draw();}});
   draw();
 }
 /* a mixed number minus a fraction, with too few parts to take away: trade 1 whole for d parts first.
    [k, d, t]: k/d take away t/d */
 const TRADE=[[9,4,3],[8,6,5],[11,5,3],[19,8,5]];
+/* Trade 1 whole for d parts, then take away: a button for each. */
 function wTrade(el){
-  const q=Q(el);let p=0,traded=false,taken=false;
+  const q=Q(el);let problemIndex=0,traded=false,taken=false;
   el.innerHTML=seg('Problem',TRADE.map(([k,d,t],i)=>[i,`${mixed(k,d)} − ${fr(t,d)}`]))+`<div class="fig" data-f></div><div class="wrow"><button type="button" class="btn" data-tr>Trade 1 whole</button><button type="button" class="btn" data-tk></button><button type="button" class="ghost-btn" data-clr>Start over</button></div><p class="eq" data-e></p><p class="readout" data-r></p>`;
   const draw=()=>{
-    const [k,d,t]=TRADE[p],W=Math.floor(k/d),r=k%d,whole={d:1,k:1,parts:false};press(el,p);
-    const rows=traded?[...Array(W-1).fill(whole),{d,k:d+r,out:taken?t:0}]:[...Array(W).fill(whole),{d,k:r}];
-    q('f').innerHTML=strips(rows,{wholes:2,label:traded?`${W-1} whole${W-1===1?'':'s'} and ${d+r} ${PART[d][1]}`+(taken?`, with ${t} crossed out`:''):`${W} wholes and ${partName(d,r)}`});
+    const [k,d,t]=TRADE[problemIndex],wholes=Math.floor(k/d),rest=k%d,whole={d:1,k:1,parts:false};press(el,problemIndex);
+    /* after the trade, one whole is cut into d parts beside the rest */
+    const rows=traded?[...Array(wholes-1).fill(whole),{d,k:d+rest,out:taken?t:0}]:[...Array(wholes).fill(whole),{d,k:rest}];
+    q('f').innerHTML=strips(rows,{wholes:2,label:traded?`${wholes-1} whole${wholes-1===1?'':'s'} and ${d+rest} ${PART[d][1]}`+(taken?`, with ${t} crossed out`:''):`${wholes} wholes and ${partName(d,rest)}`});
     q('tr').disabled=traded;q('tk').disabled=!traded||taken;q('tk').innerHTML=`Take away ${fr(t,d)}`;
-    const now=`${W-1?`${W-1} and `:''}${fr(d+r,d)}`;
+    /* the number written after the trade: "1 and 7/4" */
+    const afterTrade=`${wholes-1?`${wholes-1} and `:''}${fr(d+rest,d)}`;
     q('e').innerHTML=`${mixed(k,d)} − ${fr(t,d)} = `+(taken?`<b>${mixed(k-t,d)}</b>`:'?');
-    q('r').innerHTML=!traded?`There ${r===1?'is':'are'} only ${partName(d,r)}: not enough to take away ${partName(d,t)}. Trade 1 whole for ${partName(d,d)}.`
-      :!taken?`1 whole is ${fr(d,d)}, so ${mixed(k,d)} is ${now}. Now there are ${partName(d,d+r)}: enough to take away ${t}.`
-      :`<span class="ok">${now} − ${fr(t,d)} = `+(W-1?`${W-1} and ${fr(d+r-t,d)}, and that’s <b>${mixed(k-t,d)}</b>`:`<b>${fr(d+r-t,d)}</b>`)+`.</span>`;
+    q('r').innerHTML=!traded?`There ${rest===1?'is':'are'} only ${partName(d,rest)}: not enough to take away ${partName(d,t)}. Trade 1 whole for ${partName(d,d)}.`
+      :!taken?`1 whole is ${fr(d,d)}, so ${mixed(k,d)} is ${afterTrade}. Now there are ${partName(d,d+rest)}: enough to take away ${t}.`
+      :`<span class="ok">${afterTrade} − ${fr(t,d)} = `+(wholes-1?`${wholes-1} and ${fr(d+rest-t,d)}, and that’s <b>${mixed(k-t,d)}</b>`:`<b>${fr(d+rest-t,d)}</b>`)+`.</span>`;
   };
   q('tr').onclick=()=>{traded=true;draw();};
   q('tk').onclick=()=>{if(traded)taken=true;draw();};
   q('clr').onclick=()=>{traded=taken=false;draw();};
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){p=+b.dataset.m;traded=taken=false;draw();}});
+  el.addEventListener('click',e=>{const problemBtn=e.target.closest('[data-m]');if(problemBtn){problemIndex=+problemBtn.dataset.m;traded=taken=false;draw();}});
   draw();
 }
 /* the quick checks' figures */

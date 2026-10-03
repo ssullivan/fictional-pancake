@@ -1,35 +1,43 @@
 /* Learn Fraction Equivalence and Comparison (Grade 4 Unit 2), chapter 3: Fractions on number lines. Its widgets and steps; loaded by number-lines.html. */
-/* tap a tick to name its fraction */
+/* the denominators to choose from */
 const LD=[2,3,4,6,8];
+/* A number line from 0 to 2 in d parts: tap a tick to name its fraction. */
 function wPoint(el){
+  /* k: the tick tapped, in parts from 0 (null before one is) */
   const q=Q(el);let d=4,k=null;
   el.innerHTML=seg('Equal parts',LD.map(v=>[v,PART[v][1]]))+`<div class="fig" data-f></div><p class="readout" data-r></p>`;
   const draw=()=>{
     press(el,d);
     q('f').innerHTML=fracLine([{d,tap:true,hops:k||0,pts:k===null?[]:[{k}]}],{wholes:2,label:`Number line from 0 to 2 in ${PART[d][1]}`+(k===null?'':`, with a point at ${k}/${d}`)});
-    const W=Math.floor(k/d),r=k%d;
+    const wholes=Math.floor(k/d),rest=k%d;
     q('r').innerHTML=k===null?`Each whole is cut into ${d} equal parts, so each jump is ${fr(1,d)}. Tap a tick mark.`
       :!k?`That’s 0: no jumps yet.`
-      :`This point is <b>${fr(k,d)}</b>: ${k} jump${k>1?'s':''} of ${fr(1,d)} from 0.<br>`+(k<d?'It’s less than 1.':!r?`<span class="ok">${fr(k,d)} = ${W}.</span>`:`<span class="ok">It’s more than 1: ${W} and ${fr(r,d)}.</span>`);
+      :`This point is <b>${fr(k,d)}</b>: ${k} jump${k>1?'s':''} of ${fr(1,d)} from 0.<br>`+(k<d?'It’s less than 1.':!rest?`<span class="ok">${fr(k,d)} = ${wholes}.</span>`:`<span class="ok">It’s more than 1: ${wholes} and ${fr(rest,d)}.</span>`);
   };
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){d=+b.dataset.m;k=null;draw();return;}const t=e.target.closest('[data-v]');if(t){k=+t.dataset.v;draw();}});
+  el.addEventListener('click',e=>{
+    const denBtn=e.target.closest('[data-m]');if(denBtn){d=+denBtn.dataset.m;k=null;draw();return;}
+    const tick=e.target.closest('[data-v]');if(tick){k=+tick.dataset.v;draw();}
+  });
   draw();
 }
-/* how close a fraction is to 0, 1/2, and 1 */
+/* fractions to place against the benchmarks 0, 1/2, and 1 */
 const BENCH=[[1,4],[3,8],[5,8],[4,6],[5,6],[7,10]];
+/* How close a fraction is to 0, 1/2, and 1, on a number line with 1/2 marked. */
 function wBench(el){
-  const q=Q(el);let p=0;
+  const q=Q(el);let fracIndex=0;
   el.innerHTML=seg('Fraction',BENCH.map((f,i)=>[i,frA(f)]))+`<div class="fig" data-f></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const [n,d]=BENCH[p],h=d/2,D=[[0,n],[1/2,Math.abs(n-h)],[1,d-n]],best=Math.min(...D.map(x=>x[1])),near=D.filter(x=>x[1]===best).map(x=>x[0]);press(el,p);
+    /* distances: [benchmark, distance from it in d parts]; closest: the benchmarks at the least distance */
+    const [n,d]=BENCH[fracIndex],half=d/2,distances=[[0,n],[1/2,Math.abs(n-half)],[1,d-n]],least=Math.min(...distances.map(x=>x[1])),
+      closest=distances.filter(x=>x[1]===least).map(x=>x[0]);press(el,fracIndex);
     const name=v=>v===1/2?fr(1,2):v;
     q('f').innerHTML=fracLine([{d,pts:[{k:n}]}],{marks:[{v:1/2,t:[1,2]}],label:`Number line from 0 to 1 in ${PART[d][1]}, with 1/2 marked and a point at ${n}/${d}`});
     q('r').innerHTML=`${halfWhy([n,d])}.<br>`
-      +(near.length>1?`It’s halfway between ${name(near[0])} and ${name(near[1])}: ${fr(best,d)} from each.`
-        :`<span class="ok">It’s closest to <b>${name(near[0])}</b>: just ${fr(best,d)} away.</span>`)
-      +`<br><span class="dimline">Distance to 0: ${fr(n,d)}. To ${fr(1,2)}: ${fr(Math.abs(n-h),d)}. To 1: ${fr(d-n,d)}.</span>`;
+      +(closest.length>1?`It’s halfway between ${name(closest[0])} and ${name(closest[1])}: ${fr(least,d)} from each.`
+        :`<span class="ok">It’s closest to <b>${name(closest[0])}</b>: just ${fr(least,d)} away.</span>`)
+      +`<br><span class="dimline">Distance to 0: ${fr(n,d)}. To ${fr(1,2)}: ${fr(Math.abs(n-half),d)}. To 1: ${fr(d-n,d)}.</span>`;
   };
-  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){p=+b.dataset.m;draw();}});
+  el.addEventListener('click',e=>{const fracBtn=e.target.closest('[data-m]');if(fracBtn){fracIndex=+fracBtn.dataset.m;draw();}});
   draw();
 }
 /* the quick checks' figures */

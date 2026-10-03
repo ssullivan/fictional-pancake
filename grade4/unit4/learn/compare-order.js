@@ -1,38 +1,43 @@
 /* Learn From Hundredths to Hundred-thousands (Grade 4 Unit 4), chapter 5: Compare and order. Its widgets and steps; loaded by compare-order.html. */
 /* the first place, from the left, where a and b have different digits (null if they're the same number) */
 const firstDiff=(a,b)=>WIDE.find(e=>digitAt(a,e)!==digitAt(b,e))??null;
-/* how a and b compare, place by place */
+/* how a and b compare, place by place (html) */
 function placeWhy(a,b){
-  const e=firstDiff(a,b),la=String(a).length,lb=String(b).length;
+  const e=firstDiff(a,b),lengthA=String(a).length,lengthB=String(b).length;
   if(e===null)return 'Every digit is the same.';
-  if(la!==lb){const [lo,hi]=a<b?[a,b]:[b,a];return `${commas(hi)} has ${Math.max(la,lb)} digits and ${commas(lo)} has only ${Math.min(la,lb)}: ${commas(hi)} has ${PL[e][1]}, and ${commas(lo)} has none.`;}
-  const da=digitAt(a,e),db=digitAt(b,e);
-  return `${e===la-1?'Start with the biggest place, the '+PLACE[e].toLowerCase():'The digits are the same until the '+PLACE[e].toLowerCase()}: ${da} ${PL[e][da===1?0:1]} is ${da<db?'less':'more'} than ${db}.`;
+  /* more digits means bigger */
+  if(lengthA!==lengthB){const [smaller,bigger]=a<b?[a,b]:[b,a];return `${commas(bigger)} has ${Math.max(lengthA,lengthB)} digits and ${commas(smaller)} has only ${Math.min(lengthA,lengthB)}: ${commas(bigger)} has ${PL[e][1]}, and ${commas(smaller)} has none.`;}
+  const digitA=digitAt(a,e),digitB=digitAt(b,e);
+  return `${e===lengthA-1?'Start with the biggest place, the '+PLACE[e].toLowerCase():'The digits are the same until the '+PLACE[e].toLowerCase()}: ${digitA} ${PL[e][digitA===1?0:1]} is ${digitA<digitB?'less':'more'} than ${digitB}.`;
 }
+/* a number for wSign: its value and how it's written */
 const nn=v=>({v,t:commas(v)});
+/* Pick <, =, or > for two big numbers, then see them in a place-value chart. */
 const wCmp=wSign([[nn(45302),nn(45230)],[nn(99000),nn(100000)],[nn(607000),nn(670000)],[nn(38500),nn(38050)]],{
   show:(a,b)=>pvChart([['',a.v],['',b.v]],WIDE.indexOf(firstDiff(a.v,b.v)),{places:WIDE}),
   why:(a,b)=>placeWhy(a.v,b.v)});
-/* tap numbers from least to greatest */
+/* sets of numbers to put in order */
 const SETS=[[70500,7050,75000,70050],[120100,99000,201000,102000],[36000,306000,63000,30600]];
+/* Tap numbers from least to greatest; each goes into a place-value chart, and a wrong tap says why. */
 function wOrder(el){
-  const q=Q(el);let p=0,done=[],miss=null;
+  /* placed: the numbers in order so far; miss: the last wrong tap */
+  const q=Q(el);let setIndex=0,placed=[],miss=null;
   el.innerHTML=seg('Set',SETS.map((_,i)=>[i,`Set ${i+1}`]))+`<div class="chips" data-c></div><div data-t></div><div class="wrow"><button type="button" class="ghost-btn" data-clr>Start over</button></div><p class="readout" data-r></p>`;
   const draw=()=>{
-    const S=SETS[p],left=S.filter(v=>!done.includes(v)),least=Math.min(...left);press(el,p);
-    q('c').innerHTML=S.map((v,i)=>`<button type="button" class="chip${done.includes(v)?' found':''}" data-i="${i}"${done.includes(v)?' disabled':''}>${commas(v)}</button>`).join('');
-    q('t').innerHTML=done.length?pvChart(done.map((v,i)=>[i+1,v]),-1,{places:WIDE}):'';
+    const set=SETS[setIndex],left=set.filter(v=>!placed.includes(v)),least=Math.min(...left);press(el,setIndex);
+    q('c').innerHTML=set.map((v,i)=>`<button type="button" class="chip${placed.includes(v)?' found':''}" data-i="${i}"${placed.includes(v)?' disabled':''}>${commas(v)}</button>`).join('');
+    q('t').innerHTML=placed.length?pvChart(placed.map((v,i)=>[i+1,v]),-1,{places:WIDE}):'';
     q('r').innerHTML=(miss!==null?`<span class="no">${commas(miss)} isn’t the least one left.</span> ${commas(least)} &lt; ${commas(miss)}. ${placeWhy(least,miss)}<br>`:'')
-      +(!left.length?`<span class="ok">In order: <b>${done.map(commas).join(', ')}</b>.</span>`:done.length?'Next: which is the least of the rest?':'Tap the numbers from least to greatest.');
+      +(!left.length?`<span class="ok">In order: <b>${placed.map(commas).join(', ')}</b>.</span>`:placed.length?'Next: which is the least of the rest?':'Tap the numbers from least to greatest.');
   };
   el.addEventListener('click',e=>{
-    const b=e.target.closest('[data-m]');if(b){p=+b.dataset.m;done=[];miss=null;draw();return;}
-    const t=e.target.closest('[data-i]');if(!t||t.disabled)return;
-    const v=SETS[p][+t.dataset.i],left=SETS[p].filter(x=>!done.includes(x));
-    if(v===Math.min(...left)){done.push(v);miss=null;}else miss=v;
+    const setBtn=e.target.closest('[data-m]');if(setBtn){setIndex=+setBtn.dataset.m;placed=[];miss=null;draw();return;}
+    const chip=e.target.closest('[data-i]');if(!chip||chip.disabled)return;
+    const v=SETS[setIndex][+chip.dataset.i],left=SETS[setIndex].filter(x=>!placed.includes(x));
+    if(v===Math.min(...left)){placed.push(v);miss=null;}else miss=v;
     draw();
   });
-  q('clr').onclick=()=>{done=[];miss=null;draw();};
+  q('clr').onclick=()=>{placed=[];miss=null;draw();};
   draw();
 }
 const STEPS=[

@@ -84,15 +84,16 @@
 <script src="../../shared/util.js?v=661dbbe0"></script>
 <script src="../../shared/figures.js?v=f7616b1b"></script>
 <script src="../../shared/multiply.js?v=6cd3ac57"></script>
-<script src="figs.js?v=3814a460"></script>
+<script src="figs.js?v=c2052281"></script>
 <script src="../../shared/engine.js?v=f20ed8cf"></script>
-<script src="stations.js?v=571defb0"></script>
+<script src="stations.js?v=3fb0577e"></script>
 <script>
 /* the Mega-Bot in the final round: one battery cell charges for each right answer */
-let lit=0;
-function drawPower(G,hit){
-  const el=$('power');el.hidden=G.z.id!=='boss';if(el.hidden)return;
-  el.innerHTML=`<svg viewBox="0 0 64 64" role="img" aria-label="${lit} of 10 cells charged">${bot(lit)}</svg><div><b>${lit} of 10 cells charged</b><p>${lit===10?'Fully charged. The Mega-Bot is alive!':hit?'Right! Another cell charges up.':'Answer right to charge a cell.'}</p></div>`;
+let cells=0;
+/* the Mega-Bot beside a boss problem (hidden at the other stations); hit: the last answer was right */
+function drawPower(state,hit){
+  const el=$('power');el.hidden=state.z.id!=='boss';if(el.hidden)return;
+  el.innerHTML=`<svg viewBox="0 0 64 64" role="img" aria-label="${cells} of 10 cells charged">${bot(cells)}</svg><div><b>${cells} of 10 cells charged</b><p>${cells===10?'Fully charged. The Mega-Bot is alive!':hit?'Right! Another cell charges up.':'Answer right to charge a cell.'}</p></div>`;
   el.classList.toggle('hit',!!hit);
 }
 Game.init({
@@ -106,8 +107,9 @@ Game.init({
     stuck:'Use “Show me a hint” when you’re stuck. It shows the picture from class.',
     tap:'Tap your answer in the chart.'
   },
-  onQuestion:G=>{if(G.i===0)lit=0;drawPower(G,false);},
-  onAnswer:(G,ok)=>{if(ok)lit++;drawPower(G,ok);}
+  /* the battery empties at the start of a round */
+  onQuestion:state=>{if(state.i===0)cells=0;drawPower(state,false);},
+  onAnswer:(state,ok)=>{if(ok)cells++;drawPower(state,ok);}
 });
 </script>
 </body>
