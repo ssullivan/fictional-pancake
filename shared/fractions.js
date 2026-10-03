@@ -12,21 +12,31 @@
    stack: a row's wholes go one under another, each as wide as the picture, instead of side by side.
    empty: draw all `wholes` wholes in every row, the ones not reached yet unshaded. */
 function strips(rows,{wholes=0,stack=false,empty=false,W=560,label}={}){
-  const nW=r=>Math.max(1,Math.ceil(r.k/r.d)),M=Math.max(wholes,...rows.map(nW)),L=rows.some(r=>r.lab)?54:4,G=M>1&&!stack?14:0,
-    U=stack?W-L-4:(W-L-4-G*(M-1))/M,H=50,RG=12,lines=stack?M:1;
-  let o='';
+  /* wholesIn(r): how many wholes row r needs for k parts (at least 1); every row gets room for maxWholes */
+  const wholesIn=r=>Math.max(1,Math.ceil(r.k/r.d)),maxWholes=Math.max(wholes,...rows.map(wholesIn)),
+    labelW=rows.some(r=>r.lab)?54:4,wholeGap=maxWholes>1&&!stack?14:0,
+    /* the width of one whole: all of it when stacked, or a share of it side by side */
+    wholeW=stack?W-labelW-4:(W-labelW-4-wholeGap*(maxWholes-1))/maxWholes,
+    stripH=50,rowGap=12,stripsPerRow=stack?maxWholes:1;
+  let markup='';
   rows.forEach((r,ri)=>{
-    const y0=4+ri*lines*(H+RG),p=U/r.d,ends=Array.isArray(r.grp)?r.grp.map((g,i)=>r.grp.slice(0,i+1).reduce((a,b)=>a+b)):null,
-      blue=j=>r.grp&&(ends?ends.findIndex(e=>j<e):Math.floor(j/r.grp))%2===1;
-    if(r.lab)o+=frT(L/2-2,y0+H/2,...r.lab);
-    range(empty?M:nW(r)).forEach(w=>range(r.d).forEach(i=>{
-      const x=L+(stack?0:w*(U+G))+i*p,y=y0+(stack?w*(H+RG):0),j=w*r.d+i,on=j<r.k,gone=on&&j>=r.k-(r.out||0);
-      o+=`<rect class="fs${on?' on '+(blue(j)?'b':r.cls||''):''}${gone?' gone':''}" x="${x}" y="${y}" width="${p}" height="${H}"/>`;
-      if(r.parts!==false&&p>=30)o+=frT(x+p/2,y+H/2,1,r.d,on&&!gone?'dk':'');
-      if(gone)o+=xOut(x+p/2-8,y+H/2-8,16,16);
+    const rowTop=4+ri*stripsPerRow*(stripH+rowGap),partW=wholeW/r.d,
+      /* with a list of group sizes, where each group ends ([2, 3] ends at 2 and 5) */
+      groupEnds=Array.isArray(r.grp)?r.grp.map((g,i)=>r.grp.slice(0,i+1).reduce((a,b)=>a+b)):null,
+      /* part j is blue when it's in an odd-numbered group (the 2nd, 4th, …) */
+      blue=j=>r.grp&&(groupEnds?groupEnds.findIndex(e=>j<e):Math.floor(j/r.grp))%2===1;
+    if(r.lab)markup+=frT(labelW/2-2,rowTop+stripH/2,...r.lab);
+    range(empty?maxWholes:wholesIn(r)).forEach(w=>range(r.d).forEach(i=>{
+      /* part i of whole w is part j of the row; the first k are shaded, and the last `out` of those are taken away */
+      const x=labelW+(stack?0:w*(wholeW+wholeGap))+i*partW,y=rowTop+(stack?w*(stripH+rowGap):0),j=w*r.d+i,
+        shaded=j<r.k,gone=shaded&&j>=r.k-(r.out||0);
+      markup+=`<rect class="fs${shaded?' on '+(blue(j)?'b':r.cls||''):''}${gone?' gone':''}" x="${x}" y="${y}" width="${partW}" height="${stripH}"/>`;
+      /* write 1/d in a part when it's wide enough to fit */
+      if(r.parts!==false&&partW>=30)markup+=frT(x+partW/2,y+stripH/2,1,r.d,shaded&&!gone?'dk':'');
+      if(gone)markup+=xOut(x+partW/2-8,y+stripH/2-8,16,16);
     }));
   });
-  return svgWrap(W,8+rows.length*lines*(H+RG)-RG,o,label||'Fraction strips: '+rows.map(r=>`${r.k} ${PART[r.d][r.k===1?0:1]}`).join(', '));
+  return svgWrap(W,8+rows.length*stripsPerRow*(stripH+rowGap)-rowGap,markup,label||'Fraction strips: '+rows.map(r=>`${r.k} ${PART[r.d][r.k===1?0:1]}`).join(', '));
 }
 /* Number lines from 0 to `wholes`, one under another, lined up. rows: [{d, pts, hops, tap, labs}]: a tick every 1/d (tall at whole
    numbers, which get their number); labs: every tick gets its fraction; pts: [{k, cls}] dots at k/d ('b' blue, 'g' green);
@@ -34,29 +44,49 @@ function strips(rows,{wholes=0,stack=false,empty=false,W=560,label}={}){
    tap: each tick can be tapped (data-v = its k, data-r = the row).
    marks: [{v, t}] a dashed line through every row at v (in wholes), with t ([n, d] or text) above it. */
 function fracLine(rows,{wholes=1,W=480,marks=[],label}={}){
-  const X=26,U=(W-2*X)/wholes,top=marks.length?44:rows[0].hops&&rows[0].hops.length!==0?34:18,RH=rows.some(r=>r.labs)?84:64,x=v=>X+v*U,Y=i=>top+18+i*RH;
-  let o='';
-  marks.forEach(({v,t})=>{o+=`<line class="guide" x1="${x(v)}" y1="${top-4}" x2="${x(v)}" y2="${Y(rows.length-1)+14}"/>`+(Array.isArray(t)?frT(x(v),top-22,...t,'cy'):`<text class="lbl s cy" x="${x(v)}" y="${top-16}">${t}</text>`);});
-  rows.forEach((r,ri)=>{
-    const y=Y(ri),n=r.d*wholes;
-    o+=`<line class="axis" x1="${x(0)-6}" y1="${y}" x2="${x(wholes)+6}" y2="${y}"/>`;
-    range(n+1).forEach(k=>{
-      const whole=k%r.d===0,tx=x(k/r.d);
-      o+=`<line class="tick" x1="${tx}" y1="${y-(whole?11:7)}" x2="${tx}" y2="${y+(whole?11:7)}"/>`;
-      if(r.labs&&k)o+=frT(tx,y+32,k,r.d);
-      else if(whole)o+=`<text class="lbl" x="${tx}" y="${y+26}">${k/r.d}</text>`;
-    });
-    (Array.isArray(r.hops)?r.hops:[[0,r.hops||0,'']]).forEach(([f,t,c=''])=>range(t-f).forEach(i=>{const a=x((f+i)/r.d),b=x((f+i+1)/r.d);o+=`<path class="hop${c?' '+c:''}" d="M${a},${y-3}Q${(a+b)/2},${y-3-Math.min(40,(b-a)*.8)} ${b},${y-3}"/>`;}));
-    (r.pts||[]).forEach(({k,cls=''})=>{o+=`<circle class="pt ${cls}" cx="${x(k/r.d)}" cy="${y}" r="8"/>`;});
-    if(r.tap)range(n+1).forEach(k=>{const w=U/r.d;o+=`<rect class="hit" data-r="${ri}" data-v="${k}" x="${x(k/r.d)-w/2}" y="${y-24}" width="${w}" height="48"/>`;});
+  /* room above the first line: for marks' labels, or the first row's hops; rows with fractions under every tick are taller */
+  const left=26,wholeW=(W-2*left)/wholes,
+    topRoom=marks.length?44:rows[0].hops&&rows[0].hops.length!==0?34:18,rowH=rows.some(r=>r.labs)?84:64,
+    /* xOf(v): where v (in wholes) is; lineY(i): the height of row i's line */
+    xOf=v=>left+v*wholeW,lineY=i=>topRoom+18+i*rowH;
+  let markup='';
+  marks.forEach(({v,t})=>{
+    markup+=`<line class="guide" x1="${xOf(v)}" y1="${topRoom-4}" x2="${xOf(v)}" y2="${lineY(rows.length-1)+14}"/>`
+      +(Array.isArray(t)?frT(xOf(v),topRoom-22,...t,'cy'):`<text class="lbl s cy" x="${xOf(v)}" y="${topRoom-16}">${t}</text>`);
   });
-  return svgWrap(W,Y(rows.length-1)+RH-26,o,label||`Number line${rows.length>1?'s':''} from 0 to ${wholes}`);
+  rows.forEach((r,ri)=>{
+    const y=lineY(ri),ticks=r.d*wholes;
+    markup+=`<line class="axis" x1="${xOf(0)-6}" y1="${y}" x2="${xOf(wholes)+6}" y2="${y}"/>`;
+    range(ticks+1).forEach(k=>{
+      const whole=k%r.d===0,tickX=xOf(k/r.d);
+      markup+=`<line class="tick" x1="${tickX}" y1="${y-(whole?11:7)}" x2="${tickX}" y2="${y+(whole?11:7)}"/>`;
+      if(r.labs&&k)markup+=frT(tickX,y+32,k,r.d);
+      else if(whole)markup+=`<text class="lbl" x="${tickX}" y="${y+26}">${k/r.d}</text>`;
+    });
+    /* hops as [[from, to, cls], …]; a number n means n hops from 0 */
+    const hopRuns=Array.isArray(r.hops)?r.hops:[[0,r.hops||0,'']];
+    hopRuns.forEach(([from,to,cls=''])=>range(to-from).forEach(i=>{
+      /* one jump of 1/d, an arc as high as 0.8 of its width (up to 40) */
+      const xa=xOf((from+i)/r.d),xb=xOf((from+i+1)/r.d);
+      markup+=`<path class="hop${cls?' '+cls:''}" d="M${xa},${y-3}Q${(xa+xb)/2},${y-3-Math.min(40,(xb-xa)*.8)} ${xb},${y-3}"/>`;
+    }));
+    (r.pts||[]).forEach(({k,cls=''})=>{markup+=`<circle class="pt ${cls}" cx="${xOf(k/r.d)}" cy="${y}" r="8"/>`;});
+    /* tap targets: a box around each tick, 1/d wide */
+    if(r.tap)range(ticks+1).forEach(k=>{
+      const boxW=wholeW/r.d;
+      markup+=`<rect class="hit" data-r="${ri}" data-v="${k}" x="${xOf(k/r.d)-boxW/2}" y="${y-24}" width="${boxW}" height="48"/>`;
+    });
+  });
+  return svgWrap(W,lineY(rows.length-1)+rowH-26,markup,label||`Number line${rows.length>1?'s':''} from 0 to ${wholes}`);
 }
 /* A hundred grid: 1 whole cut into 10 columns (tenths) of 10 squares (hundredths). cells: a class for each square filled, column by
    column from the top left ('a' gold, 'b' blue), like cellsOf([30, 'a'], [25, 'b']). */
 function hundredGrid(cells,{label}={}){
-  const C=26,X=4;let o='';
-  range(100).forEach(i=>{const c=cells[i];o+=`<rect class="hg${c?' '+c:''}" x="${X+Math.floor(i/10)*C}" y="${X+i%10*C}" width="${C}" height="${C}"/>`;});
-  o+=range(9).map(i=>`<line class="hgt" x1="${X+(i+1)*C}" y1="${X}" x2="${X+(i+1)*C}" y2="${X+10*C}"/>`).join('')+`<rect class="hgw" x="${X}" y="${X}" width="${10*C}" height="${10*C}"/>`;
-  return svgWrap(10*C+2*X,10*C+2*X,o,label||`A hundred grid with ${cells.filter(Boolean).length} of 100 squares shaded`);
+  const cellSize=26,margin=4;let markup='';
+  /* square i is in column i ÷ 10, row i % 10 */
+  range(100).forEach(i=>{const cls=cells[i];markup+=`<rect class="hg${cls?' '+cls:''}" x="${margin+Math.floor(i/10)*cellSize}" y="${margin+i%10*cellSize}" width="${cellSize}" height="${cellSize}"/>`;});
+  /* heavier lines between the tenths, then the outline of the whole */
+  markup+=range(9).map(i=>`<line class="hgt" x1="${margin+(i+1)*cellSize}" y1="${margin}" x2="${margin+(i+1)*cellSize}" y2="${margin+10*cellSize}"/>`).join('')
+    +`<rect class="hgw" x="${margin}" y="${margin}" width="${10*cellSize}" height="${10*cellSize}"/>`;
+  return svgWrap(10*cellSize+2*margin,10*cellSize+2*margin,markup,label||`A hundred grid with ${cells.filter(Boolean).length} of 100 squares shaded`);
 }

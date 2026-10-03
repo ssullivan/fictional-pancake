@@ -85,7 +85,14 @@ const CALLS = {
     `numLine(0, 20, {arrows: [{a: 0, b: 8}, {a: 8, b: 13, lv: 1, q: 1}], shown: false})`, `numLine(0, 20, {arrows: [{a: 4, b: 8, q: 1}], shown: true})`,
     `numLine(0, 20, {hops: [{a: 2, b: 9, t: '+7'}, {a: 9, b: 4, t: '−5', q: 1}]})`, `numLine(0, 20, {pts: [{v: 3}, {v: 12, cls: 'b', t: 12}, {v: 14, t: 'x'}]})`,
     'numLine(0, 10, {tap: true})', `numLine(0, 100, {step: 10, big: 50, tap: 'cand', lab: v => v % 20 === 0})`,
-    'jumps(45, [-3, -5, -10])', 'jumps(45, [10, 3, -1], 2)', 'jumps(20, [5, 5], 2, true)', 'jumps(8, [2], 0)',
+    `numLine(10, 30, {u: 15.3, step: 2, big: 10, end: true, pts: [{v: 20, t: 20}, {v: 21, cls: 'b'}], hops: [{a: 10, b: 30, t: 20}],
+      arrows: [{a: 0, b: 12}, {a: 12, b: 26, lv: 2, q: 1}], shown: true, tap: 'cand'})`,
+    `numLine(-5, 5, {u: 33, pts: [{v: -2, t: '−2', cls: 'b'}, {v: 4, t: 4}], hops: [{a: 5, b: -5, t: '−10', q: 1}, {a: -1, b: 0, t: '+1'}]})`,
+    `numLine(0, 1000, {step: 100, big: 500, fmt: v => v + 'k', ls: '', pad: 40, arrows: [{a: 200, b: 700, lv: 0}]})`,
+    'jumps(45, [-3, -5, -10])', 'jumps(45, [10, 3, -1], 2)', 'jumps(20, [5, 5], 2, true)', 'jumps(8, [2], 0)', 'jumps(8, [2], 0, true)',
+    'jumps(100, [-30, -4, 10, 1], 4, true)', 'jumps(3, [1, 1, 1, 1, 1, 1])',
+    `tapes([{label: 'A', n: 5, show: 5}, {label: 'B', n: 5, show: 5}], {diff: 'diff'})`, `tapes([{label: 'Long label', n: 1, show: '?'}, {label: 'B', n: 13, show: 13}], {diff: '?'})`,
+    `partWhole([{n: 7, show: 7}], '?')`, `partWhole([{n: 1, show: 1, hi: 1}, {n: 99, show: 99}], 100)`,
   ],
   fractions: [
     `strips([{d: 4, k: 3}])`, `strips([{d: 3, k: 5, cls: 'b', lab: [5, 3]}, {d: 6, k: 2, parts: false}], {wholes: 2})`,
@@ -93,6 +100,10 @@ const CALLS = {
     `strips([{d: 4, k: 7, cls: 'g'}], {stack: true, empty: true, wholes: 3})`, `strips([{d: 12, k: 5, out: 2}], {empty: true, wholes: 2})`,
     `fracLine([{d: 4}])`, `fracLine([{d: 3, pts: [{k: 2}, {k: 4, cls: 'b'}], labs: true}, {d: 6, hops: 4, tap: true}], {wholes: 2, W: 520})`,
     `fracLine([{d: 4, hops: [[0, 3, 'q'], [3, 5]]}], {wholes: 2, marks: [{v: 0.75, t: [3, 4]}, {v: 1.5, t: 'here'}]})`, `fracLine([{d: 2, hops: 0}], {label: 'L'})`,
+    `strips([{d: 2, k: 1, lab: [1, 2]}, {d: 4, k: 2, lab: [2, 4]}, {d: 8, k: 4, lab: [4, 8]}])`, `strips([{d: 6, k: 6, grp: 3}, {d: 5, k: 12, grp: [4, 4, 4], out: 2, cls: 'b'}])`,
+    `strips([{d: 3, k: 8, out: 4}, {d: 12, k: 9, parts: false}], {stack: true, wholes: 3, W: 400})`, `strips([{d: 100, k: 37}])`,
+    `fracLine([{d: 8, labs: true, pts: [{k: 3, cls: 'g'}], hops: [[1, 4, ''], [4, 6, 'q']], tap: true}, {d: 4, pts: [{k: 7}]}], {wholes: 3, W: 600, marks: [{v: 2, t: '2'}]})`,
+    `fracLine([{d: 3, hops: 5}, {d: 6, labs: true}, {d: 12}], {wholes: 2})`,
     `hundredGrid(cellsOf([30, 'a'], [25, 'b']))`, `hundredGrid([], {label: 'Empty'})`, `hundredGrid(cellsOf([100, 'a']))`,
   ],
   graphs: [
@@ -101,6 +112,10 @@ const CALLS = {
     ...each(['{}', `{hi: 1, title: 'Weather', scale: 2, unit: '2 days'}`, `{tap: true, max: 12}`, `{tap: 'cand', scale: 5}`], o =>
       [`picGraph([{label: 'Sunny', n: 7, pic: 'sun'}, {label: 'Cloudy', n: 4, pic: 'cloud'}, {label: 'Rainy', n: 5, pic: 'rain'}], ${o})`]),
     `picGraph([{label: 'A', n: 3, pic: 'note', c: 'b'}, {label: 'Bee', n: 6, pic: 'dot', c: 'a'}], {scale: 2})`,
+    `picGraph([{label: 'Strawberry', n: 15, pic: 'dot', c: 'b'}, {label: 'Kiwi', n: 0, pic: 'note', c: 'a'}, {label: 'Fig', n: 25, pic: 'sun'}], {scale: 10, unit: '10 votes', hi: 2, title: 'A rather long title for this graph', tap: 'cand'})`,
+    `lineplot({8: 1, 9: 6, 11: 2}, 8, 12, {d: 8, tap: true, mark: 11, unit: 'pounds', u: 64})`, `lineplot({}, 0, 5, {diff: [1, 4]})`,
+    `barGraph([{label: 'Red', n: 35, c: 'a'}, {label: 'Blue', n: 50, c: 'b'}], {max: 50, scale: 5, step: 1, uh: 20, edit: true, title: 'Votes', diff: [0, 1]})`,
+    `barGraph([{label: 'A', n: 3, c: 'a'}, {label: 'B', n: 7, c: 'b'}, {label: 'C', n: 7, c: 'c'}, {label: 'D', n: 1, c: 'a'}], {hi: 3, diff: [0, 2], showDiff: true, tap: true})`,
     ...each(['{}', `{max: 20, scale: 2, hi: 1, title: 'Pets'}`, `{max: 10, edit: true, step: 1, diff: [1, 0], showDiff: true}`,
       `{max: 100, scale: 10, uh: 18, hi: [0, 2], tap: true, diff: [2, 0]}`, `{max: 10, tap: 'cand'}`], o =>
       [`barGraph([{label: 'Cats', n: 8, c: 'a'}, {label: 'Dogs', n: 3, c: 'b'}, {label: 'Fish', n: 0, c: 'c'}], ${o})`]),

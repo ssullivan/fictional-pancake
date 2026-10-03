@@ -7,25 +7,35 @@
 /* Tape diagrams to compare two amounts. rows: [{label, n, show}] where show is the number to write (or '?').
    diff: label for the difference piece after the shorter tape, or null for none. */
 function tapes(rows,{diff=null}={}){
-  const big=Math.max(...rows.map(r=>r.n)),u=Math.min(16,300/big),L=78,H=34,W=L+big*u+60;
-  let o='';
+  /* unitW is pixels per 1, so the longest tape is at most 300 wide; the labels take labelW on the left */
+  const longest=Math.max(...rows.map(r=>r.n)),unitW=Math.min(16,300/longest),labelW=78,tapeH=34,width=labelW+longest*unitW+60;
+  let markup='';
   rows.forEach((r,i)=>{
-    const y=10+i*(H+18);
-    o+=`<text class="lbl en" x="${L-10}" y="${y+H/2}">${r.label}</text><rect class="tape t${i}" x="${L}" y="${y}" width="${r.n*u}" height="${H}" rx="4"/><text class="lbl" x="${L+r.n*u/2}" y="${y+H/2}">${r.show}</text>`;
-    if(diff!==null&&r.n<big)o+=`<rect class="tape gap" x="${L+r.n*u}" y="${y}" width="${(big-r.n)*u}" height="${H}" rx="4"/><text class="lbl cy" x="${L+(r.n+big)*u/2}" y="${y+H/2}">${diff}</text>`;
+    const y=10+i*(tapeH+18);
+    markup+=`<text class="lbl en" x="${labelW-10}" y="${y+tapeH/2}">${r.label}</text>`
+      +`<rect class="tape t${i}" x="${labelW}" y="${y}" width="${r.n*unitW}" height="${tapeH}" rx="4"/>`
+      +`<text class="lbl" x="${labelW+r.n*unitW/2}" y="${y+tapeH/2}">${r.show}</text>`;
+    /* a shorter tape gets a dashed piece out to the longest one's end: the difference */
+    if(diff!==null&&r.n<longest){
+      markup+=`<rect class="tape gap" x="${labelW+r.n*unitW}" y="${y}" width="${(longest-r.n)*unitW}" height="${tapeH}" rx="4"/>`
+        +`<text class="lbl cy" x="${labelW+(r.n+longest)*unitW/2}" y="${y+tapeH/2}">${diff}</text>`;
+    }
   });
-  return svgWrap(W,10+rows.length*(H+18),o,'Tape diagram');
+  return svgWrap(width,10+rows.length*(tapeH+18),markup,'Tape diagram');
 }
 /* One tape split into parts, with a bracket and the total above. parts: [{n, show, hi}] (show: the number to write, or '?';
    hi: outline that part), total: what to write above (a number or '?'), label: what the picture says to a screen reader. */
 function partWhole(parts,total,label='Tape diagram'){
-  const sum=parts.reduce((s,p)=>s+p.n,0),W=340,u=W/sum,X=10,Y=48,H=40;
-  let o=`<path class="brace" d="M${X},${Y-8} v-8 H${X+W} v8"/><text class="lbl${total==='?'?' cy':''}" x="${X+W/2}" y="${Y-30}">${total}</text>`,x=X;
+  /* the whole tape is tapeW wide, so each 1 is unitW */
+  const sum=parts.reduce((s,p)=>s+p.n,0),tapeW=340,unitW=tapeW/sum,left=10,tapeY=48,tapeH=40;
+  let markup=`<path class="brace" d="M${left},${tapeY-8} v-8 H${left+tapeW} v8"/><text class="lbl${total==='?'?' cy':''}" x="${left+tapeW/2}" y="${tapeY-30}">${total}</text>`,x=left;
   parts.forEach((p,i)=>{
-    o+=`<rect class="tape t${i%2}${p.hi?' hi':''}" x="${x}" y="${Y}" width="${p.n*u}" height="${H}" rx="4"/><text class="lbl${p.show==='?'?' cy':''}" x="${x+p.n*u/2}" y="${Y+H/2}">${p.show}</text>`;
-    x+=p.n*u;
+    /* parts alternate between two colors (t0, t1) */
+    markup+=`<rect class="tape t${i%2}${p.hi?' hi':''}" x="${x}" y="${tapeY}" width="${p.n*unitW}" height="${tapeH}" rx="4"/>`
+      +`<text class="lbl${p.show==='?'?' cy':''}" x="${x+p.n*unitW/2}" y="${tapeY+tapeH/2}">${p.show}</text>`;
+    x+=p.n*unitW;
   });
-  return svgWrap(W+2*X,Y+H+6,o,label);
+  return svgWrap(tapeW+2*left,tapeY+tapeH+6,markup,label);
 }
 
 /* A number line from lo to hi, with a tick every `step` (taller every `big`). lab(v): which ticks get a number (default: the tall ones).
@@ -37,37 +47,66 @@ function partWhole(parts,total,label='Tape diagram'){
      t is written under the dot, and tick numbers too close to it are left off.  tap: every tick can be tapped (data-v);
    tap 'cand' makes each tick a tap answer for engine.js instead (.cand, data-id = the number).  Returns the svg. */
 function numLine(lo,hi,{u=Math.min(18,380/(hi-lo)),step=1,big=5,lab=v=>v%big===0,fmt=v=>v,pad=16,ls='s',end=false,arrows=[],shown=false,hops=[],pts=[],tap=false,label='Number line'}={}){
-  const X=pad,top=Math.max(0,...arrows.map(r=>r.lv||0)),Y=40+top*38+(hops.length?32:0),x=v=>X+(v-lo)*u,L='lbl'+(ls?' '+ls:''),near=pts.filter(p=>p.t!=null).map(p=>p.v);
-  let o=`<line class="axis" x1="${X}" y1="${Y}" x2="${x(hi)+(end?14:0)}" y2="${Y}"/>`;
-  if(end)o+=`<polygon class="arrh ax" points="${x(hi)+24},${Y} ${x(hi)+12},${Y-7} ${x(hi)+12},${Y+7}"/>`;
-  range(Math.round((hi-lo)/step)+1).forEach(i=>{
-    const v=lo+i*step,b=v%big===0;
-    o+=`<line class="tick" x1="${x(v)}" y1="${Y-(b?8:4)}" x2="${x(v)}" y2="${Y+(b?8:4)}"/>`+(lab(v)&&near.every(w=>Math.abs(w-v)*u>=30)?`<text class="${L}" x="${x(v)}" y="${Y+22}">${fmt(v)}</text>`:'');
+  /* the line is at height lineY, below room for the arrows (38 pixels a level) and the hops */
+  const topLevel=Math.max(0,...arrows.map(r=>r.lv||0)),lineY=40+topLevel*38+(hops.length?32:0),xOf=v=>pad+(v-lo)*u,
+    labelCls='lbl'+(ls?' '+ls:''),
+    /* the values of dots with text under them: tick numbers within 30 pixels of one are left off */
+    dotsWithText=pts.filter(p=>p.t!=null).map(p=>p.v),ticks=Math.round((hi-lo)/step)+1;
+  let markup=`<line class="axis" x1="${pad}" y1="${lineY}" x2="${xOf(hi)+(end?14:0)}" y2="${lineY}"/>`;
+  if(end)markup+=`<polygon class="arrh ax" points="${xOf(hi)+24},${lineY} ${xOf(hi)+12},${lineY-7} ${xOf(hi)+12},${lineY+7}"/>`;
+  range(ticks).forEach(i=>{
+    const v=lo+i*step,tall=v%big===0;
+    markup+=`<line class="tick" x1="${xOf(v)}" y1="${lineY-(tall?8:4)}" x2="${xOf(v)}" y2="${lineY+(tall?8:4)}"/>`;
+    if(lab(v)&&dotsWithText.every(w=>Math.abs(w-v)*u>=30))markup+=`<text class="${labelCls}" x="${xOf(v)}" y="${lineY+22}">${fmt(v)}</text>`;
   });
   arrows.forEach(({a,b,lv=0,q})=>{
-    const y=Y-18-lv*38,d=b>a?1:-1,t=q&&!shown?'?':Math.abs(b-a);
-    o+=`<path class="guide" d="M${x(b)},${y}V${Y}${a?`M${x(a)},${y}V${Y}`:''}"/><line class="arr${q?' q':''}" x1="${x(a)}" y1="${y}" x2="${x(b)-d*6}" y2="${y}"/><polygon class="arrh${q?' q':''}" points="${x(b)},${y} ${x(b)-d*10},${y-6} ${x(b)-d*10},${y+6}"/><text class="lbl s${q?' cy':''}" x="${(x(a)+x(b))/2}" y="${y-12}">${t}</text>`;
+    /* dashed guides drop from the arrow's ends to the line (none from 0, where the line starts) */
+    const y=lineY-18-lv*38,dir=b>a?1:-1,text=q&&!shown?'?':Math.abs(b-a);
+    markup+=`<path class="guide" d="M${xOf(b)},${y}V${lineY}${a?`M${xOf(a)},${y}V${lineY}`:''}"/>`
+      +`<line class="arr${q?' q':''}" x1="${xOf(a)}" y1="${y}" x2="${xOf(b)-dir*6}" y2="${y}"/>`
+      +`<polygon class="arrh${q?' q':''}" points="${xOf(b)},${y} ${xOf(b)-dir*10},${y-6} ${xOf(b)-dir*10},${y+6}"/>`
+      +`<text class="lbl s${q?' cy':''}" x="${(xOf(a)+xOf(b))/2}" y="${y-12}">${text}</text>`;
   });
   hops.forEach(({a,b,t,q})=>{
-    /* a curve from a to b peaking h above the line; the arrowhead follows the curve's direction at b */
-    const xa=x(a),xb=x(b),m=(xa+xb)/2,y=Y-4,h=Math.min(30,8+Math.abs(xb-xa)*.35),n=Math.hypot(xb-m,2*h),ux=(xb-m)/n,uy=2*h/n,c=q?' q':'';
-    const bx=xb-ux*11,by=y-uy*11;
-    o+=`<path class="hop${c}" d="M${xa},${y}Q${m},${y-2*h} ${bx},${by}"/><polygon class="arrh${c}" points="${xb},${y} ${bx-uy*6},${by+ux*6} ${bx+uy*6},${by-ux*6}"/><text class="${L}${q?' cy':''}" x="${m}" y="${y-h-12}">${t}</text>`;
+    /* a curve from a to b peaking about h above the line (higher for longer hops, up to 30) */
+    const xa=xOf(a),xb=xOf(b),mid=(xa+xb)/2,y=lineY-4,h=Math.min(30,8+Math.abs(xb-xa)*.35),
+      /* (ux, uy): which way the curve is heading at b, from its control point (mid, y − 2h) */
+      len=Math.hypot(xb-mid,2*h),ux=(xb-mid)/len,uy=2*h/len,cls=q?' q':'';
+    /* the curve stops 11 pixels short of b, at the arrowhead's base (baseX, baseY) */
+    const baseX=xb-ux*11,baseY=y-uy*11;
+    markup+=`<path class="hop${cls}" d="M${xa},${y}Q${mid},${y-2*h} ${baseX},${baseY}"/>`
+      +`<polygon class="arrh${cls}" points="${xb},${y} ${baseX-uy*6},${baseY+ux*6} ${baseX+uy*6},${baseY-ux*6}"/>`
+      +`<text class="${labelCls}${q?' cy':''}" x="${mid}" y="${y-h-12}">${t}</text>`;
   });
-  pts.forEach(({v,cls='',t})=>{o+=`<circle class="pt ${cls}" cx="${x(v)}" cy="${Y}" r="7"/>`+(t!=null?`<text class="${L} ${cls==='b'?'cy':'gd'}" x="${x(v)}" y="${Y+22}">${t}</text>`:'');});
-  if(tap)range(Math.round((hi-lo)/step)+1).forEach(i=>{const v=lo+i*step,at=`x="${x(v)-step*u/2}" y="${Y-34}" width="${step*u}" height="66"`;o+=tap==='cand'?`<rect class="cand hit" data-id="${v}" tabindex="0" role="button" aria-label="Tick mark ${i+1}" ${at}/>`:`<rect class="hit" data-v="${v}" ${at}/>`;});
-  return svgWrap(X*2+(hi-lo)*u+(end?26:0),Y+32,o,label);
+  pts.forEach(({v,cls='',t})=>{
+    markup+=`<circle class="pt ${cls}" cx="${xOf(v)}" cy="${lineY}" r="7"/>`;
+    if(t!=null)markup+=`<text class="${labelCls} ${cls==='b'?'cy':'gd'}" x="${xOf(v)}" y="${lineY+22}">${t}</text>`;
+  });
+  /* tap targets: a box around each tick, a step wide */
+  if(tap)range(ticks).forEach(i=>{
+    const v=lo+i*step,box=`x="${xOf(v)-step*u/2}" y="${lineY-34}" width="${step*u}" height="66"`;
+    markup+=tap==='cand'
+      ?`<rect class="cand hit" data-id="${v}" tabindex="0" role="button" aria-label="Tick mark ${i+1}" ${box}/>`
+      :`<rect class="hit" data-v="${v}" ${box}/>`;
+  });
+  return svgWrap(pad*2+(hi-lo)*u+(end?26:0),lineY+32,markup,label);
 }
 
 /* Counting on or back in jumps, not drawn to scale: start, then moves like [-3,-5,-10]. shown: how many jumps to draw.
    ask: the last number is a ?. */
 function jumps(start,moves,shown=moves.length,ask=false){
-  const G=96,R=24,Y=78,W=2*R+moves.length*G+16,end=moves.slice(0,shown).reduce((s,d)=>s+d,start);let o='',v=start;
-  const node=(i,val)=>`<circle class="jn${i?'':' st'}" cx="${8+R+i*G}" cy="${Y}" r="${R}"/><text class="lbl${ask&&i===shown?' cy':''}" x="${8+R+i*G}" y="${Y}">${ask&&i===shown?'?':val}</text>`;
-  o+=node(0,start);
+  /* each number is a circle (radius nodeR) at height nodeY, jumpW apart */
+  const jumpW=96,nodeR=24,nodeY=78,width=2*nodeR+moves.length*jumpW+16,end=moves.slice(0,shown).reduce((s,d)=>s+d,start);
+  const nodeX=i=>8+nodeR+i*jumpW,
+    node=(i,val)=>`<circle class="jn${i?'':' st'}" cx="${nodeX(i)}" cy="${nodeY}" r="${nodeR}"/><text class="lbl${ask&&i===shown?' cy':''}" x="${nodeX(i)}" y="${nodeY}">${ask&&i===shown?'?':val}</text>`;
+  let markup=node(0,start),v=start;
   moves.slice(0,shown).forEach((d,i)=>{
-    const x0=8+R+i*G,x1=x0+G;v+=d;
-    o+=`<path class="jarc" d="M${x0+8},${Y-R} Q${(x0+x1)/2},${Y-R-52} ${x1-8},${Y-R}"/><polygon class="jhead" points="${x1-8},${Y-R} ${x1-18},${Y-R-8} ${x1-4},${Y-R-12}"/><text class="lbl cy" x="${(x0+x1)/2}" y="${Y-R-34}">${d>0?'+':'−'}${Math.abs(d)}</text>`+node(i+1,v);
+    /* an arc from the top of one circle to the top of the next, labelled +d or −d */
+    const x0=nodeX(i),x1=x0+jumpW,top=nodeY-nodeR;v+=d;
+    markup+=`<path class="jarc" d="M${x0+8},${top} Q${(x0+x1)/2},${top-52} ${x1-8},${top}"/>`
+      +`<polygon class="jhead" points="${x1-8},${top} ${x1-18},${top-8} ${x1-4},${top-12}"/>`
+      +`<text class="lbl cy" x="${(x0+x1)/2}" y="${top-34}">${d>0?'+':'−'}${Math.abs(d)}</text>`+node(i+1,v);
   });
-  return svgWrap(W,Y+R+6,o,`Jumps from ${start}: `+moves.slice(0,shown).map(d=>(d>0?'plus ':'minus ')+Math.abs(d)).join(', ')+(shown?(ask?', landing on a question mark':`, landing on ${end}`):''));
+  const said=moves.slice(0,shown).map(d=>(d>0?'plus ':'minus ')+Math.abs(d)).join(', ');
+  return svgWrap(width,nodeY+nodeR+6,markup,`Jumps from ${start}: `+said+(shown?(ask?', landing on a question mark':`, landing on ${end}`):''));
 }
