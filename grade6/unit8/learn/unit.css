@@ -1,0 +1,18 @@
+/* Grade 6 Unit 8 Learn pages: statements, the widgets' squares and lists, and a solved problem to check. Loaded by every page
+   in learn/. */
+.eq{margin:0 0 10px;font:700 24px var(--mono);text-align:center}
+.eq.sm{font-size:17px}
+/* a stepper's value stays on one line */
+.stepper b{white-space:nowrap}
+/* squares in a fair-share stack */
+.sq{fill:rgba(255,201,60,.6);stroke:#fff1b8;stroke-width:1.5}
+/* sorted values: crossed off, the lower and upper halves, and the four quarters */
+.chip.gone{opacity:.35;text-decoration:line-through}
+.chip.lo,.chip.q0,.chip.q2{background:rgba(255,201,60,.22);border-color:var(--gold)}
+.chip.hi,.chip.q1,.chip.q3{background:rgba(127,227,255,.2);border-color:var(--cyan)}
+/* a solved problem to check, one line per button */
+.solved{border:1.5px dashed rgba(170,205,255,.4);border-radius:12px;padding:12px 14px;margin-top:4px}
+.solved .who{margin:0 0 8px;font:700 14px var(--mono);color:var(--dim)}
+.solved button{display:block;width:100%;text-align:left;margin:6px 0;background:#0a2340;border:2px solid rgba(170,205,255,.35);border-radius:10px;padding:8px 12px;font:700 16px var(--mono);color:var(--chalk)}
+.solved button[aria-pressed="true"].bad{border-color:var(--bad)}
+.solved button[aria-pressed="true"].fine{border-color:var(--good)}

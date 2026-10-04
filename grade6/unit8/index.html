@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Data Detectives</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=JetBrains+Mono:wght@500;700&display=swap">
+<link rel="stylesheet" href="../../shared/theme.css?v=4796e910">
+<link rel="stylesheet" href="../../shared/game.css?v=57b7d039">
+<link rel="stylesheet" href="../../shared/figures.css?v=20dca2b0">
+<link rel="stylesheet" href="../../shared/pictures.css?v=7f680159">
+<link rel="stylesheet" href="figs.css?v=42a8e5b0">
+</head>
+<body>
+
+<div class="app">
+  <section id="home">
+    <a class="back" href="../">← Grade 6</a>
+    <header class="hero">
+      <p class="eyebrow">Illustrative Mathematics · Grade 6 · Unit 8 · Data Sets and Distributions</p>
+      <h1>Data <span>Detectives</span></h1>
+      <p class="lede">Every data set has a story. Crack the case: spot statistical questions, read dot plots and histograms, find the mean as a balance point, measure spread with the MAD, find the median and quartiles, and read box plots. Each station matches lessons from class. <a href="learn.html">New to this? Learn it first →</a></p>
+      <div class="stats">
+        <span class="pill">Points <b id="hp">0</b></span>
+        <span class="pill">Stars <b id="hs">0</b>/<span id="hsMax">24</span></span>
+      </div>
+    </header>
+    <div class="zones" id="zones"></div>
+    <section class="grownups">
+      <h2>For grown-ups</h2>
+      <div><h4>How a round works</h4><p>Each station deals 8 fresh problems (Case Closed deals 10). A right answer on the first try earns 10 points. After a wrong answer, the game names the likely mistake and gives one more try for 5 points. Fraction answers can be typed as 3/20 or as a decimal.</p></div>
+      <div><h4>Numbers you can do in your head</h4><p>Data sets are small (4 to 20 values) and realistic for their context: pets per home, hours of sleep, quiz scores, goals in a game. Means come out to whole numbers or halves, and MADs to at most two decimal places, so the challenge is the idea, not the arithmetic.</p></div>
+      <div><h4>The "Show me" hint</h4><p>Hints draw the picture that makes the idea visible: the dots being counted turn blue, the mean appears as a balance point with each dot’s distance to it, the median line appears on a dot plot, and a box plot is drawn over its own dots so each quarter of the data shows.</p></div>
+      <div><h4>Mistakes it catches</h4><p>A question with only one answer taken for a statistical question, counting columns instead of dots, a histogram’s interval edge read as a count, a flat histogram read as less spread out, the total not divided (or divided by the wrong count), signed distances that add to 0 for the MAD, the median of an unsorted list, one of two middle values for the median, the middle value kept in a half for a quartile, the range for the IQR, and a longer part of a box plot read as holding more data.</p></div>
+      <div><h4>Not covered</h4><p>Collecting and studying a class’s own data (Lessons 1 and 18) works better in class than as scored problems.</p></div>
+    </section>
+  </section>
+  <section id="play" hidden>
+    <div class="bar">
+      <button id="quit" class="ghost-btn" type="button">← Stations</button>
+      <div class="bar-mid"><div class="zn" id="zname"></div><div class="track"><div id="prog"></div></div></div>
+      <div class="bar-stats"><span class="pill" id="streak">Streak <b>0</b></span><span class="pill">Pts <b id="pts">0</b></span></div>
+    </div>
+    <article class="card">
+      <p class="eyebrow" id="qnum"></p>
+      <h2 id="prompt"></h2>
+      <div class="fig" id="fig"></div>
+      <div id="answer"></div>
+      <div id="hint" class="hintbox" hidden></div>
+      <div id="feedback" role="status" aria-live="polite"></div>
+    </article>
+  </section>
+
+  <section id="done" hidden>
+    <div class="card done">
+      <p class="eyebrow" id="dzone"></p>
+      <div class="bigstars stars" id="dstars"></div>
+      <h2 id="dtitle"></h2>
+      <p id="dmsg"></p>
+      <div class="row">
+        <button class="btn" id="again" type="button">Play again</button>
+        <button class="ghost-btn" id="tomap" type="button">Back to stations</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script src="../../shared/util.js?v=af7a4707"></script>
+<script src="../../shared/figures.js?v=d2337c45"></script>
+<script src="figs.js?v=7a18cea5"></script>
+<script src="../../shared/engine.js?v=4b1b2373"></script>
+<script src="stations.js?v=3675fb84"></script>
+<script>
+Game.init({
+  saveKey:'g6u8-save',
+  zones:ZONES,icons:ICON,
+  words:{
+    right:'Case cracked!',
+    miss:'Not quite. Look at the picture again: what does each dot, bar, or part stand for?',
+    titles:['Keep investigating','Good start','Sharp detective','Master detective!'],
+    next:'Try the next station, or close the case.',
+    stuck:'Use "Show me a hint" when you’re stuck. The pictures show the clues.',
+    tap:'Tap your answer in the picture.'
+  }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,29 @@
+/* Styles for figs.js: dot plots (with mean and median lines, distances, and a fulcrum), box plots, and histograms. */
+/* dots (cy: blue), the mean line and its label (cyan), the median line and its label (gold), and distances to the mean */
+.dp-dot{fill:var(--gold);stroke:#0a2340;stroke-width:1.5}
+.dp-dot.cy{fill:var(--cyan)}
+.dp-mean{stroke:var(--cyan);stroke-width:2;stroke-dasharray:6 4}
+.lbl.dp-meant{fill:var(--cyan)}
+.dp-med{stroke:var(--gold);stroke-width:2;stroke-dasharray:3 4}
+.lbl.dp-medt{fill:var(--gold)}
+.dp-dist{stroke:var(--pink);stroke-width:2}
+.dp-fulcrum{fill:var(--chalk)}
+/* box plots: whiskers and end caps, the box (two halves), and the median line */
+.bp-w{stroke:var(--chalk);stroke-width:2.5}
+.bp-box{fill:rgba(127,227,255,.18);stroke:var(--chalk);stroke-width:2.5}
+.bp-mid{stroke:var(--gold);stroke-width:4}
+.cand:hover .bp-box,.cand:focus .bp-box{fill:rgba(255,201,60,.3)}
+.cand:hover .bp-w,.cand:focus .bp-w{stroke:var(--gold)}
+.cand:focus{outline:none}
+.cand.right .bp-box{fill:rgba(95,224,168,.4)}.cand.right .bp-w{stroke:var(--good)}
+.cand.wrong .bp-box{fill:rgba(255,154,134,.3)}.cand.wrong .bp-w{stroke:var(--bad)}
+/* histograms: gridlines, bars (cy: blue); tap problems mark bars right or wrong */
+.hg-grid{stroke:rgba(170,205,255,.18);stroke-width:1}
+.hg-bar{fill:rgba(255,201,60,.55);stroke:var(--chalk);stroke-width:1.5}
+.hg-bar.cy{fill:rgba(127,227,255,.6)}
+.cand .hit{fill:transparent;cursor:pointer}
+.cand:hover .hg-bar,.cand:focus .hg-bar{stroke:#fff;stroke-width:3}
+.cand.right .hg-bar{fill:var(--good)}
+.cand.wrong .hg-bar{fill:var(--bad);opacity:.5}
+/* a caption over one of two pictures shown together */
+.figcap{margin:6px 0 2px;font:700 14px var(--mono);color:var(--dim);text-align:center}
