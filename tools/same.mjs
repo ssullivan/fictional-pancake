@@ -241,6 +241,29 @@ const CALLS = {
           ...range(0, 7).map((done) => `algFig(${a}, ${b}, '${op}', ${done})`),
         ]),
     ),
+    ...each(
+      [
+        [347, 6],
+        [1205, 4],
+        [9, 9],
+        [2000, 3],
+      ],
+      ([a, b]) => [`mulSteps(${a}, ${b})`, ...range(0, 5).map((done) => `mulFig(${a}, ${b}, ${done})`)],
+    ),
+    `mulFig(52, 3, 1, 'L')`,
+    ...each(
+      [
+        [146, 3],
+        [57, 4],
+        [96, 8],
+        [405, 5],
+      ],
+      ([n, g]) => [`divideFig(${n}, ${g})`, `divideFig(${n}, ${g}, {split: false})`],
+    ),
+    `divideFig(30, 2, {label: 'L'})`,
+    ...range(0, 4).map((shown) => `quotientFig(568, 4, [100, 40, 2], ${shown})`),
+    `quotientFig(95, 4, [20, 3])`,
+    `quotientFig(1250, 5, [200, 50], 1, 'L')`,
   ],
   numlines: [
     ...["null", `'?'`, "3"].map(
@@ -384,6 +407,10 @@ const CALLS = {
           `pbFig('${big}', '${small}', {show: ${show}, s: 40})`,
         ]),
     ),
+    `rectFig(6, 4)`,
+    `rectFig(12, 8, {unit: 'm', ask: 'width'})`,
+    `rectFig(20, 3, {unit: 'cm', ask: 'length', label: 'L'})`,
+    `rectFig(5, 5, {grid: false})`,
   ],
   measure: [
     "hm(3, 5)",
@@ -444,6 +471,23 @@ const CALLS = {
     `arrayFig(2, 6, {band: 'r', k: 1, sum: true, hi: [1, 3], tap: true})`,
     `arrayFig(4, 4, {hi: [0, 0], tap: true, label: 'L'})`,
     ...each([1, 3, 5, 6, 8, 10], (g) => [1, 4, 5, 8, 9, 10].map((n) => `groupsFig(${g}, ${n})`)),
+    ...[7, 30, 2036, 405].map((n) => `placeParts(${n})`),
+    ...each(
+      [
+        [236, 7],
+        [36, 27],
+        [4123, 6],
+        [40, 30],
+      ],
+      ([a, b]) => [
+        `areaModel(${a}, ${b})`,
+        `areaModel(${a}, ${b}, {filled: 1})`,
+        `partialFig(${a}, ${b})`,
+        `partialFig(${a}, ${b}, 2)`,
+      ],
+    ),
+    `areaModel(12, 3, {filled: 0, label: 'L'})`,
+    `partialFig(12, 3, 0, 'L')`,
   ],
   solids: [
     ...[3, 4, 5, 6, 7, 8].map((n) => `basePoly(${n}, {a: 1.5})`),

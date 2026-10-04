@@ -1,0 +1,6 @@
+/* Styles for the unit's Learn pages: the shapes in repeating patterns (marked: the position asked about). */
+.ps{stroke:#0a2340;stroke-width:1.5}
+.ps.circle{fill:var(--gold)}
+.ps.square{fill:var(--cyan)}
+.ps.triangle{fill:var(--pink)}
+.ps.mk{stroke:#fff;stroke-width:3}

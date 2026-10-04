@@ -3,7 +3,7 @@
 
    timesTape(rows, {label})          tape diagrams for "times as many": each row is copies of one box, with its total (svg)
    convTable(units, rows, {ask, hi}) a two-column table of the same amounts in a big unit and a small unit (html)
-   rectFig(length, width, {…})       a rectangle with its side lengths, in unit squares when it's small enough (svg) */
+   Rectangles with their side lengths (rectFig) are in shared/shapes.js. */
 /* Tape diagrams, one row under another, every box the same width so rows line up. rows: [{label, times, each, total, span,
    plus, plusBoxes}]: `times` boxes each showing `each` (a number or '?'), then the row's total (or '?') after it; span: one
    box as wide as `span` boxes instead (a whole amount not yet split into copies); plus: a dashed box after them showing how
@@ -57,37 +57,4 @@ function convTable(units, rows, { ask = -1, hi = -1 } = {}) {
     )
     .join("");
   return `<table class="conv" aria-label="Table of ${units[0]} and ${units[1]}"><thead><tr><th>${units[0]}</th><th>${units[1]}</th></tr></thead><tbody>${body}</tbody></table>`;
-}
-/* A rectangle length by width, with the length written along the top and the width down the left side (unit: "m", "cm").
-   ask: 'length' or 'width' writes ? for that side instead. grid: draw the unit squares inside (only when it has 15 or
-   fewer along each side). Scaled so the longer side fits 300 pixels. */
-function rectFig(length, width, { unit = "", ask = null, grid = true, label } = {}) {
-  const scale = Math.min(32, 300 / length, 200 / width),
-    left = 58,
-    top = 34,
-    w = length * scale,
-    h = width * scale,
-    sideText = (v, which) => (ask === which ? "?" : `${commas(v)}${unit ? " " + unit : ""}`);
-  let markup = "";
-  if (grid && length <= 15 && width <= 15) {
-    range(length - 1).forEach((i) => {
-      const x = left + (i + 1) * scale;
-      markup += `<line class="rgrid" x1="${x}" y1="${top}" x2="${x}" y2="${top + h}"/>`;
-    });
-    range(width - 1).forEach((i) => {
-      const y = top + (i + 1) * scale;
-      markup += `<line class="rgrid" x1="${left}" y1="${y}" x2="${left + w}" y2="${y}"/>`;
-    });
-  }
-  markup +=
-    `<rect class="rside" x="${left}" y="${top}" width="${w}" height="${h}"/>` +
-    `<text class="lbl${ask === "length" ? " cy" : ""}" x="${left + w / 2}" y="${top - 16}">${sideText(length, "length")}</text>` +
-    `<text class="lbl en${ask === "width" ? " cy" : ""}" x="${left - 8}" y="${top + h / 2}">${sideText(width, "width")}</text>`;
-  return svgWrap(
-    left + w + 16,
-    top + h + 10,
-    markup,
-    label ||
-      `A rectangle ${ask === "length" ? "?" : length} by ${ask === "width" ? "?" : width}${unit ? " " + unit : ""}`,
-  );
 }

@@ -13,3 +13,7 @@
 .pb{stroke:#0a2340;stroke-width:2;stroke-linejoin:round}
 .pb.triangle{fill:#5fe0a8}.pb.rhombus{fill:#6f9bff}.pb.trapezoid{fill:#ff7b7b}.pb.hexagon{fill:var(--gold)}
 .pb.out{fill:none;stroke:var(--chalk);stroke-width:2.5;stroke-dasharray:7 5}
+/* rectangles with their sides (rectFig): the unit squares inside, the outline, and its side labels */
+.rgrid{stroke:rgba(170,205,255,.3);stroke-width:1}
+.rside{fill:rgba(95,224,168,.16);stroke:var(--good);stroke-width:3}
+.rside.ask{stroke:var(--gold)}

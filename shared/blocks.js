@@ -12,7 +12,10 @@
                                      numBlocks(n) draws n
    digits(n), numWords(n)            [hundreds, tens, ones] of n, and its name up to 999,999 ("four hundred six")
    pvChart(rows, hi, {places, tap}), PLACE, digitAt(n, e), commas(n)   a place-value chart (html table), hundredths to hundred-thousands; "305,020"
-   algSteps(a, b, op), algFig(a, b, op, done)   the standard algorithm to add or subtract, column by column (svg) */
+   algSteps(a, b, op), algFig(a, b, op, done)   the standard algorithm to add or subtract, column by column (svg)
+   mulSteps(a, b), mulFig(a, b, done)   the standard algorithm to multiply by a one-digit number, column by column (svg)
+   divideFig(n, groups, {split})     n in base-ten blocks, shared into equal groups with any left over (svg)
+   quotientFig(n, divisor, chunks, shown)   n ÷ divisor by partial quotients: chunks taken away one at a time (svg) */
 /* Ten-frames, 2 rows of 5 each. cells: a class for each filled cell in order ('a' gold, 'b' blue, null empty).
    out: set of crossed-out cells. tap: empty cells can be tapped (data-i). */
 const CELL = 44;
@@ -419,5 +422,136 @@ function algFig(a, b, op, done = 0, label) {
     label ||
       `${commas(a)} ${op === "+" ? "plus" : "minus"} ${commas(b)} in columns` +
         (done ? `, ${done} column${done > 1 ? "s" : ""} worked` : ""),
+  );
+}
+/* ---------- multiplying and dividing ---------- */
+/* a × b (b one digit), one column at a time from the ones (column 0). Each step: {i, top, cin, val, digit, carry}: top is a's
+   digit, cin what was carried in, val = top × b + cin, digit what's written under the column (the last column writes all
+   of val), and carry what's carried to the next column (written above it). */
+function mulSteps(a, b) {
+  const topDigits = [...String(a)].reverse().map(Number),
+    steps = [];
+  let carry = 0;
+  topDigits.forEach((top, i) => {
+    const val = top * b + carry,
+      last = i === topDigits.length - 1;
+    steps.push({ i, top, cin: carry, val, digit: last ? val : val % 10, carry: last ? 0 : Math.floor(val / 10) });
+    carry = last ? 0 : Math.floor(val / 10);
+  });
+  return steps;
+}
+/* a × b in columns, the first `done` columns worked (their digits written and carries above the next column), and the next
+   column outlined. Same look as algFig. */
+function mulFig(a, b, done = 0, label) {
+  const steps = mulSteps(a, b),
+    cols = String(a * b).length,
+    colW = 30,
+    commaGap = 12,
+    left = 40,
+    rowY = { mk: 22, a: 56, b: 96, r: 150 },
+    /* the center of column i (0 is the ones); with a comma, the hundreds and below shift right to make room for it */
+    colX = (i) => left + (cols - 1 - i) * colW + (cols > 3 && i < 3 ? commaGap : 0) + colW / 2;
+  /* a row of digits (ones first), with a comma after the thousands when there are more than 3 */
+  const row = (ds, y, cls = "") =>
+    ds.map((d, i) => (d == null ? "" : `<text class="adg${cls}" x="${colX(i)}" y="${y}">${d}</text>`)).join("") +
+    (ds.length > 3 && ds[3] != null
+      ? `<text class="adg${cls}" x="${colX(3) + colW / 2 + commaGap / 2}" y="${y + 6}">,</text>`
+      : "");
+  let markup = "";
+  if (done < steps.length)
+    markup += `<rect class="acur" x="${colX(steps[done].i) - colW / 2 + 1}" y="4" width="${colW - 2}" height="${rowY.r + 18}" rx="6"/>`;
+  markup +=
+    row([...String(a)].reverse(), rowY.a) +
+    `<text class="adg" x="${colX(0)}" y="${rowY.b}">${b}</text>` +
+    `<text class="adg" x="${left - 18}" y="${rowY.b}">×</text><line class="aline" x1="${left - 30}" y1="${rowY.b + 22}" x2="${colX(0) + colW / 2 + 4}" y2="${rowY.b + 22}"/>`;
+  /* the carries so far, above the column they go to, and the product's digits so far (the last column may write two) */
+  const answerDigits = [];
+  steps.slice(0, done).forEach((step) => {
+    if (step.carry) markup += `<text class="amk" x="${colX(step.i + 1)}" y="${rowY.mk}">${step.carry}</text>`;
+    [...String(step.digit)].reverse().forEach((d, k) => {
+      answerDigits[step.i + k] = d;
+    });
+  });
+  markup += row(answerDigits, rowY.r, " ares");
+  return svgWrap(
+    left + cols * colW + (cols > 3 ? commaGap : 0) + 12,
+    rowY.r + 26,
+    markup,
+    label || `${commas(a)} times ${b} in columns` + (done ? `, ${done} column${done > 1 ? "s" : ""} worked` : ""),
+  );
+}
+/* n (up to 999) in base-ten blocks shared into `groups` equal groups, each in a dashed box, with any ones left over in a box of
+   their own. split: false draws n in one pile, before sharing. Hundreds gold, tens blue, ones green, as in numBlocks. */
+function divideFig(n, groups, { split = true, label } = {}) {
+  if (!split) return numBlocks(n, label || `${n} in base-ten blocks, before sharing`);
+  const each = Math.floor(n / groups),
+    left = n % groups,
+    [h, t, o] = digits(each),
+    cls = { t: "b", o: "c" },
+    [groupMarkup, blockW, blockH] = hto(0, 0, h, t, o, { cls }),
+    pad = 10,
+    cellW = Math.max(blockW, 30) + 2 * pad,
+    cellH = blockH + 2 * pad,
+    gap = 12,
+    perRow = Math.min(groups + (left ? 1 : 0), 3),
+    cellX = (k) => 4 + (k % perRow) * (cellW + gap),
+    cellY = (k) => 4 + Math.floor(k / perRow) * (cellH + gap);
+  let markup = "";
+  range(groups).forEach((k) => {
+    markup +=
+      `<rect class="dgrp" x="${cellX(k)}" y="${cellY(k)}" width="${cellW}" height="${cellH}" rx="10"/>` +
+      `<g transform="translate(${cellX(k) + pad},${cellY(k) + pad})">${groupMarkup}</g>`;
+  });
+  if (left) {
+    const [leftMarkup] = hto(0, 0, 0, 0, left, { cls }),
+      k = groups;
+    markup +=
+      `<rect class="dgrp left" x="${cellX(k)}" y="${cellY(k)}" width="${cellW}" height="${cellH}" rx="10"/>` +
+      `<g transform="translate(${cellX(k) + pad},${cellY(k) + pad})">${leftMarkup}</g>`;
+  }
+  const cells = groups + (left ? 1 : 0);
+  return svgWrap(
+    8 + perRow * (cellW + gap) - gap,
+    8 + Math.ceil(cells / perRow) * (cellH + gap) - gap,
+    markup,
+    label || `${n} shared into ${groups} equal groups of ${each}` + (left ? `, with ${left} left over` : ""),
+  );
+}
+/* n ÷ divisor by partial quotients: the divisor and n under the division bar, then for each of the first `shown` chunks, chunk ×
+   divisor taken away (the chunk written at the right) and what's left. Once every chunk is shown, the chunks' sum is the
+   quotient, with any remainder. chunks: the partial quotients, like [100, 40, 2]. */
+function quotientFig(n, divisor, chunks, shown = Infinity, label) {
+  const numX = 170,
+    lineH = 32,
+    rowY = (k) => 34 + k * lineH,
+    done = shown >= chunks.length,
+    total = chunks.reduce((x, y) => x + y, 0),
+    rest = n - total * divisor;
+  /* the quotient written out at the end, and how wide it is (a label's character is about 11 pixels) */
+  const sumText = `${chunks.map(commas).join(" + ")} = ${commas(total)}${rest ? ` R ${rest}` : ""}`,
+    rightW = Math.max(130, 11 * (done ? sumText.length : 0));
+  let markup =
+    `<text class="lbl en" x="${numX - 70}" y="${rowY(0)}">${divisor}</text>` +
+    `<path class="pbar" d="M${numX - 64},${rowY(0) + 14}Q${numX - 54},${rowY(0)} ${numX - 64},${rowY(0) - 14}H${numX + 6}"/>` +
+    `<text class="lbl en" x="${numX}" y="${rowY(0)}">${commas(n)}</text>`;
+  let left = n,
+    line = 1;
+  chunks.slice(0, shown).forEach((chunk) => {
+    left -= chunk * divisor;
+    markup +=
+      `<text class="lbl en" x="${numX}" y="${rowY(line)}">− ${commas(chunk * divisor)}</text>` +
+      `<text class="lbl st cy" x="${numX + 24}" y="${rowY(line)}">${commas(chunk)} × ${divisor}</text>` +
+      `<line class="aline" x1="${numX - 70}" y1="${rowY(line) + 15}" x2="${numX + 4}" y2="${rowY(line) + 15}"/>` +
+      `<text class="lbl en" x="${numX}" y="${rowY(line + 1)}">${commas(left)}</text>`;
+    line += 2;
+  });
+  if (done) markup += `<text class="lbl st gd" x="${numX + 24}" y="${rowY(line - 1)}">${sumText}</text>`;
+  return svgWrap(
+    numX + 24 + rightW,
+    rowY(line - 1) + 22,
+    markup,
+    label ||
+      `${commas(n)} divided by ${divisor} with partial quotients` +
+        (done ? `: ${chunks.map(commas).join(" + ")} = ${commas(total)}${rest ? `, remainder ${rest}` : ""}` : ""),
   );
 }

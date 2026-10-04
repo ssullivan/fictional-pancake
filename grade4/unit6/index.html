@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>City Builders</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=JetBrains+Mono:wght@500;700&display=swap">
+<link rel="stylesheet" href="../../shared/theme.css?v=4796e910">
+<link rel="stylesheet" href="../../shared/game.css?v=57b7d039">
+<link rel="stylesheet" href="../../shared/pictures.css?v=7f680159">
+<link rel="stylesheet" href="../../shared/blocks.css?v=ef8d48f1">
+<link rel="stylesheet" href="../../shared/shapes.css?v=161509dd">
+<link rel="stylesheet" href="../../shared/multiply.css?v=2a49b04d">
+<style>
+/* the Grand Opening in the final round: 10 tower windows, one lit for each right answer */
+.fig svg+svg{margin-top:10px}
+.fig svg[role=img]{max-width:420px}
+.choice .fr{font-size:.9em}
+.power{display:flex;align-items:center;gap:14px;background:rgba(95,224,168,.08);border:1.5px solid rgba(95,224,168,.45);border-radius:14px;padding:10px 14px}
+.power svg{width:72px;height:72px;flex:none}
+.power b{font:800 20px var(--display);color:var(--good)}
+.power p{margin:4px 0 0;font:700 14px var(--mono);color:var(--dim)}
+.power.hit svg{animation:buzz .5s}
+@keyframes buzz{25%{transform:translateX(-3px)}75%{transform:translateX(3px)}}
+@media (prefers-reduced-motion:reduce){.power.hit svg{animation:none}}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <section id="home">
+    <a class="back" href="../">← Grade 4</a>
+    <header class="hero">
+      <p class="eyebrow">Illustrative Mathematics K–5 · Grade 4 · Unit 6 · Multiplying and Dividing Multi-digit Numbers</p>
+      <h1>City <span>Builders</span></h1>
+      <p class="lede">Welcome to the building site! Plant patterns in the park, stack bricks, lay tiles, run the crane, sort buses and trucks, and check the plans at City Hall. Then light up the tower at the Grand Opening. Each station matches lessons from class.</p>
+      <div class="stats">
+        <span class="pill">Points <b id="hp">0</b></span>
+        <span class="pill">Stars <b id="hs">0</b>/<span id="hsMax">18</span></span>
+      </div>
+    </header>
+    <div class="zones" id="zones"></div>
+    <section class="grownups">
+      <h2>For grown-ups</h2>
+      <div><h4>How a round works</h4><p>Each station deals 8 fresh problems (the Grand Opening deals 10). A right answer on the first try earns 10 points. After a wrong answer, the game names the likely mistake and gives one more try for 5 points. At the Grand Opening, each right answer lights one of the tower’s 10 windows.</p></div>
+      <div><h4>The "Show me" hint</h4><p>Hints use the pictures from class and start the work without finishing it: area diagrams split by place value, the first column of the standard algorithm, the first chunk of partial quotients, and base-ten blocks shared into groups. A used hint caps that problem at 5 points.</p></div>
+      <div><h4>Mistakes it catches</h4><p>Counting the start of a pattern as a step, multiplying only the biggest place, using digits instead of their values, finding only two of four partial products, leaving out carries, leaving tens unshared instead of trading them, subtracting or multiplying instead of dividing, and using the quotient when a story needs one more (or the remainder).</p></div>
+      <div><h4>Numbers</h4><p>Multiplying goes up to 4 digits by 1 digit and 2 digits by 2 digits, with few nonzero digits and at most two carries. Dividing goes up to 4 digits by 1 digit, without remainders except at Delivery Trucks, where every story says what the remainder means.</p></div>
+      <div><h4>Learn it first</h4><p>Each station matches a chapter of the <a href="learn.html">Learn page</a> for this unit, which walks through the ideas step by step.</p></div>
+      <div><h4>Not covered</h4><p>Paper Flower Decorations (Lesson 25) is an optional lesson, so there is no station for it.</p></div>
+    </section>
+  </section>
+
+  <section id="play" hidden>
+    <div class="bar">
+      <button id="quit" class="ghost-btn" type="button">← Stations</button>
+      <div class="bar-mid"><div class="zn" id="zname"></div><div class="track"><div id="prog"></div></div></div>
+      <div class="bar-stats"><span class="pill" id="streak">Streak <b>0</b></span><span class="pill">Pts <b id="pts">0</b></span></div>
+    </div>
+    <div class="power" id="power" hidden></div>
+    <article class="card">
+      <p class="eyebrow" id="qnum"></p>
+      <h2 id="prompt"></h2>
+      <div class="fig" id="fig"></div>
+      <div id="answer"></div>
+      <div id="hint" class="hintbox" hidden></div>
+      <div id="feedback" role="status" aria-live="polite"></div>
+    </article>
+  </section>
+
+  <section id="done" hidden>
+    <div class="card done">
+      <p class="eyebrow" id="dzone"></p>
+      <div class="bigstars stars" id="dstars"></div>
+      <h2 id="dtitle"></h2>
+      <p id="dmsg"></p>
+      <div class="row">
+        <button class="btn" id="again" type="button">Play again</button>
+        <button class="ghost-btn" id="tomap" type="button">Back to stations</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script src="../../shared/util.js?v=af7a4707"></script>
+<script src="../../shared/figures.js?v=d2337c45"></script>
+<script src="../../shared/pictures.js?v=f857849d"></script>
+<script src="../../shared/blocks.js?v=14699c42"></script>
+<script src="../../shared/shapes.js?v=db9bc50e"></script>
+<script src="../../shared/multiply.js?v=3d03c2c1"></script>
+<script src="../../shared/engine.js?v=4b1b2373"></script>
+<script src="stations.js?v=39ad3ee0"></script>
+<script>
+/* the Grand Opening in the final round: one tower window lights for each right answer */
+let lights=0;
+/* the tower beside a boss problem (hidden at the other stations); hit: the last answer was right */
+function drawPower(state,hit){
+  const el=$('power');el.hidden=state.z.id!=='boss';if(el.hidden)return;
+  el.innerHTML=`<svg viewBox="0 0 64 64" role="img" aria-label="${lights} of 10 windows lit">${tower(lights)}</svg><div><b>${lights} of 10 windows lit</b><p>${lights===10?'The tower is shining. The city is open!':hit?'Right! Another window lights up.':'Answer right to light a window.'}</p></div>`;
+  el.classList.toggle('hit',!!hit);
+}
+Game.init({
+  saveKey:'g4u6-save',
+  zones:ZONES,icons:ICON,
+  words:{
+    right:'Nailed it!',
+    miss:'Not quite. Check it with the picture.',
+    titles:['Keep practicing','Good start','Master builder','City planner!'],
+    next:'Try the next station, or go to the Grand Opening.',
+    stuck:'Use “Show me a hint” when you’re stuck. It shows the picture from class.',
+    tap:'Tap your answer in the picture.'
+  },
+  /* the windows go dark at the start of a round */
+  onQuestion:state=>{if(state.i===0)lights=0;drawPower(state,false);},
+  onAnswer:(state,ok)=>{if(ok)lights++;drawPower(state,ok);}
+});
+</script>
+</body>
+</html>

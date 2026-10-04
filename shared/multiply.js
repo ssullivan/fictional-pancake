@@ -6,7 +6,10 @@
    tiles(rows, n), allRects(n)       n tiles in equal rows (any left over in red), and every rectangle n tiles make (svg)
    chart(max, cls, {lo, tap})        a number chart, 10 to a row, with each square colored by cls(v) (svg)
    ctr(x, y, cls), arrayFig(r, c, {band, …}), ARRAY   a counter (markup), and an array of counters in rows and columns (svg)
-   groupsFig(g, n)                   g equal groups of n counters, each group in a circle (svg) */
+   groupsFig(g, n)                   g equal groups of n counters, each group in a circle (svg)
+   placeParts(n)                     n split into its places, leaving out zeros: 2,036 → [2000, 30, 6]
+   areaModel(a, b, {filled})         an area diagram for a × b, split by place, with the partial products inside (svg)
+   partialFig(a, b, filled)          a × b recorded as partial products, one under another, then their sum (svg) */
 /* the factors of n, smallest first */
 const factors = (n) =>
   range(n)
@@ -214,5 +217,79 @@ function groupsFig(g, n, { label } = {}) {
     Math.ceil(g / perRow) * cellSize,
     markup,
     label || `${g} group${g === 1 ? "" : "s"} with ${n} in each`,
+  );
+}
+/* n split into its places, biggest first, leaving out zeros: placeParts(2036) is [2000, 30, 6] */
+const placeParts = (n) =>
+  [...String(n)].map((digit, i, all) => +digit * 10 ** (all.length - 1 - i)).filter((part) => part > 0);
+/* the partial products of a × b in reading order: each of b's parts (top row first) times each of a's parts (left first) */
+const partialsOf = (a, b) => placeParts(b).flatMap((rowPart) => placeParts(a).map((colPart) => [colPart, rowPart]));
+/* An area diagram for a × b, not to scale: a split into its places along the top and b down the left side, with each
+   piece's partial product inside. filled: how many products to write, in reading order (the rest show ?); Infinity for all. */
+function areaModel(a, b, { filled = Infinity, label } = {}) {
+  /* pieces get wider (or taller) with their share of the number, but never too small for their product */
+  const cols = placeParts(a),
+    rows = placeParts(b),
+    colW = cols.map((part) => 74 + (230 * part) / a),
+    rowH = rows.map((part) => 50 + (70 * part) / b),
+    left = 56,
+    top = 30,
+    say = (n) => n.toLocaleString("en-US"),
+    colX = (i) => left + colW.slice(0, i).reduce((x, y) => x + y, 0),
+    rowY = (j) => top + rowH.slice(0, j).reduce((x, y) => x + y, 0);
+  let markup = "";
+  cols.forEach((part, i) => {
+    markup += `<text class="lbl" x="${colX(i) + colW[i] / 2}" y="${top - 14}">${say(part)}</text>`;
+  });
+  rows.forEach((rowPart, j) => {
+    markup += `<text class="lbl en" x="${left - 10}" y="${rowY(j) + rowH[j] / 2}">${say(rowPart)}</text>`;
+    cols.forEach((colPart, i) => {
+      /* cells alternate colors like a checkerboard, so neighbors stand apart */
+      const k = j * cols.length + i,
+        shown = k < filled,
+        text = shown ? say(colPart * rowPart) : "?",
+        /* a label's character is about 10 pixels: a product too long for its piece is written small */
+        small = text.length * 10 > colW[i] - 8;
+      markup +=
+        `<rect class="am${(i + j) % 2 ? " alt" : ""}" x="${colX(i)}" y="${rowY(j)}" width="${colW[i]}" height="${rowH[j]}"/>` +
+        `<text class="lbl${small ? " s" : ""}${shown ? "" : " cy"}" x="${colX(i) + colW[i] / 2}" y="${rowY(j) + rowH[j] / 2}">${text}</text>`;
+    });
+  });
+  return svgWrap(
+    colX(cols.length) + 8,
+    rowY(rows.length) + 6,
+    markup,
+    label || `Area diagram for ${say(a)} × ${say(b)}, split into ${cols.length * rows.length} parts`,
+  );
+}
+/* a × b recorded as partial products: a, × b, a line, then each partial product (with which places it multiplies, at the
+   right), and their sum once all are filled in. filled: how many partial products to write (Infinity for all). */
+function partialFig(a, b, filled = Infinity, label) {
+  const partials = partialsOf(a, b),
+    say = (n) => n.toLocaleString("en-US"),
+    numX = 150,
+    lineH = 30,
+    lineY = (k) => 30 + k * lineH,
+    sumShown = filled >= partials.length;
+  let markup =
+    `<text class="lbl en" x="${numX}" y="${lineY(0)}">${say(a)}</text>` +
+    `<text class="lbl en" x="${numX}" y="${lineY(1)}">× ${say(b)}</text>` +
+    `<line class="pline" x1="${numX - 110}" y1="${lineY(1) + 16}" x2="${numX + 4}" y2="${lineY(1) + 16}"/>`;
+  partials.forEach(([colPart, rowPart], k) => {
+    const y = lineY(k + 2) + 6;
+    markup +=
+      (k < filled ? `<text class="lbl en" x="${numX}" y="${y}">${say(colPart * rowPart)}</text>` : "") +
+      `<text class="lbl s st cy" x="${numX + 16}" y="${y}">${say(rowPart)} × ${say(colPart)}</text>`;
+  });
+  const sumY = lineY(partials.length + 2) + 12;
+  markup +=
+    `<line class="pline" x1="${numX - 110}" y1="${sumY - 18}" x2="${numX + 4}" y2="${sumY - 18}"/>` +
+    (sumShown ? `<text class="lbl en gd" x="${numX}" y="${sumY}">${say(a * b)}</text>` : "");
+  return svgWrap(
+    numX + 120,
+    sumY + 16,
+    markup,
+    label ||
+      `${say(a)} × ${say(b)} as ${partials.length} partial products${sumShown ? `, adding to ${say(a * b)}` : ""}`,
   );
 }

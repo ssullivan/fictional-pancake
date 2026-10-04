@@ -5,7 +5,8 @@
    picRow(n, w, h, draw, {letters, tap}), shapeRow(list, {…}), shareRow(shape, list, {…})   pictures side by side, lettered or to tap
    SOLIDS, solidFig(kind, {back})    cubes, boxes, pyramids, and prisms drawn at an angle, with the back edges dashed
    shareFig(shape, n, how, {shade})  a circle or rectangle cut into halves, thirds, or fourths
-   PB, pbFig(big, small, {show})     pattern blocks: a hexagon, trapezoid, or rhombus filled with smaller blocks */
+   PB, pbFig(big, small, {show})     pattern blocks: a hexagon, trapezoid, or rhombus filled with smaller blocks
+   rectFig(length, width, {…})       a rectangle with its side lengths, in unit squares when it's small enough (svg) */
 /* Flat shapes in a 100 × 100 box, by number of sides. Some are tilted, stretched, or bent in, so the name comes from counting sides. */
 /* Flat shapes in a 100 × 100 box, by number of sides. Some are tilted, stretched, or bent in, so the name comes from counting sides. */
 /* the corners of a regular n-gon in the box, the first at angle a0 (degrees; −90 is straight up) */
@@ -451,5 +452,38 @@ function pbFig(big, small, { show = true, s = 70, label } = {}) {
     markup,
     label ||
       `A ${big} with ${shown === pieces.length ? pieces.length : shown || 1} ${small}${(shown || 1) > 1 ? "s" : ""} in it`,
+  );
+}
+/* A rectangle length by width, with the length written along the top and the width down the left side (unit: "m", "cm").
+   ask: 'length' or 'width' writes ? for that side instead. grid: draw the unit squares inside (only when it has 15 or
+   fewer along each side). Scaled so the longer side fits 300 pixels. */
+function rectFig(length, width, { unit = "", ask = null, grid = true, label } = {}) {
+  const scale = Math.min(32, 300 / length, 200 / width),
+    left = 58,
+    top = 34,
+    w = length * scale,
+    h = width * scale,
+    sideText = (v, which) => (ask === which ? "?" : `${v.toLocaleString("en-US")}${unit ? " " + unit : ""}`);
+  let markup = "";
+  if (grid && length <= 15 && width <= 15) {
+    range(length - 1).forEach((i) => {
+      const x = left + (i + 1) * scale;
+      markup += `<line class="rgrid" x1="${x}" y1="${top}" x2="${x}" y2="${top + h}"/>`;
+    });
+    range(width - 1).forEach((i) => {
+      const y = top + (i + 1) * scale;
+      markup += `<line class="rgrid" x1="${left}" y1="${y}" x2="${left + w}" y2="${y}"/>`;
+    });
+  }
+  markup +=
+    `<rect class="rside" x="${left}" y="${top}" width="${w}" height="${h}"/>` +
+    `<text class="lbl${ask === "length" ? " cy" : ""}" x="${left + w / 2}" y="${top - 16}">${sideText(length, "length")}</text>` +
+    `<text class="lbl en${ask === "width" ? " cy" : ""}" x="${left - 8}" y="${top + h / 2}">${sideText(width, "width")}</text>`;
+  return svgWrap(
+    left + w + 16,
+    top + h + 10,
+    markup,
+    label ||
+      `A rectangle ${ask === "length" ? "?" : length} by ${ask === "width" ? "?" : width}${unit ? " " + unit : ""}`,
   );
 }

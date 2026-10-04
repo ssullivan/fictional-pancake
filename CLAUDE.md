@@ -15,13 +15,13 @@ shared/                   used by every grade; each file's header comment docume
   fracmath.css, .js       exact fractions ([n, d] pairs) for Grade 6: the math, fractions in pictures (fT), rectangles in small squares (rectGrid), boxes of small cubes (cubeBox)
   learn.css, learn.js     Learn pages: a unit's chapter list and its chapter pages (Learn.home, Learn.chapter)
   pictures.css, .js       K–5 pictures: labels, number-line marks, tap targets, counters, stacked fractions (fr, frT), part names (PART)
-    blocks                ten-frames, cubes, base-ten blocks, place-value charts, number words, the standard algorithm
+    blocks                ten-frames, cubes, base-ten blocks, place-value charts, number words, the standard algorithms, sharing blocks, partial quotients
     numlines              tape diagrams, number lines, open number lines (jumps)
     fractions             fraction strips, fraction number lines, hundred grids
     graphs                line plots, scaled picture and bar graphs
-    shapes                flat shapes, pictures in a row, solid shapes, equal parts, pattern blocks
+    shapes                flat shapes, pictures in a row, solid shapes, equal parts, pattern blocks, rectangles with their sides
     measure               clocks, the day bar, coins and dollar bills
-    multiply              factors, hops of n, tiles, number charts, arrays, equal groups
+    multiply              factors, hops of n, tiles, number charts, arrays, equal groups, area diagrams, partial products
   solids.css, solids.js   prisms and pyramids (faces, edges, vertices, names), their drawings, curved solids, and nets: Grade 6
   algebra.css, .js        letters for numbers (mathVar, withVars) and coordinate planes, one quadrant or four (coordPlane): Grade 6
   landing.css             grade cards (root page) and unit cards (grade pages)

@@ -26,3 +26,8 @@
 .plate{fill:rgba(170,205,255,.08);stroke:var(--chalk);stroke-width:2.5}
 rect.band{fill:rgba(255,201,60,.14);stroke:var(--gold);stroke-width:2.5}
 rect.band.b{fill:rgba(127,227,255,.12);stroke:var(--cyan)}
+/* area diagrams (areaModel): a piece, and every other piece (alt) in the other color */
+.am{fill:rgba(255,201,60,.18);stroke:var(--gold);stroke-width:2}
+.am.alt{fill:rgba(127,227,255,.16);stroke:var(--cyan)}
+/* partial products (partialFig): the lines over the products and over their sum */
+.pline{stroke:var(--chalk);stroke-width:2.5}

@@ -45,3 +45,7 @@ table.pv td.dp::after{content:'.';position:absolute;right:-5px;bottom:4px;color:
 .axd{stroke:var(--cyan);stroke-width:2.5;stroke-linecap:round}
 .aline{stroke:var(--chalk);stroke-width:2.5}
 .acur{fill:rgba(255,201,60,.1);stroke:var(--gold);stroke-width:2}
+/* sharing into equal groups (divideFig): a group's dashed box, and the box of ones left over; the division bar (quotientFig) */
+.dgrp{fill:rgba(127,227,255,.06);stroke:var(--cyan);stroke-width:2;stroke-dasharray:6 4}
+.dgrp.left{fill:rgba(255,154,134,.08);stroke:var(--bad)}
+.pbar{fill:none;stroke:var(--chalk);stroke-width:2.5}
