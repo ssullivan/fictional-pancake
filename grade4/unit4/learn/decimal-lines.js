@@ -1,14 +1,4 @@
 /* Learn From Hundredths to Hundred-thousands (Grade 4 Unit 4), chapter 2: Decimals on number lines. Its widgets and steps; loaded by decimal-lines.html. */
-/* a number line in hundredths from lo to hi (lo and hi in hundredths), a tick every `step`, about 380 pixels long; options go to numLine */
-const decLine = (lo, hi, step, options = {}) =>
-  numLine(lo, hi, {
-    u: 380 / ((hi - lo) / step) / step,
-    step,
-    big: step === 10 ? 50 : 5,
-    lab: (v) => step === 10 || v % 5 === 0,
-    fmt: dS,
-    ...options,
-  });
 /* the whole line in tenths, or zoomed in to hundredths between two tenths */
 const VIEWS = [
   { name: "0 to 1", lo: 0, hi: 100, step: 10 },

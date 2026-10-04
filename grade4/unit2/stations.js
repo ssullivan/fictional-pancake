@@ -98,7 +98,7 @@ function genParts() {
       ...signChoices([a, d], [b, d], (s) =>
         s === "="
           ? `${partName(d, a)} and ${partName(d, b)} are different amounts, so they aren’t equal.`
-          : `Both are ${parts(d)}, so the parts are the same size. ${Math.max(a, b)} parts are more than ${Math.min(a, b)}.`,
+          : `Both are ${parts(d)}, so the parts are the same size. Which one has more of them?`,
       ),
       prompt: `${first} uses ${fr(a, d)} of a bag of flour. ${second} uses ${fr(b, d)} of a bag the same size. Which is true?`,
       fig: (show) =>
@@ -114,13 +114,12 @@ function genParts() {
     /* the same numerator: the bigger denominator makes smaller parts */
     const [d1, d2] = shuffle(DEN.slice(0, 7)).slice(0, 2),
       a = R(1, Math.min(d1, d2) - 1),
-      [first, second] = twoKids(),
-      [smallParts, bigParts] = d1 > d2 ? [d1, d2] : [d2, d1];
+      [first, second] = twoKids();
     return {
       ...signChoices([a, d1], [a, d2], (s) =>
         s === "="
           ? `Both are ${a} part${a > 1 ? "s" : ""}, but the parts aren’t the same size, so the amounts aren’t equal.`
-          : `Both are ${a} part${a > 1 ? "s" : ""}, but ${parts(smallParts)} are smaller than ${parts(bigParts)}. Cutting the whole into more parts makes each part smaller.`,
+          : `Both are ${a} part${a > 1 ? "s" : ""}, but the parts aren’t the same size. Cutting the whole into more parts makes each part smaller.`,
       ),
       prompt: `${first} eats ${fr(a, d1)} of a ${bake}. ${second} eats ${fr(a, d2)} of another ${bake} the same size. Which is true?`,
       fig: (show) =>
@@ -356,12 +355,11 @@ function genEquiv() {
     other = same ? a * n : a * n + pick([-1, 1]),
     [first, second] = twoKids(),
     compared = sign([a, b], [other, c]);
+  /* the message for a wrong pick: the way to compare, without saying who eats more (there's one more try) */
   const why = (claim) =>
-    claim === "="
-      ? `${fr(a, b)} is ${fr(a * n, c)}, not ${fr(other, c)}, so they don’t eat the same amount.`
-      : compared === "="
-        ? `Split each ${PART[b][0]} into ${n}: ${fr(a, b)} = ${fr(a * n, c)}. That’s the same as ${fr(other, c)}.`
-        : `Split each ${PART[b][0]} into ${n}: ${fr(a, b)} = ${fr(a * n, c)}, which is ${compared === "<" ? "less" : "more"} than ${fr(other, c)}.`;
+    claim === "=" && compared !== "="
+      ? `Those aren’t the same amount. Split each ${PART[b][0]} into ${n} to write ${fr(a, b)} in ${parts(c)}, then compare.`
+      : `Split each ${PART[b][0]} into ${n} to write ${fr(a, b)} in ${parts(c)}. Then compare it to ${fr(other, c)}.`;
   return {
     ...mcOf([
       [first, compared === ">" ? null : why(">")],
@@ -488,13 +486,23 @@ function comparePair(unequal = false) {
   } while (!comparable(a, b) || (unequal && sign(a, b) === "="));
   return [a, b];
 }
-/* what a student who compares a and b by the size of the numbers alone would say, as a message for that wrong sign */
+/* The message for a wrong sign s in "a ? b": the way to compare them (cmpWhy's), without giving away which sign is right,
+   since the student gets one more try */
 const signMisc = (a, b) => (s) => {
-  const compared = cmpWhy(a, b);
-  if (s === "=") return `They aren’t the same amount. ${compared.how}: ${compared.why}`;
-  if (compared.how === "Same numerator")
-    return `A bigger denominator means smaller parts, not a bigger fraction. ${compared.why}`;
-  return `Compare the amounts, not the numbers by themselves. ${compared.how}: ${compared.why}`;
+  const compared = cmpWhy(a, b),
+    common = lcm(a[1], b[1]);
+  /* only the way cmpWhy picked is written, so its denominator is one the unit uses */
+  const nudge = {
+    "Same amount": () => `Write both in ${parts(common)} and compare.`,
+    "Same denominator": () => `Both are ${parts(a[1])}, so compare how many parts each has.`,
+    "Same numerator": () => `Both have ${a[0]} part${a[0] > 1 ? "s" : ""}. A bigger denominator means smaller parts.`,
+    "Compare to 1/2": () => `Compare each one to ${fr(1, 2)}.`,
+    "Compare to 1": () => `Each is one part short of 1 whole. Which missing part is smaller?`,
+    "Common denominator": () => `Write both in ${parts(common)} and compare.`,
+  }[compared.how.replace(/<[^>]*>/g, "").replace("12", "1/2")]();
+  return s === "=" && compared.s !== "="
+    ? `They aren’t the same amount. ${nudge}`
+    : `Compare the amounts, not the numbers by themselves. ${nudge}`;
 };
 function genCompare() {
   const variant = R(0, 3);

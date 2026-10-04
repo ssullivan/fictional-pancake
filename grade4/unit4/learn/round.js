@@ -1,27 +1,6 @@
 /* Learn From Hundredths to Hundred-thousands (Grade 4 Unit 4), chapter 6: Round. Its widgets and steps; loaded by round.html. */
 /* the places to round to */
 const TO = [1000, 10000, 100000];
-/* n rounded to the nearest multiple of unit (halfway rounds up) */
-const roundTo = (n, unit) => Math.floor(n / unit + 0.5) * unit;
-/* "the nearest thousand" */
-const nearest = (unit) =>
-  `the nearest ${unit === 1000 ? "thousand" : unit === 10000 ? "ten thousand" : "hundred thousand"}`;
-/* n on a number line from the multiple of unit below it to the one above, in 10 ticks, with the halfway point */
-function roundLine(n, unit, label) {
-  const below = Math.floor(n / unit) * unit,
-    tick = unit / 10;
-  return numLine(0, 10, {
-    u: 36,
-    step: 1,
-    big: 5,
-    pad: 36,
-    fmt: (v) => commas(below + v * tick),
-    pts: [{ v: (n - below) / tick, t: commas(n) }],
-    label:
-      label ||
-      `Number line from ${commas(below)} to ${commas(below + unit)}, with ${commas(below + unit / 2)} halfway and a point at ${commas(n)}`,
-  });
-}
 /* how n rounds to the nearest unit (html) */
 function roundWhy(n, unit) {
   const below = Math.floor(n / unit) * unit,

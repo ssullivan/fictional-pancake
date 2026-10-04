@@ -1,21 +1,5 @@
-/* Learn From Hundredths to Hundred-thousands (Grade 4 Unit 4): code used by more than one chapter. Loaded by the chapter pages in learn/, after chapters.js. */
-/* k hundredths as a decimal, as short as it goes: 47 → "0.47", 50 → "0.5", 100 → "1" */
-const dS = (k) => (k % 100 === 0 ? String(k / 100) : (k / 100).toFixed(k % 10 ? 2 : 1));
-/* the columns hundred-thousands to ones */
-const WIDE = [5, 4, 3, 2, 1, 0];
-/* a place's name for 1 and for more: PL[3] is ['thousand', 'thousands'] */
-const PL = {
-  5: ["hundred-thousand", "hundred-thousands"],
-  4: ["ten-thousand", "ten-thousands"],
-  3: ["thousand", "thousands"],
-  2: ["hundred", "hundreds"],
-  1: ["ten", "tens"],
-  0: ["one", "ones"],
-};
-/* <, >, and = as html */
-const SYM = { "<": "&lt;", ">": "&gt;", "=": "=" };
-/* how a compares to b: '<', '>', or '=' */
-const signOf = (a, b) => (a < b ? "<" : a > b ? ">" : "=");
+/* Learn From Hundredths to Hundred-thousands (Grade 4 Unit 4): code used by more than one chapter. Loaded by the chapter pages in learn/, after
+   ../figs.js (dS, WIDE, PL, SYM, signOf, and the number lines the game uses too) and chapters.js. */
 /* Pick <, =, or >, then see why. pairs: [[a, b], …] of {v, t}: the value and how it's written.
    show(a, b): a picture of both; why(a, b): html saying how they compare. */
 const wSign =
