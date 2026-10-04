@@ -87,6 +87,11 @@ module.exports = {
         winner = value(a) > value(b) ? first + cls : value(a) < value(b) ? second + cls : "They eat the same amount";
       onlyRight((label) => label === winner, "who eats more");
     }
+    // a tap lands on the tick it names, and a point is named by where it is (facts.at)
+    if (p.kind === "tap" && (match = prompt.match(/^Tap (\d+)\/\d+ on the number line/)) && p.answer !== match[1])
+      bad.push(`tap ${p.answer} for ${match[0]}`);
+    if (p.facts && p.facts.at && p.answer !== p.facts.at[0] / p.facts.at[1])
+      bad.push(`the point is not at ${p.answer}`);
     // typed answers: ? in an equivalent fraction, and the number both parts were multiplied by
     if (p.kind === "num") {
       if ((match = prompt.match(/(\d+)\/(\d+) = \?\/(\d+)/)) && p.answer !== (match[1] * match[3]) / match[2])

@@ -2,7 +2,8 @@
    Fraction strips and number lines come from shared/fractions.js; fr, mixed, PART, and partName from shared/pictures.js;
    DEN, sign, cmpWhy, and the other comparison helpers from figs.js; mcOf and miscOf from shared/util.js.
    Each generator deals one of a few kinds of problem (variant), each with a comment saying what it asks.
-   Fractions are [numerator, denominator]. */
+   Fractions are [numerator, denominator]. A problem whose numbers are only in its picture also carries facts for checks.js
+   (at: the point on the number line). */
 const KIDS = ["Mai", "Diego", "Lin", "Han", "Priya", "Kiran", "Elena", "Jada", "Noah", "Clare", "Andre", "Tyler"];
 /* two different students */
 const twoKids = () => shuffle(KIDS).slice(0, 2);
@@ -199,6 +200,7 @@ function genLines() {
       unit: "",
       answer: k / d,
       prompt: `What fraction is at the point on the number line?`,
+      facts: { at: [k, d] },
       fig: (show) => fracLine([{ d, pts: [{ k }], hops: show ? k : 0 }], { wholes }),
       misc: apart(k / d, [
         [(k + 1) / d, `That counts the tick marks, with 0 as the first. Count the jumps from 0 instead.`],
