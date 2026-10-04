@@ -1173,7 +1173,7 @@ function genGraph() {
       answer: target.id,
       why,
       fig: () =>
-        graphQ1(points, {
+        coordPlane(points, {
           xMax: 6,
           yMax: k * 6,
           yStep: k,

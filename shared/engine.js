@@ -25,8 +25,11 @@
 
    A problem from gen() is {kind, prompt, explain, hint?, fig?} plus, by kind:
      num:  answer, unit, misc?: [[wrong value, message]], frac?: true when the answer may be a fraction or mixed number
-           (a keyboard with / and space on phones, instead of the decimal keypad)
-     pair: answer: [x, y], labels: [x label, y label], equiv?: any equivalent ratio counts, pmisc?: [[[x, y], message]]
+           (a keyboard with / and space on phones, instead of the decimal keypad), neg?: true when answers in this game may be
+           negative (the full keyboard, since phone number pads have no minus key; set it on every problem, so it never hints)
+     pair: answer: [x, y], labels: [x label, y label], equiv?: any equivalent ratio counts, pmisc?: [[[x, y], message]],
+           point?: true for a point's coordinates, typed as ( x , y ): either number may be negative, and the answer and each
+           pmisc must match exactly (no equivalent ratios)
      mc:   answer: choice id, choices: [{id, label}], why?: {choice id: message}, stack?: one choice per row
      tap:  answer: id of the right .cand element in the figure (data-id), why?: {id: message}
    A 2-choice mc problem gets one try; everything else gets two.
@@ -48,6 +51,8 @@ const Game = (() => {
   const near = (x, y) => (cfg.near || ((a, b) => Math.abs(a - b) < 0.011))(x, y);
   /* is u : v the same ratio as x : y (both positive)? Compared by cross-multiplying, so no dividing by zero */
   const sameRatio = (u, v, x, y) => u > 0 && v > 0 && near(u * y, v * x);
+  /* do typed numbers u, v match the pair x, y? A point's coordinates must match exactly; otherwise the same ratio counts */
+  const samePair = (problem, u, v, x, y) => (problem.point ? near(u, x) && near(v, y) : sameRatio(u, v, x, y));
   const persist = () => {
     try {
       localStorage.setItem(cfg.saveKey, JSON.stringify(save));
@@ -139,11 +144,23 @@ const Game = (() => {
   function answerHtml(problem) {
     const hintBtn = problem.hint ? `<button type="button" class="link-btn" id="hintBtn">Show me a hint</button>` : "";
     if (problem.kind === "num") {
-      /* a fraction answer needs / and space, so it gets the full keyboard instead of the number pad */
+      /* a fraction answer needs / and space, and a negative one needs a minus, so they get the full keyboard instead of
+         the number pad */
       const keyboard = problem.frac
-        ? 'inputmode="text" placeholder="like 2 1/3"'
-        : 'inputmode="decimal" placeholder="?"';
+        ? `inputmode="text" placeholder="like ${problem.neg ? "−" : ""}2 1/3"`
+        : problem.neg
+          ? 'inputmode="text" placeholder="like −3"'
+          : 'inputmode="decimal" placeholder="?"';
       const fields = `<label for="inp" class="sr">Your answer</label><input id="inp" ${keyboard}><span class="unit">${problem.unit}</span>`;
+      return `<form class="ans" id="af" autocomplete="off">${fields}<button class="btn" id="checkBtn">Check</button></form><div class="tools" style="margin-top:12px">${hintBtn}</div>`;
+    }
+    if (problem.kind === "pair" && problem.point) {
+      /* ( x , y ), with the full keyboard for a minus sign */
+      const box = (id, name) =>
+        `<input id="${id}" class="sm" inputmode="text" placeholder="?" aria-label="${name}-coordinate">`;
+      const fields =
+        `<span class="colon">(</span>${box("inp", "x")}<span class="colon">,</span>` +
+        `${box("inp2", "y")}<span class="colon">)</span>`;
       return `<form class="ans" id="af" autocomplete="off">${fields}<button class="btn" id="checkBtn">Check</button></form><div class="tools" style="margin-top:12px">${hintBtn}</div>`;
     }
     if (problem.kind === "pair") {
@@ -247,8 +264,8 @@ const Game = (() => {
       const [x, y] = problem.answer;
       ok = problem.equiv ? sameRatio(u, v, x, y) : near(u, x) && near(v, y);
       if (!ok) {
-        const mistake = (problem.pmisc || []).find(([[wx, wy]]) => sameRatio(u, v, wx, wy));
-        msg = mistake ? mistake[1] : "Not quite. Count each kind again.";
+        const mistake = (problem.pmisc || []).find(([[wx, wy]]) => samePair(problem, u, v, wx, wy));
+        msg = mistake ? mistake[1] : problem.point ? cfg.words.miss : "Not quite. Count each kind again.";
       }
     } else {
       ok = value === problem.answer;

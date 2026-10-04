@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Expedition Zero</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=JetBrains+Mono:wght@500;700&display=swap">
+<link rel="stylesheet" href="../../shared/theme.css?v=4796e910">
+<link rel="stylesheet" href="../../shared/game.css?v=57b7d039">
+<link rel="stylesheet" href="../../shared/figures.css?v=20dca2b0">
+<link rel="stylesheet" href="../../shared/pictures.css?v=7f680159">
+<link rel="stylesheet" href="../../shared/algebra.css?v=05a86779">
+<link rel="stylesheet" href="figs.css?v=5e6710c6">
+</head>
+<body>
+
+<div class="app">
+  <section id="home">
+    <a class="back" href="../">← Grade 6</a>
+    <header class="hero">
+      <p class="eyebrow">Illustrative Mathematics · Grade 6 · Unit 7 · Rational Numbers</p>
+      <h1>Expedition <span>Zero</span></h1>
+      <p class="lede">Pack up for an expedition below zero! Find your way on the number line, compare cold temperatures and deep dives, measure distance from zero, stay inside safe limits, read the map grid in all four quadrants, and pack identical supply kits. Each station matches lessons from class. <a href="learn.html">New to this? Learn it first →</a></p>
+      <div class="stats">
+        <span class="pill">Points <b id="hp">0</b></span>
+        <span class="pill">Stars <b id="hs">0</b>/<span id="hsMax">24</span></span>
+      </div>
+    </header>
+    <div class="zones" id="zones"></div>
+    <section class="grownups">
+      <h2>For grown-ups</h2>
+      <div><h4>How a round works</h4><p>Each station deals 8 fresh problems (Summit Push deals 10). A right answer on the first try earns 10 points. After a wrong answer, the game names the likely mistake and gives one more try for 5 points. Negative answers can be typed with a minus sign: −4, -4, or −2 1/2. Points are typed as two numbers, x first.</p></div>
+      <div><h4>Numbers you can do in your head</h4><p>Signed numbers stay on friendly number lines: whole numbers, halves, and quarters. Temperatures, elevations, and bank balances are realistic, and points stay on a grid from −12 to 12. Factors and multiples use numbers up to 60. There is no adding or subtracting of negative numbers (that comes in Grade 7): distances are found by adding or subtracting distances from 0.</p></div>
+      <div><h4>The "Show me" hint</h4><p>Hints use the tools from class: the number line (horizontal, or up and down for temperatures and sea level), brackets for distance from zero, graphs of inequalities, paths on the coordinate plane, and lists of factors and multiples. A used hint caps that problem at 5 points.</p></div>
+      <div><h4>Mistakes it catches</h4><p>Reading −8 as greater than −3 because 8 is greater than 3, ordering numbers by their distance from zero, dropping the sign of a number below zero, a negative absolute value, “only 6” for numbers 6 from zero, an open circle read as closed, “at least” written as &gt;, an inequality pointing the wrong way, the boundary counted as a solution of &lt; or &gt;, x and y swapped, a sign flipped for a point, subtracting distances across an axis, reflecting across the wrong axis, a smaller common factor for the greatest one, the product for the least common multiple, and mixing up which one a story needs.</p></div>
+      <div><h4>Not covered</h4><p>The unit’s partner activities (info gaps and card sorts) and the open-ended drawing in Lesson 19 work better in class than as scored problems.</p></div>
+    </section>
+  </section>
+
+  <section id="play" hidden>
+    <div class="bar">
+      <button id="quit" class="ghost-btn" type="button">← Stations</button>
+      <div class="bar-mid"><div class="zn" id="zname"></div><div class="track"><div id="prog"></div></div></div>
+      <div class="bar-stats"><span class="pill" id="streak">Streak <b>0</b></span><span class="pill">Pts <b id="pts">0</b></span></div>
+    </div>
+    <article class="card">
+      <p class="eyebrow" id="qnum"></p>
+      <h2 id="prompt"></h2>
+      <div class="fig" id="fig"></div>
+      <div id="answer"></div>
+      <div id="hint" class="hintbox" hidden></div>
+      <div id="feedback" role="status" aria-live="polite"></div>
+    </article>
+  </section>
+
+  <section id="done" hidden>
+    <div class="card done">
+      <p class="eyebrow" id="dzone"></p>
+      <div class="bigstars stars" id="dstars"></div>
+      <h2 id="dtitle"></h2>
+      <p id="dmsg"></p>
+      <div class="row">
+        <button class="btn" id="again" type="button">Play again</button>
+        <button class="ghost-btn" id="tomap" type="button">Back to stations</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script src="../../shared/util.js?v=af7a4707"></script>
+<script src="../../shared/figures.js?v=d2337c45"></script>
+<script src="../../shared/algebra.js?v=ee6574ce"></script>
+<script src="../../shared/multiply.js?v=07690537"></script>
+<script src="figs.js?v=2319f691"></script>
+<script src="../../shared/engine.js?v=4b1b2373"></script>
+<script src="stations.js?v=d1e7a913"></script>
+<script>
+Game.init({
+  saveKey:'g6u7-save',
+  zones:ZONES,icons:ICON,
+  words:{
+    right:'On course!',
+    miss:'Not quite. Picture it on the number line: left is less, and distance from zero is never negative.',
+    titles:['Keep exploring','Good start','Solid trek','Expedition leader!'],
+    next:'Try the next station, or make the Summit Push.',
+    stuck:'Use "Show me a hint" when you’re stuck. The number lines and maps show the way.',
+    tap:'Tap your answer in the picture.'
+  }
+});
+</script>
+</body>
+</html>

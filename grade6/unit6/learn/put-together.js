@@ -54,7 +54,7 @@ function wFourViews(el) {
       hi: x,
       label: `Table for ${sit.equation}`,
     });
-    q("f").innerHTML = graphQ1(
+    q("f").innerHTML = coordPlane(
       rows.map(([v, w]) => ({ x: v, y: w, cls: v === x ? "hi" : "" })),
       { xMax: 6, yMax: sit.yMax, yStep: sit.yStep, xLabel: sit.x, yLabel: sit.y },
     );

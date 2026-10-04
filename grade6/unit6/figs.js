@@ -1,12 +1,10 @@
 /* The pictures that Grade 6 Unit 6's game (Balance Lab) and its Learn pages both use. Styles are in figs.css.
-   Needs util.js (range), figures.js (svgWrap, qbox, and the table styles), and fracmath.js (fT, ftx).
+   Needs util.js (range), figures.js (svgWrap, qbox, and the table styles), and fracmath.js (fT, ftx). Graphs (coordPlane) and
+   letters for numbers (mathVar, withVars) are in shared/algebra.js.
 
    hanger(left, right, {tip, letter, label})   a hanger diagram: a beam on a hook with weights hanging from each end (svg)
    areaSplit(side, parts, {whole, label})      a rectangle `side` tall, split into parts side by side, not to scale (svg)
-   graphQ1(points, {…})                        a first-quadrant graph: gridlines, numbered and labeled axes, and points (svg)
    valueTable(headers, rows, {hi, q, label})   a table of values: a header row, then a row for each entry (html)
-   mathVar(letter)                             a letter that stands for a number, in italics (html)
-   withVars(text)                              text with its letters for numbers in italics (html)
    power(base, exponent)                       base with a raised exponent (html) */
 
 /* Hanger diagram. left and right list what hangs on each side: 'x' is a circle for the unknown (written with `letter`), 1 is a
@@ -139,65 +137,6 @@ function areaSplit(side, parts, { whole = null, label } = {}) {
   );
 }
 
-/* First-quadrant graph from 0 to xMax across and 0 to yMax up, with gridlines every xStep and yStep, each numbered, and the
-   axes labeled xLabel and yLabel. points: [{x, y, id, cls, t}]: cls 'b' draws it blue and 'hi' outlines it; t is written
-   beside it. tap: each point is a .cand for engine.js to tap (data-id = its id). line: [m, b] draws the dashed line
-   y = m·x + b behind the points. label: what a screen reader says. */
-function graphQ1(
-  points,
-  { xMax, yMax, xStep = 1, yStep = 1, xLabel = "x", yLabel = "y", tap = false, line = null, label } = {},
-) {
-  /* the plot is plotW by plotH, its bottom left (the origin) at (left, bottom); xOf and yOf turn values into pixels */
-  const plotW = 340,
-    plotH = 230,
-    left = 62,
-    topPad = 16,
-    bottom = topPad + plotH,
-    xOf = (v) => left + (plotW * v) / xMax,
-    yOf = (v) => bottom - (plotH * v) / yMax;
-  let markup = "";
-  /* gridlines and their numbers; every other number is left off when the lines are closer than 22 pixels */
-  const xEvery = (plotW * xStep) / xMax < 22 ? 2 : 1,
-    yEvery = (plotH * yStep) / yMax < 22 ? 2 : 1;
-  range(Math.round(xMax / xStep) + 1).forEach((i) => {
-    const v = i * xStep;
-    markup += `<line class="gq-grid" x1="${xOf(v)}" y1="${yOf(0)}" x2="${xOf(v)}" y2="${yOf(yMax)}"/>`;
-    if (i % xEvery === 0) markup += `<text class="lbl s dm" x="${xOf(v)}" y="${bottom + 16}">${v}</text>`;
-  });
-  range(Math.round(yMax / yStep) + 1).forEach((i) => {
-    const v = i * yStep;
-    markup += `<line class="gq-grid" x1="${xOf(0)}" y1="${yOf(v)}" x2="${xOf(xMax)}" y2="${yOf(v)}"/>`;
-    if (i % yEvery === 0) markup += `<text class="lbl s dm en" x="${left - 8}" y="${yOf(v)}">${v}</text>`;
-  });
-  markup +=
-    `<line class="gq-axis" x1="${xOf(0)}" y1="${yOf(0)}" x2="${xOf(xMax)}" y2="${yOf(0)}"/>` +
-    `<line class="gq-axis" x1="${xOf(0)}" y1="${yOf(0)}" x2="${xOf(0)}" y2="${yOf(yMax)}"/>` +
-    `<text class="lbl s" x="${left + plotW / 2}" y="${bottom + 40}">${xLabel}</text>` +
-    `<text class="lbl s" x="16" y="${topPad + plotH / 2}" transform="rotate(-90 16 ${topPad + plotH / 2})">${yLabel}</text>`;
-  /* the line y = m·x + b, from x = 0 to where it leaves the plot (the top or the right side) */
-  if (line) {
-    const [m, b] = line,
-      xEnd = m > 0 ? Math.min(xMax, (yMax - b) / m) : xMax;
-    markup += `<line class="gq-line" x1="${xOf(0)}" y1="${yOf(b)}" x2="${xOf(xEnd)}" y2="${yOf(m * xEnd + b)}"/>`;
-  }
-  points.forEach((p) => {
-    const cx = xOf(p.x),
-      cy = yOf(p.y),
-      dot = `<circle class="gq-pt${p.cls ? " " + p.cls : ""}" cx="${cx}" cy="${cy}" r="6"/>`;
-    markup += tap
-      ? `<g class="cand" data-id="${p.id}" tabindex="0" role="button" aria-label="Point (${p.x}, ${p.y})"><circle class="hit" cx="${cx}" cy="${cy}" r="16"/>${dot}</g>`
-      : dot;
-    if (p.t) markup += `<text class="lbl s gd st" x="${cx + 10}" y="${cy - 12}">${p.t}</text>`;
-  });
-  return svgWrap(
-    left + plotW + 20,
-    bottom + 52,
-    markup,
-    label ||
-      `Graph of ${yLabel} against ${xLabel}${points.length ? `, with points ${points.map((p) => `(${p.x}, ${p.y})`).join(", ")}` : ""}`,
-  );
-}
-
 /* A table of values: headers across the top, then rows of cells (numbers or markup). hi: the index of a row to color cyan;
    q: [row, column] puts the gold "?" in that cell instead. label: what a screen reader says. */
 function valueTable(headers, rows, { hi = -1, q = null, label = "Table of values" } = {}) {
@@ -213,14 +152,5 @@ function valueTable(headers, rows, { hi = -1, q = null, label = "Table of values
   return `<table class="rt" aria-label="${label}"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>`;
 }
 
-/* a letter that stands for a number, in italics */
-const mathVar = (letter) => `<i class="mv">${letter}</i>`;
-/* text with each letter that stands for a number in italics: a lowercase letter with no letter or apostrophe on either side,
-   as in 3x or x + 4. Left alone: the words "a" and "i" (never letters for numbers here), an s after a digit (the plural in
-   "how many 2s"), and HTML tags. */
-const withVars = (text) =>
-  text.replace(/<[^>]*>|(?<![A-Za-z’'])[b-hj-z](?![A-Za-z’'])/g, (match, offset) =>
-    match[0] === "<" || (match === "s" && /\d/.test(text[offset - 1])) ? match : mathVar(match),
-  );
 /* base to the power exponent, written with a raised exponent */
 const power = (base, exponent) => `${base}<sup>${exponent}</sup>`;

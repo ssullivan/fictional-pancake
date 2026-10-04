@@ -1,0 +1,8 @@
+/* Grade 6 Unit 7 Learn pages: statements, and the widgets' controls. Loaded by every page in learn/. */
+.eq{margin:0 0 10px;font:700 24px var(--mono);text-align:center}
+.eq .ok{color:var(--good)}.eq .no{color:var(--bad)}
+.eq.sm{font-size:19px}
+/* a letter on a pressed (gold) button takes the button's dark text color */
+.seg button[aria-pressed="true"] .mv{color:inherit}
+/* a stepper's value stays on one line (−$30) */
+.stepper b{white-space:nowrap}

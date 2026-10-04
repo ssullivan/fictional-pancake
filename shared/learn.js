@@ -20,8 +20,9 @@
    Learn.chapter(UNIT, id, steps)    on learn/<id>.html: draws the chapter, where steps are [{
        title, body,             body is HTML
        widget?: el => cleanup?, draws into el; may return a function that runs when the step is left
-       check?: {kind: 'num', q, answer, unit?, misc?: [[wrong value, message]], explain, fig?, frac?}   frac: the answer may be a
-                                fraction or mixed number (a keyboard with / and space on phones, instead of the decimal keypad)
+       check?: {kind: 'num', q, answer, unit?, misc?: [[wrong value, message]], explain, fig?, frac?, neg?}   frac: the answer may
+                                be a fraction or mixed number (a keyboard with / and space on phones, instead of the decimal
+                                keypad); neg: answers in this unit may be negative (the full keyboard, which has a minus sign)
              | {kind: 'mc', q, answer, choices: [{id, label}], why: {id: message}, explain, fig?, stack?}
    }]
    Next unlocks once a step's quick check is answered (steps without a check unlock right away). */
@@ -56,8 +57,13 @@ const Learn = (() => {
         sayBtn("Read the question", () => [el.querySelector(".cq"), ...answerBox.querySelectorAll(".choice")]),
       );
     if (check.kind === "num") {
-      /* a fraction answer needs / and space, so it gets the full keyboard instead of the number pad */
-      const keyboard = check.frac ? 'inputmode="text" placeholder="like 2 1/3"' : 'inputmode="decimal" placeholder="?"';
+      /* a fraction answer needs / and space, and a negative one needs a minus, so they get the full keyboard instead of
+         the number pad */
+      const keyboard = check.frac
+        ? `inputmode="text" placeholder="like ${check.neg ? "−" : ""}2 1/3"`
+        : check.neg
+          ? 'inputmode="text" placeholder="like −3"'
+          : 'inputmode="decimal" placeholder="?"';
       answerBox.innerHTML = `<form class="ans" autocomplete="off"><label class="sr" for="cin">Your answer</label><input id="cin" ${keyboard}><span class="unit">${check.unit || ""}</span><button class="btn">Check</button></form>`;
       answerBox.querySelector("form").addEventListener("submit", (e) => {
         e.preventDefault();

@@ -44,9 +44,10 @@ const lcm = (a, b) => (a * b) / gcd(a, b);
 const $ = (id) => document.getElementById(id);
 /* Q(el)('x') finds the element marked data-x inside el */
 const Q = (el) => (a) => el.querySelector(`[data-${a}]`);
-/* Reads what a student typed: "12", "$4.50", "1,200", "3/4", "2 1/2", "-2 1/2", "12 cm". NaN if there is no number. */
+/* Reads what a student typed: "12", "$4.50", "1,200", "3/4", "2 1/2", "-2 1/2", "−2 1/2", "12 cm". NaN if there is no number. */
 function parseNum(s) {
-  s = String(s).trim().replace(/[,$]/g, "");
+  /* pages print a true minus sign (−) and some keyboards type a dash (–): both read as a minus */
+  s = String(s).trim().replace(/[,$]/g, "").replace(/[−–]/g, "-");
   /* a mixed number: optional minus, whole, space, numerator/denominator ("-2 1/2") */
   const mixed = s.match(/^(-?)(\d+)\s+(\d+)\/(\d+)/);
   if (mixed) {

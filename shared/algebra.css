@@ -1,0 +1,24 @@
+/* Styles for algebra.js: letters for numbers and coordinate planes. */
+/* a letter standing for a number */
+.mv{color:var(--cyan);font-weight:700}
+/* coordinate planes: gridlines, axes, the dashed line, and points (b blue, r red, hi outlined); tap problems mark points
+   right or wrong */
+.gq-grid{stroke:rgba(170,205,255,.18);stroke-width:1}
+.gq-axis{stroke:var(--chalk);stroke-width:2.5}
+.gq-line{stroke:var(--cyan);stroke-width:2;stroke-dasharray:6 5}
+.gq-pt{fill:var(--gold);stroke:#0a2340;stroke-width:2}
+.gq-pt.b{fill:var(--cyan)}
+.gq-pt.r{fill:var(--bad)}
+.gq-pt.hi{stroke:#fff;stroke-width:3}
+.cand{cursor:pointer}
+.cand .hit{fill:transparent}
+.cand:hover .gq-pt,.cand:focus .gq-pt{stroke:#fff;stroke-width:3}
+.cand:focus{outline:none}
+.cand.right .gq-pt{fill:var(--good)}
+.cand.wrong .gq-pt{fill:var(--bad);opacity:.5}
+/* paths and shapes through points (walk: a dashed path; fill: a shaded shape), a shaded quadrant, and the quadrants' names */
+.gq-shape{fill:none;stroke:var(--gold);stroke-width:2.5;stroke-linejoin:round}
+.gq-shape.walk{stroke:var(--cyan);stroke-dasharray:6 5}
+.gq-shape.fill{fill:rgba(255,201,60,.18)}
+.gq-shade{fill:rgba(127,227,255,.12)}
+.lbl.gq-quad{fill:rgba(170,205,255,.45);font-size:22px}

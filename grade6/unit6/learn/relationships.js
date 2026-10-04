@@ -81,7 +81,7 @@ function wGraph(el) {
     press(el, rateId);
     q("n").textContent = n;
     q("line").textContent = lineShown ? "Hide the line" : "Draw the line";
-    q("f").innerHTML = graphQ1(
+    q("f").innerHTML = coordPlane(
       range(n).map((i) => ({ x: i + 1, y: r.rate * (i + 1), cls: i === n - 1 ? "hi" : "" })),
       {
         xMax: 8,
@@ -158,7 +158,7 @@ function wCompare(el) {
       hi: upTo,
       label: `Table for ${kind.equation}`,
     });
-    q("f").innerHTML = graphQ1(
+    q("f").innerHTML = coordPlane(
       rows.map(([x, y]) => ({ x, y })),
       { xMax: 6, yMax: 30, yStep: 5, xLabel: kind.x, yLabel: kind.y, line: kind.id === "add" ? [1, 5] : [5, 0] },
     );

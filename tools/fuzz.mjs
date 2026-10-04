@@ -11,6 +11,8 @@
 //     limits: {zoneId: {dp, nz, max}},   most decimal places, most nonzero digits, largest value, for the
 //                                        answer and every number in the prompt (the boss gets the widest)
 //     check: (p, zoneId) => [messages],   optional real-world checks; an empty list when the problem is fine
+//     signed: true,                       optional: answers may be negative (from Grade 6 Unit 7 on), and max limits
+//                                        their size (absolute value); otherwise every answer must be positive
 //   };
 import { readFileSync, existsSync, globSync } from "node:fs";
 import { join, resolve, dirname } from "node:path";
@@ -125,15 +127,15 @@ function check(p) {
 // numbers as written: decimal places and nonzero digits
 const dp = (v) => (String(Math.round(v * 1e6) / 1e6).split(".")[1] || "").length;
 const nz = (v) => String(Math.round(v * 1e6) / 1e6).replace(/[^1-9]/g, "").length;
-function withinLimits(p, lim) {
+function withinLimits(p, lim, signed) {
   const bad = [],
     nums = [...p.prompt.replace(/<[^>]*>/g, " ").matchAll(/\d[\d,]*(?:\.\d+)?/g)].map((m) => +m[0].replace(/,/g, ""));
   const answers = p.kind === "num" ? [p.answer] : p.kind === "pair" ? p.answer : [];
-  for (const a of answers) if (!(a > 0)) bad.push(`answer ${a} is not positive`);
+  if (!signed) for (const a of answers) if (!(a > 0)) bad.push(`answer ${a} is not positive`);
   for (const [what, v] of [...answers.map((a) => ["answer", a]), ...nums.map((n) => ["prompt number", n])]) {
     if (dp(v) > lim.dp) bad.push(`${what} ${v} has more than ${lim.dp} decimal places`);
     if (nz(v) > lim.nz) bad.push(`${what} ${v} has more than ${lim.nz} nonzero digits`);
-    if (v > lim.max) bad.push(`${what} ${v} is over ${lim.max}`);
+    if (Math.abs(v) > lim.max) bad.push(`${what} ${v} is over ${lim.max}`);
   }
   return bad;
 }
@@ -175,7 +177,7 @@ for (const game of games) {
           p = z.gen();
           bad = check(p);
           different.add(problemKey(p));
-          if (!bad.length && lim) bad = withinLimits(p, lim);
+          if (!bad.length && lim) bad = withinLimits(p, lim, extra.signed);
           if (!bad.length && extra.check) bad = extra.check(p, z.id);
         } catch (e) {
           bad = [`threw ${e.stack.split("\n").slice(0, 3).join(" ")}`];

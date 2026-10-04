@@ -1,0 +1,17 @@
+/* Styles for figs.js: number lines through negative numbers and up-and-down number lines. */
+/* the tick at 0 is a little bolder */
+.tick.zero{stroke-width:3.5}
+/* an inequality's ray and the circle at its end (open: hollow), a hollow dot, and brackets for distances */
+.sl-ray{stroke:var(--cyan);stroke-width:6;stroke-linecap:round}
+.sl-rayh{fill:var(--cyan)}
+.sl-end{fill:var(--cyan);stroke:var(--cyan);stroke-width:3}
+.sl-end.open{fill:#0a2340}
+.pt.sl-hollow{fill:#0a2340}
+.sl-span{fill:none;stroke:var(--cyan);stroke-width:2.5}
+/* up-and-down lines: sky and sea, and a thermometer's tube, bulb, and liquid (cold: below zero) */
+.vl-sky{fill:rgba(127,227,255,.06)}
+.vl-sea{fill:rgba(64,140,255,.28)}
+.vl-tube{fill:rgba(243,246,251,.08);stroke:var(--chalk);stroke-width:2}
+.vl-fill,.vl-bulb{fill:#ff7b7b}
+.vl-fill.cold,.vl-bulb.cold{fill:#6fb8ff}
+.pt.r{fill:var(--bad);stroke:#ffd9d0}
