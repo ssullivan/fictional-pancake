@@ -715,8 +715,7 @@ function genAlgorithm() {
     (variant === 2 && !algSteps(a, b, "-").some((s) => s.marks.some((m) => m.v === 9)))
   );
   const answer = op === "+" ? a + b : a - b,
-    [story, unit] = pick(STORIES[op]),
-    columns = algSteps(a, b, algOp).length;
+    [story, unit] = pick(STORIES[op]);
   const wrong =
     op === "+"
       ? [[noCarry(a, b), `That leaves out the 1 you carry when a column makes 10 or more.`]]
@@ -732,7 +731,8 @@ function genAlgorithm() {
     unit,
     answer,
     prompt: story(a, b),
-    fig: (show) => algFig(a, b, algOp, show ? columns : 0),
+    /* the hint works the ones column only: the rest is the student's to do */
+    fig: (show) => algFig(a, b, algOp, show ? 1 : 0),
     misc: miscOf(answer, wrong).filter(([v]) => v !== answer),
     hint:
       op === "+"
