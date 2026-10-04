@@ -1,0 +1,17 @@
+/* Grade 6 Unit 9 Learn pages: statements, the widgets' vote bars, and the town map. Loaded by every page in learn/. */
+.eq{margin:0 0 10px;font:700 24px var(--mono);text-align:center}
+.eq.sm{font-size:17px}
+/* a stepper's value stays on one line */
+.stepper b{white-space:nowrap}
+/* a class's yes votes (gold) over its no votes */
+.vote-yes{fill:rgba(255,201,60,.6);stroke:var(--chalk);stroke-width:1.5}
+.vote-no{fill:rgba(170,205,255,.15);stroke:var(--chalk);stroke-width:1.5}
+/* vote bars: the leader in gold, and the dashed line at a majority */
+.vbar{fill:rgba(127,227,255,.4);stroke:var(--chalk);stroke-width:1.5}
+.vbar.lead{fill:rgba(255,201,60,.6)}
+.need{stroke:var(--cyan);stroke-width:2;stroke-dasharray:5 4}
+/* the town map: blocks for banana slugs (gold) and sea lions (green), and the district lines */
+.block{stroke:rgba(9,32,61,.6);stroke-width:1}
+.block.slug{fill:rgba(255,201,60,.55)}
+.block.lion{fill:rgba(95,224,168,.4)}
+.district{fill:none;stroke:var(--chalk);stroke-width:3.5;stroke-linecap:square}

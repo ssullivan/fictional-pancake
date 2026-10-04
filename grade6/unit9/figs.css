@@ -1,0 +1,37 @@
+/* Styles for figs.js: squares cut from a rectangle, ranked-ballot tables, people in a class, and bars inside bars. */
+/* the rectangle's outline, its squares (c0–c3: one shade for each size), and the rectangle still left (dashed) */
+.cut-out{fill:none;stroke:var(--chalk);stroke-width:2.5}
+.cut-sq{stroke:var(--chalk);stroke-width:2}
+.cut-sq.c0{fill:rgba(255,201,60,.45)}
+.cut-sq.c1{fill:rgba(127,227,255,.4)}
+.cut-sq.c2{fill:rgba(255,138,196,.4)}
+.cut-sq.c3{fill:rgba(95,224,168,.4)}
+.cut-rest{fill:rgba(170,205,255,.08);stroke:var(--dim);stroke-width:2;stroke-dasharray:6 4}
+/* ranked ballots: a smaller table that scrolls inside its box on a narrow phone; out: left out of the vote, vote: the
+   choice each group votes for now */
+.bt-wrap{overflow-x:auto;max-width:100%}
+table.rt.bt{font-size:15px}
+table.rt.bt th{padding:6px 10px;text-align:center}
+table.rt.bt td{padding:6px 10px;white-space:nowrap}
+table.rt.bt tbody th{border-bottom:1px solid rgba(170,205,255,.25)}
+table.rt.bt td.out{color:var(--dim);text-decoration:line-through;opacity:.6}
+table.rt.bt td.vote{color:var(--gold)}
+/* small tables (it): tighter on a phone, as are the ballots, so every column fits */
+@media (max-width:480px){
+  table.rt.it{font-size:15px}
+  table.rt.it th,table.rt.it td{padding:6px 8px}
+  table.rt.it th{font-size:12px;padding:6px 4px}
+  table.rt.bt{font-size:13px}
+  table.rt.bt th,table.rt.bt td{padding:5px 6px}
+}
+/* people: gold for the ones counted, dim for the rest */
+.pp{fill:rgba(170,205,255,.15);stroke:var(--dim);stroke-width:1.5}
+.pp.on{fill:var(--gold);stroke:#fff1b8}
+/* bars inside bars, one shade for each level */
+.nest{stroke:var(--chalk);stroke-width:1.5}
+.nest.n0{fill:rgba(170,205,255,.25)}
+.nest.n1{fill:rgba(127,227,255,.45)}
+.nest.n2{fill:rgba(255,201,60,.55)}
+.nest.n3{fill:rgba(255,138,196,.55)}
+/* a caption over one of two pictures or tables shown together */
+.figcap{margin:6px 0 2px;font:700 14px var(--mono);color:var(--dim);text-align:center}

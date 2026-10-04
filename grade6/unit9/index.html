@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Town Hall</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=JetBrains+Mono:wght@500;700&display=swap">
+<link rel="stylesheet" href="../../shared/theme.css?v=4796e910">
+<link rel="stylesheet" href="../../shared/game.css?v=57b7d039">
+<link rel="stylesheet" href="../../shared/figures.css?v=20dca2b0">
+<link rel="stylesheet" href="../../shared/pictures.css?v=7f680159">
+<link rel="stylesheet" href="figs.css?v=7b598353">
+</head>
+<body>
+
+<div class="app">
+  <section id="home">
+    <a class="back" href="../">← Grade 6</a>
+    <header class="hero">
+      <p class="eyebrow">Illustrative Mathematics · Grade 6 · Unit 9 · Putting It All Together</p>
+      <h1>Town <span>Hall</span></h1>
+      <p class="lede">The town needs your math. Shrink the world to a class, cut rectangles into squares, decide which class was more in favor, count supermajorities, find who really decided, count ranked ballots three ways, and share out representatives fairly. Each station matches a lesson from class. <a href="learn.html">New to this? Learn it first →</a></p>
+      <div class="stats">
+        <span class="pill">Points <b id="hp">0</b></span>
+        <span class="pill">Stars <b id="hs">0</b>/<span id="hsMax">24</span></span>
+      </div>
+    </header>
+    <div class="zones" id="zones"></div>
+    <section class="grownups">
+      <h2>For grown-ups</h2>
+      <div><h4>How a round works</h4><p>Each station deals 8 fresh problems (Town Meeting deals 10). A right answer on the first try earns 10 points. After a wrong answer, the game names the likely mistake and gives one more try for 5 points. A question with only two choices (does a vote pass, which mascot wins) gets one try.</p></div>
+      <div><h4>Putting it all together</h4><p>This optional unit uses the year’s math on real questions: ratios and percents (Units 2 and 3) to shrink the world to a class and to compare votes, common factors (Unit 7) to cut rectangles into squares, and rates (“people per representative”) to share seats fairly.</p></div>
+      <div><h4>Numbers you can do in your head</h4><p>World facts are rounded to friendly shares like “about 1 in 4” from recent UN and ITU figures. Classes have 20 to 36 students, percents come out whole, rectangles are at most 30 long, and elections have three choices and up to 36 voters, so the challenge is the reasoning, not the arithmetic.</p></div>
+      <div><h4>The "Show me" hint</h4><p>Hints show the class as dots, cut the rectangle into its squares, draw bars inside bars for a percent of a percent, and spell out each voting rule.</p></div>
+      <div><h4>Mistakes it catches</h4><p>The people who would <i>not</i> instead of who would, 1 in 4 read as 4 students, comparing yes counts instead of shares, rounding a supermajority down, exactly half taken for a majority, a percent of the voters taken for a percent of everyone, the winner by a different voting rule, forgetting 2nd-choice points, and one representative per group no matter its size.</p></div>
+      <div><h4>Voting words</h4><p>IM calls the points count (2 for a 1st choice, 1 for a 2nd, 0 for a 3rd) “instant runoff,” and the game does too. Elsewhere this is often called a Borda count, and “instant runoff” can mean a ranked runoff counted all at once.</p></div>
+      <div><h4>Not covered</h4><p>Lesson 1 (Fermi problems), making a class’s own “If Our Class Were the World” display, and drawing district maps (Lesson 6) are open-ended, so they work better in class than as scored problems.</p></div>
+    </section>
+  </section>
+  <section id="play" hidden>
+    <div class="bar">
+      <button id="quit" class="ghost-btn" type="button">← Stations</button>
+      <div class="bar-mid"><div class="zn" id="zname"></div><div class="track"><div id="prog"></div></div></div>
+      <div class="bar-stats"><span class="pill" id="streak">Streak <b>0</b></span><span class="pill">Pts <b id="pts">0</b></span></div>
+    </div>
+    <article class="card">
+      <p class="eyebrow" id="qnum"></p>
+      <h2 id="prompt"></h2>
+      <div class="fig" id="fig"></div>
+      <div id="answer"></div>
+      <div id="hint" class="hintbox" hidden></div>
+      <div id="feedback" role="status" aria-live="polite"></div>
+    </article>
+  </section>
+
+  <section id="done" hidden>
+    <div class="card done">
+      <p class="eyebrow" id="dzone"></p>
+      <div class="bigstars stars" id="dstars"></div>
+      <h2 id="dtitle"></h2>
+      <p id="dmsg"></p>
+      <div class="row">
+        <button class="btn" id="again" type="button">Play again</button>
+        <button class="ghost-btn" id="tomap" type="button">Back to stations</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script src="../../shared/util.js?v=af7a4707"></script>
+<script src="../../shared/figures.js?v=d2337c45"></script>
+<script src="figs.js?v=7764eb80"></script>
+<script src="../../shared/engine.js?v=4b1b2373"></script>
+<script src="stations.js?v=4b2c5f63"></script>
+<script>
+Game.init({
+  saveKey:'g6u9-save',
+  zones:ZONES,icons:ICON,
+  words:{
+    right:'Motion carried!',
+    miss:'Not quite. Look at the picture again: who is in each group, and what is it out of?',
+    titles:['Keep at it','Good start','Sharp citizen','Town hero!'],
+    next:'Try the next station, or call the Town Meeting.',
+    stuck:'Use "Show me a hint" when you’re stuck. The pictures show the groups.',
+    tap:'Tap your answer in the picture.'
+  }
+});
+</script>
+</body>
+</html>
