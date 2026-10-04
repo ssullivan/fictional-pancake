@@ -297,6 +297,10 @@ const CALLS = {
     `tapes([{label: 'Long label', n: 1, show: '?'}, {label: 'B', n: 13, show: 13}], {diff: '?'})`,
     `partWhole([{n: 7, show: 7}], '?')`,
     `partWhole([{n: 1, show: 1, hi: 1}, {n: 99, show: 99}], 100)`,
+    `timesTape([{label: 'A', times: 1, each: 4, total: 4}, {label: 'B', times: 3, each: 4, total: '?'}])`,
+    `timesTape([{label: 'A', times: 1, each: '?', total: '?'}, {label: 'B', times: 1, span: 4, each: 20, total: '? × 5'}], {label: 'L'})`,
+    `timesTape([{label: 'A', times: 1, each: 4, total: 4}, {label: 'B', times: 1, each: 4, total: 7, plus: '+3', plusBoxes: 0.75}])`,
+    `timesTape([{label: 'A', times: 10, each: '2,000', total: '20,000'}])`,
   ],
   fractions: [
     `strips([{d: 4, k: 3}])`,

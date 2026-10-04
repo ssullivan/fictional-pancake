@@ -2,6 +2,7 @@
 
    tapes(rows, {diff})               tape diagram comparing two amounts
    partWhole(parts, total)           one tape split into parts, with the total above
+   timesTape(rows, {label})          tapes for "times as many": each row is copies of one box, with its total (svg)
    numLine(lo, hi, {…})              a number line with arrows, jumps, dots, and tappable ticks (svg)
    jumps(start, moves, shown, ask)   an open number line: counting on or back in jumps, not drawn to scale (svg) */
 /* Tape diagrams to compare two amounts. rows: [{label, n, show}] where show is the number to write (or '?').
@@ -49,6 +50,49 @@ function partWhole(parts, total, label = "Tape diagram") {
     x += p.n * unitW;
   });
   return svgWrap(tapeW + 2 * left, tapeY + tapeH + 6, markup, label);
+}
+
+/* Tape diagrams, one row under another, every box the same width so rows line up. rows: [{label, times, each, total, span,
+   plus, plusBoxes}]: `times` boxes each showing `each` (a number or '?'), then the row's total (or '?') after it; span: one
+   box as wide as `span` boxes instead (a whole amount not yet split into copies); plus: a dashed box after them showing how
+   many more (for "more than"), as wide as plusBoxes boxes. The first row is gold and the others blue. */
+function timesTape(rows, { label = "Tape diagram" } = {}) {
+  /* boxesIn(r): how many box widths row r takes */
+  const boxesIn = (r) => (r.span || r.times) + (r.plus ? r.plusBoxes || 1 : 0),
+    most = Math.max(...rows.map(boxesIn)),
+    labelW = 72,
+    totalW = 74,
+    boxW = Math.min(64, 330 / most),
+    boxH = 36,
+    rowGap = 16;
+  let markup = "";
+  rows.forEach((r, i) => {
+    const y = 6 + i * (boxH + rowGap),
+      textY = y + boxH / 2;
+    markup += `<text class="lbl en" x="${labelW - 10}" y="${textY}">${r.label}</text>`;
+    const pieceW = r.span ? r.span * boxW : boxW;
+    range(r.span ? 1 : r.times).forEach((j) => {
+      const x = labelW + j * pieceW;
+      /* a small label is about 8.5 pixels a character: a box too narrow for its number leaves it out */
+      const fits = String(r.each).length * 8.5 <= pieceW - 4;
+      markup +=
+        `<rect class="tt ${i ? "tt1" : "tt0"}" x="${x}" y="${y}" width="${pieceW}" height="${boxH}" rx="3"/>` +
+        (fits
+          ? `<text class="lbl${r.each === "?" ? " cy" : ""}${pieceW < 44 ? " s" : ""}" x="${x + pieceW / 2}" y="${textY}">${r.each}</text>`
+          : "");
+    });
+    let end = labelW + (r.span || r.times) * boxW;
+    if (r.plus) {
+      const plusW = (r.plusBoxes || 1) * boxW;
+      markup +=
+        `<rect class="tt tgap" x="${end}" y="${y}" width="${plusW}" height="${boxH}" rx="3"/>` +
+        `<text class="lbl s" x="${end + plusW / 2}" y="${textY}">${r.plus}</text>`;
+      end += plusW;
+    }
+    if (r.total !== undefined)
+      markup += `<text class="lbl st${r.total === "?" ? " cy" : ""}" x="${end + 10}" y="${textY}">${r.total === "?" ? "?" : `= ${r.total}`}</text>`;
+  });
+  return svgWrap(labelW + most * boxW + totalW, 12 + rows.length * (boxH + rowGap) - rowGap, markup, label);
 }
 
 /* A number line from lo to hi, with a tick every `step` (taller every `big`). lab(v): which ticks get a number (default: the tall ones).

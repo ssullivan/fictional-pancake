@@ -1,9 +1,4 @@
-/* Styles for figs.js: "times as many" tape diagrams, and conversion tables. */
-/* tape boxes: the smaller amount (tt0), its copies in the bigger one (tt1), and the extra in "more than" (tgap) */
-.tt{stroke-width:2.5}
-.tt.tt0{fill:rgba(255,201,60,.3);stroke:var(--gold)}
-.tt.tt1{fill:rgba(127,227,255,.25);stroke:var(--cyan)}
-.tt.tgap{fill:rgba(255,138,196,.18);stroke:var(--pink);stroke-dasharray:6 4}
+/* Styles for figs.js: conversion tables. */
 /* conversion tables: the big unit, the small unit, and the row asked about */
 table.conv{border-collapse:collapse;margin:6px auto;font:700 18px var(--mono);font-variant-numeric:tabular-nums}
 table.conv th{font:700 14px var(--mono);color:var(--dim);padding:6px 16px;border-bottom:2px solid rgba(243,246,251,.5)}
