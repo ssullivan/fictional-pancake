@@ -40,6 +40,7 @@ const FILES = [
   "shapes",
   "measure",
   "multiply",
+  "angles",
   "solids",
 ];
 
@@ -488,6 +489,21 @@ const CALLS = {
     ),
     `areaModel(12, 3, {filled: 0, label: 'L'})`,
     `partialFig(12, 3, 0, 'L')`,
+  ],
+  angles: [
+    `polar(10, 20, 30, 45)`,
+    ...["point", "line", "ray", "segment"].map((kind) => `geoFig('${kind}')`),
+    `geoFig('ray', {names: ['P', 'Q'], tilt: 30, label: 'L'})`,
+    `angleMark(100, 100, 0, 90)`,
+    `angleMark(100, 100, 20, 250, {r: 20, text: '230°'})`,
+    ...[30, 90, 135, 180, 270, 360].map((deg) => `angleFig(${deg})`),
+    `angleFig(50, {turn: 40, letters: ['A', 'B', 'C'], text: '?', label: 'L'})`,
+    `angleFig(90, {mark: false, r: 80})`,
+    ...[0, 35, 90, 160].map((deg) => `protractor(${deg})`),
+    `protractor(65, {base: 'left'})`,
+    `protractor(0, {ray: false, label: 'L'})`,
+    ...[0, 40, 90, 120].map((cross) => `linesFig(${cross})`),
+    `linesFig(0, {gap: 30, label: 'L'})`,
   ],
   solids: [
     ...[3, 4, 5, 6, 7, 8].map((n) => `basePoly(${n}, {a: 1.5})`),

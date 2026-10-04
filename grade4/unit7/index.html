@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Angle Arcade</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=JetBrains+Mono:wght@500;700&display=swap">
+<link rel="stylesheet" href="../../shared/theme.css?v=4796e910">
+<link rel="stylesheet" href="../../shared/game.css?v=57b7d039">
+<link rel="stylesheet" href="../../shared/pictures.css?v=7f680159">
+<link rel="stylesheet" href="../../shared/measure.css?v=d386c645">
+<link rel="stylesheet" href="../../shared/angles.css?v=c6f008f2">
+<style>
+/* High Score in the final round: 10 scoreboard lights, one lit for each right answer; picture choices */
+.choice svg{max-height:90px}
+.fig svg+svg{margin-top:10px}
+.fig svg[role=img]{max-width:420px}
+.choice .fr{font-size:.9em}
+.power{display:flex;align-items:center;gap:14px;background:rgba(95,224,168,.08);border:1.5px solid rgba(95,224,168,.45);border-radius:14px;padding:10px 14px}
+.power svg{width:72px;height:72px;flex:none}
+.power b{font:800 20px var(--display);color:var(--good)}
+.power p{margin:4px 0 0;font:700 14px var(--mono);color:var(--dim)}
+.power.hit svg{animation:buzz .5s}
+@keyframes buzz{25%{transform:translateX(-3px)}75%{transform:translateX(3px)}}
+@media (prefers-reduced-motion:reduce){.power.hit svg{animation:none}}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <section id="home">
+    <a class="back" href="../">← Grade 4</a>
+    <header class="hero">
+      <p class="eyebrow">Illustrative Mathematics K–5 · Grade 4 · Unit 7 · Angles and Angle Measurement</p>
+      <h1>Angle <span>Arcade</span></h1>
+      <p class="lede">Welcome to the arcade! Spot lines, rays, and segments, aim light beams, spin the clock tower, read the protractor panel, and sort angles. Then go for the High Score. Each station matches lessons from class.</p>
+      <div class="stats">
+        <span class="pill">Points <b id="hp">0</b></span>
+        <span class="pill">Stars <b id="hs">0</b>/<span id="hsMax">18</span></span>
+      </div>
+    </header>
+    <div class="zones" id="zones"></div>
+    <section class="grownups">
+      <h2>For grown-ups</h2>
+      <div><h4>How a round works</h4><p>Each station deals 8 fresh problems (High Score deals 10). A right answer on the first try earns 10 points. After a wrong answer, the game names the likely mistake and gives one more try for 5 points. At High Score, each right answer lights one of 10 lights on the scoreboard.</p></div>
+      <div><h4>The "Show me" hint</h4><p>Hints point to what to look for: the arrows on a figure, a right-angle mark, the shaded turn on a clock, and which scale of the protractor starts at 0 on the angle’s first ray. A used hint caps that problem at 5 points.</p></div>
+      <div><h4>Mistakes it catches</h4><p>Mixing up lines, rays, and segments, starting a ray’s name at the wrong point, calling crossing lines perpendicular, using 10° for a minute instead of 6°, reading the wrong scale of a protractor (180 minus the angle), and subtracting from the wrong whole (90°, 180°, or 360°).</p></div>
+      <div><h4>Numbers</h4><p>Angles are in whole degrees, and in fives on the protractor. The protractor’s inner scale counts from 0 on the right and its outer scale from 0 on the left.</p></div>
+      <div><h4>Learn it first</h4><p>Each station matches a chapter of the <a href="learn.html">Learn page</a> for this unit, which walks through the ideas step by step.</p></div>
+      <div><h4>Not covered</h4><p>Guess the Figure (Lesson 16) is an optional lesson, so there is no station for it.</p></div>
+    </section>
+  </section>
+
+  <section id="play" hidden>
+    <div class="bar">
+      <button id="quit" class="ghost-btn" type="button">← Stations</button>
+      <div class="bar-mid"><div class="zn" id="zname"></div><div class="track"><div id="prog"></div></div></div>
+      <div class="bar-stats"><span class="pill" id="streak">Streak <b>0</b></span><span class="pill">Pts <b id="pts">0</b></span></div>
+    </div>
+    <div class="power" id="power" hidden></div>
+    <article class="card">
+      <p class="eyebrow" id="qnum"></p>
+      <h2 id="prompt"></h2>
+      <div class="fig" id="fig"></div>
+      <div id="answer"></div>
+      <div id="hint" class="hintbox" hidden></div>
+      <div id="feedback" role="status" aria-live="polite"></div>
+    </article>
+  </section>
+
+  <section id="done" hidden>
+    <div class="card done">
+      <p class="eyebrow" id="dzone"></p>
+      <div class="bigstars stars" id="dstars"></div>
+      <h2 id="dtitle"></h2>
+      <p id="dmsg"></p>
+      <div class="row">
+        <button class="btn" id="again" type="button">Play again</button>
+        <button class="ghost-btn" id="tomap" type="button">Back to stations</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script src="../../shared/util.js?v=af7a4707"></script>
+<script src="../../shared/figures.js?v=d2337c45"></script>
+<script src="../../shared/measure.js?v=0695e308"></script>
+<script src="../../shared/angles.js?v=40488584"></script>
+<script src="figs.js?v=c1d3d62e"></script>
+<script src="../../shared/engine.js?v=4b1b2373"></script>
+<script src="stations.js?v=3ad3b5a0"></script>
+<script>
+/* High Score in the final round: one scoreboard light comes on for each right answer */
+let lights=0;
+/* the scoreboard beside a boss problem (hidden at the other stations); hit: the last answer was right */
+function drawPower(state,hit){
+  const el=$('power');el.hidden=state.z.id!=='boss';if(el.hidden)return;
+  el.innerHTML=`<svg viewBox="0 0 64 64" role="img" aria-label="${lights} of 10 lights on">${scoreboard(lights)}</svg><div><b>${lights} of 10 lights on</b><p>${lights===10?'New high score!':hit?'Right! Another light comes on.':'Answer right to light up the board.'}</p></div>`;
+  el.classList.toggle('hit',!!hit);
+}
+Game.init({
+  saveKey:'g4u7-save',
+  zones:ZONES,icons:ICON,
+  words:{
+    right:'Nailed it!',
+    miss:'Not quite. Check it with the picture.',
+    titles:['Keep practicing','Good start','Angle ace','Arcade champion!'],
+    next:'Try the next station, or go for the High Score.',
+    stuck:'Use “Show me a hint” when you’re stuck. It shows the picture from class.',
+    tap:'Tap your answer in the picture.'
+  },
+  /* the scoreboard goes dark at the start of a round */
+  onQuestion:state=>{if(state.i===0)lights=0;drawPower(state,false);},
+  onAnswer:(state,ok)=>{if(ok)lights++;drawPower(state,ok);}
+});
+</script>
+</body>
+</html>

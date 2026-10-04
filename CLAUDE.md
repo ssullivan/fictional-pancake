@@ -22,6 +22,7 @@ shared/                   used by every grade; each file's header comment docume
     shapes                flat shapes, pictures in a row, solid shapes, equal parts, pattern blocks, rectangles with their sides
     measure               clocks, the day bar, coins and dollar bills
     multiply              factors, hops of n, tiles, number charts, arrays, equal groups, area diagrams, partial products
+    angles                points, lines, rays, segments, angles and their marks, protractors, parallel and perpendicular lines
   solids.css, solids.js   prisms and pyramids (faces, edges, vertices, names), their drawings, curved solids, and nets: Grade 6
   algebra.css, .js        letters for numbers (mathVar, withVars) and coordinate planes, one quadrant or four (coordPlane): Grade 6
   landing.css             grade cards (root page) and unit cards (grade pages)

@@ -1,0 +1,17 @@
+/* Styles for shared/angles.js: points, lines, rays, and segments (gline, b blue; gpt a point; garrow an arrowhead), angles' rays
+   (gray, b blue) and their marks (garc an arc, gbox a right-angle box), and protractors (prot the half circle, ptick its ticks,
+   pnum its numbers: in the inner scale, out the outer one; pbase its base line). */
+.gline{stroke:var(--chalk);stroke-width:3;stroke-linecap:round}
+.gline.b{stroke:var(--cyan)}
+.garrow{fill:var(--chalk)}
+.gpt{fill:var(--gold)}
+.gray{stroke:var(--gold);stroke-width:3.5;stroke-linecap:round}
+.gray.b{stroke:var(--cyan)}
+.garc{fill:none;stroke:var(--cyan);stroke-width:2.5}
+.gbox{fill:none;stroke:var(--cyan);stroke-width:2.5}
+.prot{fill:rgba(170,205,255,.1);stroke:var(--chalk);stroke-width:2}
+.ptick{stroke:var(--chalk);stroke-width:1.5}
+.pbase{stroke:rgba(243,246,251,.5);stroke-width:1.5}
+.pnum{font:700 13px var(--mono);text-anchor:middle;dominant-baseline:central}
+.pnum.in{fill:var(--chalk)}
+.pnum.out{fill:var(--pink)}
