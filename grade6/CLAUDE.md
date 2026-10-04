@@ -9,7 +9,7 @@ General rules for games and Learn pages are in the root `CLAUDE.md`.
 | `unit1/` | Blueprint Builders (7 zones + the Final Blueprint); Learn page with 8 chapters, including Polyhedra and Prisms, pyramids & nets (Lesson 13) | Grade 6 Unit 1 |
 | `unit2/` | Mix Masters; Learn page with 6 chapters (Lessons 1–16) | Grade 6 Unit 2 |
 | `unit3/` | Rate Racers; Learn page with 6 chapters (Lessons 1–16) | Grade 6 Unit 3 |
-| `unit4/` | Fraction Workshop (7 stations + the Big Build); Learn page with 8 chapters (Lessons 1–16). `figs.js` has the exact fraction math (`[n, d]` pairs) and the pictures the game and Learn pages share: `groupTape`, `oneGroup`, `rectGrid`, `cubeBox` | Grade 6 Unit 4 |
+| `unit4/` | Fraction Workshop (7 stations + the Big Build); Learn page with 8 chapters (Lessons 1–16). `figs.js` has the pictures the game and Learn pages share (`groupTape`, `oneGroup`); the fraction math, `rectGrid`, and `cubeBox` are in `shared/fracmath.js` | Grade 6 Unit 4 |
 | `unit5/` | Decimal Diner; Learn page with 6 chapters (Lessons 1–14) | Grade 6 Unit 5 |
 
 ## Curriculum reference: IM Grade 6

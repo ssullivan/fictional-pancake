@@ -1,11 +1,5 @@
 /* Learn Dividing Fractions (Grade 6 Unit 4): code more than one chapter uses. Loaded by the chapter pages in learn/, after chapters.js
-   and ../figs.js (fractions and pictures the game uses too). */
-/* run fn(id) when a choice button (data-m) in el is pressed (not one in a two-row widget's data-top or data-bot row) */
-const onPick = (el, fn) =>
-  el.addEventListener("click", (e) => {
-    const choice = e.target.closest("[data-m]");
-    if (choice && !choice.closest("[data-top],[data-bot]")) fn(choice.dataset.m);
-  });
+   and ../figs.js (pictures the game uses too). */
 /* a number as a fraction (denominators up to 48): 1.875 is [15, 8] */
 const toFrac = (v) => {
   for (let d = 1; d <= 48; d++) {

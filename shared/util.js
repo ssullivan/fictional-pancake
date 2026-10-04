@@ -66,6 +66,12 @@ const seg = (label, opts) =>
   `<div class="seg" role="group" aria-label="${label}">${opts.map(([id, text]) => `<button type="button" data-m="${id}">${text}</button>`).join("")}</div>`;
 const press = (el, m) =>
   el.querySelectorAll("[data-m]").forEach((b) => b.setAttribute("aria-pressed", b.dataset.m === String(m)));
+/* run fn(id) when a choice button (data-m) in el is pressed (not one in a two-row widget's data-top or data-bot row) */
+const onPick = (el, fn) =>
+  el.addEventListener("click", (e) => {
+    const choice = e.target.closest("[data-m]");
+    if (choice && !choice.closest("[data-top],[data-bot]")) fn(choice.dataset.m);
+  });
 /* For widgets with two rows of choice buttons, each in its own box (<div data-top>${seg(…)}</div>): which row a click was in.
    Returns [row, id] or null. */
 const segHit = (e, rows) => {

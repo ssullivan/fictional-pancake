@@ -12,6 +12,7 @@ shared/                   used by every grade; each file's header comment docume
   theme.css               colors, fonts, page header, pills, buttons, feedback boxes: every page
   game.css, engine.js     game screens and the game engine (Game.init)
   figures.css, figures.js double number lines, ratio tables, diagram styles
+  fracmath.css, .js       exact fractions ([n, d] pairs) for Grade 6: the math, fractions in pictures (fT), rectangles in small squares (rectGrid), boxes of small cubes (cubeBox)
   learn.css, learn.js     Learn pages: a unit's chapter list and its chapter pages (Learn.home, Learn.chapter)
   pictures.css, .js       K–5 pictures: labels, number-line marks, tap targets, counters, stacked fractions (fr, frT), part names (PART)
     blocks                ten-frames, cubes, base-ten blocks, place-value charts, number words, the standard algorithm
@@ -23,7 +24,7 @@ shared/                   used by every grade; each file's header comment docume
     multiply              factors, hops of n, tiles, number charts, arrays, equal groups
   solids.css, solids.js   prisms and pyramids (faces, edges, vertices, names), their drawings, curved solids, and nets: Grade 6
   landing.css             grade cards (root page) and unit cards (grade pages)
-  util.js                 R, pick, range, shuffle, miscOf, mcOf, problemKey, gcd, lcm, $, Q, parseNum, and Learn controls (seg, press, segHit, stepper)
+  util.js                 R, pick, range, shuffle, miscOf, mcOf, problemKey, gcd, lcm, $, Q, parseNum, and Learn controls (seg, press, onPick, segHit, stepper)
   speak.js                Read to me buttons for K–2 Learn pages and games (readAloud)
 tools/                    check.mjs, fuzz.mjs, snap.mjs, same.mjs (see Checking a change)
 .prettierrc.json          Prettier settings for the JavaScript (.prettierignore leaves out HTML, CSS, and docs)

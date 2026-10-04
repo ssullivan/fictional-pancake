@@ -34,8 +34,8 @@ function clockFig(h, m, { r = 100, shade = null, fives = false, label } = {}) {
     const [x, y] = at(i * 5, r * 0.72);
     markup += `<text class="clk-n" x="${x}" y="${y}" style="font-size:${round1(r * 0.2)}px">${i || 12}</text>`;
     if (fives) {
-      const [fx, fy] = at(i * 5, r + 18);
-      markup += `<text class="lbl s cy" x="${fx}" y="${fy}">${String(i * 5).padStart(2, "0")}</text>`;
+      const [labelX, labelY] = at(i * 5, r + 18);
+      markup += `<text class="lbl s cy" x="${labelX}" y="${labelY}">${String(i * 5).padStart(2, "0")}</text>`;
     }
   });
   /* the hour hand moves between the hours as the minutes go by: 5 minute-marks an hour, plus m/12 */
