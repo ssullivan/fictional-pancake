@@ -284,6 +284,7 @@ const CALLS = {
     `fracLine([{d: 3, pts: [{k: 2}, {k: 4, cls: 'b'}], labs: true}, {d: 6, hops: 4, tap: true}], {wholes: 2, W: 520})`,
     `fracLine([{d: 4, hops: [[0, 3, 'q'], [3, 5]]}], {wholes: 2, marks: [{v: 0.75, t: [3, 4]}, {v: 1.5, t: 'here'}]})`,
     `fracLine([{d: 2, hops: 0}], {label: 'L'})`,
+    `fracLine([{d: 5, tap: 'cand', pts: [{k: 2}]}], {wholes: 2})`,
     `strips([{d: 2, k: 1, lab: [1, 2]}, {d: 4, k: 2, lab: [2, 4]}, {d: 8, k: 4, lab: [4, 8]}])`,
     `strips([{d: 6, k: 6, grp: 3}, {d: 5, k: 12, grp: [4, 4, 4], out: 2, cls: 'b'}])`,
     `strips([{d: 3, k: 8, out: 4}, {d: 12, k: 9, parts: false}], {stack: true, wholes: 3, W: 400})`,

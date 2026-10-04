@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Fraction Bakery</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=JetBrains+Mono:wght@500;700&display=swap">
+<link rel="stylesheet" href="../../shared/theme.css?v=4796e910">
+<link rel="stylesheet" href="../../shared/game.css?v=57b7d039">
+<link rel="stylesheet" href="../../shared/pictures.css?v=7f680159">
+<link rel="stylesheet" href="../../shared/fractions.css?v=a126b20b">
+<style>
+/* the Big Bake-Off in the final round: a cake with 10 candles, one lit for each right answer */
+.choice .fr{font-size:.9em}
+.power{display:flex;align-items:center;gap:14px;background:rgba(95,224,168,.08);border:1.5px solid rgba(95,224,168,.45);border-radius:14px;padding:10px 14px}
+.power svg{width:72px;height:72px;flex:none}
+.power b{font:800 20px var(--display);color:var(--good)}
+.power p{margin:4px 0 0;font:700 14px var(--mono);color:var(--dim)}
+.power.hit svg{animation:buzz .5s}
+@keyframes buzz{25%{transform:translateX(-3px)}75%{transform:translateX(3px)}}
+@media (prefers-reduced-motion:reduce){.power.hit svg{animation:none}}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <section id="home">
+    <a class="back" href="../">← Grade 4</a>
+    <header class="hero">
+      <p class="eyebrow">Illustrative Mathematics K–5 · Grade 4 · Unit 2 · Fraction Equivalence and Comparison</p>
+      <h1>Fraction <span>Bakery</span></h1>
+      <p class="lede">Welcome to the bakery! Cut pans into equal pieces, measure along the tape, match twin trays, slice and stack the parts, and judge the taste test. Then light the candles at the Big Bake-Off. Each station matches lessons from class.</p>
+      <div class="stats">
+        <span class="pill">Points <b id="hp">0</b></span>
+        <span class="pill">Stars <b id="hs">0</b>/<span id="hsMax">18</span></span>
+      </div>
+    </header>
+    <div class="zones" id="zones"></div>
+    <section class="grownups">
+      <h2>For grown-ups</h2>
+      <div><h4>How a round works</h4><p>Each station deals 8 fresh problems (the Big Bake-Off deals 10). A right answer on the first try earns 10 points. After a wrong answer, the game names the likely mistake and gives one more try for 5 points. At the Big Bake-Off, each right answer lights one of the cake’s 10 candles.</p></div>
+      <div><h4>The "Show me" hint</h4><p>Hints use the pictures from class: fraction strips (tape diagrams), number lines with jumps of one part, and strips split or grouped to show equivalent fractions. A used hint caps that problem at 5 points.</p></div>
+      <div><h4>Mistakes it catches</h4><p>Counting the unshaded parts, switching the numerator and denominator, counting tick marks instead of jumps, using two wholes as one whole, thinking a bigger denominator means a bigger fraction, adding the same number to the top and bottom (instead of multiplying), changing only one of the two numbers, and ordering fractions by their numerators or denominators alone.</p></div>
+      <div><h4>Numbers</h4><p>Denominators are 2, 3, 4, 5, 6, 8, 10, and 12, as in the unit. Typed fraction answers can be written like 3/4 or 1 3/4. Comparisons use the unit’s ways: the same denominator, the same numerator, 1/2 or 1 as a benchmark, or a common denominator up to twelfths.</p></div>
+      <div><h4>Learn it first</h4><p>Each station matches a chapter of the <a href="learn.html">Learn page</a> for this unit, which walks through the ideas step by step.</p></div>
+      <div><h4>Not covered</h4><p>Paper Clip Games (Lesson 17) is an optional lesson, so there is no station for it.</p></div>
+    </section>
+  </section>
+
+  <section id="play" hidden>
+    <div class="bar">
+      <button id="quit" class="ghost-btn" type="button">← Stations</button>
+      <div class="bar-mid"><div class="zn" id="zname"></div><div class="track"><div id="prog"></div></div></div>
+      <div class="bar-stats"><span class="pill" id="streak">Streak <b>0</b></span><span class="pill">Pts <b id="pts">0</b></span></div>
+    </div>
+    <div class="power" id="power" hidden></div>
+    <article class="card">
+      <p class="eyebrow" id="qnum"></p>
+      <h2 id="prompt"></h2>
+      <div class="fig" id="fig"></div>
+      <div id="answer"></div>
+      <div id="hint" class="hintbox" hidden></div>
+      <div id="feedback" role="status" aria-live="polite"></div>
+    </article>
+  </section>
+
+  <section id="done" hidden>
+    <div class="card done">
+      <p class="eyebrow" id="dzone"></p>
+      <div class="bigstars stars" id="dstars"></div>
+      <h2 id="dtitle"></h2>
+      <p id="dmsg"></p>
+      <div class="row">
+        <button class="btn" id="again" type="button">Play again</button>
+        <button class="ghost-btn" id="tomap" type="button">Back to stations</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script src="../../shared/util.js?v=af7a4707"></script>
+<script src="../../shared/figures.js?v=d2337c45"></script>
+<script src="../../shared/pictures.js?v=f857849d"></script>
+<script src="../../shared/fractions.js?v=0cb3561f"></script>
+<script src="figs.js?v=d1c0db2a"></script>
+<script src="../../shared/engine.js?v=4b1b2373"></script>
+<script src="stations.js?v=bc98d07e"></script>
+<script>
+/* the Big Bake-Off in the final round: one candle lights for each right answer */
+let candles=0;
+/* the cake beside a boss problem (hidden at the other stations); hit: the last answer was right */
+function drawPower(state,hit){
+  const el=$('power');el.hidden=state.z.id!=='boss';if(el.hidden)return;
+  el.innerHTML=`<svg viewBox="0 0 64 64" role="img" aria-label="${candles} of 10 candles lit">${cake(candles)}</svg><div><b>${candles} of 10 candles lit</b><p>${candles===10?'Every candle is lit. You win the Bake-Off!':hit?'Right! Another candle lights up.':'Answer right to light a candle.'}</p></div>`;
+  el.classList.toggle('hit',!!hit);
+}
+Game.init({
+  saveKey:'g4u2-save',
+  zones:ZONES,icons:ICON,
+  words:{
+    right:'Nailed it!',
+    miss:'Not quite. Check it with the picture.',
+    titles:['Keep practicing','Good start','Bakery pro','Master baker!'],
+    next:'Try the next station, or enter the Big Bake-Off.',
+    stuck:'Use “Show me a hint” when you’re stuck. It shows the picture from class.',
+    tap:'Tap your answer on the number line.'
+  },
+  /* the candles go out at the start of a round */
+  onQuestion:state=>{if(state.i===0)candles=0;drawPower(state,false);},
+  onAnswer:(state,ok)=>{if(ok)candles++;drawPower(state,ok);}
+});
+</script>
+</body>
+</html>

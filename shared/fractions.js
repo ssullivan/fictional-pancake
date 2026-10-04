@@ -57,7 +57,8 @@ function strips(rows, { wholes = 0, stack = false, empty = false, W = 560, label
 /* Number lines from 0 to `wholes`, one under another, lined up. rows: [{d, pts, hops, tap, labs}]: a tick every 1/d (tall at whole
    numbers, which get their number); labs: every tick gets its fraction; pts: [{k, cls}] dots at k/d ('b' blue, 'g' green);
    hops: that many jumps of 1/d from 0, or [[from, to, cls], …]: jumps of 1/d from from/d to to/d ('q' blue);
-   tap: each tick can be tapped (data-v = its k, data-r = the row).
+   tap: each tick can be tapped (data-v = its k, data-r = the row); tap 'cand' makes each tick a tap answer for engine.js instead
+   (.cand, data-id = its k; use it on a picture with one row).
    marks: [{v, t}] a dashed line through every row at v (in wholes), with t ([n, d] or text) above it. */
 function fracLine(rows, { wholes = 1, W = 480, marks = [], label } = {}) {
   /* room above the first line: for marks' labels, or the first row's hops; rows with fractions under every tick are taller */
@@ -103,8 +104,12 @@ function fracLine(rows, { wholes = 1, W = 480, marks = [], label } = {}) {
     /* tap targets: a box around each tick, 1/d wide */
     if (r.tap)
       range(ticks + 1).forEach((k) => {
-        const boxW = wholeW / r.d;
-        markup += `<rect class="hit" data-r="${ri}" data-v="${k}" x="${xOf(k / r.d) - boxW / 2}" y="${y - 24}" width="${boxW}" height="48"/>`;
+        const boxW = wholeW / r.d,
+          box = `x="${xOf(k / r.d) - boxW / 2}" y="${y - 24}" width="${boxW}" height="48"`;
+        markup +=
+          r.tap === "cand"
+            ? `<rect class="cand hit" data-id="${k}" tabindex="0" role="button" aria-label="Tick mark ${k + 1}" ${box}/>`
+            : `<rect class="hit" data-r="${ri}" data-v="${k}" ${box}/>`;
       });
   });
   return svgWrap(

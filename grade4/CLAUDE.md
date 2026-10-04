@@ -9,7 +9,7 @@ When a unit gets a game or Learn page, add a row here and turn its "Coming soon"
 | Folder | Game | Learn page | Unit |
 |---|---|---|---|
 | `unit1/` | Factor Factory (`index.html`, 5 stations + the Mega-Bot) | `learn.html` + `learn/` (5 chapters, Lessons 1–7) | Grade 4 Unit 1 |
-| `unit2/` | — | `learn.html` + `learn/` (6 chapters, Lessons 1–16) | Grade 4 Unit 2 |
+| `unit2/` | Fraction Bakery (`index.html`, 5 stations + the Big Bake-Off; `figs.js` holds the comparison helpers its Learn pages use too) | `learn.html` + `learn/` (6 chapters, Lessons 1–16) | Grade 4 Unit 2 |
 | `unit3/` | — | `learn.html` + `learn/` (6 chapters, Lessons 1–18) | Grade 4 Unit 3 |
 | `unit4/` | — | `learn.html` + `learn/` (7 chapters, Lessons 1–22) | Grade 4 Unit 4 |
 
