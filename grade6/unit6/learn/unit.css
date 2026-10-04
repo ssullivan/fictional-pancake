@@ -1,0 +1,32 @@
+/* Grade 6 Unit 6 Learn pages: equations, worked lines, and tables. Loaded by learn.html and every page in learn/. */
+.eq{margin:0 0 10px;font:700 24px var(--mono);text-align:center}
+.eq .q{background:var(--gold);color:#1a1300;border-radius:6px;padding:0 8px}
+.eq .ok{color:var(--good)}.eq .no{color:var(--bad)}
+.eq.sm{font-size:19px}
+/* lines of work, one under the next, with the reason beside each */
+.work-lines{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:6px;font:700 20px var(--mono)}
+.work-lines .why{font:500 14.5px var(--mono);color:var(--dim);display:inline-block;margin-left:14px}
+.work-lines .why:first-child{margin-left:0}
+.work-lines .bad{color:var(--bad)}
+.work-lines mark{background:rgba(255,201,60,.3);color:inherit;border-radius:5px;padding:0 4px}
+/* pictures side by side, wrapping on a phone */
+.figrow{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;align-items:center}
+.figrow>*{flex:1 1 260px;min-width:0}
+/* a solved problem to check, one line per button */
+.solved{border:1.5px dashed rgba(170,205,255,.4);border-radius:12px;padding:12px 14px;margin-top:12px}
+.solved .who{margin:0 0 8px;font:700 14px var(--mono);color:var(--dim)}
+.solved button{display:block;width:100%;text-align:left;margin:6px 0;background:#0a2340;border:2px solid rgba(170,205,255,.35);border-radius:10px;padding:8px 12px;font:700 18px var(--mono)}
+.solved button[aria-pressed="true"].bad{border-color:var(--bad)}
+.solved button[aria-pressed="true"].fine{border-color:var(--good)}
+/* tables of values sit centered */
+.tables{display:flex;flex-wrap:wrap;gap:12px;justify-content:center}
+/* a piece taken away: crossed out */
+.xr-cut{stroke:var(--bad);stroke-width:2.5;fill:none}
+/* a letter on a pressed (gold) button takes the button's dark text color */
+.seg button[aria-pressed="true"] .mv{color:inherit}
+/* yes and no in a table */
+.rt .ok{color:var(--good)}.rt .no{color:var(--bad)}
+/* paper with its creases, and the part of a part that's shaded */
+.paper{fill:rgba(243,246,251,.08);stroke:var(--chalk);stroke-width:2.5}
+.crease{stroke:var(--cyan);stroke-width:1.5;stroke-dasharray:5 4}
+.part-on{fill:rgba(255,201,60,.55)}

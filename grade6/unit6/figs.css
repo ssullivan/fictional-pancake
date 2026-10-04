@@ -1,0 +1,30 @@
+/* Styles for figs.js: letters for numbers, hanger diagrams, area diagrams, and first-quadrant graphs. */
+/* a letter standing for a number */
+.mv{color:var(--cyan);font-weight:700}
+/* hangers: the hook, the beam, strings, the unknown (a circle with its letter), unit squares, and labeled blocks */
+.hg-hook,.hg-str{stroke:var(--dim);stroke-width:2;fill:none}
+.hg-pin{fill:var(--chalk)}
+.hg-beam{stroke:var(--chalk);stroke-width:5;stroke-linecap:round}
+.hg-x{fill:rgba(127,227,255,.3);stroke:var(--cyan);stroke-width:2.5}
+.lbl.hg-let{fill:var(--cyan);font-style:italic;font-size:19px}
+.hg-one{fill:rgba(255,201,60,.4);stroke:var(--gold);stroke-width:2}
+.hg-w{fill:rgba(255,201,60,.2);stroke:var(--gold);stroke-width:2}
+/* area diagrams: parts in two colors by turns, and a dashed part taken away */
+.as-part{stroke:var(--chalk);stroke-width:2.5}
+.as-part.c0{fill:rgba(255,201,60,.3)}
+.as-part.c1{fill:rgba(127,227,255,.25)}
+.as-part.cut{fill:none;stroke:var(--dim);stroke-dasharray:7 5}
+.lbl.as-area{font-size:20px}
+/* graphs: gridlines, axes, the dashed line, and points (b blue, hi outlined); tap problems mark points right or wrong */
+.gq-grid{stroke:rgba(170,205,255,.18);stroke-width:1}
+.gq-axis{stroke:var(--chalk);stroke-width:2.5}
+.gq-line{stroke:var(--cyan);stroke-width:2;stroke-dasharray:6 5}
+.gq-pt{fill:var(--gold);stroke:#0a2340;stroke-width:2}
+.gq-pt.b{fill:var(--cyan)}
+.gq-pt.hi{stroke:#fff;stroke-width:3}
+.cand{cursor:pointer}
+.cand .hit{fill:transparent}
+.cand:hover .gq-pt,.cand:focus .gq-pt{stroke:#fff;stroke-width:3}
+.cand:focus{outline:none}
+.cand.right .gq-pt{fill:var(--good)}
+.cand.wrong .gq-pt{fill:var(--bad);opacity:.5}

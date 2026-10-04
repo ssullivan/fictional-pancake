@@ -11,6 +11,7 @@ General rules for games and Learn pages are in the root `CLAUDE.md`.
 | `unit3/` | Rate Racers; Learn page with 6 chapters (Lessons 1–16) | Grade 6 Unit 3 |
 | `unit4/` | Fraction Workshop (7 stations + the Big Build); Learn page with 8 chapters (Lessons 1–16). `figs.js` has the pictures the game and Learn pages share (`groupTape`, `oneGroup`); the fraction math, `rectGrid`, and `cubeBox` are in `shared/fracmath.js` | Grade 6 Unit 4 |
 | `unit5/` | Decimal Diner; Learn page with 6 chapters (Lessons 1–14) | Grade 6 Unit 5 |
+| `unit6/` | Balance Lab (7 stations + the Grand Balance); Learn page with 9 chapters (Lessons 1–19). `figs.js` has the pictures and text helpers the game and Learn pages share: `hanger`, `areaSplit`, `graphQ1` (first quadrant; move it to `shared/` when Unit 7 needs a coordinate plane), `valueTable`, and `mathVar`/`withVars`/`power` for letters and exponents. Its Learn page builds in research on teaching early algebra (see its "For grown-ups" notes): the equal sign as a balance, letters as numbers, the same move on each side, checking by substitution, and solved problems with a mistake to find | Grade 6 Unit 6 |
 
 ## Curriculum reference: IM Grade 6
 
