@@ -1,0 +1,17 @@
+/* Styles for figs.js: "times as many" tape diagrams, conversion tables, and rectangles with their sides. */
+/* tape boxes: the smaller amount (tt0), its copies in the bigger one (tt1), and the extra in "more than" (tgap) */
+.tt{stroke-width:2.5}
+.tt.tt0{fill:rgba(255,201,60,.3);stroke:var(--gold)}
+.tt.tt1{fill:rgba(127,227,255,.25);stroke:var(--cyan)}
+.tt.tgap{fill:rgba(255,138,196,.18);stroke:var(--pink);stroke-dasharray:6 4}
+/* conversion tables: the big unit, the small unit, and the row asked about */
+table.conv{border-collapse:collapse;margin:6px auto;font:700 18px var(--mono);font-variant-numeric:tabular-nums}
+table.conv th{font:700 14px var(--mono);color:var(--dim);padding:6px 16px;border-bottom:2px solid rgba(243,246,251,.5)}
+table.conv td{padding:6px 18px;text-align:center;border-bottom:1px solid rgba(170,205,255,.25)}
+table.conv td+td{border-left:2px solid rgba(243,246,251,.5)}
+table.conv tr.hi td{color:var(--gold)}
+table.conv .q{display:inline-block;min-width:1.8em;background:var(--gold);color:#1a1300;border-radius:6px;padding:0 6px}
+/* rectangles: the unit squares inside, the outline, and its side labels */
+.rgrid{stroke:rgba(170,205,255,.3);stroke-width:1}
+.rside{fill:rgba(95,224,168,.16);stroke:var(--good);stroke-width:3}
+.rside.ask{stroke:var(--gold)}
