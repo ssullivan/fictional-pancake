@@ -3,19 +3,19 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Rocket Lab</title>
+<title>Shape Gallery</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=JetBrains+Mono:wght@500;700&display=swap">
 <link rel="stylesheet" href="../../shared/theme.css?v=4796e910">
 <link rel="stylesheet" href="../../shared/game.css?v=57b7d039">
 <link rel="stylesheet" href="../../shared/pictures.css?v=7f680159">
-<link rel="stylesheet" href="../../shared/blocks.css?v=ef8d48f1">
-<link rel="stylesheet" href="../../shared/numlines.css?v=9257b1d0">
-<link rel="stylesheet" href="../../shared/fractions.css?v=a126b20b">
+<link rel="stylesheet" href="figs.css?v=41cbd663">
 <style>
-/* the Countdown in the final round: 10 fuel cells, one filled for each right answer */
-.fig .pv{margin:0 auto}
+/* the Grand Gallery in the final round: 10 frames, one filled for each right answer; picture choices */
+.choice svg{max-height:90px}
+.fig svg+svg{margin-top:10px}
+.fig svg[role=img]{max-width:420px}
 .choice .fr{font-size:.9em}
 .power{display:flex;align-items:center;gap:14px;background:rgba(95,224,168,.08);border:1.5px solid rgba(95,224,168,.45);border-radius:14px;padding:10px 14px}
 .power svg{width:72px;height:72px;flex:none}
@@ -32,9 +32,9 @@
   <section id="home">
     <a class="back" href="../">← Grade 4</a>
     <header class="hero">
-      <p class="eyebrow">Illustrative Mathematics K–5 · Grade 4 · Unit 4 · From Hundredths to Hundred-thousands</p>
-      <h1>Rocket <span>Lab</span></h1>
-      <p class="lede">Welcome to the Rocket Lab! Read the fuel gauge, launch along number lines, punch in big numbers, fire the ten-times thrusters, round orbits, and add and subtract on the launch pad. Then fuel up for the Countdown. Each station matches lessons from class.</p>
+      <p class="eyebrow">Illustrative Mathematics K–5 · Grade 4 · Unit 8 · Properties of Two-dimensional Shapes</p>
+      <h1>Shape <span>Gallery</span></h1>
+      <p class="lede">Welcome to the gallery! Sort the triangles, study the quadrilaterals, fold shapes in the hall of mirrors, and measure the frames. Then hang the pictures at the Grand Gallery. Each station matches lessons from class.</p>
       <div class="stats">
         <span class="pill">Points <b id="hp">0</b></span>
         <span class="pill">Stars <b id="hs">0</b>/<span id="hsMax">18</span></span>
@@ -43,12 +43,12 @@
     <div class="zones" id="zones"></div>
     <section class="grownups">
       <h2>For grown-ups</h2>
-      <div><h4>How a round works</h4><p>Each station deals 8 fresh problems (the Countdown deals 10). A right answer on the first try earns 10 points. After a wrong answer, the game names the likely mistake and gives one more try for 5 points. At the Countdown, each right answer fills one of the rocket’s 10 fuel cells.</p></div>
-      <div><h4>The "Show me" hint</h4><p>Hints use the pictures from class: hundred grids, number lines in tenths and hundredths, place-value charts, number lines for rounding, and the standard algorithm worked column by column. A used hint caps that problem at 5 points.</p></div>
-      <div><h4>Mistakes it catches</h4><p>Writing hundredths as tenths, thinking a decimal with more digits is bigger, leaving out the zeros that hold empty places, adding 10 instead of multiplying by 10, rounding the wrong way or to the wrong place, comparing first digits when the numbers have different lengths, forgetting to carry, and taking the smaller digit from the bigger one instead of trading.</p></div>
-      <div><h4>Numbers</h4><p>Decimals stay in tenths and hundredths, in money and measurement. Whole numbers stay within 1,000,000 with few nonzero digits, and each addition or subtraction needs at most one trade (a trade across zeros counts as one, as in Lesson 21). Typed answers can use commas.</p></div>
+      <div><h4>How a round works</h4><p>Each station deals 8 fresh problems (the Grand Gallery deals 10). A right answer on the first try earns 10 points. After a wrong answer, the game names the likely mistake and gives one more try for 5 points. At the Grand Gallery, each right answer hangs one of 10 pictures.</p></div>
+      <div><h4>The "Show me" hint</h4><p>Hints point to the marks from class: tick marks on equal sides, right-angle boxes, and folding on a dashed line (the folded outline shows where the shape lands). A used hint caps that problem at 5 points.</p></div>
+      <div><h4>Mistakes it catches</h4><p>Mixing up the names of triangles, counting parallel sides instead of pairs, missing the corner-to-corner lines of symmetry (or counting folds that don’t match), dividing a perimeter by the wrong number of sides, and adding sides of a figure that should be subtracted (or the other way).</p></div>
+      <div><h4>Numbers</h4><p>Lengths are whole centimeters. An equilateral triangle counts as isosceles too, as in the unit: it has at least 2 equal sides.</p></div>
       <div><h4>Learn it first</h4><p>Each station matches a chapter of the <a href="learn.html">Learn page</a> for this unit, which walks through the ideas step by step.</p></div>
-      <div><h4>Not covered</h4><p>Bees are Buzzing (Lesson 23) is an optional lesson, so there is no station for it.</p></div>
+      <div><h4>Not covered</h4><p>All Kinds of Attributes (Lesson 6), Symmetry in Action (Lesson 9), and Ways to Find Angle Measurements (Lesson 10) are optional lessons, so there are no stations for them.</p></div>
     </section>
   </section>
 
@@ -85,38 +85,32 @@
 
 <script src="../../shared/util.js?v=af7a4707"></script>
 <script src="../../shared/figures.js?v=d2337c45"></script>
-<script src="../../shared/pictures.js?v=f857849d"></script>
-<script src="../../shared/blocks.js?v=14699c42"></script>
-<script src="../../shared/numlines.js?v=a413c6f7"></script>
-<script src="../../shared/fractions.js?v=0cb3561f"></script>
-<script src="figs.js?v=63d33ceb"></script>
+<script src="figs.js?v=949fb988"></script>
 <script src="../../shared/engine.js?v=4b1b2373"></script>
-<script src="stations.js?v=2c93fb64"></script>
+<script src="stations.js?v=ed636f10"></script>
 <script>
-/* the Countdown in the final round: one fuel cell fills for each right answer */
-let cells=0;
-/* the rocket beside a boss problem (hidden at the other stations); hit: the last answer was right */
+/* the Grand Gallery in the final round: one picture is hung for each right answer */
+let hung=0;
+/* the gallery wall beside a boss problem (hidden at the other stations); hit: the last answer was right */
 function drawPower(state,hit){
   const el=$('power');el.hidden=state.z.id!=='boss';if(el.hidden)return;
-  el.innerHTML=`<svg viewBox="0 0 64 64" role="img" aria-label="${cells} of 10 fuel cells full">${rocket(cells)}</svg><div><b>${cells} of 10 fuel cells full</b><p>${cells===10?'3, 2, 1… liftoff!':hit?'Right! Another fuel cell fills.':'Answer right to fill a fuel cell.'}</p></div>`;
+  el.innerHTML=`<svg viewBox="0 0 64 64" role="img" aria-label="${hung} of 10 pictures hung">${gallery(hung)}</svg><div><b>${hung} of 10 pictures hung</b><p>${hung===10?'The gallery is open!':hit?'Right! Another picture goes up.':'Answer right to hang a picture.'}</p></div>`;
   el.classList.toggle('hit',!!hit);
 }
 Game.init({
-  saveKey:'g4u4-save',
+  saveKey:'g4u8-save',
   zones:ZONES,icons:ICON,
-  /* typed answers must be right to the hundredth (0.33 counts for 1/3, but 0.92 doesn’t for 0.91) */
-  near:(x,y)=>Math.abs(x-y)<0.005,
   words:{
     right:'Nailed it!',
     miss:'Not quite. Check it with the picture.',
-    titles:['Keep practicing','Good start','Rocket pro','Mission commander!'],
-    next:'Try the next station, or start the Countdown.',
+    titles:['Keep practicing','Good start','Shape expert','Master curator!'],
+    next:'Try the next station, or open the Grand Gallery.',
     stuck:'Use “Show me a hint” when you’re stuck. It shows the picture from class.',
     tap:'Tap your answer in the picture.'
   },
-  /* the fuel cells empty at the start of a round */
-  onQuestion:state=>{if(state.i===0)cells=0;drawPower(state,false);},
-  onAnswer:(state,ok)=>{if(ok)cells++;drawPower(state,ok);}
+  /* the wall is empty at the start of a round */
+  onQuestion:state=>{if(state.i===0)hung=0;drawPower(state,false);},
+  onAnswer:(state,ok)=>{if(ok)hung++;drawPower(state,ok);}
 });
 </script>
 </body>

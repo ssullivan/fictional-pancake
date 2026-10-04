@@ -1,0 +1,7 @@
+/* Styles for figs.js: a shape (shp), the tick marks on its equal sides (stick), its right-angle boxes (sright), and dashed lines
+   of symmetry or folds (ssym). */
+.shp{fill:rgba(127,227,255,.18);stroke:var(--cyan);stroke-width:3;stroke-linejoin:round}
+.stick{stroke:var(--gold);stroke-width:2.5}
+.sright{fill:none;stroke:var(--gold);stroke-width:2}
+.ssym{stroke:var(--pink);stroke-width:2.5;stroke-dasharray:8 6}
+.sghost{fill:none;stroke:var(--pink);stroke-width:2;stroke-dasharray:4 4}
