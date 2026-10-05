@@ -9,7 +9,7 @@
 .grade-card p{margin:0;color:var(--dim)}
 .grade-card .go{font:700 13px/1 var(--mono);color:var(--gold);margin-top:6px}
 
-/* grade page: one card per unit, with Learn and Play links, or "Coming soon" */
+/* grade page: one card per unit, with Learn and Play links (and a Study guide link where there is one), or "Coming soon" */
 .unit-list{list-style:none;margin:0;padding:0;display:grid;gap:16px;grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}
 .unit-card{display:grid;gap:8px;align-content:start;height:100%;padding:20px;border-radius:14px;
   background:var(--sheet);border:1px solid rgba(170,205,255,.25)}
@@ -22,6 +22,9 @@
 .links .play:hover{background:#ffd866}
 .links .learn{color:var(--cyan);border:1.5px solid rgba(127,227,255,.55)}
 .links .learn:hover{background:rgba(127,227,255,.12)}
+/* a printable study guide for the unit (unitN/study.html), where there is one */
+.links .study{color:var(--chalk);border:1.5px dashed rgba(243,246,251,.5)}
+.links .study:hover{background:rgba(243,246,251,.1)}
 .unit-card.soon{background:transparent;border-style:dashed}
 .unit-card.soon h2{color:var(--dim)}
 .unit-card .tag{font:700 13px/1 var(--mono);color:var(--dim);margin-top:8px}
