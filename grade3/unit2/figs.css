@@ -1,0 +1,29 @@
+/* Styles for figs.js. Unit squares: acell an empty square to cover, atile a tile (big: one 2 squares on a side), aout a shape's
+   outline; awhole a figure in one piece, arect a rectangle to tile and atick the marks on its side; apart a part of a figure (b the second, in blue), agrid and
+   agridsq the unit squares inside one, aoutline its outline, acut the line it's cut along, aprod a part's multiplication;
+   arul a ruler, arult its ticks, arunum its numbers, aread and aring a side that's been measured and its reading. ashape is a shape to tap in the game. */
+.acell{fill:rgba(170,205,255,.06);stroke:rgba(170,205,255,.45);stroke-width:1.5;stroke-dasharray:4 3}
+.atile{fill:rgba(255,201,60,.5);stroke:#0a2340;stroke-width:1.5}
+.atile.big{fill:rgba(255,138,196,.55)}
+.aout{fill:none;stroke:var(--gold);stroke-width:3;stroke-linecap:round}
+.arect{fill:rgba(127,227,255,.08);stroke:var(--cyan);stroke-width:3}
+.atick{stroke:var(--cyan);stroke-width:2}
+.awhole{fill:rgba(95,224,168,.16)}
+.apart{fill:rgba(255,201,60,.24);stroke:none}
+.apart.b{fill:rgba(127,227,255,.22)}
+.agrid,.agridsq{fill:none;stroke:rgba(243,246,251,.28);stroke-width:1}
+.aoutline{fill:none;stroke:var(--good);stroke-width:3;stroke-linejoin:round}
+.awhole.aoutline{fill:rgba(95,224,168,.16)}
+.acut{stroke:var(--pink);stroke-width:3;stroke-dasharray:8 5}
+.aprod{fill:var(--chalk)}
+.arul{fill:#f0d9a8;stroke:#c9a86a;stroke-width:1}
+.arult{stroke:#0a2340;stroke-width:1.5}
+.lbl.arunum{fill:#0a2340;font-size:12px}
+.aread{stroke:var(--cyan);stroke-width:4;stroke-linecap:round}
+.aring{fill:none;stroke:var(--cyan);stroke-width:2.5}
+/* a shape to tap in the game: its squares light up on hover, and turn green or red once tapped */
+.ashape{cursor:pointer}
+.ashape:hover .atile,.ashape:focus .atile{fill:rgba(255,201,60,.8)}
+.ashape:focus{outline:none}
+.ashape.right .atile{fill:var(--good)}
+.ashape.wrong{opacity:.45;cursor:default}

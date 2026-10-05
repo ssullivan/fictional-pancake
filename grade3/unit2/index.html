@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tile Town</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=JetBrains+Mono:wght@500;700&display=swap">
+<link rel="stylesheet" href="../../shared/theme.css?v=4796e910">
+<link rel="stylesheet" href="../../shared/game.css?v=57b7d039">
+<link rel="stylesheet" href="../../shared/pictures.css?v=7f680159">
+<link rel="stylesheet" href="../../shared/shapes.css?v=161509dd">
+<link rel="stylesheet" href="figs.css?v=4ffb0a28">
+<style>
+/* two rectangles side by side to compare, each with a caption */
+.pair{display:flex;flex-wrap:wrap;gap:12px;justify-content:center}
+.pair figure{margin:0;flex:1 1 200px;text-align:center}
+.pair figcaption{font:700 15px var(--mono);color:var(--dim)}
+/* Town Square: a mosaic of 10 tiles, one laid for each right answer */
+.power{display:flex;align-items:center;gap:14px;background:rgba(127,227,255,.08);border:1.5px solid rgba(127,227,255,.45);border-radius:14px;padding:10px 14px}
+.power svg{width:72px;height:72px;flex:none}
+.power b{font:800 20px var(--display);color:var(--cyan)}
+.power p{margin:4px 0 0;font:700 14px var(--mono);color:var(--dim)}
+.power.hit svg{animation:bob .5s}
+@keyframes bob{50%{transform:translateY(-4px)}}
+@media (prefers-reduced-motion:reduce){.power.hit svg{animation:none}}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <section id="home">
+    <a class="back" href="../">← Grade 3</a>
+    <header class="hero">
+      <p class="eyebrow">Illustrative Mathematics K–5 · Grade 3 · Unit 2 · Area and Multiplication</p>
+      <h1>Tile <span>Town</span></h1>
+      <p class="lede">Welcome to Tile Town, where everything gets covered in squares! Tile floors at the shop, build rectangles on the mosaic wall, pick the right square units, measure garden plots, split rectangles on Split Street, and find the area of rooms with corners cut away. Then finish the mosaic in the Town Square. Each station matches lessons from class.</p>
+      <div class="stats">
+        <span class="pill">Points <b id="hp">0</b></span>
+        <span class="pill">Stars <b id="hs">0</b>/<span id="hsMax">21</span></span>
+      </div>
+    </header>
+    <div class="zones" id="zones"></div>
+    <section class="grownups">
+      <h2>For grown-ups</h2>
+      <div><h4>How a round works</h4><p>Each station deals 8 fresh problems (the Town Square deals 10). A right answer on the first try earns 10 points. After a wrong answer, the game names the likely mistake and gives one more try for 5 points. In the Town Square, each right answer lays a tile in the mosaic.</p></div>
+      <div><h4>The "Show me" hint</h4><p>Hints use the pictures from class: shapes covered in unit squares, partly tiled rectangles, rectangles with their side lengths, rectangles cut into two parts, and L-shaped figures cut into two rectangles. A used hint caps that problem at 5 points.</p></div>
+      <div><h4>Mistakes it catches</h4><p>Counting the sides around a shape instead of the squares inside, counting only the tiles drawn so far, adding the side lengths instead of multiplying, finding the distance around (perimeter) instead of the area, using square units that are much too big or too small, adding only one part of a figure, counting a big rectangle without taking away the cut corner, and adding where a missing side needs subtracting.</p></div>
+      <div><h4>Numbers</h4><p>Side lengths go up to 10, and every area stays within 100. Areas are in square units, square centimeters, square inches, square feet, or square meters. Rugs, gardens, rooms, and stamps all come in sizes that make sense.</p></div>
+      <div><h4>Learn it first</h4><p>Each station matches a chapter of the <a href="learn.html">Learn page</a> for this unit, which walks through the ideas step by step.</p></div>
+      <div><h4>Not covered</h4><p>Area and the Multiplication Table (Lesson 11) and New Room (Lesson 15) are optional lessons, so there are no stations for them.</p></div>
+    </section>
+  </section>
+
+  <section id="play" hidden>
+    <div class="bar">
+      <button id="quit" class="ghost-btn" type="button">← Stations</button>
+      <div class="bar-mid"><div class="zn" id="zname"></div><div class="track"><div id="prog"></div></div></div>
+      <div class="bar-stats"><span class="pill" id="streak">Streak <b>0</b></span><span class="pill">Pts <b id="pts">0</b></span></div>
+    </div>
+    <div class="power" id="power" hidden></div>
+    <article class="card">
+      <p class="eyebrow" id="qnum"></p>
+      <h2 id="prompt"></h2>
+      <div class="fig" id="fig"></div>
+      <div id="answer"></div>
+      <div id="hint" class="hintbox" hidden></div>
+      <div id="feedback" role="status" aria-live="polite"></div>
+    </article>
+  </section>
+
+  <section id="done" hidden>
+    <div class="card done">
+      <p class="eyebrow" id="dzone"></p>
+      <div class="bigstars stars" id="dstars"></div>
+      <h2 id="dtitle"></h2>
+      <p id="dmsg"></p>
+      <div class="row">
+        <button class="btn" id="again" type="button">Play again</button>
+        <button class="ghost-btn" id="tomap" type="button">Back to stations</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script src="../../shared/util.js?v=af7a4707"></script>
+<script src="../../shared/figures.js?v=d2337c45"></script>
+<script src="../../shared/shapes.js?v=db9bc50e"></script>
+<script src="figs.js?v=6558e8b6"></script>
+<script src="../../shared/engine.js?v=4b1b2373"></script>
+<script src="stations.js?v=560ac021"></script>
+<script>
+/* Town Square: one tile goes in the mosaic for each right answer */
+let tilesLaidSoFar=0;
+/* the mosaic beside a boss problem (hidden at the other stations); hit: the last answer was right */
+function drawPower(state,hit){
+  const el=$('power');el.hidden=state.z.id!=='boss';if(el.hidden)return;
+  el.innerHTML=`<svg viewBox="0 0 64 64" role="img" aria-label="${tilesLaidSoFar} of 10 tiles laid">${mosaic(tilesLaidSoFar)}</svg><div><b>${tilesLaidSoFar} of 10 tiles</b><p>${tilesLaidSoFar===10?'The mosaic is done. Tile Town shines!':hit?'Right! Another tile goes in.':'Answer right to lay a tile.'}</p></div>`;
+  el.classList.toggle('hit',!!hit);
+}
+Game.init({
+  saveKey:'g3u2-save',
+  zones:ZONES,icons:ICON,
+  words:{
+    right:'Nailed it!',
+    miss:'Not quite. Check it with the picture.',
+    titles:['Keep practicing','Good start','Tile pro','Tile Town champion!'],
+    next:'Try the next station, or head to the Town Square.',
+    stuck:'Use “Show me a hint” when you’re stuck. It shows the picture from class.',
+    tap:'Tap your answer in the picture.'
+  },
+  /* the mosaic starts empty at the start of a round */
+  onQuestion:state=>{if(state.i===0)tilesLaidSoFar=0;drawPower(state,false);},
+  onAnswer:(state,ok)=>{if(ok)tilesLaidSoFar++;drawPower(state,ok);}
+});
+</script>
+</body>
+</html>
