@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Treasure Cove</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=JetBrains+Mono:wght@500;700&display=swap">
+<link rel="stylesheet" href="../../shared/theme.css?v=4796e910">
+<link rel="stylesheet" href="../../shared/game.css?v=57b7d039">
+<link rel="stylesheet" href="../../shared/pictures.css?v=7f680159">
+<link rel="stylesheet" href="../../shared/blocks.css?v=ef8d48f1">
+<link rel="stylesheet" href="../../shared/numlines.css?v=c057db89">
+<style>
+/* Treasure Island: a chest of 10 gold coins, one dropped in for each right answer */
+.power{display:flex;align-items:center;gap:14px;background:rgba(255,201,60,.08);border:1.5px solid rgba(255,201,60,.45);border-radius:14px;padding:10px 14px}
+.power svg{width:72px;height:72px;flex:none}
+.power b{font:800 20px var(--display);color:var(--gold)}
+.power p{margin:4px 0 0;font:700 14px var(--mono);color:var(--dim)}
+.power.hit svg{animation:bob .5s}
+@keyframes bob{50%{transform:translateY(-4px)}}
+@media (prefers-reduced-motion:reduce){.power.hit svg{animation:none}}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <section id="home">
+    <a class="back" href="../">← Grade 3</a>
+    <header class="hero">
+      <p class="eyebrow">Illustrative Mathematics K–5 · Grade 3 · Unit 3 · Wrapping Up Addition and Subtraction within 1,000</p>
+      <h1>Treasure <span>Cove</span></h1>
+      <p class="lede">Welcome to Treasure Cove, a harbor full of ships, shells, and gold! Count coins in the Counting House, load cargo at the dock, run the Supply Shop, round from Lighthouse Point, estimate from the Crow’s Nest, and plan two-step voyages. Then dig up the chest on Treasure Island. Each station matches lessons from class.</p>
+      <div class="stats">
+        <span class="pill">Points <b id="hp">0</b></span>
+        <span class="pill">Stars <b id="hs">0</b>/<span id="hsMax">21</span></span>
+      </div>
+    </header>
+    <div class="zones" id="zones"></div>
+    <section class="grownups">
+      <h2>For grown-ups</h2>
+      <div><h4>How a round works</h4><p>Each station deals 8 fresh problems (Treasure Island deals 10). A right answer on the first try earns 10 points. After a wrong answer, the game names the likely mistake and gives one more try for 5 points. On Treasure Island, each right answer drops a gold coin in the chest.</p></div>
+      <div><h4>The "Show me" hint</h4><p>Hints use the pictures from class: base-ten blocks, open number lines with jumps, adding and subtracting by place in expanded form, the standard algorithm worked column by column, number lines for rounding, and tape diagrams for two-step stories. A used hint caps that problem at 5 points.</p></div>
+      <div><h4>Mistakes it catches</h4><p>Leaving out a 0 for an empty place, counting tens as ones, trading a hundred without taking it away, forgetting a new ten or hundred, taking the smaller digit from the bigger one instead of regrouping, forgetting a jump, rounding to the wrong place or always down, forgetting that halfway rounds up, giving the exact answer when asked to estimate, and using the wrong operation in one step of a two-step story.</p></div>
+      <div><h4>Numbers</h4><p>Every number stays within 1,000, and each place regroups at most once. Two-step stories may multiply equal groups within 10 × 10, as in Unit 1. Ferries, trails, shells, and coins all come in amounts that make sense.</p></div>
+      <div><h4>Learn it first</h4><p>Each station matches a chapter of the <a href="learn.html">Learn page</a> for this unit, which walks through the ideas step by step.</p></div>
+      <div><h4>Not covered</h4><p>Classroom Supplies (Lesson 21) is an optional lesson, so there’s no station for it.</p></div>
+    </section>
+  </section>
+
+  <section id="play" hidden>
+    <div class="bar">
+      <button id="quit" class="ghost-btn" type="button">← Stations</button>
+      <div class="bar-mid"><div class="zn" id="zname"></div><div class="track"><div id="prog"></div></div></div>
+      <div class="bar-stats"><span class="pill" id="streak">Streak <b>0</b></span><span class="pill">Pts <b id="pts">0</b></span></div>
+    </div>
+    <div class="power" id="power" hidden></div>
+    <article class="card">
+      <p class="eyebrow" id="qnum"></p>
+      <h2 id="prompt"></h2>
+      <div class="fig" id="fig"></div>
+      <div id="answer"></div>
+      <div id="hint" class="hintbox" hidden></div>
+      <div id="feedback" role="status" aria-live="polite"></div>
+    </article>
+  </section>
+
+  <section id="done" hidden>
+    <div class="card done">
+      <p class="eyebrow" id="dzone"></p>
+      <div class="bigstars stars" id="dstars"></div>
+      <h2 id="dtitle"></h2>
+      <p id="dmsg"></p>
+      <div class="row">
+        <button class="btn" id="again" type="button">Play again</button>
+        <button class="ghost-btn" id="tomap" type="button">Back to stations</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script src="../../shared/util.js?v=6fcbe1bb"></script>
+<script src="../../shared/figures.js?v=d2337c45"></script>
+<script src="../../shared/pictures.js?v=f857849d"></script>
+<script src="../../shared/blocks.js?v=8836c7d3"></script>
+<script src="../../shared/numlines.js?v=221aec05"></script>
+<script src="figs.js?v=a1e02d8b"></script>
+<script src="../../shared/engine.js?v=4b1b2373"></script>
+<script src="stations.js?v=e10bcba4"></script>
+<script>
+/* Treasure Island: one gold coin goes in the chest for each right answer */
+let coinsInChest=0;
+/* the chest beside a boss problem (hidden at the other stations); hit: the last answer was right */
+function drawPower(state,hit){
+  const el=$('power');el.hidden=state.z.id!=='boss';if(el.hidden)return;
+  el.innerHTML=`<svg viewBox="0 0 64 64" role="img" aria-label="${coinsInChest} of 10 coins in the chest">${chest(coinsInChest)}</svg><div><b>${coinsInChest} of 10 coins</b><p>${coinsInChest===10?'The chest is full. You found the treasure!':hit?'Right! Another coin drops in.':'Answer right to add a coin.'}</p></div>`;
+  el.classList.toggle('hit',!!hit);
+}
+Game.init({
+  saveKey:'g3u3-save',
+  zones:ZONES,icons:ICON,
+  words:{
+    right:'Nailed it!',
+    miss:'Not quite. Check it with the picture.',
+    titles:['Keep practicing','Good start','Deckhand pro','Treasure Cove captain!'],
+    next:'Try the next station, or sail to Treasure Island.',
+    stuck:'Use “Show me a hint” when you’re stuck. It shows the picture from class.',
+    tap:'Tap your answer on the number line.'
+  },
+  /* the chest empties at the start of a round */
+  onQuestion:state=>{if(state.i===0)coinsInChest=0;drawPower(state,false);},
+  onAnswer:(state,ok)=>{if(ok)coinsInChest++;drawPower(state,ok);}
+});
+</script>
+</body>
+</html>
