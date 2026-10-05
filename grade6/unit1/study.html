@@ -9,17 +9,23 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=JetBrains+Mono:wght@500;700&display=swap">
 <link rel="stylesheet" href="../../shared/theme.css?v=4796e910">
 <style>
-/* Study guide: a printable review for the whole unit. On screen it uses the site's colors (theme.css); printed, it's dark
-   ink on white letter paper, and the practice test and answer key each start a new page. */
+/* Study guide: a printable review for the whole unit. Unlike the rest of the site, it's a plain white page with dark ink, on
+   screen just as on paper (theme.css gives only the fonts and resets; its navy grid is turned off here). Printed, it fits
+   letter paper, and the practice test and answer key each start a new page. */
+:root{color-scheme:light}
+html,body{background:#fff}
+body{background-image:none;color:#111a2b}
 .guide{
-  --ink:var(--chalk); --muted:var(--dim); --rule:rgba(170,205,255,.22); --wash:var(--sheet);
-  --accent:var(--gold); --tint:rgba(255,201,60,.16); --tint-line:var(--gold); --height:var(--cyan);
-  --grid:rgba(170,205,255,.2); --hole:var(--bg);
+  --ink:#111a2b; --muted:#4a5568; --rule:#c9d0dc; --wash:#f6f8fb;
+  --accent:#7a5300; --tint:#fff3cf; --tint-line:#b58300; --height:#1d5f91; --grid:#dfe5ee; --hole:#fff;
   max-width:820px;margin:0 auto;padding-inline:16px;padding-block:28px 64px;color:var(--ink)
 }
+.guide .back{color:var(--muted)}
+.guide .back:hover{color:var(--ink)}
+.guide :focus-visible{outline-color:var(--height)}
 .guide h1,.guide h2,.guide h3{font-family:var(--display);text-wrap:balance;margin:0}
 .guide .eyebrow{color:var(--accent);margin:0 0 6px}
-.cover{border-bottom:2px solid var(--rule);padding-bottom:18px;margin-bottom:22px}
+.cover{border-bottom:2px solid var(--ink);padding-bottom:18px;margin-bottom:22px}
 .cover h1{font-size:clamp(34px,6vw,52px);font-weight:800;line-height:1.02;letter-spacing:-.01em}
 .cover .sub{margin:10px 0 0;color:var(--muted);max-width:62ch}
 .howto{margin:12px 0 0;padding:10px 14px;border:1.5px dashed var(--rule);border-radius:10px;color:var(--muted);font-size:15px}
@@ -92,17 +98,11 @@ ol.key .num{flex:none;min-width:30px;font:700 13px/1.7 var(--mono);color:var(--a
 }
 @page{size:letter;margin:.55in}
 @media print{
-  html,body{background:#fff}
-  body{background-image:none;color:#111a2b;min-height:0;font-size:12.5px}
-  .guide{
-    --ink:#111a2b; --muted:#4a5568; --rule:#c9d0dc; --wash:#f6f8fb;
-    --accent:#7a5300; --tint:#fff3cf; --tint-line:#b58300; --height:#1d5f91; --grid:#dfe5ee; --hole:#fff;
-    max-width:none;padding:0
-  }
+  body{min-height:0;font-size:12.5px}
+  .guide{max-width:none;padding:0}
   .back,.howto{display:none}
-  .cover{border-bottom-color:#111a2b}
   .cover h1{font-size:30px}
-  .plan li,.sheet,.example,.watch,.m.f{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .plan li,.sheet,.example,.watch,.m.f,.guide svg{-webkit-print-color-adjust:exact;print-color-adjust:exact}
   .topic{margin-top:18px;padding-top:14px}
   .th,.ke h3,.try{break-after:avoid}
   .example,.watch{break-inside:avoid}

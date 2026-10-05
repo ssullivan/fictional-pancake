@@ -1,5 +1,6 @@
-// Every unit's printable study guide (grade*/unit*/study.html): it opens from the unit's card on the grade page, every
-// diagram is drawn, nothing scrolls sideways, and printed it's dark ink on white with the test and the key on new pages.
+// Every unit's printable study guide (grade*/unit*/study.html): it opens from the unit's card on the grade page, it's a plain
+// white page (not the site's navy grid), every diagram is drawn, nothing scrolls sideways, and printed it drops the back link
+// and starts the test and the key on new pages.
 const { test, expect } = require("./fixtures");
 const { globSync } = require("node:fs");
 
@@ -11,6 +12,12 @@ for (const guide of guides) {
     await page.goto(`${grade}/index.html`);
     await page.locator(`a.study[href="${guide.slice(grade.length + 1)}"]`).click();
     await expect(page).toHaveURL(new RegExp(`${guide}$`));
+    expect(
+      await page.evaluate(() => [
+        getComputedStyle(document.body).backgroundColor,
+        getComputedStyle(document.body).backgroundImage,
+      ]),
+    ).toEqual(["rgb(255, 255, 255)", "none"]);
 
     // every placeholder has its diagram, each with a label for screen readers
     const placeholders = page.locator("[data-fig]");
