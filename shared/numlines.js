@@ -4,7 +4,8 @@
    partWhole(parts, total)           one tape split into parts, with the total above
    timesTape(rows, {label})          tapes for "times as many": each row is copies of one box, with its total (svg)
    numLine(lo, hi, {…})              a number line with arrows, jumps, dots, and tappable ticks (svg)
-   jumps(start, moves, shown, ask)   an open number line: counting on or back in jumps, not drawn to scale (svg) */
+   jumps(start, moves, shown, ask)   an open number line: counting on or back in jumps, not drawn to scale (svg)
+   roundLine(n, unit, label)         n on a number line between the multiples of unit around it, for rounding (svg) */
 /* Tape diagrams to compare two amounts. rows: [{label, n, show}] where show is the number to write (or '?').
    diff: label for the difference piece after the shorter tape, or null for none. */
 function tapes(rows, { diff = null } = {}) {
@@ -226,4 +227,22 @@ function jumps(start, moves, shown = moves.length, ask = false) {
     markup,
     `Jumps from ${start}: ` + said + (shown ? (ask ? ", landing on a question mark" : `, landing on ${end}`) : ""),
   );
+}
+/* n on a number line from the multiple of unit below it to the one above, in 10 ticks, with the halfway point labelled.
+   Numbers are written with commas ("46,500"), by written(v). label: what the picture says to a screen reader (default: its numbers). */
+function roundLine(n, unit, label) {
+  const below = Math.floor(n / unit) * unit,
+    tick = unit / 10,
+    written = (v) => v.toLocaleString("en-US");
+  return numLine(0, 10, {
+    u: 36,
+    step: 1,
+    big: 5,
+    pad: 36,
+    fmt: (v) => written(below + v * tick),
+    pts: [{ v: (n - below) / tick, t: written(n) }],
+    label:
+      label ||
+      `Number line from ${written(below)} to ${written(below + unit)}, with ${written(below + unit / 2)} halfway and a point at ${written(n)}`,
+  });
 }

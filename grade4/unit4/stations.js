@@ -1,7 +1,7 @@
 /* Rocket Lab (Grade 4 Unit 4): the problem generators, station list, and icons. Loaded by index.html and by tools/fuzz.mjs.
    Place-value charts, number words, commas, and the standard algorithm come from shared/blocks.js; number lines from
    shared/numlines.js; hundred grids from shared/fractions.js; fr and cellsOf from shared/pictures.js; dS, WIDE, PL, SYM, signOf,
-   decLine, roundTo, nearest, and roundLine from figs.js; mcOf and miscOf from shared/util.js.
+   decLine, and nearest from figs.js; roundLine from shared/numlines.js; roundTo, mcOf, and miscOf from shared/util.js.
    Each generator deals one of a few kinds of problem (variant), each with a comment saying what it asks. Decimals are
    generated as whole numbers of hundredths (k) and shown with dS(k), so 0.1 + 0.2 never comes out 0.30000000000000004. */
 const KIDS = ["Mai", "Diego", "Lin", "Han", "Priya", "Kiran", "Elena", "Jada", "Noah", "Clare", "Andre", "Tyler"];

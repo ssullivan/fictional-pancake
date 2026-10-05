@@ -1,11 +1,11 @@
-/* Numbers and pictures that Grade 4 Unit 4's game and its Learn pages both use. Needs numlines.js (numLine) and blocks.js (commas).
+/* Numbers and pictures that Grade 4 Unit 4's game and its Learn pages both use. Needs numlines.js (numLine).
 
    dS(k)                             k hundredths as a decimal, as short as it goes: 47 → "0.47", 50 → "0.5"
    WIDE                              the columns hundred-thousands to ones, for pvChart
    PL, SYM, signOf(a, b)             place names (PL[3] is ['thousand', 'thousands']), < > = as html, and how a compares to b
    decLine(lo, hi, step, options)    a number line in hundredths (svg)
-   roundTo(n, unit), nearest(unit)   n rounded to the nearest unit, and "the nearest thousand"
-   roundLine(n, unit, label)         n on a number line between the multiples of unit around it (svg) */
+   nearest(unit)                     "the nearest thousand"
+   Rounding (roundTo) is in shared/util.js, and its number line (roundLine) in shared/numlines.js. */
 /* k hundredths as a decimal, as short as it goes: 47 → "0.47", 50 → "0.5", 100 → "1" */
 const dS = (k) => (k % 100 === 0 ? String(k / 100) : (k / 100).toFixed(k % 10 ? 2 : 1));
 /* the columns hundred-thousands to ones */
@@ -33,24 +33,6 @@ const decLine = (lo, hi, step, options = {}) =>
     fmt: dS,
     ...options,
   });
-/* n rounded to the nearest multiple of unit (halfway rounds up) */
-const roundTo = (n, unit) => Math.floor(n / unit + 0.5) * unit;
 /* "the nearest thousand" */
 const nearest = (unit) =>
   `the nearest ${unit === 1000 ? "thousand" : unit === 10000 ? "ten thousand" : "hundred thousand"}`;
-/* n on a number line from the multiple of unit below it to the one above, in 10 ticks, with the halfway point */
-function roundLine(n, unit, label) {
-  const below = Math.floor(n / unit) * unit,
-    tick = unit / 10;
-  return numLine(0, 10, {
-    u: 36,
-    step: 1,
-    big: 5,
-    pad: 36,
-    fmt: (v) => commas(below + v * tick),
-    pts: [{ v: (n - below) / tick, t: commas(n) }],
-    label:
-      label ||
-      `Number line from ${commas(below)} to ${commas(below + unit)}, with ${commas(below + unit / 2)} halfway and a point at ${commas(n)}`,
-  });
-}

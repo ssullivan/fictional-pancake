@@ -83,6 +83,7 @@ const CALLS = {
     "shuffle(range(9))",
     "gcd(84, 36)",
     "lcm(6, 15)",
+    ...["roundTo(245, 10)", "roundTo(244, 10)", "roundTo(350, 100)", "roundTo(46700, 1000)", "roundTo(0, 100)"],
     `miscOf(5, [[4, 'a'], [6, 'b'], [4, 'c']])`,
     `problemKey({prompt: 'p', explain: 'e', choices: [{label: 'b'}, {label: 'a'}]})`,
     `mcOf([['1', null], ['2', 'no'], ['3', 'no']])`,
@@ -223,6 +224,7 @@ const CALLS = {
       ),
     ),
     "commas(305020)",
+    ...each([0, 1, 2, 3, 4, 5], (e) => [`placeWord(${e}, 1)`, `placeWord(${e}, 3)`, `placeWord(${e})`]),
     ...each(
       [
         [5, 3],
@@ -239,6 +241,7 @@ const CALLS = {
       ([a, b]) =>
         each(["+", "−"], (op) => [
           `algSteps(${a}, ${b}, '${op}')`,
+          `algSteps(${a}, ${b}, '${op}').map((step) => algSay(step, '${op}'))`,
           ...range(0, 7).map((done) => `algFig(${a}, ${b}, '${op}', ${done})`),
         ]),
     ),
@@ -293,6 +296,9 @@ const CALLS = {
     "jumps(8, [2], 0, true)",
     "jumps(100, [-30, -4, 10, 1], 4, true)",
     "jumps(3, [1, 1, 1, 1, 1, 1])",
+    "roundLine(46700, 1000)",
+    "roundLine(245, 10, 'L')",
+    "roundLine(300, 100)",
     `tapes([{label: 'A', n: 5, show: 5}, {label: 'B', n: 5, show: 5}], {diff: 'diff'})`,
     `tapes([{label: 'Long label', n: 1, show: '?'}, {label: 'B', n: 13, show: 13}], {diff: '?'})`,
     `partWhole([{n: 7, show: 7}], '?')`,

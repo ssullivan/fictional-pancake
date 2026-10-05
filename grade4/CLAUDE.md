@@ -11,7 +11,7 @@ When a unit gets a game or Learn page, add a row here and turn its "Coming soon"
 | `unit1/` | Factor Factory (`index.html`, 5 stations + the Mega-Bot) | `learn.html` + `learn/` (5 chapters, Lessons 1–7) | Grade 4 Unit 1 |
 | `unit2/` | Fraction Bakery (`index.html`, 5 stations + the Big Bake-Off; `figs.js` holds the comparison helpers its Learn pages use too) | `learn.html` + `learn/` (6 chapters, Lessons 1–16) | Grade 4 Unit 2 |
 | `unit3/` | Camp Fraction (`index.html`, 6 stations + Stargazing; `figs.js` holds `frMix`, which its Learn pages use too) | `learn.html` + `learn/` (6 chapters, Lessons 1–18) | Grade 4 Unit 3 |
-| `unit4/` | Rocket Lab (`index.html`, 6 stations + the Countdown; `figs.js` holds the decimal and rounding number lines its Learn pages use too) | `learn.html` + `learn/` (7 chapters, Lessons 1–22) | Grade 4 Unit 4 |
+| `unit4/` | Rocket Lab (`index.html`, 6 stations + the Countdown; `figs.js` holds the decimal number lines its Learn pages use too; rounding lines are `roundLine` in `shared/numlines.js`) | `learn.html` + `learn/` (7 chapters, Lessons 1–22) | Grade 4 Unit 4 |
 | `unit5/` | Zoo Crew (`index.html`, 5 stations + Feeding Time; `figs.js` holds the tape diagrams, unit tables, and rectangles its Learn pages use too) | `learn.html` + `learn/` (5 chapters, Lessons 1–17) | Grade 4 Unit 5 |
 | `unit6/` | City Builders (`index.html`, 7 stations + the Grand Opening) | `learn.html` + `learn/` (8 chapters, Lessons 1–24) | Grade 4 Unit 6 |
 | `unit7/` | Angle Arcade (`index.html`, 6 stations + High Score; `figs.js` holds `angleKind` and `splitFig`, which its Learn pages use too) | `learn.html` + `learn/` (6 chapters, Lessons 1–15) | Grade 4 Unit 7 |

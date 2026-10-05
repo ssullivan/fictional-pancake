@@ -41,6 +41,8 @@ function mcOf(list, extra = {}) {
 /* greatest common factor and least common multiple */
 const gcd = (a, b) => (b ? gcd(b, a % b) : a);
 const lcm = (a, b) => (a * b) / gcd(a, b);
+/* n rounded to the nearest multiple of unit (halfway rounds up): roundTo(245, 10) is 250, roundTo(1340, 1000) is 1000 */
+const roundTo = (n, unit) => Math.floor(n / unit + 0.5) * unit;
 const $ = (id) => document.getElementById(id);
 /* Q(el)('x') finds the element marked data-x inside el */
 const Q = (el) => (a) => el.querySelector(`[data-${a}]`);

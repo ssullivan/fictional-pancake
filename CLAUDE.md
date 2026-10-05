@@ -16,7 +16,7 @@ shared/                   used by every grade; each file's header comment docume
   learn.css, learn.js     Learn pages: a unit's chapter list and its chapter pages (Learn.home, Learn.chapter)
   pictures.css, .js       K–5 pictures: labels, number-line marks, tap targets, counters, stacked fractions (fr, frT), part names (PART)
     blocks                ten-frames, cubes, base-ten blocks, place-value charts, number words, the standard algorithms, sharing blocks, partial quotients
-    numlines              tape diagrams, number lines, open number lines (jumps)
+    numlines              tape diagrams, number lines, open number lines (jumps), rounding number lines
     fractions             fraction strips, fraction number lines, hundred grids
     graphs                line plots, scaled picture and bar graphs
     shapes                flat shapes, pictures in a row, solid shapes, equal parts, pattern blocks, rectangles with their sides
@@ -26,7 +26,7 @@ shared/                   used by every grade; each file's header comment docume
   solids.css, solids.js   prisms and pyramids (faces, edges, vertices, names), their drawings, curved solids, and nets: Grade 6
   algebra.css, .js        letters for numbers (mathVar, withVars) and coordinate planes, one quadrant or four (coordPlane): Grade 6
   landing.css             grade cards (root page) and unit cards (grade pages)
-  util.js                 R, pick, range, shuffle, miscOf, mcOf, problemKey, gcd, lcm, $, Q, parseNum, and Learn controls (seg, press, onPick, segHit, stepper)
+  util.js                 R, pick, range, shuffle, miscOf, mcOf, problemKey, gcd, lcm, roundTo, $, Q, parseNum, and Learn controls (seg, press, onPick, segHit, stepper)
   speak.js                Read to me buttons for K–2 Learn pages and games (readAloud)
 tools/                    check.mjs, fuzz.mjs, snap.mjs, same.mjs (see Checking a change)
 .prettierrc.json          Prettier settings for the JavaScript (.prettierignore leaves out HTML, CSS, and docs)

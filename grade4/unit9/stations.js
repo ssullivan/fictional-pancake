@@ -1,7 +1,7 @@
 /* Year-End Fair (Grade 4 Unit 9): the problem generators, station list, and icons. Loaded by index.html and by tools/fuzz.mjs.
    Fraction strips come from shared/fractions.js; the standard algorithms and partial quotients from shared/blocks.js; tape
-   diagrams from shared/numlines.js; area diagrams from shared/multiply.js; fr and mixed from shared/pictures.js; mcOf and
-   miscOf from shared/util.js.
+   diagrams from shared/numlines.js; area diagrams from shared/multiply.js; fr and mixed from shared/pictures.js; roundTo, mcOf,
+   and miscOf from shared/util.js.
    Each generator deals one of a few kinds of problem (variant), each with a comment saying what it asks. Every problem also
    carries facts for checks.js: its kind (t) and the numbers it was made from, so the answer can be worked out again. */
 const KIDS = ["Mai", "Diego", "Lin", "Han", "Priya", "Kiran", "Elena", "Jada", "Noah", "Clare", "Andre", "Tyler"];
@@ -350,8 +350,6 @@ function genProblems() {
 }
 
 /* ---------- Guessing Jar: estimate (Lesson 10) ---------- */
-/* n rounded to the nearest unit, halfway up */
-const roundTo = (n, unit) => Math.floor(n / unit + 0.5) * unit;
 function genEstimate() {
   const variant = R(0, 1);
   if (variant === 0) {

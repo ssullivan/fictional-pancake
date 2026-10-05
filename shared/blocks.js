@@ -13,6 +13,8 @@
    digits(n), numWords(n)            [hundreds, tens, ones] of n, and its name up to 999,999 ("four hundred six")
    pvChart(rows, hi, {places, tap}), PLACE, digitAt(n, e), commas(n)   a place-value chart (html table), hundredths to hundred-thousands; "305,020"
    algSteps(a, b, op), algFig(a, b, op, done)   the standard algorithm to add or subtract, column by column (svg)
+   algSay(step, op), algWidget(problems, op), placeWord(e, n)   what a worked column says, a Learn widget that works problems
+                                     a column at a time, and a place's name ("ten", "hundreds")
    mulSteps(a, b), mulFig(a, b, done)   the standard algorithm to multiply by a one-digit number, column by column (svg)
    divideFig(n, groups, {split})     n in base-ten blocks, shared into equal groups with any left over (svg)
    quotientFig(n, divisor, chunks, shown)   n ÷ divisor by partial quotients: chunks taken away one at a time (svg) */
@@ -424,6 +426,84 @@ function algFig(a, b, op, done = 0, label) {
         (done ? `, ${done} column${done > 1 ? "s" : ""} worked` : ""),
   );
 }
+/* a place's name in words, for 1 or for more: placeWord(1, 1) is "ten", placeWord(2, 3) "hundreds" */
+const placeWord = (e, n) => (n === 1 ? PLACE[e].toLowerCase().slice(0, -1) : PLACE[e].toLowerCase());
+/* What one worked column of the standard algorithm says (html). step: one of algSteps' steps; op: '+' or '−' */
+function algSay(step, op) {
+  const { i, top, bot, cin, val, digit, carry, from } = step,
+    head = `<b>${PLACE[i]}:</b> `,
+    /* n of place e: "1 ten", "3 hundreds"; and "becomes" for 1 and "become" for more */
+    pn = (n, e) => `${n} ${placeWord(e, n)}`,
+    bec = (n) => (n === 1 ? "becomes" : "become");
+  if (op === "+")
+    return (
+      head +
+      `${top} + ${bot}${cin ? " + 1" : ""} = ${val}.` +
+      (carry
+        ? ` That’s ${pn(1, i + 1)} and ${pn(val - 10, i)}: write ${digit}, and put the 1 above the ${placeWord(i + 1)}.`
+        : ` Write ${val}.`)
+    );
+  if (step.blank) return head + `${top} − ${bot} = 0. A 0 at the front of a number isn’t written.`;
+  if (from === null) return head + `${top} − ${bot} = ${val}. Write ${digit}.`;
+  /* regrouping: the digit was `was` before it got 10 more; the place regrouped from is now `now`; skipped: the 0 places in between */
+  const was = top - 10,
+    now = step.marks[0].v,
+    skipped = range(from - i - 1).map((k) => placeWord(i + 1 + k));
+  return (
+    head +
+    `${was} is less than ${bot}, so regroup` +
+    (skipped.length ? `, but there are no ${skipped.join(" or ")}. Regroup` : "") +
+    ` 1 ${placeWord(from, 1)}: ${pn(now + 1, from)} ${bec(now + 1)} ${now}, ` +
+    (skipped.length ? `the 0 ${skipped.join(" and 0 ")} become 9${skipped.length > 1 ? " each" : ""}, ` : "") +
+    `and ${pn(was, i)} ${bec(was)} ${top}. ${top} − ${bot} = ${val}. Write ${digit}.`
+  );
+}
+/* Learn widget: the standard algorithm, one column at a time, saying what each column does. problems: [[a, b], …], picked
+   with a row of buttons; op: '+' or '−'. */
+const algWidget = (problems, op) => (el) => {
+  /* columns: how many columns are worked so far */
+  const q = Q(el);
+  let problemIndex = 0,
+    columns = 0;
+  el.innerHTML =
+    seg(
+      "Problem",
+      problems.map(([a, b], i) => [i, `${commas(a)} ${op} ${commas(b)}`]),
+    ) +
+    `<div class="fig" data-f></div><div class="wrow"><button type="button" class="btn" data-go>Next column</button><button type="button" class="ghost-btn" data-clr>Start over</button></div><p class="readout" data-r></p>`;
+  const draw = () => {
+    const [a, b] = problems[problemIndex],
+      steps = algSteps(a, b, op),
+      done = columns === steps.length;
+    press(el, problemIndex);
+    q("go").disabled = done;
+    q("f").innerHTML = algFig(a, b, op, columns);
+    q("r").innerHTML =
+      (columns ? algSay(steps[columns - 1], op) : "Line up the places. Start with the ones, on the right.") +
+      (done
+        ? `<br><span class="ok">${commas(a)} ${op} ${commas(b)} = <b>${commas(op === "+" ? a + b : a - b)}</b>.</span>`
+        : columns
+          ? `<br><span class="dimline">Next: the ${placeWord(steps[columns].i)}.</span>`
+          : "");
+  };
+  q("go").onclick = () => {
+    if (columns < algSteps(...problems[problemIndex], op).length) columns++;
+    draw();
+  };
+  q("clr").onclick = () => {
+    columns = 0;
+    draw();
+  };
+  el.addEventListener("click", (e) => {
+    const problemBtn = e.target.closest("[data-m]");
+    if (problemBtn) {
+      problemIndex = +problemBtn.dataset.m;
+      columns = 0;
+      draw();
+    }
+  });
+  draw();
+};
 /* ---------- multiplying and dividing ---------- */
 /* a × b (b one digit), one column at a time from the ones (column 0). Each step: {i, top, cin, val, digit, carry}: top is a's
    digit, cin what was carried in, val = top × b + cin, digit what's written under the column (the last column writes all

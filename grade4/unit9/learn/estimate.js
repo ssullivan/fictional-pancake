@@ -5,8 +5,6 @@ const ESTIMATES = [
   ["+", 3489, 2516],
   ["−", 8120, 2975],
 ];
-/* n rounded to the nearest unit (halfway rounds up) */
-const roundTo = (n, unit) => Math.floor(n / unit + 0.5) * unit;
 /* Pick a problem and what to round to: the estimate with friendly numbers, and how close it is. */
 function wRound(el) {
   const q = Q(el);

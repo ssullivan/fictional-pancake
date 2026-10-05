@@ -1,86 +1,8 @@
 /* Learn From Hundredths to Hundred-thousands (Grade 4 Unit 4), chapter 7: Add and subtract. Its widgets and steps; loaded by add-subtract.html. */
-/* n of place e: "1 ten", "3 hundreds" */
-const pn = (n, e) => `${n} ${PL[e][n === 1 ? 0 : 1]}`;
-/* the text with its first letter capitalized */
-const cap = (text) => text[0].toUpperCase() + text.slice(1);
-/* "becomes" for 1 and "become" for more */
-const bec = (n) => (n === 1 ? "becomes" : "become");
-/* what one worked column says (html). step: one of algSteps' steps; op: '+' or '−' */
-function colSay(step, op) {
-  const { i, top, bot, cin, val, digit, carry, from } = step,
-    head = `<b>${cap(PL[i][1])}:</b> `;
-  if (op === "+")
-    return (
-      head +
-      `${top} + ${bot}${cin ? " + 1" : ""} = ${val}.` +
-      (carry
-        ? ` That’s ${pn(1, i + 1)} and ${pn(val - 10, i)}: write ${digit}, and put the 1 above the ${PL[i + 1][1]}.`
-        : ` Write ${val}.`)
-    );
-  if (step.blank) return head + `${top} − ${bot} = 0. A 0 at the front of a number isn’t written.`;
-  if (from === null) return head + `${top} − ${bot} = ${val}. Write ${digit}.`;
-  /* regrouping: the digit was `was` before it got 10 more; the place regrouped from is now `now`; skipped: the 0 places in between */
-  const was = top - 10,
-    now = step.marks[0].v,
-    skipped = range(from - i - 1).map((k) => PL[i + 1 + k][1]);
-  return (
-    head +
-    `${was} is less than ${bot}, so regroup` +
-    (skipped.length ? `, but there are no ${skipped.join(" or ")}. Regroup` : "") +
-    ` 1 ${PL[from][0]}: ${pn(now + 1, from)} ${bec(now + 1)} ${now}, ` +
-    (skipped.length ? `the 0 ${skipped.join(" and 0 ")} become 9${skipped.length > 1 ? " each" : ""}, ` : "") +
-    `and ${pn(was, i)} ${bec(was)} ${top}. ${top} − ${bot} = ${val}. Write ${digit}.`
-  );
-}
-/* A widget for the standard algorithm, one column at a time. PROBS: [[a, b], …]; op: '+' or '−'. */
-const wAlg = (PROBS, op) => (el) => {
-  /* columns: how many columns are worked so far */
-  const q = Q(el);
-  let problemIndex = 0,
-    columns = 0;
-  el.innerHTML =
-    seg(
-      "Problem",
-      PROBS.map(([a, b], i) => [i, `${commas(a)} ${op} ${commas(b)}`]),
-    ) +
-    `<div class="fig" data-f></div><div class="wrow"><button type="button" class="btn" data-go>Next column</button><button type="button" class="ghost-btn" data-clr>Start over</button></div><p class="readout" data-r></p>`;
-  const draw = () => {
-    const [a, b] = PROBS[problemIndex],
-      steps = algSteps(a, b, op),
-      done = columns === steps.length;
-    press(el, problemIndex);
-    q("go").disabled = done;
-    q("f").innerHTML = algFig(a, b, op, columns);
-    q("r").innerHTML =
-      (columns ? colSay(steps[columns - 1], op) : "Line up the places. Start with the ones, on the right.") +
-      (done
-        ? `<br><span class="ok">${commas(a)} ${op} ${commas(b)} = <b>${commas(op === "+" ? a + b : a - b)}</b>.</span>`
-        : columns
-          ? `<br><span class="dimline">Next: the ${PL[steps[columns].i][1]}.</span>`
-          : "");
-  };
-  q("go").onclick = () => {
-    if (columns < algSteps(...PROBS[problemIndex], op).length) columns++;
-    draw();
-  };
-  q("clr").onclick = () => {
-    columns = 0;
-    draw();
-  };
-  el.addEventListener("click", (e) => {
-    const problemBtn = e.target.closest("[data-m]");
-    if (problemBtn) {
-      problemIndex = +problemBtn.dataset.m;
-      columns = 0;
-      draw();
-    }
-  });
-  draw();
-};
 const STEPS = [
   {
     title: "Add in columns",
-    widget: wAlg(
+    widget: algWidget(
       [
         [4625, 2318],
         [36450, 21380],
@@ -104,7 +26,7 @@ const STEPS = [
   },
   {
     title: "Subtract in columns",
-    widget: wAlg(
+    widget: algWidget(
       [
         [5462, 2138],
         [47315, 12160],
@@ -128,7 +50,7 @@ const STEPS = [
   },
   {
     title: "Subtract across zeros",
-    widget: wAlg(
+    widget: algWidget(
       [
         [5000, 1250],
         [40000, 12500],
