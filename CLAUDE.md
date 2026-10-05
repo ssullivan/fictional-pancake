@@ -73,6 +73,8 @@ Games are aligned to Illustrative Mathematics (IM): IM K–5 Math for Grades K�
 - write the generators in `stations.js`: each returns a problem (`num`, `pair`, `mc`, or `tap`; the shapes are documented at the top of `engine.js`), and `ZONES` lists the stations with the boss last as `id:'boss'`;
 - set the save key, words, and any hooks in `Game.init` (Unit 1 shows the hooks: its own figure drawing, a zone note, and a Build-it mode);
 - set limits for every station in `checks.js`, plus a `check` for each real-world rule. Answers must be positive unless `checks.js` sets `signed: true` (Grade 6 Unit 7 on); then give every typed problem `neg: true`, which opens the full keyboard (phone number pads have no minus key), and type points as `pair` problems with `point: true`.
+- make `check` work every answer out again, not just look at it. When a problem's numbers are only in its picture (a line plot, a point on a number line, a shape), give it `facts` (the numbers it was made from) for `check` to use. To be sure the checks catch mistakes, change each answer to a wrong one and confirm `check` complains.
+- when typed answers can be hundredths (decimals, money, cents of a dollar), pass `near: (x, y) => Math.abs(x - y) < 0.005` to `Game.init`: the default ±0.011 counts 0.92 as right for 0.91. It still accepts 0.33 for 1/3.
 
 Only add to `shared/` what more than one unit needs, and keep the engine free of unit-specific words; pass them in through `Game.init`.
 
