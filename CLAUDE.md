@@ -29,8 +29,8 @@ shared/                   used by every grade; each file's header comment docume
   util.js                 R, pick, range, shuffle, miscOf, mcOf, problemKey, gcd, lcm, roundTo, $, Q, parseNum, and Learn controls (seg, press, onPick, segHit, stepper)
   speak.js                Read to me buttons for K–2 Learn pages and games (readAloud)
 facts/                    Math Facts, for any grade (see Math facts)
-  index.html              hub: a card for addition, subtraction, and multiplication
-  practice.html, .js      Quick Pick: pick a set, then answer facts for as long as you like (#add, #sub, #mult)
+  index.html              hub: a card for addition, subtraction, multiplication, and division
+  practice.html, .js      Quick Pick: pick a set, then answer facts for as long as you like (#add, #sub, #mult, #div)
   facts.js, facts.css     the facts engine (sets, choices, help, hints, which fact next) and the facts pages' styles
 tools/                    check.mjs, fuzz.mjs, facts.mjs, snap.mjs, same.mjs (see Checking a change)
 .prettierrc.json          Prettier settings for the JavaScript (.prettierignore leaves out HTML, CSS, and docs)
@@ -92,7 +92,7 @@ When building a game:
 
 ## Math facts
 
-`facts/` is practice for any grade, linked from the root page under the grade cards. It doesn't use `shared/engine.js`, whose rounds end: Quick Pick plays forever. `facts/facts.js` (its header documents the API) holds the sets (addition and subtraction within 10 or 20, multiplication tables 0 to 12), four choices for each fact (the answer and three named mistakes), how to work a fact out (`factHelp`, with ten-frames, arrays, or a rectangle broken apart) and a hint that doesn't give the answer away (`factHint`), and the picker: missed or hinted facts come back 3 to 5 facts later until they're right twice in a row, and known facts come up less. Progress is saved per fact under `facts-save`. `tools/facts.mjs` (run by `check.mjs`) deals every fact of every set many times and checks the choices, help, hints, and picker; `tests/facts.spec.js` plays it. A new facts game (typing the answer, missing numbers, a sprint) gets its own page in `facts/` on the same engine, and a card on `facts/index.html`.
+`facts/` is practice for any grade, linked from the root page under the grade cards. It doesn't use `shared/engine.js`, whose rounds end: Quick Pick plays forever. `facts/facts.js` (its header documents the API) holds the sets (addition and subtraction within 10 or 20, multiplication tables 0 to 12, division by 1 to 12), four choices for each fact (the answer and three named mistakes), how to work a fact out (`factHelp`, with ten-frames, arrays, or a rectangle broken apart) and a hint that doesn't give the answer away (`factHint`), and the picker: missed or hinted facts come back 3 to 5 facts later until they're right twice in a row, and known facts come up less. Progress is saved per fact under `facts-save`. `tools/facts.mjs` (run by `check.mjs`) deals every fact of every set many times and checks the choices, help, hints, and picker; `tests/facts.spec.js` plays it. A new facts game (typing the answer, missing numbers, a sprint) gets its own page in `facts/` on the same engine, and a card on `facts/index.html`.
 
 ## Learn pages
 

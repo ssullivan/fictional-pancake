@@ -51,6 +51,8 @@ const sets = [
   ["sub", "20", 121],
   ...FACT_OPS.mult.tables.map((t) => ["mult", [t], 13]),
   ["mult", FACT_OPS.mult.tables, 91],
+  ...FACT_OPS.div.tables.map((t) => ["div", [t], 13]),
+  ["div", FACT_OPS.div.tables, 156],
 ];
 for (const [op, choice, expected] of sets) {
   const facts = factsIn(op, choice),
@@ -65,6 +67,8 @@ for (const [op, choice, expected] of sets) {
     if (op === "sub" && (answer < 0 || fact.b > 10 || answer > 10 || fact.a > +choice))
       fail(`${name}: ${text} isn't in it`, text);
     if (op === "mult" && !(choice.includes(fact.a) || choice.includes(fact.b)))
+      fail(`${name}: ${text} isn't in it`, text);
+    if (op === "div" && !(choice.includes(fact.b) && Number.isInteger(answer) && answer <= 12))
       fail(`${name}: ${text} isn't in it`, text);
     // both orders of a multiplication fact, many deals each
     const shown = op === "mult" ? [fact, { ...fact, a: fact.b, b: fact.a }] : [fact];
@@ -97,7 +101,8 @@ for (const [op, choice, expected] of sets) {
         fail(`${name}: help doesn't give the answer`, `${factText(f)}: ${help.text}`);
       // (times 0 can't hide it: the rule is that the answer is 0)
       if (
-        !(op === "mult" && answer === 0) &&
+        !((op === "mult" || op === "div") && answer === 0) &&
+        !(op === "div" && f.a === f.b) &&
         (new RegExp(`= ${answer}\\b(?!\\d)`).test(hint) || hint.endsWith(` ${answer}.`))
       )
         fail(`${name}: the hint gives the answer away`, `${factText(f)}: ${hint}`);

@@ -2,9 +2,11 @@
    facts/practice.html and by tools/facts.mjs. Needs util.js (R, pick, shuffle, range); the pictures in factHelp need
    pictures.js (cellsOf), blocks.js (tenFrames), multiply.js (arrayFig), and shapes.js (splitFig).
 
-   FACT_OPS                          the operations: their sign, name, and sets (addition and subtraction) or tables (multiplication)
+   FACT_OPS                          the operations: their sign, name, and sets (addition and subtraction) or tables
+                                     (multiplication and division)
    factKey(fact), factAnswer(fact), factText(fact)   "7×8", 56, and "7 × 8"
-   factsIn(op, pick)                 every fact in a set ('10' or '20'), or in a list of times tables: [{op, a, b}]
+   factsIn(op, pick)                 every fact in a set ('10' or '20'), or in a list of tables: [{op, a, b}]
+                                     (a division fact is a ÷ b: 56 ÷ 7 is {a: 56, b: 7})
    factChoices(fact)                 4 different answers to pick from, one right: [{value, why}] (why is null for the right one)
    factHelp(fact)                    how to work it out: {text, fig} (fig is svg markup, or '')
    factHint(fact)                    the same strategy as a hint, without the answer
@@ -29,15 +31,18 @@ const FACT_OPS = {
     ],
   },
   mult: { sign: "×", name: "Multiplication", tables: range(13) },
+  /* dividing by 1 to 12: no dividing by 0 */
+  div: { sign: "÷", name: "Division", tables: range(12).map((i) => i + 1) },
 };
 /* a fact's key: "7+8", "15−7", "7×8" (a multiplication fact and its turnaround share one key, smaller factor first) */
 const factKey = ({ op, a, b }) =>
   op === "mult" ? `${Math.min(a, b)}×${Math.max(a, b)}` : `${a}${FACT_OPS[op].sign}${b}`;
-const factAnswer = ({ op, a, b }) => (op === "add" ? a + b : op === "sub" ? a - b : a * b);
+const factAnswer = ({ op, a, b }) => (op === "add" ? a + b : op === "sub" ? a - b : op === "mult" ? a * b : a / b);
 const factText = ({ op, a, b }) => `${a} ${FACT_OPS[op].sign} ${b}`;
 /* Every fact in a set. Addition: within 10, both numbers adding to 10 or less; within 20, any two numbers 0 to 10.
    Subtraction: the same facts turned around (from 10 or less; from 20 or less, taking away 0 to 10 and leaving 0 to 10).
-   Multiplication: each table t in the list times 0 to 12, each fact once (3 × 7 and 7 × 3 are one fact). */
+   Multiplication: each table t in the list times 0 to 12, each fact once (3 × 7 and 7 × 3 are one fact).
+   Division: the same facts turned around, divided by each table t: 0 ÷ t to (12 × t) ÷ t. */
 function factsIn(op, choice) {
   const facts = [];
   if (op === "add")
@@ -64,6 +69,7 @@ function factsIn(op, choice) {
       }),
     );
   }
+  if (op === "div") choice.forEach((t) => range(13).forEach((n) => facts.push({ op, a: t * n, b: t })));
   return facts;
 }
 
@@ -109,6 +115,15 @@ function factChoices(fact) {
       [answer + near, "Skip-count carefully."],
     );
   }
+  if (op === "div")
+    mistakes.push(
+      ...(answer === 0 ? [[b, `0 shared into ${b} groups leaves 0 in each.`]] : []),
+      [answer + near, `${b} × ${answer + near} = ${b * (answer + near)}, not ${a}.`],
+      [b, `${b} is the number you divide by. ${b} times what is ${a}?`],
+      [a - b, `That’s ${a} − ${b}. This one is divide.`],
+      [answer - near, `${b} × ${answer - near} = ${b * (answer - near)}, not ${a}.`],
+      [a + b, `That’s ${a} + ${b}. This one is divide.`],
+    );
   const picked = [];
   mistakes.forEach(([value, why]) => {
     if (picked.length < 3 && value >= 0 && value !== answer && !picked.some((p) => p.value === value))
@@ -170,6 +185,19 @@ function factHelp(fact) {
         fig,
       };
     return { text: `Think addition: ${b} + ${answer} = ${a}, so ${a} − ${b} = ${answer}.`, fig };
+  }
+  if (op === "div") {
+    /* a split into b equal rows: an array when it's small enough to count, or a rectangle with 10 broken off */
+    const fig =
+      answer >= 1 && answer <= 10 && b <= 10
+        ? arrayFig(b, answer, { label: `An array: ${a} in ${b} equal rows of ${answer}` })
+        : answer > 10
+          ? splitFig(b, answer, 10, { grid: false, products: true })
+          : "";
+    if (a === 0) return { text: `0 shared into ${b} groups leaves 0 in each: 0 ÷ ${b} = 0.`, fig };
+    if (b === 1) return { text: `Dividing by 1 leaves the number: ${a} ÷ 1 = ${a}.`, fig };
+    if (a === b) return { text: `A number divided by itself is 1: ${a} ÷ ${b} = 1.`, fig };
+    return { text: `Think multiplication: ${b} × ? = ${a}. ${b} × ${answer} = ${a}, so ${a} ÷ ${b} = ${answer}.`, fig };
   }
   /* multiplication: n is the other factor of a table with a rule; a picture when the array is small enough to count */
   const array = a >= 1 && b >= 1 && a <= 10 && b <= 10 ? arrayFig(a, b) : "",
@@ -245,6 +273,12 @@ function factHint(fact) {
     if (answer === 0) return "A number take away itself leaves nothing.";
     if (a > 10 && b > a - 10) return `Think addition: ${b} + ? = ${a}. Jump from ${b} to 10 first.`;
     return `Think addition: ${b} + ? = ${a}.`;
+  }
+  if (op === "div") {
+    if (a === 0) return "0 shared into any number of groups leaves 0 in each.";
+    if (b === 1) return "Dividing by 1 leaves the number.";
+    if (a === b) return "A number divided by itself is 1.";
+    return `Think multiplication: ${b} × ? = ${a}.`;
   }
   const has = (t) => a === t || b === t,
     other = (t) => (a === t ? b : a),

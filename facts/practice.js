@@ -1,10 +1,12 @@
 /* Quick Pick (facts/practice.html): pick which facts to practice, then answer them for as long as you like, tapping one of
-   four answers. The operation comes from the link: practice.html#add, #sub, or #mult. Facts, choices, help, and which fact
+   four answers. The operation comes from the link: practice.html#add, #sub, #mult, or #div. Facts, choices, help, and which fact
    comes next are in facts.js; this file draws the screens and saves progress on this device. */
 const SAVE_KEY = "facts-save";
-/* the operation: 'add', 'sub', or 'mult' */
-const op = ["add", "sub", "mult"].includes(location.hash.slice(1)) ? location.hash.slice(1) : "add";
-/* Saved progress for every operation: {add: {set, memory, best}, sub: {…}, mult: {tables, memory, best}} */
+/* the operation: 'add', 'sub', 'mult', or 'div' */
+const op = ["add", "sub", "mult", "div"].includes(location.hash.slice(1)) ? location.hash.slice(1) : "add";
+/* does this operation practice tables (multiplication and division), not sets? */
+const byTables = !!FACT_OPS[op].tables;
+/* Saved progress for every operation: {add: {set, memory, best}, sub: {…}, mult: {tables, memory, best}, div: {…}} */
 let save = {};
 try {
   save = JSON.parse(localStorage.getItem(SAVE_KEY) || "{}") || {};
@@ -17,10 +19,10 @@ const mine = (save[op] = save[op] || {}),
   };
 mine.memory = mine.memory || {};
 mine.best = mine.best || 0;
-if (op === "mult") mine.tables = mine.tables || [2, 3, 4, 5];
+if (byTables) mine.tables = mine.tables || [2, 3, 4, 5];
 else mine.set = mine.set || "20";
 /* the facts picked to practice */
-const chosenFacts = () => factsIn(op, op === "mult" ? mine.tables : mine.set);
+const chosenFacts = () => factsIn(op, byTables ? mine.tables : mine.set);
 /* the fact tapped on the map (null before any tap) */
 let mapPick = null;
 
@@ -29,16 +31,16 @@ function drawSetup() {
   const opInfo = FACT_OPS[op];
   document.title = `${opInfo.name} · Quick Pick · Math Facts`;
   $("opTitle").innerHTML = `${opInfo.name} <span>facts</span>`;
-  /* addition and subtraction pick a set; multiplication ticks the tables */
-  $("sets").innerHTML =
-    op === "mult"
-      ? `<div class="seg tables" role="group" aria-label="Times tables">${opInfo.tables
-          .map((t) => `<button type="button" data-t="${t}" aria-label="Times ${t}">× ${t}</button>`)
-          .join(
-            "",
-          )}</div><div class="row"><button type="button" class="link-btn" id="allTables">All tables</button><button type="button" class="link-btn" id="noTables">Clear</button></div>`
-      : seg("Facts", opInfo.sets);
-  if (op === "mult") {
+  /* addition and subtraction pick a set; multiplication and division tick the tables */
+  const tableWord = op === "mult" ? "Times" : "Divided by";
+  $("sets").innerHTML = byTables
+    ? `<div class="seg tables" role="group" aria-label="${op === "mult" ? "Times tables" : "Dividing by"}">${opInfo.tables
+        .map((t) => `<button type="button" data-t="${t}" aria-label="${tableWord} ${t}">${opInfo.sign} ${t}</button>`)
+        .join(
+          "",
+        )}</div><div class="row"><button type="button" class="link-btn" id="allTables">All tables</button><button type="button" class="link-btn" id="noTables">Clear</button></div>`
+    : seg("Facts", opInfo.sets);
+  if (byTables) {
     $("sets")
       .querySelectorAll("[data-t]")
       .forEach((b) => b.setAttribute("aria-pressed", mine.tables.includes(+b.dataset.t)));
@@ -73,30 +75,38 @@ $("sets").addEventListener("click", (e) => {
 });
 
 /* ---------- the fact map ---------- */
-/* The map's squares: a table of every fact for the operation. Addition: rows a, columns b. Subtraction: rows the number
-   taken away, columns the answer. Multiplication: rows and columns 0 to 12. Each is [row, col, fact]. */
+/* The map's rows and columns: the numbers along its left side and top. Addition: a down the side, b along the top.
+   Subtraction: the number taken away, and the answer. Multiplication: 0 to 12 both ways. Division: the number divided by
+   (1 to 12), and the answer. */
+const MAP_SIDES = {
+  add: [range(11), range(11)],
+  sub: [range(11), range(11)],
+  mult: [range(13), range(13)],
+  div: [range(12).map((i) => i + 1), range(13)],
+};
+/* the fact in the map's square for row number r and column number c */
+const squareFact = (r, c) =>
+  op === "sub" ? { op, a: r + c, b: r } : op === "div" ? { op, a: r * c, b: r } : { op, a: r, b: c };
+/* every square of the map: [row, col, fact], where row and col count from 0 */
 function mapFacts() {
-  const size = op === "mult" ? 13 : 11;
-  return range(size).flatMap((row) =>
-    range(size).map((col) => [row, col, op === "sub" ? { op, a: row + col, b: row } : { op, a: row, b: col }]),
-  );
+  const [rowNums, colNums] = MAP_SIDES[op];
+  return rowNums.flatMap((r, row) => colNums.map((c, col) => [row, col, squareFact(r, c)]));
 }
 /* The fact map (svg): each square colored by how well its fact is known, dim when it isn't in the facts picked, and
    outlined when tapped. The top row and left column are the numbers. */
 function factMap() {
-  const size = op === "mult" ? 13 : 11,
-    cellSize = op === "mult" ? 28 : 32,
+  const [rowNums, colNums] = MAP_SIDES[op],
+    cellSize = byTables ? 28 : 32,
     inSet = new Set(chosenFacts().map(factKey)),
-    corner = { add: "+", sub: "−", mult: "×" }[op],
+    corner = FACT_OPS[op].sign,
     cellX = (col) => 2 + (col + 1) * cellSize,
     cellY = (row) => 2 + (row + 1) * cellSize;
   /* a square at row, col with its text (row and col −1 are the headers) */
   const square = (row, col, cls, text, attrs = "") =>
     `<g class="${cls}"${attrs}><rect x="${cellX(col)}" y="${cellY(row)}" width="${cellSize}" height="${cellSize}"/><text class="lbl s" x="${cellX(col) + cellSize / 2}" y="${cellY(row) + cellSize / 2}">${text}</text></g>`;
   let markup = square(-1, -1, "fh", corner);
-  range(size).forEach((i) => {
-    markup += square(-1, i, "fh", i) + square(i, -1, "fh", i);
-  });
+  colNums.forEach((c, col) => (markup += square(-1, col, "fh", c)));
+  rowNums.forEach((r, row) => (markup += square(row, -1, "fh", r)));
   mapFacts().forEach(([row, col, fact]) => {
     const key = factKey(fact),
       status = factStatus(mine.memory, key),
@@ -105,15 +115,16 @@ function factMap() {
       row,
       col,
       `fm ${status}${inSet.has(key) ? "" : " out"}${picked ? " cur" : ""}`,
-      op === "sub" ? fact.a : factAnswer(fact),
+      /* subtraction and division show the number they start from; the others their answer */
+      op === "sub" || op === "div" ? fact.a : factAnswer(fact),
       ` data-a="${fact.a}" data-b="${fact.b}" role="button" tabindex="0" aria-label="${factText(fact)}, ${status}"`,
     );
   });
   return svgWrap(
-    (size + 1) * cellSize + 4,
-    (size + 1) * cellSize + 4,
+    (colNums.length + 1) * cellSize + 4,
+    (rowNums.length + 1) * cellSize + 4,
     markup,
-    `Fact map: ${size} by ${size} ${FACT_OPS[op].name.toLowerCase()} facts, colored by how well each is known`,
+    `Fact map: ${rowNums.length} by ${colNums.length} ${FACT_OPS[op].name.toLowerCase()} facts, colored by how well each is known`,
   );
 }
 /* the words for each color on the map */

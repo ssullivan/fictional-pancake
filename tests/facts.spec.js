@@ -5,12 +5,12 @@ const { test, expect } = require("./fixtures");
 
 // the answer to a fact as the page writes it: "7 + 8 = ?" → 15
 function answerOf(text) {
-  const [, a, sign, b] = text.match(/(\d+) ([+−×]) (\d+)/);
-  return sign === "+" ? +a + +b : sign === "−" ? a - b : a * b;
+  const [, a, sign, b] = text.match(/(\d+) ([+−×÷]) (\d+)/);
+  return sign === "+" ? +a + +b : sign === "−" ? a - b : sign === "×" ? a * b : a / b;
 }
 // the same fact either way round: "8 × 7" and "7 × 8" are one fact
 const factOf = (text) => {
-  const [, a, sign, b] = text.match(/(\d+) ([+−×]) (\d+)/);
+  const [, a, sign, b] = text.match(/(\d+) ([+−×÷]) (\d+)/);
   return sign === "×" ? `${Math.min(a, b)}×${Math.max(a, b)}` : `${a}${sign}${b}`;
 };
 // a fresh start on a page, with no saved progress
@@ -31,12 +31,13 @@ test("the main page and the hub link to every operation", async ({ page }) => {
     ["Addition", "add"],
     ["Subtraction", "sub"],
     ["Multiplication", "mult"],
+    ["Division", "div"],
   ])
     await expect(page.getByRole("link", { name: new RegExp(name) })).toHaveAttribute("href", `practice.html#${hash}`);
   await noSideways(page);
 });
 
-for (const op of ["add", "sub", "mult"]) {
+for (const op of ["add", "sub", "mult", "div"]) {
   test(`Quick Pick ${op}: 30 right answers in a row`, async ({ page, hasTouch }) => {
     const press = (loc) => (hasTouch ? loc.tap() : loc.click());
     await fresh(page, `facts/practice.html#${op}`);
@@ -153,5 +154,21 @@ test("the fact map shows a fact, practices it, and colors what's known", async (
   // 7 × 8 and 8 × 7 are one fact, both known
   await expect(page.locator('.fm[data-a="7"][data-b="8"]')).toHaveClass(/known/);
   await expect(page.locator('.fm[data-a="8"][data-b="7"]')).toHaveClass(/known/);
+  await noSideways(page);
+});
+
+test("division: tables from 1 to 12, and a map of every fact", async ({ page, hasTouch }) => {
+  const press = (loc) => (hasTouch ? loc.tap() : loc.click());
+  await fresh(page, "facts/practice.html#div");
+  await expect(page.locator("h1")).toContainText("Division");
+  await expect(page.getByRole("button", { name: "Divided by 0" })).toHaveCount(0);
+  await press(page.getByRole("button", { name: "Clear" }));
+  await press(page.getByRole("button", { name: "Divided by 7" }));
+  await expect(page.locator("#known")).toHaveText("You know 0 of these 13 facts.");
+  await expect(page.locator(".fm")).toHaveCount(156);
+  await expect(page.locator(".fm:not(.out)")).toHaveCount(13);
+  await press(page.locator('.fm[data-a="56"][data-b="7"]'));
+  await expect(page.locator("#mapInfo")).toContainText("56 ÷ 7 = 8");
+  await expect(page.locator("#mapInfo")).toContainText("Think multiplication: 7 × ? = 56.");
   await noSideways(page);
 });
