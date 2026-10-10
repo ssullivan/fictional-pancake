@@ -1,17 +1,17 @@
 /* Data graphs for K–5 pages: line plots, picture graphs, and bar graphs. Styles are in graphs.css.
    Needs util.js, figures.js (svgWrap), and pictures.js.
 
-   lineplot(counts, lo, hi, {d, …})  a line plot: an X for each measurement, in whole numbers or fractions (svg)
+   lineplot(counts, lo, hi, {d, mixed, …})   a line plot: an X for each measurement, in whole numbers or fractions (svg)
    PIC, picGraph(rows, {scale, …})   picture graphs, where each picture shows 1 or a scale like 2, 5, or 10 (half pictures too) (svg)
    barGraph(rows, {max, scale, …})   bar graphs with a line every 1, 2, 5, or 10; bars to read, set by tapping, or compare (svg) */
 /* A line plot: counts {k: how many} from lo to hi, one X for each, at k/d (d 1: whole numbers; otherwise every tick is a fraction).
    mark: highlight k. tap: ticks can be tapped (data-v = k). diff: [a, b] draws an arrow from a to b under the line, labelled with b − a.
-   unit: written under the line. u: pixels between ticks. */
+   unit: written under the line. u: pixels between ticks. mixed: ticks past 1 are written as mixed numbers (4 1/2, not 9/2). */
 function lineplot(
   counts,
   lo,
   hi,
-  { d = 1, mark = null, tap = false, diff = null, unit = "inches", u = 56, label } = {},
+  { d = 1, mark = null, tap = false, diff = null, unit = "inches", u = 56, mixed = false, label } = {},
 ) {
   /* the line is low enough for the tallest stack of Xs (room for at least 3), 26 pixels each */
   const tallest = Math.max(3, ...Object.values(counts)),
@@ -19,7 +19,17 @@ function lineplot(
     lineY = 16 + tallest * 26,
     xOf = (v) => left + (v - lo) * u,
     isFraction = d > 1,
-    say = (k) => (isFraction ? `${k}/${d}` : k);
+    /* k/d in words for the label: "9/2", or when mixed "4 1/2" (and a whole number as one: "4") */
+    say = (k) =>
+      !isFraction
+        ? k
+        : !mixed
+          ? `${k}/${d}`
+          : k % d === 0
+            ? k / d
+            : k > d
+              ? `${Math.floor(k / d)} ${k % d}/${d}`
+              : `${k}/${d}`;
   /* belowY: where the next thing under the line goes (fractions under the ticks take more room) */
   let markup = "",
     belowY = lineY + (isFraction ? 60 : 44);
@@ -33,7 +43,11 @@ function lineplot(
     markup +=
       `<line class="tick" x1="${xOf(v)}" y1="${lineY - 6}" x2="${xOf(v)}" y2="${lineY + 6}"/>` +
       (isFraction && v % d
-        ? frT(xOf(v), lineY + 28, v, d, marked ? "cy" : "")
+        ? mixed && v > d
+          ? /* the whole number, then the fraction left over, side by side */
+            `<text class="lbl s${marked ? " cy" : ""}" x="${xOf(v) - 9}" y="${lineY + 28}">${Math.floor(v / d)}</text>` +
+            frT(xOf(v) + 8, lineY + 28, v % d, d, marked ? "cy" : "")
+          : frT(xOf(v), lineY + 28, v, d, marked ? "cy" : "")
         : `<text class="lbl${marked ? " cy" : ""}" x="${xOf(v)}" y="${lineY + 22}">${v / d}</text>`);
     range(counts[v] || 0).forEach((j) => {
       markup += `<text class="xm${marked ? " hi" : ""}" x="${xOf(v)}" y="${lineY - 16 - j * 26}">X</text>`;

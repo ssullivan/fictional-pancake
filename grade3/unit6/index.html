@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Orchard Market</title>
+<title>Science Fair</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=JetBrains+Mono:wght@500;700&display=swap">
@@ -12,14 +12,13 @@
 <link rel="stylesheet" href="../../shared/pictures.css?v=7f680159">
 <link rel="stylesheet" href="../../shared/numlines.css?v=c057db89">
 <link rel="stylesheet" href="../../shared/graphs.css?v=f7818432">
-<link rel="stylesheet" href="../../shared/multiply.css?v=2a49b04d">
+<link rel="stylesheet" href="../../shared/measure.css?v=d386c645">
+<link rel="stylesheet" href="figs.css?v=b9f40ece">
 <style>
-.fig svg+svg{margin-top:10px}
-.eqn{display:block;margin-top:10px;font:700 28px var(--mono);color:var(--gold)}
-/* the Harvest Festival: a basket of 10 apples, one added for each right answer */
-.power{display:flex;align-items:center;gap:14px;background:rgba(255,123,123,.08);border:1.5px solid rgba(255,123,123,.45);border-radius:14px;padding:10px 14px}
+/* Grand Prize: a trophy with 10 stars, one lit for each right answer */
+.power{display:flex;align-items:center;gap:14px;background:rgba(255,201,60,.08);border:1.5px solid rgba(255,201,60,.45);border-radius:14px;padding:10px 14px}
 .power svg{width:72px;height:72px;flex:none}
-.power b{font:800 20px var(--display);color:#ff9a9a}
+.power b{font:800 20px var(--display);color:var(--gold)}
 .power p{margin:4px 0 0;font:700 14px var(--mono);color:var(--dim)}
 .power.hit svg{animation:bob .5s}
 @keyframes bob{50%{transform:translateY(-4px)}}
@@ -32,9 +31,9 @@
   <section id="home">
     <a class="back" href="../">← Grade 3</a>
     <header class="hero">
-      <p class="eyebrow">Illustrative Mathematics K–5 · Grade 3 · Unit 1 · Introducing Multiplication</p>
-      <h1>Orchard <span>Market</span></h1>
-      <p class="lede">Welcome to the orchard! Read the graphs in the barn and the silo, count baskets of fruit, crack the equations in the shed, count trees planted in rows, and turn arrays around. Then fill the basket at the Harvest Festival. Each station matches lessons from class.</p>
+      <p class="eyebrow">Illustrative Mathematics K–5 · Grade 3 · Unit 6 · Measuring Length, Time, Liquid Volume, and Weight</p>
+      <h1>Science <span>Fair</span></h1>
+      <p class="lede">Welcome to the Science Fair, where everything gets measured! Measure to the half and fourth inch in the Measuring Lab, read line plots in the Data Corner, weigh things at the Weigh Station, pour liters at Water Works, keep time at the Clock Tower, and solve stories in the Problem Lab. Then go for the Grand Prize. Each station matches lessons from class.</p>
       <div class="stats">
         <span class="pill">Points <b id="hp">0</b></span>
         <span class="pill">Stars <b id="hs">0</b>/<span id="hsMax">21</span></span>
@@ -43,12 +42,12 @@
     <div class="zones" id="zones"></div>
     <section class="grownups">
       <h2>For grown-ups</h2>
-      <div><h4>How a round works</h4><p>Each station deals 8 fresh problems (the Harvest Festival deals 10). A right answer on the first try earns 10 points. After a wrong answer, the game names the likely mistake and gives one more try for 5 points. At the Harvest Festival, each right answer adds an apple to the basket.</p></div>
-      <div><h4>The "Show me" hint</h4><p>Hints use the pictures from class: scaled picture and bar graphs, circles of equal groups, tape diagrams, hops on a number line, and arrays. A used hint caps that problem at 5 points.</p></div>
-      <div><h4>Mistakes it catches</h4><p>Counting pictures instead of what they show, forgetting a half picture, reading a bar that ends between lines as the line below, adding instead of multiplying or subtracting, counting the groups instead of the things in them, writing 3 × 6 for 6 groups of 3, and thinking that turning the factors around changes the product.</p></div>
-      <div><h4>Numbers</h4><p>Graphs use a scale of 2, 5, or 10. Factors go up to 10, and every number stays within 100. As in class, 4 × 3 means 4 groups of 3, and in an array, 4 rows of 3.</p></div>
+      <div><h4>How a round works</h4><p>Each station deals 8 fresh problems (the Grand Prize deals 10). A right answer on the first try earns 10 points. After a wrong answer, the game names the likely mistake and gives one more try for 5 points. In the Grand Prize round, each right answer lights a star on the trophy.</p></div>
+      <div><h4>The "Show me" hint</h4><p>Hints use the pictures from class: rulers marked in halves and fourths of an inch, line plots, scales, containers marked in liters, clocks with the minutes around the edge, number lines of times, and tape diagrams. A used hint caps that problem at 5 points.</p></div>
+      <div><h4>Mistakes it catches</h4><p>Reading only the whole inches, reading the half-inch mark as a fourth, counting every mark as an inch, counting the shorter things instead of the longer ones, reading the small marks on a scale as whole steps, reading the empty part of a container, counting by 5s past the minute hand, reading the hour too soon, subtracting times as if an hour were 100 minutes, counting only part of a time that crosses the hour, using the wrong operation, and stopping after one step of a two-step story.</p></div>
+      <div><h4>Numbers</h4><p>Lengths are to the nearest half or fourth of an inch. Weights are in grams (up to 1,000) or kilograms, liquid volumes in liters, and times to the minute, with elapsed times under an hour that never cross 12 o’clock. Stories use one unit at a time, with friendly numbers.</p></div>
       <div><h4>Learn it first</h4><p>Each station matches a chapter of the <a href="learn.html">Learn page</a> for this unit, which walks through the ideas step by step.</p></div>
-      <div><h4>Not covered</h4><p>Game Night Seating Plan (Lesson 21) is an optional lesson, so there’s no station for it.</p></div>
+      <div><h4>Not covered</h4><p>Design a Carnival Game (Lesson 16) is an optional lesson, so there’s no station for it.</p></div>
     </section>
   </section>
 
@@ -88,32 +87,33 @@
 <script src="../../shared/pictures.js?v=f857849d"></script>
 <script src="../../shared/numlines.js?v=221aec05"></script>
 <script src="../../shared/graphs.js?v=10f5b3b7"></script>
-<script src="../../shared/multiply.js?v=3d03c2c1"></script>
+<script src="../../shared/measure.js?v=0695e308"></script>
+<script src="figs.js?v=49b31267"></script>
 <script src="../../shared/engine.js?v=4b1b2373"></script>
-<script src="stations.js?v=27cd87d1"></script>
+<script src="stations.js?v=b722e768"></script>
 <script>
-/* the Harvest Festival: one apple goes in the basket for each right answer */
-let apples=0;
-/* the basket beside a boss problem (hidden at the other stations); hit: the last answer was right */
+/* Grand Prize: one star on the trophy lights for each right answer */
+let starsWon=0;
+/* the trophy beside a boss problem (hidden at the other stations); hit: the last answer was right */
 function drawPower(state,hit){
   const el=$('power');el.hidden=state.z.id!=='boss';if(el.hidden)return;
-  el.innerHTML=`<svg viewBox="0 0 64 64" role="img" aria-label="${apples} of 10 apples in the basket">${basket(apples)}</svg><div><b>${apples} of 10 apples</b><p>${apples===10?'The basket is full. Happy harvest!':hit?'Right! Another apple goes in.':'Answer right to add an apple.'}</p></div>`;
+  el.innerHTML=`<svg viewBox="0 0 64 64" role="img" aria-label="${starsWon} of 10 stars on the trophy">${trophy(starsWon)}</svg><div><b>${starsWon} of 10 stars</b><p>${starsWon===10?'All 10 stars! You win the Grand Prize!':hit?'Right! Another star lights up.':'Answer right to light a star.'}</p></div>`;
   el.classList.toggle('hit',!!hit);
 }
 Game.init({
-  saveKey:'g3u1-save',
+  saveKey:'g3u6-save',
   zones:ZONES,icons:ICON,
   words:{
     right:'Nailed it!',
     miss:'Not quite. Check it with the picture.',
-    titles:['Keep practicing','Good start','Orchard pro','Harvest champion!'],
-    next:'Try the next station, or head to the Harvest Festival.',
+    titles:['Keep practicing','Good start','Lab pro','Science Fair champion!'],
+    next:'Try the next station, or go for the Grand Prize.',
     stuck:'Use “Show me a hint” when you’re stuck. It shows the picture from class.',
-    tap:'Tap your answer in the graph.'
+    tap:'Tap your answer on the ruler.'
   },
-  /* the basket empties at the start of a round */
-  onQuestion:state=>{if(state.i===0)apples=0;drawPower(state,false);},
-  onAnswer:(state,ok)=>{if(ok)apples++;drawPower(state,ok);}
+  /* the trophy starts dark at the start of a round */
+  onQuestion:state=>{if(state.i===0)starsWon=0;drawPower(state,false);},
+  onAnswer:(state,ok)=>{if(ok)starsWon++;drawPower(state,ok);}
 });
 </script>
 </body>

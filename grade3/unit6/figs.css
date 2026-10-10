@@ -1,0 +1,15 @@
+/* Styles for figs.js. Rulers (inchRuler): mrul the ruler, mtick its marks, mnum its numbers, mbar the bar measured (b blue).
+   Scales (dialFig): dial the face, dtick its marks, dnum its numbers, needle the needle (its middle is clk-c, from measure.css).
+   Containers (beakerFig): beaker the outline, btick its liter marks, water the water. */
+.mrul{fill:#f0d9a8;stroke:#c9a86a;stroke-width:1.5}
+.mtick{stroke:#0a2340;stroke-width:1.5}
+.lbl.mnum{fill:#0a2340}
+.mbar{fill:var(--gold);stroke:#fff1b8;stroke-width:2}
+.mbar.b{fill:var(--cyan);stroke:#d6f6ff}
+.dial{fill:#f3f6fb;stroke:var(--gold);stroke-width:5}
+.dtick{stroke:#0a2340;stroke-width:2}
+.lbl.dnum{fill:#0a2340;font-size:12px}
+.needle{stroke:#e0445e;stroke-width:4;stroke-linecap:round}
+.beaker{fill:rgba(170,205,255,.08);stroke:var(--chalk);stroke-width:3;stroke-linejoin:round}
+.btick{stroke:var(--chalk);stroke-width:2}
+.water{fill:rgba(127,227,255,.55)}

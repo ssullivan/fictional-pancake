@@ -334,6 +334,8 @@ const CALLS = {
     `lineplot({3: 2, 4: 1}, 2, 7, {mark: 4, tap: true, diff: [3, 6], unit: 'cm', u: 48, label: 'L'})`,
     `lineplot({5: 2, 6: 3, 9: 1}, 4, 10, {d: 4, mark: 6, diff: [5, 9]})`,
     `lineplot({2: 1}, 0, 4, {d: 2, tap: true})`,
+    `lineplot({13: 2, 18: 3, 19: 1}, 12, 20, {d: 4, mixed: true, mark: 18, diff: [13, 19]})`,
+    `lineplot({1: 1, 3: 2}, 0, 6, {d: 2, mixed: true, tap: true})`,
     ...each(
       ["{}", `{hi: 1, title: 'Weather', scale: 2, unit: '2 days'}`, `{tap: true, max: 12}`, `{tap: 'cand', scale: 5}`],
       (o) => [
