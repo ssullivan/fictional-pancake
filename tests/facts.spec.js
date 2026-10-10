@@ -203,3 +203,62 @@ for (const op of ["add", "sub", "mult", "div"])
     }
     await noSideways(page);
   });
+
+test("Type it: the number pad, delete, a wrong answer, and a real keyboard", async ({ page, hasTouch }) => {
+  const press = (loc) => (hasTouch ? loc.tap() : loc.click());
+  // tap each digit of n on the pad
+  const padType = async (n) => {
+    for (const digit of String(n)) await press(page.locator(`.pad [data-key="${digit}"]`));
+  };
+  await fresh(page, "facts/practice.html#mult");
+  await press(page.locator("#input [data-m='type']"));
+  await press(page.getByRole("button", { name: "Start" }));
+  await expect(page.locator(".pad button")).toHaveCount(12);
+  await expect(page.locator(".choice")).toHaveCount(0);
+  // Go with nothing typed does nothing; delete takes a digit off
+  await press(page.getByRole("button", { name: "Go" }));
+  await expect(page.locator("#feedback")).toBeEmpty();
+  await padType(98);
+  await press(page.getByRole("button", { name: "Delete" }));
+  await expect(page.locator("#typed")).toHaveText("9");
+  await press(page.getByRole("button", { name: "Delete" }));
+  await expect(page.locator("#typed")).toHaveText("?");
+  // 10 right on the pad
+  let last = "";
+  for (let i = 0; i < 10; i++) {
+    await expect(page.locator("#fact")).not.toHaveText(last, { timeout: 5000 });
+    const text = await page.locator("#fact").textContent();
+    await padType(answerOf(text));
+    await expect(page.locator("#typed")).toHaveText(String(answerOf(text)));
+    await press(page.getByRole("button", { name: "Go" }));
+    await expect(page.locator("#typed")).toHaveClass(/yes/);
+    last = text;
+  }
+  await expect(page.locator("#right")).toHaveText("10");
+  // a wrong answer says what was typed, and the keys stop working until Next
+  await expect(page.locator("#fact")).not.toHaveText(last, { timeout: 5000 });
+  const text = await page.locator("#fact").textContent(),
+    wrong = answerOf(text) + 1;
+  await padType(wrong);
+  await press(page.getByRole("button", { name: "Go" }));
+  await expect(page.locator("#typed")).toHaveClass(/no/);
+  await expect(page.locator(".fb.bad")).toContainText(`You typed ${wrong}.`);
+  await expect(page.getByRole("button", { name: "Go" })).toBeDisabled();
+  await press(page.getByRole("button", { name: "Next fact →" }));
+  // a real keyboard (on a desktop): digits, Backspace, and Enter
+  if (!hasTouch)
+    for (let i = 0; i < 5; i++) {
+      const now = await page.locator("#fact").textContent();
+      // an extra digit to delete, when the answer leaves room for one (3 digits at most)
+      const extra = answerOf(now) < 100;
+      await page.keyboard.type(`${answerOf(now)}${extra ? 7 : ""}`);
+      if (extra) await page.keyboard.press("Backspace");
+      await page.keyboard.press("Enter");
+      await expect(page.locator("#typed")).toHaveClass(/yes/);
+      await expect(page.locator("#fact")).not.toHaveText(now, { timeout: 5000 });
+    }
+  // the choice is saved
+  await page.reload();
+  await expect(page.locator("#input [data-m='type']")).toHaveAttribute("aria-pressed", "true");
+  await noSideways(page);
+});

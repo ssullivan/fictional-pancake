@@ -20,6 +20,8 @@ const mine = (save[op] = save[op] || {}),
 mine.memory = mine.memory || {};
 /* how facts are shown: 'plain' (7 + 8 = ?), 'missing' (7 + ? = 15), or 'mix' */
 mine.show = mine.show || "plain";
+/* how answers are given: 'pick' one of four, or 'type' it on the number pad (or a keyboard) */
+mine.input = mine.input || "pick";
 mine.best = mine.best || 0;
 if (byTables) mine.tables = mine.tables || [2, 3, 4, 5];
 else mine.set = mine.set || "20";
@@ -63,6 +65,11 @@ function drawSetup() {
     ["mix", "Mix them"],
   ]);
   press($("show"), mine.show);
+  $("input").innerHTML = seg("Answer by", [
+    ["pick", "Picking from 4"],
+    ["type", "Typing it"],
+  ]);
+  press($("input"), mine.input);
   const facts = chosenFacts(),
     known = facts.filter((f) => factStatus(mine.memory, factKey(f)) === "known").length;
   $("start").disabled = !facts.length;
@@ -94,6 +101,13 @@ $("show").addEventListener("click", (e) => {
   const choice = e.target.closest("[data-m]");
   if (!choice) return;
   mine.show = choice.dataset.m;
+  persist();
+  drawSetup();
+});
+$("input").addEventListener("click", (e) => {
+  const choice = e.target.closest("[data-m]");
+  if (!choice) return;
+  mine.input = choice.dataset.m;
   persist();
   drawSetup();
 });
@@ -200,7 +214,12 @@ function startPlay(focus = null) {
   $("playTitle").textContent = `${FACT_OPS[op].name} · Quick Pick`;
   nextFact();
 }
-/* deal the next fact and its four answers */
+/* the number pad for typing an answer: 1 to 9, then delete, 0, and Go */
+const PAD =
+  `<div class="typed" id="typed" aria-live="polite">?</div><div class="pad">` +
+  [1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => `<button type="button" data-key="${n}">${n}</button>`).join("") +
+  `<button type="button" data-key="del" aria-label="Delete">⌫</button><button type="button" data-key="0">0</button><button type="button" class="go" data-key="go">Go</button></div>`;
+/* deal the next fact, and its four answers or the number pad */
 function nextFact() {
   const dealt = play.picker.next(),
     /* hide a number instead of the answer when the setup says to, and the fact still has one answer */
@@ -209,10 +228,15 @@ function nextFact() {
   play.fact = fact;
   play.done = false;
   play.hinted = false;
+  play.typed = "";
   $("fact").textContent = factPrompt(fact);
-  $("choices").innerHTML = factChoices(fact)
-    .map((c) => `<button type="button" class="choice" data-v="${c.value}">${c.value}</button>`)
-    .join("");
+  $("choices").className = mine.input === "type" ? "typing" : "choices fchoices";
+  $("choices").innerHTML =
+    mine.input === "type"
+      ? PAD
+      : factChoices(fact)
+          .map((c) => `<button type="button" class="choice" data-v="${c.value}">${c.value}</button>`)
+          .join("");
   $("hint").hidden = true;
   $("hintBtn").disabled = false;
   $("feedback").innerHTML = "";
@@ -243,6 +267,13 @@ function answer(value) {
     play.missed.set(factKey(fact), fact);
   }
   persist();
+  /* typed: the answer box turns green or red; picked: the right choice turns green, a wrong pick red */
+  if (mine.input === "type") {
+    $("typed").classList.add(ok ? "yes" : "no");
+    $("choices")
+      .querySelectorAll("[data-key]")
+      .forEach((b) => (b.disabled = true));
+  }
   $("choices")
     .querySelectorAll(".choice")
     .forEach((b) => {
@@ -258,7 +289,9 @@ function answer(value) {
     play.timer = setTimeout(nextFact, 700);
   } else {
     $("feedback").innerHTML =
-      `<div class="fb bad"><h4>${factFull(fact)}</h4><p>${help.text}</p>` +
+      `<div class="fb bad"><h4>${factFull(fact)}</h4>` +
+      (mine.input === "type" ? `<p>You typed ${value}.</p>` : "") +
+      `<p>${help.text}</p>` +
       (help.fig ? `<div class="fig">${help.fig}</div>` : "") +
       `<p>It’ll come back soon.</p><button type="button" class="btn" id="nextBtn">Next fact →</button></div>`;
     $("nextBtn").onclick = nextFact;
@@ -266,8 +299,32 @@ function answer(value) {
   }
 }
 $("choices").addEventListener("click", (e) => {
-  const b = e.target.closest(".choice");
+  const b = e.target.closest(".choice"),
+    key = e.target.closest("[data-key]");
   if (b && !b.disabled) answer(+b.dataset.v);
+  if (key && !key.disabled) typeKey(key.dataset.key);
+});
+/* a key on the number pad (or keyboard): a digit (at most 3), 'del', or 'go' to check a typed answer */
+function typeKey(key) {
+  if (!play || play.done || mine.input !== "type") return;
+  if (key === "go") {
+    if (play.typed) answer(+play.typed);
+    return;
+  }
+  if (key === "del") play.typed = play.typed.slice(0, -1);
+  else if (play.typed.length < 3) play.typed = play.typed === "0" ? key : play.typed + key;
+  $("typed").textContent = play.typed || "?";
+}
+/* a keyboard types too: digits, Backspace, and Enter (only while a fact is waiting for its answer) */
+document.addEventListener("keydown", (e) => {
+  if ($("play").hidden || !play || play.done || mine.input !== "type") return;
+  if (/^[0-9]$/.test(e.key)) typeKey(e.key);
+  else if (e.key === "Backspace") typeKey("del");
+  else if (e.key === "Enter") {
+    e.preventDefault();
+    typeKey("go");
+  } else return;
+  e.preventDefault();
 });
 $("hintBtn").onclick = () => {
   const help = factHelp(play.fact);

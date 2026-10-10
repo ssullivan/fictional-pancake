@@ -4,6 +4,15 @@
 .fact{font:800 clamp(44px,12vw,72px)/1 var(--display);margin:4px 0;text-align:center;letter-spacing:.01em}
 .fchoices{grid-template-columns:1fr 1fr}
 .fchoices .choice{font:800 clamp(28px,7vw,40px) var(--display);padding:18px 10px}
+/* typing an answer: what's typed so far (yes or no once checked), and the number pad, 3 keys across, big for a finger */
+.typed{font:800 clamp(36px,10vw,56px)/1 var(--display);text-align:center;padding:12px;border:2px solid rgba(170,205,255,.4);border-radius:14px;background:#0a2340;min-height:1.4em}
+.typed.yes{border-color:var(--good);background:rgba(95,224,168,.15)}
+.typed.no{border-color:var(--bad)}
+.pad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px;max-width:420px;margin-inline:auto}
+.pad button{background:#0a2340;border:2px solid rgba(170,205,255,.4);border-radius:12px;padding:14px 0;font:800 26px var(--display)}
+.pad button:hover:not(:disabled){border-color:var(--gold)}
+.pad button.go{background:var(--gold);color:#1a1300;border-color:var(--gold)}
+.pad button:disabled{opacity:.5}
 /* the setup screen: space between its cards, section headings, notes, the row with Start, and the table toggles */
 #setup .card + .card{margin-top:16px}
 h2.fset{font:800 21px var(--display);margin:0}
