@@ -1,6 +1,6 @@
 /* Tile Town (Grade 3 Unit 2): the problem generators, station list, and icons. Loaded by index.html and by tools/fuzz.mjs.
-   Shapes of unit squares, tiled rectangles, rectangles cut in two, L-shaped figures, and rulers come from figs.js; rectangles
-   with their side lengths (rectFig) from shared/shapes.js; mcOf and miscOf from shared/util.js.
+   Shapes of unit squares, tiled rectangles, L-shaped figures, and rulers come from figs.js; rectangles with their side lengths
+   (rectFig) and rectangles cut in two (splitFig) from shared/shapes.js; mcOf and miscOf from shared/util.js.
    Each generator deals one of a few kinds of problem (variant), each with a comment saying what it asks. */
 const KIDS = ["Mai", "Diego", "Lin", "Han", "Priya", "Kiran", "Elena", "Jada", "Noah", "Clare", "Andre", "Tyler"];
 /* n and the word for it: "1 tile", "3 tiles" (plural: the word for more than one) */

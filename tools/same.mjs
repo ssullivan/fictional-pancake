@@ -422,6 +422,11 @@ const CALLS = {
     `rectFig(12, 8, {unit: 'm', ask: 'width'})`,
     `rectFig(20, 3, {unit: 'cm', ask: 'length', label: 'L'})`,
     `rectFig(5, 5, {grid: false})`,
+    // whole (a cut of 0 or every column), cut with the grid and sides, products, a side asked, and a long one without a grid
+    ...each([0, 3, 7], (cut) => [`splitFig(4, 7, ${cut})`, `splitFig(4, 7, ${cut}, {products: true, grid: false})`]),
+    `splitFig(6, 8, 5, {ask: 'right'})`,
+    `splitFig(9, 7, 5, {ask: 'left', sides: false, label: 'L'})`,
+    `splitFig(4, 21, 10, {grid: false, products: true})`,
   ],
   measure: [
     "hm(3, 5)",

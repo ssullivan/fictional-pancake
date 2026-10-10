@@ -4,11 +4,10 @@
    CELL                                    pixels on a side of one unit square, when there's room
    cellsFig(shapes, {size, letters, on, tap, label})   shapes made of unit squares, side by side and lettered (svg)
    tilesLaid(rows, cols, how), tilingFig(rows, cols, {how, k, label})   square tiles laid on a rectangle, fairly or not (svg)
-   splitFig(rows, cols, cut, {grid, sides, products, ask, label})   a rectangle cut into two parts in two colors (svg)
    lCells(wide, tall, cutWide, cutTall), lFig(wide, tall, cutWide, cutTall, {…})   an L-shaped figure: a rectangle with a corner
                                            cut away, with its side lengths and a cut into two rectangles (svg)
    rulerRect(length, width, unit, {read})  a rectangle with a ruler along its top and left sides (svg)
-   Rectangles with their side lengths (rectFig) are in shared/shapes.js. */
+   Rectangles with their side lengths (rectFig) and rectangles cut in two (splitFig) are in shared/shapes.js. */
 const CELL = 30;
 
 /* ---------- shapes made of unit squares ---------- */
@@ -135,56 +134,6 @@ function tilingFig(rows, cols, { how = "fair", k = rows, label } = {}) {
     top + rows * size + 6,
     markup,
     label || `A rectangle ${cols} squares long and ${rows} squares tall, ${what}`,
-  );
-}
-
-/* ---------- a rectangle cut in two ---------- */
-/* A rectangle `rows` squares tall and `cols` long, cut into two parts: `cut` columns on the left (gold) and the rest on the
-   right (blue); a cut of 0 or cols leaves it whole, in gold. grid: draw the unit squares. sides: write the side lengths (rows on the left, each part's width on top).
-   products: write each part's multiplication inside it. ask: 'left' or 'right' writes ? for that part's width. */
-function splitFig(rows, cols, cut, { grid = true, sides = true, products = false, ask = null, label } = {}) {
-  const size = Math.min(CELL + 4, 400 / cols, 260 / rows),
-    left = sides ? 40 : 6,
-    top = sides ? 34 : 6,
-    whole = cut <= 0 || cut >= cols,
-    widths = whole ? [cols] : [cut, cols - cut],
-    partX = [left, left + cut * size];
-  let markup = "";
-  widths.forEach((w, i) => {
-    markup += `<rect class="apart${i ? " b" : ""}" x="${partX[i]}" y="${top}" width="${w * size}" height="${rows * size}"/>`;
-  });
-  if (grid) {
-    range(cols - 1).forEach((c) => {
-      const x = left + (c + 1) * size;
-      if (whole || c + 1 !== cut)
-        markup += `<line class="agrid" x1="${x}" y1="${top}" x2="${x}" y2="${top + rows * size}"/>`;
-    });
-    range(rows - 1).forEach((r) => {
-      const y = top + (r + 1) * size;
-      markup += `<line class="agrid" x1="${left}" y1="${y}" x2="${left + cols * size}" y2="${y}"/>`;
-    });
-  }
-  if (!whole)
-    markup += `<line class="acut" x1="${partX[1]}" y1="${top - 4}" x2="${partX[1]}" y2="${top + rows * size + 4}"/>`;
-  if (sides) {
-    markup += `<text class="lbl en" x="${left - 10}" y="${top + (rows * size) / 2}">${rows}</text>`;
-    widths.forEach((w, i) => {
-      const asked = ask === (i ? "right" : "left");
-      markup += `<text class="lbl${asked ? " cy" : ""}" x="${partX[i] + (w * size) / 2}" y="${top - 16}">${asked ? "?" : w}</text>`;
-    });
-  }
-  if (products)
-    widths.forEach((w, i) => {
-      markup += `<text class="lbl s aprod" x="${partX[i] + (w * size) / 2}" y="${top + (rows * size) / 2}">${rows} × ${w}</text>`;
-    });
-  return svgWrap(
-    left + cols * size + 8,
-    top + rows * size + 8,
-    markup,
-    label ||
-      (whole
-        ? `A rectangle ${rows} squares tall and ${cols} long`
-        : `A rectangle ${rows} squares tall and ${cols} long, cut into ${rows} by ${ask === "left" ? "?" : cut} and ${rows} by ${ask === "right" ? "?" : cols - cut}`),
   );
 }
 

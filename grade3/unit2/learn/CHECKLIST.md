@@ -65,8 +65,8 @@ IM lessons: 1–10, 12–14. Not covered: Lessons 11 and 15 (Area and the Multip
 ## Chapter 4: Square units · `learn/square-units.html` · Lessons 6–7
 
 ### Step 1: Squares of different sizes
-- [ ] It starts with the small squares: `pressed Small squares; see A square centimeter is about the size of the tip of your finger. A square inch is about the size of a postage stamp.; see About 6 square centimeters fit in 1 square inch.; count .agrid = 4`
-- [ ] The big squares: `click Big squares; see A square foot is about the size of a floor tile. A square meter is about the size of a small table top.; see About 11 square feet fit in 1 square meter.; see These are drawn much smaller than they really are.; count .agrid = 6`
+- [ ] It starts with the small squares: `pressed Small squares; see A square centimeter is about the size of the tip of your finger. A square inch is about the size of a postage stamp.; see About 6 square centimeters fit in 1 square inch.; count .agridsq = 4`
+- [ ] The big squares: `click Big squares; see A square foot is about the size of a floor tile. A square meter is about the size of a small table top.; see About 11 square feet fit in 1 square meter.; see These are drawn much smaller than they really are.; count .agridsq = 6`
 - [ ] Edge: back to the small squares drops the note: `click Big squares; click Small squares; nosee drawn much smaller`
 - Quick check: Lin covers a notebook with square inches. Han covers the same notebook with square centimeters. Who needs more squares? Answer: “Han”. Mistakes it names: “Lin”, “They need the same number”.
 

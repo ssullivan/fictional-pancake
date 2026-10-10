@@ -31,8 +31,8 @@ function unitSquaresFig(kind) {
   /* the small unit's lines inside the big square: how many small squares fit across it */
   for (let x = smallSide; x < bigSide; x += smallSide)
     markup +=
-      `<line class="agrid" x1="${bigX + x}" y1="${base - bigSide}" x2="${bigX + x}" y2="${base}"/>` +
-      `<line class="agrid" x1="${bigX}" y1="${base - x}" x2="${bigX + bigSide}" y2="${base - x}"/>`;
+      `<line class="agridsq" x1="${bigX + x}" y1="${base - bigSide}" x2="${bigX + x}" y2="${base}"/>` +
+      `<line class="agridsq" x1="${bigX}" y1="${base - x}" x2="${bigX + bigSide}" y2="${base - x}"/>`;
   [
     [smallX + smallSide / 2, smallName],
     [bigX + bigSide / 2, bigName],

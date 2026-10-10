@@ -6,7 +6,8 @@
    SOLIDS, solidFig(kind, {back})    cubes, boxes, pyramids, and prisms drawn at an angle, with the back edges dashed
    shareFig(shape, n, how, {shade})  a circle or rectangle cut into halves, thirds, or fourths
    PB, pbFig(big, small, {show})     pattern blocks: a hexagon, trapezoid, or rhombus filled with smaller blocks
-   rectFig(length, width, {…})       a rectangle with its side lengths, in unit squares when it's small enough (svg) */
+   rectFig(length, width, {…})       a rectangle with its side lengths, in unit squares when it's small enough (svg)
+   splitFig(rows, cols, cut, {grid, sides, products, ask, label})   a rectangle cut into two parts in two colors (svg) */
 /* Flat shapes in a 100 × 100 box, by number of sides. Some are tilted, stretched, or bent in, so the name comes from counting sides. */
 /* Flat shapes in a 100 × 100 box, by number of sides. Some are tilted, stretched, or bent in, so the name comes from counting sides. */
 /* the corners of a regular n-gon in the box, the first at angle a0 (degrees; −90 is straight up) */
@@ -454,6 +455,56 @@ function pbFig(big, small, { show = true, s = 70, label } = {}) {
       `A ${big} with ${shown === pieces.length ? pieces.length : shown || 1} ${small}${(shown || 1) > 1 ? "s" : ""} in it`,
   );
 }
+/* A rectangle `rows` squares tall and `cols` long, cut into two parts: `cut` columns on the left (gold) and the rest on the
+   right (blue); a cut of 0 or cols leaves it whole, in gold. grid: draw the unit squares. sides: write the side lengths (rows on the left, each part's width on top).
+   products: write each part's multiplication inside it. ask: 'left' or 'right' writes ? for that part's width. */
+function splitFig(rows, cols, cut, { grid = true, sides = true, products = false, ask = null, label } = {}) {
+  /* a unit square is up to 34 pixels on a side, smaller to fit 400 wide and 260 tall */
+  const size = Math.min(34, 400 / cols, 260 / rows),
+    left = sides ? 40 : 6,
+    top = sides ? 34 : 6,
+    whole = cut <= 0 || cut >= cols,
+    widths = whole ? [cols] : [cut, cols - cut],
+    partX = [left, left + cut * size];
+  let markup = "";
+  widths.forEach((w, i) => {
+    markup += `<rect class="apart${i ? " b" : ""}" x="${partX[i]}" y="${top}" width="${w * size}" height="${rows * size}"/>`;
+  });
+  if (grid) {
+    range(cols - 1).forEach((c) => {
+      const x = left + (c + 1) * size;
+      if (whole || c + 1 !== cut)
+        markup += `<line class="agrid" x1="${x}" y1="${top}" x2="${x}" y2="${top + rows * size}"/>`;
+    });
+    range(rows - 1).forEach((r) => {
+      const y = top + (r + 1) * size;
+      markup += `<line class="agrid" x1="${left}" y1="${y}" x2="${left + cols * size}" y2="${y}"/>`;
+    });
+  }
+  if (!whole)
+    markup += `<line class="acut" x1="${partX[1]}" y1="${top - 4}" x2="${partX[1]}" y2="${top + rows * size + 4}"/>`;
+  if (sides) {
+    markup += `<text class="lbl en" x="${left - 10}" y="${top + (rows * size) / 2}">${rows}</text>`;
+    widths.forEach((w, i) => {
+      const asked = ask === (i ? "right" : "left");
+      markup += `<text class="lbl${asked ? " cy" : ""}" x="${partX[i] + (w * size) / 2}" y="${top - 16}">${asked ? "?" : w}</text>`;
+    });
+  }
+  if (products)
+    widths.forEach((w, i) => {
+      markup += `<text class="lbl s aprod" x="${partX[i] + (w * size) / 2}" y="${top + (rows * size) / 2}">${rows} × ${w}</text>`;
+    });
+  return svgWrap(
+    left + cols * size + 8,
+    top + rows * size + 8,
+    markup,
+    label ||
+      (whole
+        ? `A rectangle ${rows} squares tall and ${cols} long`
+        : `A rectangle ${rows} squares tall and ${cols} long, cut into ${rows} by ${ask === "left" ? "?" : cut} and ${rows} by ${ask === "right" ? "?" : cols - cut}`),
+  );
+}
+
 /* A rectangle length by width, with the length written along the top and the width down the left side (unit: "m", "cm").
    ask: 'length' or 'width' writes ? for that side instead. grid: draw the unit squares inside (only when it has 15 or
    fewer along each side). Scaled so the longer side fits 300 pixels. */

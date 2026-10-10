@@ -17,3 +17,10 @@
 .rgrid{stroke:rgba(170,205,255,.3);stroke-width:1}
 .rside{fill:rgba(95,224,168,.16);stroke:var(--good);stroke-width:3}
 .rside.ask{stroke:var(--gold)}
+/* rectangles cut in two (splitFig): apart a part (b the second, in blue), agrid the unit squares inside, acut the line it's cut
+   along, aprod a part's multiplication */
+.apart{fill:rgba(255,201,60,.24);stroke:none}
+.apart.b{fill:rgba(127,227,255,.22)}
+.agrid{fill:none;stroke:rgba(243,246,251,.28);stroke-width:1}
+.acut{stroke:var(--pink);stroke-width:3;stroke-dasharray:8 5}
+.aprod{fill:var(--chalk)}
