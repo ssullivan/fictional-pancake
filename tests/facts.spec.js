@@ -3,14 +3,24 @@
 // tables and sets are saved, the fact map opens a fact to practice, and Stop shows a summary. No page scrolls sideways.
 const { test, expect } = require("./fixtures");
 
-// the answer to a fact as the page writes it: "7 + 8 = ?" → 15
-function answerOf(text) {
-  const [, a, sign, b] = text.match(/(\d+) ([+−×÷]) (\d+)/);
-  return sign === "+" ? +a + +b : sign === "−" ? a - b : sign === "×" ? a * b : a / b;
+// a fact as the page writes it, solved: "7 + 8 = ?", "7 + ? = 15", or "? + 8 = 15" → {a, sign, b, value: the number asked for}
+function solve(text) {
+  const [, left, sign, right, result] = text.match(/(\d+|\?) ([+−×÷]) (\d+|\?) = (\d+|\?)/),
+    apply = (x, y) => (sign === "+" ? x + y : sign === "−" ? x - y : sign === "×" ? x * y : x / y);
+  if (result === "?") return { a: +left, sign, b: +right, value: apply(+left, +right) };
+  const total = +result;
+  if (left === "?") {
+    const a = { "+": total - right, "−": total + +right, "×": total / right, "÷": total * right }[sign];
+    return { a, sign, b: +right, value: a };
+  }
+  const b = { "+": total - left, "−": left - total, "×": total / left, "÷": left / total }[sign];
+  return { a: +left, sign, b, value: b };
 }
-// the same fact either way round: "8 × 7" and "7 × 8" are one fact
+// the number to tap for a fact as the page writes it
+const answerOf = (text) => solve(text).value;
+// the fact, the same either way round: "8 × 7" and "7 × 8" are one fact, and a hidden number doesn't change it
 const factOf = (text) => {
-  const [, a, sign, b] = text.match(/(\d+) ([+−×÷]) (\d+)/);
+  const { a, sign, b } = solve(text);
   return sign === "×" ? `${Math.min(a, b)}×${Math.max(a, b)}` : `${a}${sign}${b}`;
 };
 // a fresh start on a page, with no saved progress
@@ -172,3 +182,24 @@ test("division: tables from 1 to 12, and a map of every fact", async ({ page, ha
   await expect(page.locator("#mapInfo")).toContainText("Think multiplication: 7 × ? = 56.");
   await noSideways(page);
 });
+
+for (const op of ["add", "sub", "mult", "div"])
+  test(`missing numbers ${op}: 15 facts, each hiding a number`, async ({ page, hasTouch }) => {
+    const press = (loc) => (hasTouch ? loc.tap() : loc.click());
+    await fresh(page, `facts/practice.html#${op}`);
+    await press(page.locator("#show [data-m='missing']"));
+    await expect(page.locator("#show [data-m='missing']")).toHaveAttribute("aria-pressed", "true");
+    await press(page.getByRole("button", { name: "Start" }));
+    let last = "";
+    for (let i = 0; i < 15; i++) {
+      await expect(page.locator("#fact")).not.toHaveText(last, { timeout: 5000 });
+      const text = await page.locator("#fact").textContent(),
+        { a, sign, b, value } = solve(text);
+      // a hidden number, unless the fact can't hide one (times 0)
+      if (!(sign === "×" && (a === 0 || b === 0)) && !(sign === "÷" && a === 0)) expect(text).not.toMatch(/= \?$/);
+      await press(page.locator(".choice", { hasText: new RegExp(`^${value}$`) }));
+      await expect(page.locator(".fb.good")).toContainText(`${a} ${sign} ${b} = `);
+      last = text;
+    }
+    await noSideways(page);
+  });

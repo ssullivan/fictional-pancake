@@ -17,11 +17,34 @@ const ctx = vm.createContext({ console });
 for (const [, src] of html.matchAll(/<script src="([^"?]+)(?:\?[^"]*)?"><\/script>/g))
   if (!src.endsWith("practice.js"))
     vm.runInContext(readFileSync(join(ROOT, "facts", src), "utf8"), ctx, { filename: src });
-const { FACT_OPS, factsIn, factKey, factAnswer, factText, factChoices, factHelp, factHint, makePicker } =
-  vm.runInContext(
-    "({FACT_OPS, factsIn, factKey, factAnswer, factText, factChoices, factHelp, factHint, makePicker})",
-    ctx,
-  );
+const names = [
+    "FACT_OPS",
+    "factsIn",
+    "factKey",
+    "factAnswer",
+    "factText",
+    "askable",
+    "factValue",
+    "factPrompt",
+    "factChoices",
+    "factHelp",
+    "factHint",
+    "makePicker",
+  ],
+  {
+    FACT_OPS,
+    factsIn,
+    factKey,
+    factAnswer,
+    factText,
+    askable,
+    factValue,
+    factPrompt,
+    factChoices,
+    factHelp,
+    factHint,
+    makePicker,
+  } = vm.runInContext(`({${names.join(", ")}})`, ctx);
 
 const failures = new Map();
 const fail = (what, example) => {
@@ -29,18 +52,29 @@ const fail = (what, example) => {
   failures.get(what).count++;
 };
 const BROKEN = /NaN|undefined|Infinity|\[object |\bnull\b/;
-// the value of "7 × 5 + 7 × 3" (× first), for checking the equations help states
+// every word a fact shows: its help, hint, and the reason for each wrong choice
+const words = (f) =>
+  [
+    factHelp(f).text,
+    factHint(f),
+    ...factChoices(f)
+      .filter((c) => c.why)
+      .map((c) => c.why),
+  ].join(" ");
+// the value of "7 × 5 + 7 × 3" or "56 ÷ 7" (× and ÷ first, left to right), for checking the equations help states
 function evaluate(expression) {
-  return expression
-    .split(/ ([+−]) /)
-    .reduce(
-      (acc, part, i, parts) =>
-        i % 2
-          ? acc
-          : acc +
-            (i && parts[i - 1] === "−" ? -1 : 1) * part.split(" × ").reduce((product, factor) => product * +factor, 1),
-      0,
-    );
+  const terms = expression.split(/ ([+−]) /),
+    // a term's ×s and ÷s, left to right
+    product = (term) => {
+      const parts = term.split(/ ([×÷]) /);
+      let value = +parts[0];
+      for (let i = 1; i < parts.length; i += 2)
+        value = parts[i] === "×" ? value * +parts[i + 1] : value / +parts[i + 1];
+      return value;
+    };
+  let value = product(terms[0]);
+  for (let i = 1; i < terms.length; i += 2) value += (terms[i] === "+" ? 1 : -1) * product(terms[i + 1]);
+  return value;
 }
 
 // every set: addition and subtraction within 10 and 20, each times table alone, and all of them together
@@ -70,22 +104,28 @@ for (const [op, choice, expected] of sets) {
       fail(`${name}: ${text} isn't in it`, text);
     if (op === "div" && !(choice.includes(fact.b) && Number.isInteger(answer) && answer <= 12))
       fail(`${name}: ${text} isn't in it`, text);
-    // both orders of a multiplication fact, many deals each
-    const shown = op === "mult" ? [fact, { ...fact, a: fact.b, b: fact.a }] : [fact];
-    for (const f of shown)
+    // both orders of a multiplication fact, each asked for its answer and with each number hidden (when that has one
+    // answer), many deals each
+    const orders = op === "mult" ? [fact, { ...fact, a: fact.b, b: fact.a }] : [fact],
+      asked = orders.flatMap((f) => [null, "a", "b"].filter((ask) => askable(f, ask)).map((ask) => ({ ...f, ask })));
+    for (const f of asked) {
+      const value = factValue(f),
+        prompt = factPrompt(f);
+      if ((f.ask === "a" ? f.a : f.ask === "b" ? f.b : answer) !== value)
+        fail(`${name}: ${prompt} asks for the wrong number`, prompt);
+      if (prompt.split("?").length !== 2) fail(`${name}: ${prompt} doesn't hide one number`, prompt);
       for (let k = 0; k < 40; k++) {
         const choices = factChoices(f),
           values = choices.map((c) => c.value);
-        if (choices.length !== 4) fail(`${name}: ${choices.length} choices`, factText(f));
-        if (new Set(values).size !== values.length) fail(`${name}: the same choice twice`, `${factText(f)}: ${values}`);
-        if (values.filter((v) => v === answer).length !== 1)
-          fail(`${name}: the answer isn't one choice`, `${factText(f)}: ${values}`);
+        if (choices.length !== 4) fail(`${name}: ${choices.length} choices`, prompt);
+        if (new Set(values).size !== values.length) fail(`${name}: the same choice twice`, `${prompt}: ${values}`);
+        if (values.filter((v) => v === value).length !== 1)
+          fail(`${name}: the answer isn't one choice`, `${prompt}: ${values}`);
         if (values.some((v) => !Number.isInteger(v) || v < 0))
-          fail(`${name}: a choice isn't a whole number`, `${factText(f)}: ${values}`);
-        if (choices.some((c) => (c.value === answer) !== (c.why === null)))
-          fail(`${name}: a reason is missing or on the answer`, factText(f));
+          fail(`${name}: a choice isn't a whole number`, `${prompt}: ${values}`);
+        if (choices.some((c) => (c.value === value) !== (c.why === null)))
+          fail(`${name}: a reason is missing or on the answer`, prompt);
       }
-    for (const f of shown) {
       const help = factHelp(f),
         hint = factHint(f);
       for (const [what, words] of [
@@ -96,20 +136,20 @@ for (const [op, choice, expected] of sets) {
           .filter((c) => c.why)
           .map((c) => ["reason", c.why]),
       ])
-        if (BROKEN.test(words)) fail(`${name}: ${what} shows a broken value`, `${factText(f)}: ${words}`);
-      if (!help.text.includes(String(answer)))
-        fail(`${name}: help doesn't give the answer`, `${factText(f)}: ${help.text}`);
-      // (times 0 can't hide it: the rule is that the answer is 0)
-      if (
-        !((op === "mult" || op === "div") && answer === 0) &&
-        !(op === "div" && f.a === f.b) &&
-        (new RegExp(`= ${answer}\\b(?!\\d)`).test(hint) || hint.endsWith(` ${answer}.`))
-      )
-        fail(`${name}: the hint gives the answer away`, `${factText(f)}: ${hint}`);
+        if (BROKEN.test(words)) fail(`${name}: ${what} shows a broken value`, `${prompt}: ${words}`);
+      if (/÷ 0\b/.test(words(f))) fail(`${name}: something is divided by 0`, prompt);
+      if (!help.text.includes(String(value))) fail(`${name}: help doesn't give the answer`, `${prompt}: ${help.text}`);
+      // (rules like times 0 or a number divided by itself can't hide their answer, and neither can a hidden number that's
+      // the same as the one shown, as in ? × 1 = 7)
+      const rule =
+        (!f.ask && (((op === "mult" || op === "div") && answer === 0) || (op === "div" && f.a === f.b))) ||
+        (f.ask && value === answer);
+      if (!rule && new RegExp(`(= |\\bis )${value}\\b(?!\\d)`).test(hint))
+        fail(`${name}: the hint gives the answer away`, `${prompt}: ${hint}`);
       for (const [statement, left, right] of `${help.text} ${hint}`.matchAll(
-        /(\d+(?: [+−×] \d+)+) = (\d+)\b(?! [+−×])/g,
+        /(\d+(?: [+−×÷] \d+)+) = (\d+)\b(?! [+−×÷])/g,
       ))
-        if (evaluate(left) !== +right) fail(`${name}: says ${statement}`, factText(f));
+        if (evaluate(left) !== +right) fail(`${name}: says ${statement}`, prompt);
     }
   }
   // the picker: 3,000 deals, missing every 7th fact

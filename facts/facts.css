@@ -7,6 +7,7 @@
 /* the setup screen: space between its cards, section headings, notes, the row with Start, and the table toggles */
 #setup .card + .card{margin-top:16px}
 h2.fset{font:800 21px var(--display);margin:0}
+h3.fsub{font:700 15px var(--mono);color:var(--dim);margin:4px 0 0}
 .fnote{margin:0;color:var(--dim)}
 .row{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
 .known{color:var(--dim);font:500 15px var(--mono)}

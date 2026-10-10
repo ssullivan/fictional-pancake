@@ -18,9 +18,18 @@ const mine = (save[op] = save[op] || {}),
     } catch (e) {}
   };
 mine.memory = mine.memory || {};
+/* how facts are shown: 'plain' (7 + 8 = ?), 'missing' (7 + ? = 15), or 'mix' */
+mine.show = mine.show || "plain";
 mine.best = mine.best || 0;
 if (byTables) mine.tables = mine.tables || [2, 3, 4, 5];
 else mine.set = mine.set || "20";
+/* an example of each way to show a fact, for the "Show facts as" buttons */
+const SHOW_EXAMPLES = {
+  add: ["7 + 8 = ?", "7 + ? = 15"],
+  sub: ["15 − 8 = ?", "15 − ? = 7"],
+  mult: ["6 × 7 = ?", "6 × ? = 42"],
+  div: ["42 ÷ 6 = ?", "42 ÷ ? = 7"],
+};
 /* the facts picked to practice */
 const chosenFacts = () => factsIn(op, byTables ? mine.tables : mine.set);
 /* the fact tapped on the map (null before any tap) */
@@ -47,6 +56,13 @@ function drawSetup() {
     $("allTables").onclick = () => setTables(opInfo.tables);
     $("noTables").onclick = () => setTables([]);
   } else press($("sets"), mine.set);
+  const [plainExample, missingExample] = SHOW_EXAMPLES[op];
+  $("show").innerHTML = seg("Show facts as", [
+    ["plain", plainExample],
+    ["missing", missingExample],
+    ["mix", "Mix them"],
+  ]);
+  press($("show"), mine.show);
   const facts = chosenFacts(),
     known = facts.filter((f) => factStatus(mine.memory, factKey(f)) === "known").length;
   $("start").disabled = !facts.length;
@@ -72,6 +88,14 @@ $("sets").addEventListener("click", (e) => {
     persist();
     drawSetup();
   }
+});
+
+$("show").addEventListener("click", (e) => {
+  const choice = e.target.closest("[data-m]");
+  if (!choice) return;
+  mine.show = choice.dataset.m;
+  persist();
+  drawSetup();
 });
 
 /* ---------- the fact map ---------- */
@@ -141,7 +165,7 @@ function drawMap() {
   const status = factStatus(mine.memory, factKey(mapPick)),
     m = mine.memory[factKey(mapPick)];
   $("mapInfo").innerHTML =
-    `<div class="fb info"><p><b>${factText(mapPick)} = ${factAnswer(mapPick)}</b> · ${STATUS_WORD[status]}` +
+    `<div class="fb info"><p><b>${factFull(mapPick)}</b> · ${STATUS_WORD[status]}` +
     (m ? ` (right ${m.r}, missed ${m.w})` : "") +
     `</p><p>${factHelp(mapPick).text}</p><button type="button" class="btn" id="practiceOne">Practice this fact</button></div>`;
   $("practiceOne").onclick = () => startPlay(factKey(mapPick));
@@ -178,11 +202,14 @@ function startPlay(focus = null) {
 }
 /* deal the next fact and its four answers */
 function nextFact() {
-  const fact = play.picker.next();
+  const dealt = play.picker.next(),
+    /* hide a number instead of the answer when the setup says to, and the fact still has one answer */
+    hide = mine.show === "missing" || (mine.show === "mix" && R(0, 1)) ? pick(["a", "b"]) : null,
+    fact = { ...dealt, ask: askable(dealt, hide) ? hide : null };
   play.fact = fact;
   play.done = false;
   play.hinted = false;
-  $("fact").textContent = `${factText(fact)} = ?`;
+  $("fact").textContent = factPrompt(fact);
   $("choices").innerHTML = factChoices(fact)
     .map((c) => `<button type="button" class="choice" data-v="${c.value}">${c.value}</button>`)
     .join("");
@@ -201,7 +228,7 @@ function drawCounts() {
 function answer(value) {
   if (play.done) return;
   const fact = play.fact,
-    right = factAnswer(fact),
+    right = factValue(fact),
     ok = value === right;
   play.done = true;
   play.tried++;
@@ -227,11 +254,11 @@ function answer(value) {
   drawCounts();
   const help = factHelp(fact);
   if (ok) {
-    $("feedback").innerHTML = `<div class="fb good"><h4>Yes! ${factText(fact)} = ${right}</h4></div>`;
+    $("feedback").innerHTML = `<div class="fb good"><h4>Yes! ${factFull(fact)}</h4></div>`;
     play.timer = setTimeout(nextFact, 700);
   } else {
     $("feedback").innerHTML =
-      `<div class="fb bad"><h4>${factText(fact)} = ${right}</h4><p>${help.text}</p>` +
+      `<div class="fb bad"><h4>${factFull(fact)}</h4><p>${help.text}</p>` +
       (help.fig ? `<div class="fig">${help.fig}</div>` : "") +
       `<p>It’ll come back soon.</p><button type="button" class="btn" id="nextBtn">Next fact →</button></div>`;
     $("nextBtn").onclick = nextFact;
@@ -261,7 +288,7 @@ $("stop").onclick = () => {
     : "You stopped before the first fact.";
   const work = [...play.missed.values()];
   $("sumWork").innerHTML = work.length
-    ? `<p class="fnote">Facts to work on:</p><p class="worklist">${work.map((f) => `<span>${factText(f)} = ${factAnswer(f)}</span>`).join("")}</p>`
+    ? `<p class="fnote">Facts to work on:</p><p class="worklist">${work.map((f) => `<span>${factFull(f)}</span>`).join("")}</p>`
     : "";
 };
 $("again").onclick = () => startPlay();

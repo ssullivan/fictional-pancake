@@ -7,6 +7,9 @@
    factKey(fact), factAnswer(fact), factText(fact)   "7×8", 56, and "7 × 8"
    factsIn(op, pick)                 every fact in a set ('10' or '20'), or in a list of tables: [{op, a, b}]
                                      (a division fact is a ÷ b: 56 ÷ 7 is {a: 56, b: 7})
+   A fact can hide a number instead of its answer (fact.ask 'a' or 'b': 7 + ? = 15 hides b). askable(fact, ask) says
+   whether that has one answer (0 × ? = 0 doesn't); factPrompt(fact) is "7 + ? = 15", factValue(fact) the number asked
+   for (8), and factFull(fact) the whole fact, "7 + 8 = 15". The functions below follow ask.
    factChoices(fact)                 4 different answers to pick from, one right: [{value, why}] (why is null for the right one)
    factHelp(fact)                    how to work it out: {text, fig} (fig is svg markup, or '')
    factHint(fact)                    the same strategy as a hint, without the answer
@@ -39,6 +42,21 @@ const factKey = ({ op, a, b }) =>
   op === "mult" ? `${Math.min(a, b)}×${Math.max(a, b)}` : `${a}${FACT_OPS[op].sign}${b}`;
 const factAnswer = ({ op, a, b }) => (op === "add" ? a + b : op === "sub" ? a - b : op === "mult" ? a * b : a / b);
 const factText = ({ op, a, b }) => `${a} ${FACT_OPS[op].sign} ${b}`;
+/* can the fact hide a (or b) and still have one answer? Not 0 × ? = 0, ? × 0 = 0, or 0 ÷ ? = 0 */
+const askable = ({ op, a, b }, ask) =>
+  !ask || !((op === "mult" && (a === 0 || b === 0)) || (op === "div" && a === 0 && ask === "b"));
+/* the number a fact asks for: its answer, or the number it hides */
+const factValue = (fact) => (fact.ask === "a" ? fact.a : fact.ask === "b" ? fact.b : factAnswer(fact));
+/* the fact as asked: "7 + 8 = ?", "7 + ? = 15", "? + 8 = 15" */
+const factPrompt = (fact) => {
+  const { op, a, b, ask } = fact,
+    sign = FACT_OPS[op].sign;
+  return ask
+    ? `${ask === "a" ? "?" : a} ${sign} ${ask === "b" ? "?" : b} = ${factAnswer(fact)}`
+    : `${a} ${sign} ${b} = ?`;
+};
+/* the whole fact: "7 + 8 = 15" */
+const factFull = (fact) => `${factText(fact)} = ${factAnswer(fact)}`;
 /* Every fact in a set. Addition: within 10, both numbers adding to 10 or less; within 20, any two numbers 0 to 10.
    Subtraction: the same facts turned around (from 10 or less; from 20 or less, taking away 0 to 10 and leaving 0 to 10).
    Multiplication: each table t in the list times 0 to 12, each fact once (3 × 7 and 7 × 3 are one fact).
@@ -77,11 +95,13 @@ function factsIn(op, choice) {
 /* Four answers to pick from: the right one and 3 named mistakes, all different whole numbers, in a random order. Mistakes
    that land on the right answer, or below 0, are left out, and numbers near the answer fill any gap. */
 function factChoices(fact) {
-  const { op, a, b } = fact,
-    answer = factAnswer(fact),
+  const { op, a, b, ask } = fact,
+    answer = factValue(fact),
     near = pick([1, -1]),
-    mistakes = [];
-  if (op === "add")
+    mistakes = ask ? missingMistakes(fact, near) : [];
+  if (ask) {
+    /* nothing more: the missing-number mistakes are in, and numbers near the answer fill any gap */
+  } else if (op === "add")
     mistakes.push(
       [answer + near, "Count on carefully from the bigger number."],
       [Math.abs(a - b), `That’s ${Math.max(a, b)} − ${Math.min(a, b)}. This one is plus.`],
@@ -90,7 +110,7 @@ function factChoices(fact) {
       [a * b, `That’s ${a} × ${b}. This one is plus.`],
       [answer + 10 * (answer >= 10 ? -1 : 1), "Look at the tens: is it more or less than 10?"],
     );
-  if (op === "sub")
+  else if (op === "sub")
     mistakes.push(
       [answer + near, "Count back carefully, or think addition."],
       [a + b, `That’s ${a} + ${b}. This one is minus.`],
@@ -98,7 +118,7 @@ function factChoices(fact) {
       [answer - near, "Count back carefully, or think addition."],
       [answer + 2 * near, "Count back carefully, or think addition."],
     );
-  if (op === "mult") {
+  else if (op === "mult") {
     /* a neighbor fact: one group more or fewer, of either factor */
     const neighbors = shuffle([
       [(a + 1) * b, `That’s ${a + 1} × ${b}, one group too many.`],
@@ -114,8 +134,7 @@ function factChoices(fact) {
       ...neighbors.slice(1),
       [answer + near, "Skip-count carefully."],
     );
-  }
-  if (op === "div")
+  } else if (op === "div")
     mistakes.push(
       ...(answer === 0 ? [[b, `0 shared into ${b} groups leaves 0 in each.`]] : []),
       [answer + near, `${b} × ${answer + near} = ${b * (answer + near)}, not ${a}.`],
@@ -138,10 +157,65 @@ function factChoices(fact) {
   return shuffle([{ value: answer, why: null }, ...picked]);
 }
 
+/* Named mistakes for a fact with a hidden number: giving the number shown after =, the wrong operation, or a number one
+   off (shown worked out, so the student sees why it doesn't fit). */
+function missingMistakes(fact, near) {
+  const { op, a, b, ask } = fact,
+    total = factAnswer(fact),
+    value = factValue(fact),
+    /* the fact with the hidden number one off: what it would give */
+    offBy = (n) => (ask === "a" ? { ...fact, a: value + n } : { ...fact, b: value + n }),
+    worked = (n) => `${factText(offBy(n))} = ${factAnswer(offBy(n))}, not ${total}.`,
+    shown = ask === "a" ? b : a;
+  if (op === "add")
+    return [
+      [total, `${total} is the total. What do you add to ${shown} to make it?`],
+      [total + shown, `That adds ${shown}. Think ${total} − ${shown}.`],
+      [value + near, worked(near)],
+      [value - near, worked(-near)],
+    ];
+  if (op === "sub")
+    return ask === "b"
+      ? [
+          [total, `${total} is what’s left. How many were taken away?`],
+          [a + total, `That adds. Think ${a} − ${total}.`],
+          [value + near, worked(near)],
+          [value - near, worked(-near)],
+        ]
+      : [
+          [total, `${total} is what’s left. How many were there to start?`],
+          [Math.abs(total - b), `That takes away. Add back what was taken: ${total} + ${b}.`],
+          [value + near, worked(near)],
+          [value - near, worked(-near)],
+        ];
+  if (op === "mult")
+    return [
+      [total, `${total} is the product. What times ${shown} makes it?`],
+      [total - shown, `That subtracts. Think ${total} ÷ ${shown}.`],
+      [value + near, worked(near)],
+      [value - near, worked(-near)],
+    ];
+  /* division */
+  return ask === "a"
+    ? [
+        [total, `${total} is the answer. What was divided by ${b}?`],
+        [b + total, `That adds. Multiply: ${b} × ${total}.`],
+        [b * (total + near), `${b * (total + near)} ÷ ${b} = ${total + near}, not ${total}.`],
+        [b * (total - near), `${b * (total - near)} ÷ ${b} = ${total - near}, not ${total}.`],
+      ]
+    : [
+        [total, `${total} is the answer. What do you divide ${a} by to get it?`],
+        [a - total, `That subtracts. Think ${total} × ? = ${a}.`],
+        /* never ÷ 0 */
+        ...[near, -near].filter((n) => value + n > 0).map((n) => [value + n, `${a} ÷ ${value + n} isn’t ${total}.`]),
+      ];
+}
+
 /* ---------- how to work it out ---------- */
 /* A strategy for the fact, in words, and a picture of it: ten-frames to make ten or take away, an array, or a rectangle
    broken into two easier facts. */
 function factHelp(fact) {
+  if (fact.ask) return { text: missingHelp(fact), fig: factHelp({ ...fact, ask: null }).fig };
   const { op, a, b } = fact,
     answer = factAnswer(fact);
   if (op === "add") {
@@ -256,6 +330,7 @@ function factHelp(fact) {
 
 /* The strategy factHelp uses, said as a hint that doesn't give the answer away. */
 function factHint(fact) {
+  if (fact.ask) return missingHint(fact);
   const { op, a, b } = fact,
     answer = factAnswer(fact);
   if (op === "add") {
@@ -294,6 +369,46 @@ function factHint(fact) {
   if (has(12)) return `Break 12 into 10 and 2: ${other(12)} × 10 + ${other(12)} × 2.`;
   if (has(4)) return `Times 4: double ${other(4)}, then double again.`;
   return `Break ${big} into 5 and ${big - 5}: ${small} × 5 + ${small} × ${big - 5}.`;
+}
+
+/* how to find a hidden number: with the related fact (subtract to find an addend, divide to find a factor) */
+function missingHelp(fact) {
+  const { op, a, b, ask } = fact,
+    total = factAnswer(fact),
+    whole = factFull(fact);
+  if (op === "add")
+    return ask === "b"
+      ? `${a} + ? = ${total}: think ${total} − ${a} = ${b}. ${whole}.`
+      : `? + ${b} = ${total}: think ${total} − ${b} = ${a}. ${whole}.`;
+  if (op === "sub")
+    return ask === "b"
+      ? `${a} − ? = ${total}: think ${total} + ? = ${a}. ${total} + ${b} = ${a}, so ${whole}.`
+      : `? − ${b} = ${total}: add back what was taken away. ${total} + ${b} = ${a}, so ${whole}.`;
+  if (op === "mult")
+    return ask === "b"
+      ? `${a} × ? = ${total}: think ${total} ÷ ${a} = ${b}. ${whole}.`
+      : `? × ${b} = ${total}: think ${total} ÷ ${b} = ${a}. ${whole}.`;
+  return ask === "a"
+    ? `? ÷ ${b} = ${total}: multiply. ${b} × ${total} = ${a}, so ${whole}.`
+    : `${a} ÷ ? = ${total}: think ${total} × ? = ${a}. ${total} × ${b} = ${a}, so ${whole}.`;
+}
+/* the same, as a hint that doesn't give the hidden number away */
+function missingHint(fact) {
+  const { op, a, b, ask } = fact,
+    total = factAnswer(fact);
+  if (op === "add") return `Think ${total} − ${ask === "b" ? a : b}.`;
+  if (op === "sub")
+    return ask === "b"
+      ? total === 0
+        ? `What can you take away from ${a} to leave nothing?`
+        : `What do you add to ${total} to make ${a}?`
+      : `Add back what was taken away: ${total} + ${b}.`;
+  if (op === "mult") return `${ask === "b" ? a : b} times what is ${total}?`;
+  return ask === "a"
+    ? `Multiply: ${b} × ${total}.`
+    : total === 1
+      ? "A number divided by itself is 1."
+      : `${total} times what is ${a}?`;
 }
 
 /* ---------- which fact next ---------- */
