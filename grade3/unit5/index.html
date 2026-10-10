@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Fraction Farm</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=JetBrains+Mono:wght@500;700&display=swap">
+<link rel="stylesheet" href="../../shared/theme.css?v=4796e910">
+<link rel="stylesheet" href="../../shared/game.css?v=57b7d039">
+<link rel="stylesheet" href="../../shared/pictures.css?v=7f680159">
+<link rel="stylesheet" href="../../shared/fractions.css?v=a126b20b">
+<link rel="stylesheet" href="../../shared/shapes.css?v=b9871bf9">
+<style>
+/* County Fair: a basket with room for 10 apples, one for each right answer */
+.power{display:flex;align-items:center;gap:14px;background:rgba(255,201,60,.08);border:1.5px solid rgba(255,201,60,.45);border-radius:14px;padding:10px 14px}
+.power svg{width:72px;height:72px;flex:none}
+.power b{font:800 20px var(--display);color:var(--gold)}
+.power p{margin:4px 0 0;font:700 14px var(--mono);color:var(--dim)}
+.power.hit svg{animation:bob .5s}
+@keyframes bob{50%{transform:translateY(-4px)}}
+@media (prefers-reduced-motion:reduce){.power.hit svg{animation:none}}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <section id="home">
+    <a class="back" href="../">← Grade 3</a>
+    <header class="hero">
+      <p class="eyebrow">Illustrative Mathematics K–5 · Grade 3 · Unit 5 · Fractions as Numbers</p>
+      <h1>Fraction <span>Farm</span></h1>
+      <p class="lede">Welcome to Fraction Farm, where everything gets cut into equal parts! Slice pies at the Pie Stand, plant the Garden Rows, walk the Fence Line, count wholes in the Big Barn, match up the Garden Plots, and judge the Harvest Contest. Then win a blue ribbon at the County Fair. Each station matches lessons from class.</p>
+      <div class="stats">
+        <span class="pill">Points <b id="hp">0</b></span>
+        <span class="pill">Stars <b id="hs">0</b>/<span id="hsMax">21</span></span>
+      </div>
+    </header>
+    <div class="zones" id="zones"></div>
+    <section class="grownups">
+      <h2>For grown-ups</h2>
+      <div><h4>How a round works</h4><p>Each station deals 8 fresh problems (the County Fair deals 10). A right answer on the first try earns 10 points. After a wrong answer, the game names the likely mistake and gives one more try for 5 points. At the County Fair, each right answer puts an apple in the prize basket.</p></div>
+      <div><h4>The "Show me" hint</h4><p>Hints use the pictures from class: shapes cut into equal parts, fraction strips, and number lines with jumps of one part. A used hint caps that problem at 5 points.</p></div>
+      <div><h4>Mistakes it catches</h4><p>Counting the unshaded parts, switching the top and bottom numbers, counting tick marks instead of jumps, counting from 1 instead of 0, writing the number of parts instead of a fraction, thinking more slices means bigger slices, adding the same number to the top and bottom to make an equivalent fraction, and keeping the top number when the parts change.</p></div>
+      <div><h4>Numbers</h4><p>Denominators are 2, 3, 4, 6, and 8, as in Grade 3. Fractions are parts of one whole, points on number lines up to 3, and whole numbers written as fractions. Comparisons have the same denominator or the same numerator, or are equivalent. Typed fraction answers are written like 3/4; an equivalent fraction counts too.</p></div>
+      <div><h4>Learn it first</h4><p>Each station matches a chapter of the <a href="learn.html">Learn page</a> for this unit, which walks through the ideas step by step.</p></div>
+      <div><h4>Not covered</h4><p>Design With Fractions (Lesson 18) is an optional lesson, so there’s no station for it.</p></div>
+    </section>
+  </section>
+
+  <section id="play" hidden>
+    <div class="bar">
+      <button id="quit" class="ghost-btn" type="button">← Stations</button>
+      <div class="bar-mid"><div class="zn" id="zname"></div><div class="track"><div id="prog"></div></div></div>
+      <div class="bar-stats"><span class="pill" id="streak">Streak <b>0</b></span><span class="pill">Pts <b id="pts">0</b></span></div>
+    </div>
+    <div class="power" id="power" hidden></div>
+    <article class="card">
+      <p class="eyebrow" id="qnum"></p>
+      <h2 id="prompt"></h2>
+      <div class="fig" id="fig"></div>
+      <div id="answer"></div>
+      <div id="hint" class="hintbox" hidden></div>
+      <div id="feedback" role="status" aria-live="polite"></div>
+    </article>
+  </section>
+
+  <section id="done" hidden>
+    <div class="card done">
+      <p class="eyebrow" id="dzone"></p>
+      <div class="bigstars stars" id="dstars"></div>
+      <h2 id="dtitle"></h2>
+      <p id="dmsg"></p>
+      <div class="row">
+        <button class="btn" id="again" type="button">Play again</button>
+        <button class="ghost-btn" id="tomap" type="button">Back to stations</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script src="../../shared/util.js?v=6fcbe1bb"></script>
+<script src="../../shared/figures.js?v=d2337c45"></script>
+<script src="../../shared/pictures.js?v=f857849d"></script>
+<script src="../../shared/fractions.js?v=0cb3561f"></script>
+<script src="../../shared/shapes.js?v=26616a86"></script>
+<script src="figs.js?v=3d5dfd06"></script>
+<script src="../../shared/engine.js?v=4b1b2373"></script>
+<script src="stations.js?v=772e4639"></script>
+<script>
+/* County Fair: one apple goes in the basket for each right answer */
+let applesIn=0;
+/* the basket beside a boss problem (hidden at the other stations); hit: the last answer was right */
+function drawPower(state,hit){
+  const el=$('power');el.hidden=state.z.id!=='boss';if(el.hidden)return;
+  el.innerHTML=`<svg viewBox="0 0 64 64" role="img" aria-label="${applesIn} of 10 apples in the basket">${basket(applesIn)}</svg><div><b>${applesIn} of 10 apples</b><p>${applesIn===10?'The basket is full. You win the blue ribbon!':hit?'Right! Another apple goes in.':'Answer right to add an apple.'}</p></div>`;
+  el.classList.toggle('hit',!!hit);
+}
+Game.init({
+  saveKey:'g3u5-save',
+  zones:ZONES,icons:ICON,
+  words:{
+    right:'Nailed it!',
+    miss:'Not quite. Check it with the picture.',
+    titles:['Keep practicing','Good start','Farm hand pro','Fraction Farm champion!'],
+    next:'Try the next station, or head to the County Fair.',
+    stuck:'Use “Show me a hint” when you’re stuck. It shows the picture from class.',
+    tap:'Tap your answer on the number line.'
+  },
+  /* the basket is empty at the start of a round */
+  onQuestion:state=>{if(state.i===0)applesIn=0;drawPower(state,false);},
+  onAnswer:(state,ok)=>{if(ok)applesIn++;drawPower(state,ok);}
+});
+</script>
+</body>
+</html>
