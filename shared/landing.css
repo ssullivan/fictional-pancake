@@ -2,6 +2,8 @@
 
 /* root page: one card per grade */
 .grade-list{list-style:none;margin:0;padding:0;display:grid;gap:16px;grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}
+/* a second list under the grades (Math Facts on the root page) gets the same gap the cards have */
+.grade-list + .grade-list{margin-top:16px}
 .grade-card{display:grid;gap:8px;align-content:start;height:100%;padding:20px;border-radius:14px;text-decoration:none;color:inherit;
   background:var(--sheet);border:1px solid rgba(170,205,255,.25);transition:background .15s,transform .15s}
 .grade-card:hover{background:var(--sheet2);transform:translateY(-2px)}

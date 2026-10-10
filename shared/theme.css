@@ -62,6 +62,10 @@ button{font:inherit;color:inherit;cursor:pointer}
 .fb.good h4{color:var(--good)}.fb.bad h4{color:var(--bad)}
 .fb p{margin:0}
 
+/* a row of choice buttons (seg in util.js: Learn widgets, and the math facts set picker); the pressed one is gold */
+.seg{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.seg button{background:none;border:1.5px solid rgba(170,205,255,.4);border-radius:10px;padding:7px 12px;font:700 14px var(--mono)}
+.seg button[aria-pressed="true"]{background:var(--gold);color:#1a1300;border-color:var(--gold)}
 /* Read to me buttons (speak.js) */
 .say{display:inline-block;background:rgba(127,227,255,.1);border:1.5px solid rgba(127,227,255,.55);border-radius:999px;color:var(--cyan);padding:7px 14px;font:700 14px var(--mono);margin:0 0 10px}
 .say:hover{background:rgba(127,227,255,.2)}

@@ -40,9 +40,6 @@ a{color:var(--cyan)}
 .slider{display:flex;align-items:center;gap:10px;font:700 14px var(--mono);color:var(--dim);flex:1 1 260px}
 .slider input{flex:1;min-width:110px;accent-color:var(--gold);height:30px}
 .slider b{color:var(--gold);min-width:1.2em}
-.seg{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
-.seg button{background:none;border:1.5px solid rgba(170,205,255,.4);border-radius:10px;padding:7px 12px;font:700 14px var(--mono)}
-.seg button[aria-pressed="true"]{background:var(--gold);color:#1a1300;border-color:var(--gold)}
 .readout{margin:12px 0 0;font:500 15px/1.55 var(--mono)}
 .readout b{color:var(--gold)}
 .readout .ok,.readout .ok b{color:var(--good)}

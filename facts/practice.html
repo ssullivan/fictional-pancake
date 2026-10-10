@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Quick Pick · Math Facts</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=JetBrains+Mono:wght@500;700&display=swap">
+<link rel="stylesheet" href="../shared/theme.css?v=c2e276bb">
+<link rel="stylesheet" href="../shared/game.css?v=57b7d039">
+<link rel="stylesheet" href="../shared/pictures.css?v=7f680159">
+<link rel="stylesheet" href="../shared/blocks.css?v=ef8d48f1">
+<link rel="stylesheet" href="../shared/multiply.css?v=2a49b04d">
+<link rel="stylesheet" href="../shared/shapes.css?v=b9871bf9">
+<link rel="stylesheet" href="facts.css?v=611f6081">
+</head>
+<body>
+
+<div class="app">
+  <!-- pick the facts to practice, and see how well each one is known -->
+  <section id="setup">
+    <a class="back" href="./">← Math Facts</a>
+    <header class="hero">
+      <p class="eyebrow">Math Facts · Quick Pick</p>
+      <h1 id="opTitle"></h1>
+      <p class="lede">See a fact, tap its answer. Play as long as you like: facts you miss come back soon, and facts you know come up less.</p>
+    </header>
+    <div class="card">
+      <h2 class="fset">Facts to practice</h2>
+      <div id="sets"></div>
+      <div class="row"><button type="button" class="btn" id="start">Start</button><span class="known" id="known"></span></div>
+    </div>
+    <div class="card">
+      <h2 class="fset">Your fact map</h2>
+      <p class="fnote">Each square is a fact. Tap one to see it, or to practice it.</p>
+      <div class="fig" id="map"></div>
+      <div class="legend" id="legend"></div>
+      <div id="mapInfo" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <!-- endless practice: a fact, four answers -->
+  <section id="play" hidden>
+    <div class="bar">
+      <button id="stop" class="ghost-btn" type="button">← Stop</button>
+      <div class="bar-stats"><span class="pill">Right <b id="right">0</b></span><span class="pill" id="streak">Streak <b>0</b></span><span class="pill">Best <b id="best">0</b></span></div>
+    </div>
+    <article class="card">
+      <p class="eyebrow" id="playTitle"></p>
+      <h2 id="fact" class="fact"></h2>
+      <div class="choices fchoices" id="choices"></div>
+      <div class="tools"><button type="button" class="link-btn" id="hintBtn">Show me how</button></div>
+      <div id="hint" class="hintbox" hidden></div>
+      <div id="feedback" role="status" aria-live="polite"></div>
+    </article>
+  </section>
+
+  <!-- what happened this time -->
+  <section id="summary" hidden>
+    <div class="card done">
+      <p class="eyebrow" id="sumTitle"></p>
+      <h2 id="sumRight"></h2>
+      <p id="sumMsg"></p>
+      <div id="sumWork"></div>
+      <div class="row">
+        <button class="btn" id="again" type="button">Keep going</button>
+        <button class="ghost-btn" id="change" type="button">Change facts</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script src="../shared/util.js?v=6fcbe1bb"></script>
+<script src="../shared/figures.js?v=d2337c45"></script>
+<script src="../shared/pictures.js?v=f857849d"></script>
+<script src="../shared/blocks.js?v=8836c7d3"></script>
+<script src="../shared/multiply.js?v=3d03c2c1"></script>
+<script src="../shared/shapes.js?v=26616a86"></script>
+<script src="facts.js?v=129ad735"></script>
+<script src="practice.js?v=24229375"></script>
+</body>
+</html>

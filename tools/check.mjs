@@ -338,5 +338,8 @@ for (const home of globSync("grade*/unit*/learn.html", { cwd: ROOT }).sort()) {
 
 const fuzz = spawnSync(process.execPath, [join(ROOT, "tools/fuzz.mjs")], { stdio: "inherit" });
 if (fuzz.status) problems++;
+// the math facts engine: every fact's choices, help, and hint, and the picker (tools/facts.mjs)
+const facts = spawnSync(process.execPath, [join(ROOT, "tools/facts.mjs")], { stdio: "inherit" });
+if (facts.status) problems++;
 console.log(problems ? `${problems} problem(s)` : "All checks passed.");
 process.exit(problems ? 1 : 0);
