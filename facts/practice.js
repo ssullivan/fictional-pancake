@@ -22,6 +22,12 @@ mine.memory = mine.memory || {};
 mine.show = mine.show || "plain";
 /* how answers are given: 'pick' one of four, or 'type' it on the number pad (or a keyboard) */
 mine.input = mine.input || "pick";
+/* the best 1-minute sprint for each set: {setKey: right answers} */
+mine.sprint = mine.sprint || {};
+/* how long a sprint lasts, in milliseconds */
+const SPRINT_MS = 60000;
+/* which set is picked, as a key for the sprint bests: "set 20", "tables 2,3,4,5" */
+const setKey = () => (byTables ? `tables ${mine.tables.join(",")}` : `set ${mine.set}`);
 mine.best = mine.best || 0;
 if (byTables) mine.tables = mine.tables || [2, 3, 4, 5];
 else mine.set = mine.set || "20";
@@ -73,6 +79,13 @@ function drawSetup() {
   const facts = chosenFacts(),
     known = facts.filter((f) => factStatus(mine.memory, factKey(f)) === "known").length;
   $("start").disabled = !facts.length;
+  $("sprintBtn").disabled = !facts.length;
+  const sprintBest = mine.sprint[setKey()];
+  $("sprintBest").textContent = !facts.length
+    ? ""
+    : sprintBest
+      ? `Sprint best for these facts: ${sprintBest} right in 1 minute.`
+      : "How many can you get right in 1 minute? Try a sprint.";
   $("known").textContent = facts.length
     ? `You know ${known} of these ${facts.length} facts.`
     : "Pick at least one table.";
@@ -182,7 +195,7 @@ function drawMap() {
     `<div class="fb info"><p><b>${factFull(mapPick)}</b> · ${STATUS_WORD[status]}` +
     (m ? ` (right ${m.r}, missed ${m.w})` : "") +
     `</p><p>${factHelp(mapPick).text}</p><button type="button" class="btn" id="practiceOne">Practice this fact</button></div>`;
-  $("practiceOne").onclick = () => startPlay(factKey(mapPick));
+  $("practiceOne").onclick = () => startPlay({ focus: factKey(mapPick) });
 }
 /* tap (or Enter on) a square to see its fact */
 function pickSquare(e) {
@@ -203,16 +216,40 @@ $("map").addEventListener("keydown", (e) => {
 /* this time's play: the picker, the fact on screen, whether it's answered or hinted, and the counts */
 let play = null;
 /* Start playing the facts picked; focus: a fact to practice more often (from the map) */
-function startPlay(focus = null) {
-  let facts = chosenFacts();
+/* Start playing. focus: a fact from the map to practice more often; only: just these facts (the ones missed in a sprint);
+   sprint: a 1-minute sprint, with no hints, that ends by itself. */
+function startPlay({ focus = null, only = null, sprint = false } = {}) {
+  let facts = only || chosenFacts();
   /* a fact from the map that isn't in the picked set joins it */
   if (focus && !facts.some((f) => factKey(f) === focus)) facts = [...facts, mapPick];
-  play = { picker: makePicker(facts, mine.memory, focus), right: 0, tried: 0, streak: 0, best: 0, missed: new Map() };
+  play = {
+    picker: makePicker(facts, mine.memory, focus),
+    options: { focus, only, sprint },
+    right: 0,
+    tried: 0,
+    streak: 0,
+    best: 0,
+    missed: new Map(),
+  };
   $("setup").hidden = true;
   $("summary").hidden = true;
   $("play").hidden = false;
-  $("playTitle").textContent = `${FACT_OPS[op].name} · Quick Pick`;
+  $("playTitle").textContent = `${FACT_OPS[op].name} · ${sprint ? "1-minute sprint" : "Quick Pick"}`;
+  $("hintBtn").hidden = sprint;
+  $("sprintBar").hidden = !sprint;
+  if (sprint) {
+    play.endsAt = Date.now() + SPRINT_MS;
+    play.ticker = setInterval(tickSprint, 200);
+    tickSprint();
+  }
   nextFact();
+}
+/* a sprint's clock: the bar and seconds left, and the end of the sprint when they run out */
+function tickSprint() {
+  const left = Math.max(0, play.endsAt - Date.now());
+  $("sprintFill").style.width = `${(left / SPRINT_MS) * 100}%`;
+  $("sprintTime").textContent = `${Math.ceil(left / 1000)} seconds`;
+  if (!left) finish(true);
 }
 /* the number pad for typing an answer: 1 to 9, then delete, 0, and Go */
 const PAD =
@@ -221,6 +258,7 @@ const PAD =
   `<button type="button" data-key="del" aria-label="Delete">⌫</button><button type="button" data-key="0">0</button><button type="button" class="go" data-key="go">Go</button></div>`;
 /* deal the next fact, and its four answers or the number pad */
 function nextFact() {
+  if (play.over) return;
   const dealt = play.picker.next(),
     /* hide a number instead of the answer when the setup says to, and the fact still has one answer */
     hide = mine.show === "missing" || (mine.show === "mix" && R(0, 1)) ? pick(["a", "b"]) : null,
@@ -286,7 +324,11 @@ function answer(value) {
   const help = factHelp(fact);
   if (ok) {
     $("feedback").innerHTML = `<div class="fb good"><h4>Yes! ${factFull(fact)}</h4></div>`;
-    play.timer = setTimeout(nextFact, 700);
+    play.timer = setTimeout(nextFact, play.options.sprint ? 300 : 700);
+  } else if (play.options.sprint) {
+    /* a sprint keeps going: the right answer for a second, then the next fact */
+    $("feedback").innerHTML = `<div class="fb bad"><h4>${factFull(fact)}</h4></div>`;
+    play.timer = setTimeout(nextFact, 1000);
   } else {
     $("feedback").innerHTML =
       `<div class="fb bad"><h4>${factFull(fact)}</h4>` +
@@ -334,27 +376,52 @@ $("hintBtn").onclick = () => {
   $("hint").hidden = false;
 };
 /* Stop: a summary of this time */
-$("stop").onclick = () => {
+/* The end of playing: a summary of this time. finished: a sprint ran its full minute (only then can it be a new best). */
+function finish(finished = false) {
+  const { sprint } = play.options;
+  play.over = true;
   clearTimeout(play.timer);
+  clearInterval(play.ticker);
   $("play").hidden = true;
   $("summary").hidden = false;
-  $("sumTitle").textContent = `${FACT_OPS[op].name} · Quick Pick`;
-  $("sumRight").textContent = play.tried ? `${play.right} of ${play.tried} right` : "See you next time";
-  $("sumMsg").textContent = play.tried
-    ? `Best streak this time: ${play.best}. Best ever: ${mine.best}.`
-    : "You stopped before the first fact.";
+  $("sumTitle").textContent = `${FACT_OPS[op].name} · ${sprint ? "1-minute sprint" : "Quick Pick"}`;
+  if (sprint) {
+    const best = mine.sprint[setKey()] || 0,
+      newBest = finished && !play.options.only && play.right > best;
+    if (newBest) mine.sprint[setKey()] = play.right;
+    persist();
+    $("sumRight").textContent = `${play.right} right in 1 minute`;
+    $("sumMsg").textContent = !finished
+      ? "You stopped before the minute was up, so this sprint doesn’t count toward your best."
+      : newBest
+        ? best
+          ? `A new best for these facts! Your last best was ${best}.`
+          : "Your first sprint best for these facts!"
+        : `Your best for these facts is ${best}.`;
+  } else {
+    $("sumRight").textContent = play.tried ? `${play.right} of ${play.tried} right` : "See you next time";
+    $("sumMsg").textContent = play.tried
+      ? `Best streak this time: ${play.best}. Best ever: ${mine.best}.`
+      : "You stopped before the first fact.";
+  }
   const work = [...play.missed.values()];
   $("sumWork").innerHTML = work.length
     ? `<p class="fnote">Facts to work on:</p><p class="worklist">${work.map((f) => `<span>${factFull(f)}</span>`).join("")}</p>`
     : "";
-};
-$("again").onclick = () => startPlay();
+  $("again").textContent = sprint ? "Sprint again" : "Keep going";
+  $("practiceMissed").hidden = !work.length;
+  play.work = work.map(({ op: factOp, a, b }) => ({ op: factOp, a, b }));
+}
+$("stop").onclick = () => finish(false);
+$("practiceMissed").onclick = () => startPlay({ only: play.work });
+$("again").onclick = () => startPlay(play.options);
 $("change").onclick = () => {
   $("summary").hidden = true;
   $("setup").hidden = false;
   drawSetup();
 };
 $("start").onclick = () => startPlay();
+$("sprintBtn").onclick = () => startPlay({ sprint: true });
 /* a link to another operation (practice.html#mult) redraws the page for it */
 window.addEventListener("hashchange", () => location.reload());
 drawSetup();

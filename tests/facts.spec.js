@@ -249,8 +249,8 @@ test("Type it: the number pad, delete, a wrong answer, and a real keyboard", asy
   if (!hasTouch)
     for (let i = 0; i < 5; i++) {
       const now = await page.locator("#fact").textContent();
-      // an extra digit to delete, when the answer leaves room for one (3 digits at most)
-      const extra = answerOf(now) < 100;
+      // an extra digit to delete, when the answer leaves room for one (3 digits at most, and a 0 is replaced, not added to)
+      const extra = answerOf(now) > 0 && answerOf(now) < 100;
       await page.keyboard.type(`${answerOf(now)}${extra ? 7 : ""}`);
       if (extra) await page.keyboard.press("Backspace");
       await page.keyboard.press("Enter");
@@ -260,5 +260,60 @@ test("Type it: the number pad, delete, a wrong answer, and a real keyboard", asy
   // the choice is saved
   await page.reload();
   await expect(page.locator("#input [data-m='type']")).toHaveAttribute("aria-pressed", "true");
+  await noSideways(page);
+});
+
+test("a 1-minute sprint: the clock, best scores for each set, and practicing what was missed", async ({
+  page,
+  hasTouch,
+}) => {
+  const press = (loc) => (hasTouch ? loc.tap() : loc.click());
+  // answer the fact on screen: right, or one more than right; then let the next one come
+  const answerIt = async (right) => {
+    const text = await page.locator("#fact").textContent(),
+      value = answerOf(text) + (right ? 0 : 1);
+    await press(page.locator(".choice", { hasText: new RegExp(`^${value}$`) }));
+    await page.clock.runFor(right ? 300 : 1000);
+    return text;
+  };
+  await page.clock.install();
+  await fresh(page, "facts/practice.html#add");
+  await expect(page.locator("#sprintBest")).toHaveText("How many can you get right in 1 minute? Try a sprint.");
+  await press(page.getByRole("button", { name: "1-minute sprint" }));
+  await expect(page.locator("#sprintTime")).toHaveText("60 seconds");
+  await expect(page.getByRole("button", { name: "Show me how" })).toBeHidden();
+  for (let i = 0; i < 5; i++) await answerIt(true);
+  const missed = await answerIt(false);
+  await page.clock.runFor(30000);
+  await expect(page.locator("#sprintTime")).not.toHaveText("60 seconds");
+  await page.clock.runFor(30000);
+  await expect(page.locator("#summary")).toBeVisible();
+  await expect(page.locator("#sumRight")).toHaveText("5 right in 1 minute");
+  await expect(page.locator("#sumMsg")).toHaveText("Your first sprint best for these facts!");
+  await expect(page.locator(".worklist")).toContainText(String(answerOf(missed)));
+  // practice just the missed fact
+  await press(page.getByRole("button", { name: "Practice these" }));
+  await expect(page.locator("#sprintBar")).toBeHidden();
+  expect(factOf(await page.locator("#fact").textContent())).toBe(factOf(missed));
+  await press(page.getByRole("button", { name: "← Stop" }));
+  await press(page.getByRole("button", { name: "Change facts" }));
+  await expect(page.locator("#sprintBest")).toHaveText("Sprint best for these facts: 5 right in 1 minute.");
+  // a worse sprint doesn't change the best
+  await press(page.getByRole("button", { name: "1-minute sprint" }));
+  await answerIt(true);
+  await page.clock.runFor(60000);
+  await expect(page.locator("#sumMsg")).toHaveText("Your best for these facts is 5.");
+  // a sprint stopped early doesn't count
+  await press(page.getByRole("button", { name: "Sprint again" }));
+  for (let i = 0; i < 7; i++) await answerIt(true);
+  await press(page.getByRole("button", { name: "← Stop" }));
+  await expect(page.locator("#sumMsg")).toContainText("doesn’t count toward your best");
+  // each set has its own best, kept after a reload
+  await press(page.getByRole("button", { name: "Change facts" }));
+  await press(page.getByRole("button", { name: "Sums within 10" }));
+  await expect(page.locator("#sprintBest")).toHaveText("How many can you get right in 1 minute? Try a sprint.");
+  await press(page.getByRole("button", { name: "Sums within 20" }));
+  await page.reload();
+  await expect(page.locator("#sprintBest")).toHaveText("Sprint best for these facts: 5 right in 1 minute.");
   await noSideways(page);
 });

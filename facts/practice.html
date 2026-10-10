@@ -13,7 +13,7 @@
 <link rel="stylesheet" href="../shared/blocks.css?v=ef8d48f1">
 <link rel="stylesheet" href="../shared/multiply.css?v=2a49b04d">
 <link rel="stylesheet" href="../shared/shapes.css?v=b9871bf9">
-<link rel="stylesheet" href="facts.css?v=9a028a2a">
+<link rel="stylesheet" href="facts.css?v=8d9dba0d">
 </head>
 <body>
 
@@ -33,7 +33,9 @@
       <div id="show"></div>
       <h3 class="fsub">Answer by</h3>
       <div id="input"></div>
-      <div class="row"><button type="button" class="btn" id="start">Start</button><span class="known" id="known"></span></div>
+      <div class="row"><button type="button" class="btn" id="start">Start</button><button type="button" class="ghost-btn" id="sprintBtn">1-minute sprint</button></div>
+      <p class="known" id="known"></p>
+      <p class="known" id="sprintBest"></p>
     </div>
     <div class="card">
       <h2 class="fset">Your fact map</h2>
@@ -50,6 +52,8 @@
       <button id="stop" class="ghost-btn" type="button">← Stop</button>
       <div class="bar-stats"><span class="pill">Right <b id="right">0</b></span><span class="pill" id="streak">Streak <b>0</b></span><span class="pill">Best <b id="best">0</b></span></div>
     </div>
+    <!-- the time left in a sprint -->
+    <div class="sprintbar" id="sprintBar" hidden><div class="sprintfill" id="sprintFill"></div><span id="sprintTime"></span></div>
     <article class="card">
       <p class="eyebrow" id="playTitle"></p>
       <h2 id="fact" class="fact"></h2>
@@ -69,6 +73,7 @@
       <div id="sumWork"></div>
       <div class="row">
         <button class="btn" id="again" type="button">Keep going</button>
+        <button class="ghost-btn" id="practiceMissed" type="button" hidden>Practice these</button>
         <button class="ghost-btn" id="change" type="button">Change facts</button>
       </div>
     </div>
@@ -82,6 +87,6 @@
 <script src="../shared/multiply.js?v=3d03c2c1"></script>
 <script src="../shared/shapes.js?v=26616a86"></script>
 <script src="facts.js?v=5b77bd50"></script>
-<script src="practice.js?v=768c4a6b"></script>
+<script src="practice.js?v=92e3e134"></script>
 </body>
 </html>
