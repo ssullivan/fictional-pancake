@@ -1,12 +1,14 @@
 /* Math facts: the facts in each set, the choices for a fact, how to work it out, and which fact to practice next. Used by
-   facts/practice.html and by tools/facts.mjs. Needs util.js (R, pick, shuffle, range); the pictures in factHelp need
-   pictures.js (cellsOf), blocks.js (tenFrames), multiply.js (arrayFig), and shapes.js (splitFig).
+   facts/practice.html and by tools/facts.mjs. Needs util.js (R, pick, shuffle, range, gcd); the pictures in factHelp need
+   pictures.js (cellsOf), blocks.js (tenFrames), multiply.js (arrayFig), shapes.js (splitFig), and fractions.js (strips,
+   hundredGrid).
 
    FACT_OPS                          the operations: their sign, name, and sets (addition and subtraction) or tables
                                      (multiplication and division)
    factKey(fact), factAnswer(fact), factText(fact)   "7×8", 56, and "7 × 8"
    factsIn(op, pick)                 every fact in a set ('10' or '20'), or in a list of tables: [{op, a, b}]
-                                     (a division fact is a ÷ b: 56 ÷ 7 is {a: 56, b: 7})
+                                     (a division fact is a ÷ b: 56 ÷ 7 is {a: 56, b: 7}; a fraction to simplify is a/b:
+                                     6/8 is {a: 6, b: 8}, and its answer is text, "3/4")
    A fact can hide a number instead of its answer (fact.ask 'a' or 'b': 7 + ? = 15 hides b). askable(fact, ask) says
    whether that has one answer (0 × ? = 0 doesn't); factPrompt(fact) is "7 + ? = 15", factValue(fact) the number asked
    for (8), and factFull(fact) the whole fact, "7 + 8 = 15". The functions below follow ask.
@@ -36,27 +38,58 @@ const FACT_OPS = {
   mult: { sign: "×", name: "Multiplication", tables: range(13) },
   /* dividing by 1 to 12: no dividing by 0 */
   div: { sign: "÷", name: "Division", tables: range(12).map((i) => i + 1) },
+  /* simplifying fractions less than 1 (improper fractions are for later) */
+  simp: {
+    sign: "/",
+    name: "Simplifying Fractions",
+    sets: [
+      ["12", "Denominators up to 12"],
+      ["24", "Denominators up to 24"],
+      ["100", "Hundredths"],
+    ],
+  },
 };
+/* a fraction a/b in simplest form, [numerator, denominator]: both divided by their greatest common factor */
+const simplest = (a, b) => [a / gcd(a, b), b / gcd(a, b)];
 /* a fact's key: "7+8", "15−7", "7×8" (a multiplication fact and its turnaround share one key, smaller factor first) */
 const factKey = ({ op, a, b }) =>
   op === "mult" ? `${Math.min(a, b)}×${Math.max(a, b)}` : `${a}${FACT_OPS[op].sign}${b}`;
-const factAnswer = ({ op, a, b }) => (op === "add" ? a + b : op === "sub" ? a - b : op === "mult" ? a * b : a / b);
-const factText = ({ op, a, b }) => `${a} ${FACT_OPS[op].sign} ${b}`;
+/* the answer: a number, or for a fraction to simplify its simplest form as text ("3/4") */
+const factAnswer = ({ op, a, b }) =>
+  op === "add" ? a + b : op === "sub" ? a - b : op === "mult" ? a * b : op === "div" ? a / b : simplest(a, b).join("/");
+const factText = ({ op, a, b }) => (op === "simp" ? `${a}/${b}` : `${a} ${FACT_OPS[op].sign} ${b}`);
 /* can the fact hide a (or b) and still have one answer? Not 0 × ? = 0, ? × 0 = 0, or 0 ÷ ? = 0 */
+/* A fraction to simplify hides a number of its simplest form instead (6/8 = ?/4), so only one that simplifies can. */
 const askable = ({ op, a, b }, ask) =>
-  !ask || !((op === "mult" && (a === 0 || b === 0)) || (op === "div" && a === 0 && ask === "b"));
+  !ask ||
+  !(
+    (op === "mult" && (a === 0 || b === 0)) ||
+    (op === "div" && a === 0 && ask === "b") ||
+    (op === "simp" && gcd(a, b) === 1)
+  );
 /* the number a fact asks for: its answer, or the number it hides */
-const factValue = (fact) => (fact.ask === "a" ? fact.a : fact.ask === "b" ? fact.b : factAnswer(fact));
-/* the fact as asked: "7 + 8 = ?", "7 + ? = 15", "? + 8 = 15" */
+const factValue = (fact) => {
+  const { op, a, b, ask } = fact;
+  if (op === "simp" && ask) return simplest(a, b)[ask === "a" ? 0 : 1];
+  return ask === "a" ? a : ask === "b" ? b : factAnswer(fact);
+};
+/* the fact as asked: "7 + 8 = ?", "7 + ? = 15", "? + 8 = 15", "6/8 = ?", "6/8 = ?/4" */
 const factPrompt = (fact) => {
   const { op, a, b, ask } = fact,
     sign = FACT_OPS[op].sign;
+  if (op === "simp") {
+    const [n, d] = simplest(a, b);
+    return `${a}/${b} = ${!ask ? "?" : ask === "a" ? `?/${d}` : `${n}/?`}`;
+  }
   return ask
     ? `${ask === "a" ? "?" : a} ${sign} ${ask === "b" ? "?" : b} = ${factAnswer(fact)}`
     : `${a} ${sign} ${b} = ?`;
 };
-/* the whole fact: "7 + 8 = 15" */
-const factFull = (fact) => `${factText(fact)} = ${factAnswer(fact)}`;
+/* the whole fact: "7 + 8 = 15", "6/8 = 3/4", or "5/8 is already simplest" */
+const factFull = (fact) =>
+  fact.op === "simp" && gcd(fact.a, fact.b) === 1
+    ? `${factText(fact)} is already simplest`
+    : `${factText(fact)} = ${factAnswer(fact)}`;
 /* Every fact in a set. Addition: within 10, both numbers adding to 10 or less; within 20, any two numbers 0 to 10.
    Subtraction: the same facts turned around (from 10 or less; from 20 or less, taking away 0 to 10 and leaving 0 to 10).
    Multiplication: each table t in the list times 0 to 12, each fact once (3 × 7 and 7 × 3 are one fact).
@@ -88,6 +121,17 @@ function factsIn(op, choice) {
     );
   }
   if (op === "div") choice.forEach((t) => range(13).forEach((n) => facts.push({ op, a: t * n, b: t })));
+  if (op === "simp") {
+    /* every fraction less than 1 that simplifies, and about 1 in 6 already in simplest form, spread evenly */
+    const denominators = choice === "100" ? [100] : range(+choice - 1).map((i) => i + 2),
+      simplifies = [],
+      already = [];
+    denominators.forEach((b) =>
+      range(b - 1).forEach((i) => (gcd(i + 1, b) > 1 ? simplifies : already).push({ op, a: i + 1, b })),
+    );
+    const keep = Math.round(simplifies.length / 5);
+    return [...simplifies, ...range(keep).map((i) => already[Math.floor((i * already.length) / keep)])];
+  }
   return facts;
 }
 
@@ -95,6 +139,7 @@ function factsIn(op, choice) {
 /* Four answers to pick from: the right one and 3 named mistakes, all different whole numbers, in a random order. Mistakes
    that land on the right answer, or below 0, are left out, and numbers near the answer fill any gap. */
 function factChoices(fact) {
+  if (fact.op === "simp") return simpChoices(fact);
   const { op, a, b, ask } = fact,
     answer = factValue(fact),
     near = pick([1, -1]),
@@ -215,6 +260,7 @@ function missingMistakes(fact, near) {
 /* A strategy for the fact, in words, and a picture of it: ten-frames to make ten or take away, an array, or a rectangle
    broken into two easier facts. */
 function factHelp(fact) {
+  if (fact.op === "simp") return simpHelp(fact);
   if (fact.ask) return { text: missingHelp(fact), fig: factHelp({ ...fact, ask: null }).fig };
   const { op, a, b } = fact,
     answer = factAnswer(fact);
@@ -330,6 +376,7 @@ function factHelp(fact) {
 
 /* The strategy factHelp uses, said as a hint that doesn't give the answer away. */
 function factHint(fact) {
+  if (fact.op === "simp") return simpHint(fact);
   if (fact.ask) return missingHint(fact);
   const { op, a, b } = fact,
     answer = factAnswer(fact);
@@ -409,6 +456,123 @@ function missingHint(fact) {
     : total === 1
       ? "A number divided by itself is 1."
       : `${total} times what is ${a}?`;
+}
+
+/* ---------- simplifying fractions ---------- */
+/* Four choices for a fraction to simplify: its simplest form and 3 named mistakes (dividing by a common factor that isn't
+   the greatest, dividing only the top or the bottom, taking the same number from both, flipping it, or multiplying when
+   it's already simplest). With a hidden number (6/8 = ?/4), the choices are numbers: the one before simplifying, one from
+   taking away instead of dividing, and ones a little off. Choices are text ("3/4") or numbers, all different. */
+function simpChoices(fact) {
+  const { a, b, ask } = fact,
+    g = gcd(a, b),
+    [n, d] = simplest(a, b),
+    value = factValue(fact),
+    near = pick([1, -1]);
+  let mistakes;
+  if (ask === "a")
+    mistakes = [
+      [a, `${a} is the top before simplifying. ${b} ÷ ${g} = ${d}, so divide ${a} by ${g} too.`],
+      [a - (b - d), `That takes the same amount from the top as from the bottom. Divide instead: ${a} ÷ ${g}.`],
+      [n + near, `${n + near}/${d} isn’t equal to ${a}/${b}.`],
+      [n - near, `${n - near}/${d} isn’t equal to ${a}/${b}.`],
+    ];
+  else if (ask === "b")
+    mistakes = [
+      [b, `${b} is the bottom before simplifying. ${a} ÷ ${g} = ${n}, so divide ${b} by ${g} too.`],
+      [b - (a - n), `That takes the same amount from the bottom as from the top. Divide instead: ${b} ÷ ${g}.`],
+      [d + near, `${n}/${d + near} isn’t equal to ${a}/${b}.`],
+      [d - near, `${n}/${d - near} isn’t equal to ${a}/${b}.`],
+    ];
+  else if (g === 1)
+    mistakes = [
+      [`${2 * a}/${2 * b}`, `That’s equal to ${a}/${b}, but not simpler: both were multiplied by 2.`],
+      ...(a > 1
+        ? [[`${a - 1}/${b - 1}`, `Taking 1 from the top and bottom changes the size. ${a}/${b} is already simplest.`]]
+        : []),
+      [`${b}/${a}`, "That’s flipped: the top and bottom changed places."],
+      [`${a + 1}/${b}`, `That’s not equal to ${a}/${b}. Only 1 divides both ${a} and ${b}.`],
+    ];
+  else {
+    /* a common factor smaller than the greatest: the smallest number above 1 that divides both */
+    const smaller = range(g - 2)
+      .map((i) => i + 2)
+      .find((f) => g % f === 0);
+    mistakes = [
+      ...(smaller
+        ? [
+            [
+              `${a / smaller}/${b / smaller}`,
+              `That’s equal, but not simplest: ${a / smaller} and ${b / smaller} can both still be divided by ${g / smaller}.`,
+            ],
+          ]
+        : []),
+      [`${n}/${b}`, `Divide the bottom by ${g} too.`],
+      [`${a}/${d}`, `Divide the top by ${g} too.`],
+      ...(a - g >= 1
+        ? [
+            [
+              `${a - g}/${b - g}`,
+              "Taking the same number from the top and bottom changes the size. Divide both instead.",
+            ],
+          ]
+        : []),
+      ...(n > 1 ? [[`${d}/${n}`, "That’s flipped: the top and bottom changed places."]] : []),
+    ];
+  }
+  const picked = [];
+  mistakes.forEach(([choice, why]) => {
+    /* whole numbers above 0, or fractions with a top and bottom above 0; different from the answer and each other */
+    const ok = typeof choice === "number" ? choice > 0 : choice.split("/").every((part) => +part > 0);
+    if (picked.length < 3 && ok && choice !== value && !picked.some((p) => p.value === choice))
+      picked.push({ value: choice, why });
+  });
+  /* fill any gap: numbers near the answer, or fractions with the answer's bottom and a different top */
+  for (let step = 1; picked.length < 3; step++)
+    [step, -step].forEach((offset) => {
+      const choice = ask ? value + offset : `${n + offset}/${d}`,
+        ok = ask ? choice > 0 : n + offset > 0;
+      if (picked.length < 3 && ok && choice !== value && !picked.some((p) => p.value === choice))
+        picked.push({ value: choice, why: `That isn’t equal to ${a}/${b}.` });
+    });
+  return shuffle([{ value, why: null }, ...picked]);
+}
+/* how to simplify: divide the top and bottom by their greatest common factor, with strips (or a hundred grid) showing
+   the same amount */
+function simpHelp(fact) {
+  const { a, b, ask } = fact,
+    g = gcd(a, b),
+    [n, d] = simplest(a, b),
+    fig =
+      b === 100
+        ? hundredGrid(cellsOf([a, "a"]), { label: `A hundred grid with ${a} squares shaded` })
+        : strips([{ d: b, k: a, lab: [a, b] }, ...(g > 1 ? [{ d, k: n, cls: "b", lab: [n, d] }] : [])], {
+            label: `Fraction strips: ${a}/${b}${g > 1 ? ` and ${n}/${d}, the same length` : ""}`,
+          });
+  if (g === 1)
+    return { text: `${a} and ${b} have no common factor except 1, so ${a}/${b} is already in simplest form.`, fig };
+  if (ask === "a")
+    return {
+      text: `${b} ÷ ${g} = ${d}, so divide the top by ${g} too: ${a} ÷ ${g} = ${n}. ${a}/${b} = ${n}/${d}.`,
+      fig,
+    };
+  if (ask === "b")
+    return {
+      text: `${a} ÷ ${g} = ${n}, so divide the bottom by ${g} too: ${b} ÷ ${g} = ${d}. ${a}/${b} = ${n}/${d}.`,
+      fig,
+    };
+  return {
+    text: `The greatest number that divides both ${a} and ${b} is ${g}. ${a} ÷ ${g} = ${n} and ${b} ÷ ${g} = ${d}, so ${a}/${b} = ${n}/${d}.`,
+    fig,
+  };
+}
+/* the same, as a hint that doesn't give the answer away (or say whether it simplifies) */
+function simpHint(fact) {
+  const { a, b, ask } = fact,
+    [n, d] = simplest(a, b);
+  if (ask === "a") return `What did you divide ${b} by to get ${d}? Divide ${a} by the same number.`;
+  if (ask === "b") return `What did you divide ${a} by to get ${n}? Divide ${b} by the same number.`;
+  return `What’s the biggest number that divides both ${a} and ${b}?`;
 }
 
 /* ---------- which fact next ---------- */

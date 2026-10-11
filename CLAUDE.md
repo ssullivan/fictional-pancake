@@ -29,9 +29,9 @@ shared/                   used by every grade; each file's header comment docume
   util.js                 R, pick, range, shuffle, miscOf, mcOf, problemKey, gcd, lcm, roundTo, $, Q, parseNum, and Learn controls (seg, press, onPick, segHit, stepper)
   speak.js                Read to me buttons for K–2 Learn pages and games (readAloud)
 facts/                    Math Facts, for any grade (see Math facts)
-  index.html              hub: a card for addition, subtraction, multiplication, and division
+  index.html              hub: a card for addition, subtraction, multiplication, division, and simplifying fractions
   practice.html, .js      Quick Pick: pick a set, then answer facts for as long as you like, or race a 1-minute sprint
-                          (#add, #sub, #mult, #div)
+                          (#add, #sub, #mult, #div, #simp)
   facts.js, facts.css     the facts engine (sets, choices, help, hints, which fact next) and the facts pages' styles
 tools/                    check.mjs, fuzz.mjs, facts.mjs, snap.mjs, same.mjs (see Checking a change)
 .prettierrc.json          Prettier settings for the JavaScript (.prettierignore leaves out HTML, CSS, and docs)
@@ -93,7 +93,7 @@ When building a game:
 
 ## Math facts
 
-`facts/` is practice for any grade, linked from the root page under the grade cards. It doesn't use `shared/engine.js`, whose rounds end: Quick Pick plays forever. `facts/facts.js` (its header documents the API) holds the sets (addition and subtraction within 10 or 20, multiplication tables 0 to 12, division by 1 to 12), facts shown plainly (7 + 8 = ?) or with a number hidden (7 + ? = 15, `fact.ask`), answered by picking from four or typing on a number pad (or a keyboard), four choices for each fact (the answer and three named mistakes), how to work a fact out (`factHelp`, with ten-frames, arrays, or a rectangle broken apart) and a hint that doesn't give the answer away (`factHint`), and the picker: missed or hinted facts come back 3 to 5 facts later until they're right twice in a row, and known facts come up less. A 1-minute sprint (optional, never the default) keeps a best score for each set and offers the facts it missed to practice. Progress, settings, and sprint bests are saved under `facts-save`. `tools/facts.mjs` (run by `check.mjs`) deals every fact of every set many times and checks the choices, help, hints, and picker; `tests/facts.spec.js` plays it. A new way to play goes on the practice page as a setup option; a new kind of fact goes in `FACT_OPS` (with its choices, help, hint, map sides in `practice.js`, and a card on `facts/index.html`).
+`facts/` is practice for any grade, linked from the root page under the grade cards. It doesn't use `shared/engine.js`, whose rounds end: Quick Pick plays forever. `facts/facts.js` (its header documents the API) holds the sets (addition and subtraction within 10 or 20, multiplication tables 0 to 12, division by 1 to 12, and simplifying fractions less than 1 with denominators to 12, to 24, or 100, whose answers are text like "3/4"), facts shown plainly (7 + 8 = ?) or with a number hidden (7 + ? = 15, `fact.ask`), answered by picking from four or typing on a number pad (or a keyboard), four choices for each fact (the answer and three named mistakes), how to work a fact out (`factHelp`, with ten-frames, arrays, or a rectangle broken apart) and a hint that doesn't give the answer away (`factHint`), and the picker: missed or hinted facts come back 3 to 5 facts later until they're right twice in a row, and known facts come up less. A 1-minute sprint (optional, never the default) keeps a best score for each set and offers the facts it missed to practice. Progress, settings, and sprint bests are saved under `facts-save`. `tools/facts.mjs` (run by `check.mjs`) deals every fact of every set many times and checks the choices, help, hints, and picker; `tests/facts.spec.js` plays it. A new way to play goes on the practice page as a setup option; a new kind of fact goes in `FACT_OPS` (with its choices, help, hint, map sides in `practice.js`, and a card on `facts/index.html`).
 
 ## Learn pages
 

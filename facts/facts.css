@@ -3,6 +3,10 @@
 /* the fact, big, and four answers in a 2 × 2 grid, big enough for a finger */
 .fact{font:800 clamp(44px,12vw,72px)/1 var(--display);margin:4px 0;text-align:center;letter-spacing:.01em}
 .fchoices{grid-template-columns:1fr 1fr}
+/* a stacked fraction in the fact, a choice, or the typed answer keeps the big size; the note under the fact */
+.fact .fr,.fchoices .fr,.typed .fr{font-size:.62em;vertical-align:middle}
+.factnote{text-align:center;margin-top:-8px}
+.factnote:empty{display:none}
 .fchoices .choice{font:800 clamp(28px,7vw,40px) var(--display);padding:18px 10px}
 /* typing an answer: what's typed so far (yes or no once checked), and the number pad, 3 keys across, big for a finger */
 .typed{font:800 clamp(36px,10vw,56px)/1 var(--display);text-align:center;padding:12px;border:2px solid rgba(170,205,255,.4);border-radius:14px;background:#0a2340;min-height:1.4em}
@@ -12,6 +16,7 @@
 .pad button{background:#0a2340;border:2px solid rgba(170,205,255,.4);border-radius:12px;padding:14px 0;font:800 26px var(--display)}
 .pad button:hover:not(:disabled){border-color:var(--gold)}
 .pad button.go{background:var(--gold);color:#1a1300;border-color:var(--gold)}
+.pad button.go.wide{grid-column:1 / -1}
 .pad button:disabled{opacity:.5}
 /* a sprint's time left: a bar that empties over the minute, with the seconds beside it */
 .sprintbar{position:relative;height:28px;border-radius:14px;background:rgba(170,205,255,.12);border:1.5px solid rgba(170,205,255,.35);margin-bottom:12px;overflow:hidden}
@@ -23,7 +28,7 @@ h2.fset{font:800 21px var(--display);margin:0}
 h3.fsub{font:700 15px var(--mono);color:var(--dim);margin:4px 0 0}
 .fnote{margin:0;color:var(--dim)}
 .row{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
-.known{color:var(--dim);font:500 15px var(--mono)}
+.known{color:var(--dim);font:500 15px var(--mono);margin:0}
 .seg.tables button{min-width:58px}
 /* the fact map: fh the numbers along the top and side; fm a fact (new, missed, learning, known; out when it isn't in the facts
    picked; cur when tapped); fm-chip a color in the legend */
@@ -35,6 +40,7 @@ h3.fsub{font:700 15px var(--mono);color:var(--dim);margin:4px 0 0}
 .fm.learning rect,.fm-chip.learning{fill:var(--gold);background:var(--gold)}
 .fm.known rect,.fm-chip.known{fill:var(--good);background:var(--good)}
 .fm.missed text,.fm.learning text,.fm.known text{fill:#0a2340}
+.lbl.xs{font-size:9px}
 .fm.out{opacity:.3}
 .fm.cur rect{stroke:#fff;stroke-width:3}
 .fm:focus{outline:none}.fm:focus rect{stroke:#fff;stroke-width:3}

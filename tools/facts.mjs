@@ -87,7 +87,15 @@ const sets = [
   ["mult", FACT_OPS.mult.tables, 91],
   ...FACT_OPS.div.tables.map((t) => ["div", [t], 13]),
   ["div", FACT_OPS.div.tables, 156],
+  // fractions to simplify: every one that simplifies, and about 1 in 6 already simplest
+  ["simp", "12", 25],
+  ["simp", "24", 116],
+  ["simp", "100", 71],
 ];
+// the greatest common factor, worked out here again rather than taken from util.js
+const greatest = (x, y) => (y ? greatest(y, x % y) : x);
+// "6/8" → [6, 8]
+const parts = (text) => text.split("/").map(Number);
 for (const [op, choice, expected] of sets) {
   const facts = factsIn(op, choice),
     name = `${op} ${choice}`;
@@ -104,6 +112,12 @@ for (const [op, choice, expected] of sets) {
       fail(`${name}: ${text} isn't in it`, text);
     if (op === "div" && !(choice.includes(fact.b) && Number.isInteger(answer) && answer <= 12))
       fail(`${name}: ${text} isn't in it`, text);
+    if (op === "simp") {
+      const g = greatest(fact.a, fact.b);
+      if (!(fact.a > 0 && fact.a < fact.b && (choice === "100" ? fact.b === 100 : fact.b <= +choice)))
+        fail(`${name}: ${text} isn't in it`, text);
+      if (answer !== `${fact.a / g}/${fact.b / g}`) fail(`${name}: ${text} isn't ${answer} in simplest form`, text);
+    }
     // both orders of a multiplication fact, each asked for its answer and with each number hidden (when that has one
     // answer), many deals each
     const orders = op === "mult" ? [fact, { ...fact, a: fact.b, b: fact.a }] : [fact],
@@ -111,8 +125,16 @@ for (const [op, choice, expected] of sets) {
     for (const f of asked) {
       const value = factValue(f),
         prompt = factPrompt(f);
-      if ((f.ask === "a" ? f.a : f.ask === "b" ? f.b : answer) !== value)
-        fail(`${name}: ${prompt} asks for the wrong number`, prompt);
+      // the number asked for: the hidden one, or the answer (a fraction's hidden number is from its simplest form)
+      const expected =
+        op === "simp" && f.ask
+          ? parts(answer)[f.ask === "a" ? 0 : 1]
+          : f.ask === "a"
+            ? f.a
+            : f.ask === "b"
+              ? f.b
+              : answer;
+      if (expected !== value) fail(`${name}: ${prompt} asks for the wrong number`, prompt);
       if (prompt.split("?").length !== 2) fail(`${name}: ${prompt} doesn't hide one number`, prompt);
       for (let k = 0; k < 40; k++) {
         const choices = factChoices(f),
@@ -121,8 +143,18 @@ for (const [op, choice, expected] of sets) {
         if (new Set(values).size !== values.length) fail(`${name}: the same choice twice`, `${prompt}: ${values}`);
         if (values.filter((v) => v === value).length !== 1)
           fail(`${name}: the answer isn't one choice`, `${prompt}: ${values}`);
-        if (values.some((v) => !Number.isInteger(v) || v < 0))
-          fail(`${name}: a choice isn't a whole number`, `${prompt}: ${values}`);
+        // whole numbers, or (simplifying) fractions with a top and bottom above 0
+        if (
+          values.some((v) => (typeof v === "string" ? !/^[1-9]\d*\/[1-9]\d*$/.test(v) : !Number.isInteger(v) || v < 0))
+        )
+          fail(`${name}: a choice isn't a whole number or a fraction`, `${prompt}: ${values}`);
+        // a wrong fraction equal to the one asked about says it isn't simplest
+        if (op === "simp" && !f.ask)
+          choices.forEach((c) => {
+            const [n, d] = parts(c.value);
+            if (c.why && n * f.b === d * f.a && !/not simple/.test(c.why))
+              fail(`${name}: an equal choice doesn't say it isn't simplest`, `${prompt}: ${c.value}: ${c.why}`);
+          });
         if (choices.some((c) => (c.value === value) !== (c.why === null)))
           fail(`${name}: a reason is missing or on the answer`, prompt);
       }

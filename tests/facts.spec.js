@@ -5,6 +5,14 @@ const { test, expect } = require("./fixtures");
 
 // a fact as the page writes it, solved: "7 + 8 = ?", "7 + ? = 15", or "? + 8 = 15" → {a, sign, b, value: the number asked for}
 function solve(text) {
+  // a fraction to simplify: "6/8 = ?" asks for "3/4"; "6/8 = ?/4" asks for 3, and "6/8 = 3/?" for 4
+  const fraction = text.match(/^(\d+)\/(\d+) = (\?|\d+)\/?(\?|\d+)?$/);
+  if (fraction) {
+    const [, a, b, top, bottom] = fraction,
+      g = gcd(+a, +b),
+      [n, d] = [a / g, b / g];
+    return { a: +a, sign: "/", b: +b, value: top === "?" && !bottom ? `${n}/${d}` : top === "?" ? n : d };
+  }
   const [, left, sign, right, result] = text.match(/(\d+|\?) ([+−×÷]) (\d+|\?) = (\d+|\?)/),
     apply = (x, y) => (sign === "+" ? x + y : sign === "−" ? x - y : sign === "×" ? x * y : x / y);
   if (result === "?") return { a: +left, sign, b: +right, value: apply(+left, +right) };
@@ -16,6 +24,8 @@ function solve(text) {
   const b = { "+": total - left, "−": left - total, "×": total / left, "÷": left / total }[sign];
   return { a: +left, sign, b, value: b };
 }
+// the greatest common factor
+const gcd = (x, y) => (y ? gcd(y, x % y) : x);
 // the number to tap for a fact as the page writes it
 const answerOf = (text) => solve(text).value;
 // the fact, the same either way round: "8 × 7" and "7 × 8" are one fact, and a hidden number doesn't change it
@@ -42,12 +52,13 @@ test("the main page and the hub link to every operation", async ({ page }) => {
     ["Subtraction", "sub"],
     ["Multiplication", "mult"],
     ["Division", "div"],
+    ["Simplifying Fractions", "simp"],
   ])
     await expect(page.getByRole("link", { name: new RegExp(name) })).toHaveAttribute("href", `practice.html#${hash}`);
   await noSideways(page);
 });
 
-for (const op of ["add", "sub", "mult", "div"]) {
+for (const op of ["add", "sub", "mult", "div", "simp"]) {
   test(`Quick Pick ${op}: 30 right answers in a row`, async ({ page, hasTouch }) => {
     const press = (loc) => (hasTouch ? loc.tap() : loc.click());
     await fresh(page, `facts/practice.html#${op}`);
@@ -61,12 +72,15 @@ for (const op of ["add", "sub", "mult", "div"]) {
         values = await page.locator(".choice").allTextContents();
       expect(new Set(values).size, `${text}: ${values}`).toBe(4);
       expect(
-        values.filter((v) => +v === answerOf(text)),
+        values.filter((v) => v === String(answerOf(text))),
         `${text}: ${values}`,
       ).toHaveLength(1);
       if (factOf(text) === (last && factOf(last))) throw new Error(`${text} twice in a row`);
       await press(page.locator(".choice", { hasText: new RegExp(`^${answerOf(text)}$`) }));
-      await expect(page.locator(".fb.good")).toContainText(`= ${answerOf(text)}`);
+      // "= 15", "= 3/4", or "is already simplest" for a fraction that doesn't simplify
+      await expect(page.locator(".fb.good")).toContainText(
+        `${text.startsWith(`${answerOf(text)} =`) ? "is already simplest" : `= ${answerOf(text)}`}`,
+      );
       last = text;
     }
     await expect(page.locator("#right")).toHaveText("30");
@@ -183,7 +197,7 @@ test("division: tables from 1 to 12, and a map of every fact", async ({ page, ha
   await noSideways(page);
 });
 
-for (const op of ["add", "sub", "mult", "div"])
+for (const op of ["add", "sub", "mult", "div", "simp"])
   test(`missing numbers ${op}: 15 facts, each hiding a number`, async ({ page, hasTouch }) => {
     const press = (loc) => (hasTouch ? loc.tap() : loc.click());
     await fresh(page, `facts/practice.html#${op}`);
@@ -195,10 +209,11 @@ for (const op of ["add", "sub", "mult", "div"])
       await expect(page.locator("#fact")).not.toHaveText(last, { timeout: 5000 });
       const text = await page.locator("#fact").textContent(),
         { a, sign, b, value } = solve(text);
-      // a hidden number, unless the fact can't hide one (times 0)
-      if (!(sign === "×" && (a === 0 || b === 0)) && !(sign === "÷" && a === 0)) expect(text).not.toMatch(/= \?$/);
+      // a hidden number, unless the fact can't hide one (times 0, or a fraction already simplest)
+      if (!(sign === "×" && (a === 0 || b === 0)) && !(sign === "÷" && a === 0) && !(sign === "/" && gcd(a, b) === 1))
+        expect(text).not.toMatch(/= \?$/);
       await press(page.locator(".choice", { hasText: new RegExp(`^${value}$`) }));
-      await expect(page.locator(".fb.good")).toContainText(`${a} ${sign} ${b} = `);
+      await expect(page.locator(".fb.good")).toContainText(sign === "/" ? `${a}/${b} = ` : `${a} ${sign} ${b} = `);
       last = text;
     }
     await noSideways(page);
@@ -315,5 +330,63 @@ test("a 1-minute sprint: the clock, best scores for each set, and practicing wha
   await press(page.getByRole("button", { name: "Sums within 20" }));
   await page.reload();
   await expect(page.locator("#sprintBest")).toHaveText("Sprint best for these facts: 5 right in 1 minute.");
+  await noSideways(page);
+});
+
+test("simplifying fractions: sets, the map, a fraction already simplest, and typing a fraction", async ({
+  page,
+  hasTouch,
+}) => {
+  const press = (loc) => (hasTouch ? loc.tap() : loc.click());
+  await fresh(page, "facts/practice.html#simp");
+  await expect(page.locator("h1")).toHaveText("Simplifying fractions");
+  // the sets and their maps: a triangle of fractions less than 1, or hundredths 1 to 99
+  await expect(page.locator("#known")).toHaveText("You know 0 of these 25 facts.");
+  await expect(page.locator(".fm")).toHaveCount(66);
+  await press(page.getByRole("button", { name: "Denominators up to 24" }));
+  await expect(page.locator("#known")).toHaveText("You know 0 of these 116 facts.");
+  await expect(page.locator(".fm")).toHaveCount(276);
+  await press(page.getByRole("button", { name: "Hundredths" }));
+  await expect(page.locator("#known")).toHaveText("You know 0 of these 71 facts.");
+  await expect(page.locator(".fm")).toHaveCount(99);
+  await press(page.locator('.fm[data-a="75"][data-b="100"]'));
+  await expect(page.locator("#mapInfo")).toContainText("75/100 = 3/4");
+  await expect(page.locator("#mapInfo")).toContainText("The greatest number that divides both 75 and 100 is 25.");
+  await press(page.getByRole("button", { name: "Denominators up to 12" }));
+  // a fraction already in simplest form says so
+  await press(page.locator('.fm[data-a="5"][data-b="8"]'));
+  await expect(page.locator("#mapInfo")).toContainText("5/8 is already simplest");
+  // type a fraction: a number, /, a number, Go; an equal one that isn't simplest is wrong, and says so
+  await press(page.locator("#input [data-m='type']"));
+  await press(page.getByRole("button", { name: "Start" }));
+  const padType = async (text) => {
+    for (const key of text) await press(page.locator(`.pad [data-key="${key}"]`));
+  };
+  let last = "";
+  for (let i = 0; i < 8; i++) {
+    await expect(page.locator("#fact")).not.toHaveText(last, { timeout: 5000 });
+    const text = await page.locator("#fact").textContent(),
+      { a, b, value } = solve(text);
+    // the first one: Go does nothing without a bottom number; then try it unsimplified (when it simplifies)
+    if (i === 0) {
+      await padType(String(a));
+      await press(page.getByRole("button", { name: "Go" }));
+      await expect(page.locator("#feedback")).toBeEmpty();
+      await press(page.getByRole("button", { name: "Fraction bar" }));
+      await padType(String(b));
+      await expect(page.locator("#typed")).toHaveText(`${a}/${b}`);
+      await press(page.getByRole("button", { name: "Go" }));
+      if (value === `${a}/${b}`) await expect(page.locator(".fb.good")).toContainText("is already simplest");
+      else {
+        await expect(page.locator(".fb.bad")).toContainText("but not simplest: divide again");
+        await press(page.getByRole("button", { name: "Next fact →" }));
+      }
+    } else {
+      await padType(value.replace("/", "/"));
+      await press(page.getByRole("button", { name: "Go" }));
+      await expect(page.locator("#typed")).toHaveClass(/yes/);
+    }
+    last = text;
+  }
   await noSideways(page);
 });

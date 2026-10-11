@@ -1,12 +1,13 @@
-/* Quick Pick (facts/practice.html): pick which facts to practice, then answer them for as long as you like, tapping one of
-   four answers. The operation comes from the link: practice.html#add, #sub, #mult, or #div. Facts, choices, help, and which fact
-   comes next are in facts.js; this file draws the screens and saves progress on this device. */
+/* Quick Pick (facts/practice.html): pick which facts to practice, then answer them for as long as you like, picking one of
+   four answers or typing it. The operation comes from the link: practice.html#add, #sub, #mult, #div, or #simp (simplifying
+   fractions). Facts, choices, help, and which fact comes next are in facts.js; this file draws the screens and saves progress
+   on this device. */
 const SAVE_KEY = "facts-save";
-/* the operation: 'add', 'sub', 'mult', or 'div' */
-const op = ["add", "sub", "mult", "div"].includes(location.hash.slice(1)) ? location.hash.slice(1) : "add";
+/* the operation: 'add', 'sub', 'mult', 'div', or 'simp' */
+const op = Object.keys(FACT_OPS).includes(location.hash.slice(1)) ? location.hash.slice(1) : "add";
 /* does this operation practice tables (multiplication and division), not sets? */
 const byTables = !!FACT_OPS[op].tables;
-/* Saved progress for every operation: {add: {set, memory, best}, sub: {…}, mult: {tables, memory, best}, div: {…}} */
+/* Saved progress for every operation: {add: {set, memory, best, …}, sub, mult: {tables, memory, best, …}, div, simp} */
 let save = {};
 try {
   save = JSON.parse(localStorage.getItem(SAVE_KEY) || "{}") || {};
@@ -30,14 +31,17 @@ const SPRINT_MS = 60000;
 const setKey = () => (byTables ? `tables ${mine.tables.join(",")}` : `set ${mine.set}`);
 mine.best = mine.best || 0;
 if (byTables) mine.tables = mine.tables || [2, 3, 4, 5];
-else mine.set = mine.set || "20";
+else mine.set = mine.set || (op === "simp" ? "12" : "20");
 /* an example of each way to show a fact, for the "Show facts as" buttons */
 const SHOW_EXAMPLES = {
   add: ["7 + 8 = ?", "7 + ? = 15"],
   sub: ["15 − 8 = ?", "15 − ? = 7"],
   mult: ["6 × 7 = ?", "6 × ? = 42"],
   div: ["42 ÷ 6 = ?", "42 ÷ ? = 7"],
+  simp: ["6/8 = ?", "6/8 = ?/4"],
 };
+/* text with every fraction in it ("6/8", "?/4") written stacked; other text is unchanged */
+const stack = (text) => String(text).replace(/(\d+|\?)\/(\d+|\?)/g, (match, top, bottom) => fr(top, bottom));
 /* the facts picked to practice */
 const chosenFacts = () => factsIn(op, byTables ? mine.tables : mine.set);
 /* the fact tapped on the map (null before any tap) */
@@ -47,7 +51,7 @@ let mapPick = null;
 function drawSetup() {
   const opInfo = FACT_OPS[op];
   document.title = `${opInfo.name} · Quick Pick · Math Facts`;
-  $("opTitle").innerHTML = `${opInfo.name} <span>facts</span>`;
+  $("opTitle").innerHTML = op === "simp" ? "Simplifying <span>fractions</span>" : `${opInfo.name} <span>facts</span>`;
   /* addition and subtraction pick a set; multiplication and division tick the tables */
   const tableWord = op === "mult" ? "Times" : "Divided by";
   $("sets").innerHTML = byTables
@@ -66,8 +70,8 @@ function drawSetup() {
   } else press($("sets"), mine.set);
   const [plainExample, missingExample] = SHOW_EXAMPLES[op];
   $("show").innerHTML = seg("Show facts as", [
-    ["plain", plainExample],
-    ["missing", missingExample],
+    ["plain", stack(plainExample)],
+    ["missing", stack(missingExample)],
     ["mix", "Mix them"],
   ]);
   press($("show"), mine.show);
@@ -126,56 +130,87 @@ $("input").addEventListener("click", (e) => {
 });
 
 /* ---------- the fact map ---------- */
-/* The map's rows and columns: the numbers along its left side and top. Addition: a down the side, b along the top.
-   Subtraction: the number taken away, and the answer. Multiplication: 0 to 12 both ways. Division: the number divided by
-   (1 to 12), and the answer. */
-const MAP_SIDES = {
-  add: [range(11), range(11)],
-  sub: [range(11), range(11)],
-  mult: [range(13), range(13)],
-  div: [range(12).map((i) => i + 1), range(13)],
-};
-/* the fact in the map's square for row number r and column number c */
-const squareFact = (r, c) =>
-  op === "sub" ? { op, a: r + c, b: r } : op === "div" ? { op, a: r * c, b: r } : { op, a: r, b: c };
-/* every square of the map: [row, col, fact], where row and col count from 0 */
-function mapFacts() {
-  const [rowNums, colNums] = MAP_SIDES[op];
-  return rowNums.flatMap((r, row) => colNums.map((c, col) => [row, col, squareFact(r, c)]));
+/* The map's layout: the numbers down its left side (rows) and along its top (cols), the fact in the square for row number
+   r and column number c (null where there's none), what each square says, and its size.
+   Addition: a down the side, b along the top. Subtraction: the number taken away, and the answer. Multiplication: 0 to 12
+   both ways. Division: the number divided by (1 to 12), and the answer. Simplifying: the denominator down the side and the
+   numerator along the top, a triangle, since the top is smaller; hundredths: tens down the side and ones along the top. */
+function mapLayout() {
+  if (op === "simp" && mine.set === "100")
+    return {
+      rows: range(10).map((i) => i * 10),
+      cols: range(10),
+      factAt: (r, c) => (r + c ? { op, a: r + c, b: 100 } : null),
+      text: (fact) => fact.a,
+      corner: "/100",
+      cellSize: 30,
+    };
+  if (op === "simp") {
+    const most = +mine.set;
+    return {
+      rows: range(most - 1).map((i) => i + 2),
+      cols: range(most - 1).map((i) => i + 1),
+      factAt: (r, c) => (c < r ? { op, a: c, b: r } : null),
+      text: () => "",
+      corner: "/",
+      cellSize: most > 12 ? 15 : 28,
+    };
+  }
+  const sides = {
+    add: [range(11), range(11)],
+    sub: [range(11), range(11)],
+    mult: [range(13), range(13)],
+    div: [range(12).map((i) => i + 1), range(13)],
+  }[op];
+  return {
+    rows: sides[0],
+    cols: sides[1],
+    factAt: (r, c) =>
+      op === "sub" ? { op, a: r + c, b: r } : op === "div" ? { op, a: r * c, b: r } : { op, a: r, b: c },
+    /* subtraction and division show the number they start from; the others their answer */
+    text: (fact) => (op === "sub" || op === "div" ? fact.a : factAnswer(fact)),
+    corner: FACT_OPS[op].sign,
+    cellSize: byTables ? 28 : 32,
+  };
 }
 /* The fact map (svg): each square colored by how well its fact is known, dim when it isn't in the facts picked, and
    outlined when tapped. The top row and left column are the numbers. */
 function factMap() {
-  const [rowNums, colNums] = MAP_SIDES[op],
-    cellSize = byTables ? 28 : 32,
+  const { rows, cols, factAt, text, corner, cellSize } = mapLayout(),
     inSet = new Set(chosenFacts().map(factKey)),
-    corner = FACT_OPS[op].sign,
+    /* small squares get small numbers */
+    textCls = cellSize < 20 ? "lbl xs" : "lbl s",
     cellX = (col) => 2 + (col + 1) * cellSize,
     cellY = (row) => 2 + (row + 1) * cellSize;
   /* a square at row, col with its text (row and col −1 are the headers) */
-  const square = (row, col, cls, text, attrs = "") =>
-    `<g class="${cls}"${attrs}><rect x="${cellX(col)}" y="${cellY(row)}" width="${cellSize}" height="${cellSize}"/><text class="lbl s" x="${cellX(col) + cellSize / 2}" y="${cellY(row) + cellSize / 2}">${text}</text></g>`;
+  const square = (row, col, cls, words, attrs = "") =>
+    `<g class="${cls}"${attrs}><rect x="${cellX(col)}" y="${cellY(row)}" width="${cellSize}" height="${cellSize}"/><text class="${textCls}" x="${cellX(col) + cellSize / 2}" y="${cellY(row) + cellSize / 2}">${words}</text></g>`;
   let markup = square(-1, -1, "fh", corner);
-  colNums.forEach((c, col) => (markup += square(-1, col, "fh", c)));
-  rowNums.forEach((r, row) => (markup += square(row, -1, "fh", r)));
-  mapFacts().forEach(([row, col, fact]) => {
-    const key = factKey(fact),
-      status = factStatus(mine.memory, key),
-      picked = mapPick && factKey(mapPick) === key && mapPick.a === fact.a && mapPick.b === fact.b;
-    markup += square(
-      row,
-      col,
-      `fm ${status}${inSet.has(key) ? "" : " out"}${picked ? " cur" : ""}`,
-      /* subtraction and division show the number they start from; the others their answer */
-      op === "sub" || op === "div" ? fact.a : factAnswer(fact),
-      ` data-a="${fact.a}" data-b="${fact.b}" role="button" tabindex="0" aria-label="${factText(fact)}, ${status}"`,
-    );
-  });
+  cols.forEach((c, col) => (markup += square(-1, col, "fh", c)));
+  rows.forEach((r, row) => (markup += square(row, -1, "fh", r)));
+  let squares = 0;
+  rows.forEach((r, row) =>
+    cols.forEach((c, col) => {
+      const fact = factAt(r, c);
+      if (!fact) return;
+      squares++;
+      const key = factKey(fact),
+        status = factStatus(mine.memory, key),
+        picked = mapPick && factKey(mapPick) === key && mapPick.a === fact.a && mapPick.b === fact.b;
+      markup += square(
+        row,
+        col,
+        `fm ${status}${inSet.has(key) ? "" : " out"}${picked ? " cur" : ""}`,
+        text(fact),
+        ` data-a="${fact.a}" data-b="${fact.b}" role="button" tabindex="0" aria-label="${factText(fact)}, ${status}"`,
+      );
+    }),
+  );
   return svgWrap(
-    (colNums.length + 1) * cellSize + 4,
-    (rowNums.length + 1) * cellSize + 4,
+    (cols.length + 1) * cellSize + 4,
+    (rows.length + 1) * cellSize + 4,
     markup,
-    `Fact map: ${rowNums.length} by ${colNums.length} ${FACT_OPS[op].name.toLowerCase()} facts, colored by how well each is known`,
+    `Fact map: ${squares} ${FACT_OPS[op].name.toLowerCase()} facts, colored by how well each is known`,
   );
 }
 /* the words for each color on the map */
@@ -192,9 +227,9 @@ function drawMap() {
   const status = factStatus(mine.memory, factKey(mapPick)),
     m = mine.memory[factKey(mapPick)];
   $("mapInfo").innerHTML =
-    `<div class="fb info"><p><b>${factFull(mapPick)}</b> · ${STATUS_WORD[status]}` +
+    `<div class="fb info"><p><b>${stack(factFull(mapPick))}</b> · ${STATUS_WORD[status]}` +
     (m ? ` (right ${m.r}, missed ${m.w})` : "") +
-    `</p><p>${factHelp(mapPick).text}</p><button type="button" class="btn" id="practiceOne">Practice this fact</button></div>`;
+    `</p><p>${stack(factHelp(mapPick).text)}</p><button type="button" class="btn" id="practiceOne">Practice this fact</button></div>`;
   $("practiceOne").onclick = () => startPlay({ focus: factKey(mapPick) });
 }
 /* tap (or Enter on) a square to see its fact */
@@ -215,7 +250,6 @@ $("map").addEventListener("keydown", (e) => {
 /* ---------- playing ---------- */
 /* this time's play: the picker, the fact on screen, whether it's answered or hinted, and the counts */
 let play = null;
-/* Start playing the facts picked; focus: a fact to practice more often (from the map) */
 /* Start playing. focus: a fact from the map to practice more often; only: just these facts (the ones missed in a sprint);
    sprint: a 1-minute sprint, with no hints, that ends by itself. */
 function startPlay({ focus = null, only = null, sprint = false } = {}) {
@@ -251,11 +285,18 @@ function tickSprint() {
   $("sprintTime").textContent = `${Math.ceil(left / 1000)} seconds`;
   if (!left) finish(true);
 }
-/* the number pad for typing an answer: 1 to 9, then delete, 0, and Go */
-const PAD =
+/* The number pad for typing an answer: 1 to 9, then delete, 0, and Go. fraction: a / key after 0, to go from the top
+   number to the bottom one, with Go on a row of its own. */
+const padHtml = (fraction) =>
   `<div class="typed" id="typed" aria-live="polite">?</div><div class="pad">` +
   [1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => `<button type="button" data-key="${n}">${n}</button>`).join("") +
-  `<button type="button" data-key="del" aria-label="Delete">⌫</button><button type="button" data-key="0">0</button><button type="button" class="go" data-key="go">Go</button></div>`;
+  `<button type="button" data-key="del" aria-label="Delete">⌫</button><button type="button" data-key="0">0</button>` +
+  (fraction
+    ? `<button type="button" data-key="/" aria-label="Fraction bar">/</button><button type="button" class="go wide" data-key="go">Go</button>`
+    : `<button type="button" class="go" data-key="go">Go</button>`) +
+  `</div>`;
+/* does the fact on screen want a fraction typed (a fraction to simplify, with no number hidden)? */
+const wantsFraction = () => play.fact.op === "simp" && !play.fact.ask;
 /* deal the next fact, and its four answers or the number pad */
 function nextFact() {
   if (play.over) return;
@@ -267,13 +308,15 @@ function nextFact() {
   play.done = false;
   play.hinted = false;
   play.typed = "";
-  $("fact").textContent = factPrompt(fact);
+  play.choices = mine.input === "type" ? [] : factChoices(fact);
+  $("fact").innerHTML = stack(factPrompt(fact));
+  $("factNote").textContent = op === "simp" && !fact.ask ? "Write it in simplest form." : "";
   $("choices").className = mine.input === "type" ? "typing" : "choices fchoices";
   $("choices").innerHTML =
     mine.input === "type"
-      ? PAD
-      : factChoices(fact)
-          .map((c) => `<button type="button" class="choice" data-v="${c.value}">${c.value}</button>`)
+      ? padHtml(wantsFraction())
+      : play.choices
+          .map((c) => `<button type="button" class="choice" data-v="${c.value}">${stack(c.value)}</button>`)
           .join("");
   $("hint").hidden = true;
   $("hintBtn").disabled = false;
@@ -286,11 +329,12 @@ function drawCounts() {
   $("streak").innerHTML = `Streak <b>${play.streak}</b>`;
   $("streak").classList.toggle("hot", play.streak >= 5);
 }
-/* check a tapped answer: right goes on by itself; wrong shows the answer and how to work it out, with a Next button */
+/* Check an answer, picked or typed (as text, "56" or "3/4"): right goes on by itself; wrong shows the answer, why the pick
+   was wrong, and how to work it out, with a Next button. */
 function answer(value) {
   if (play.done) return;
   const fact = play.fact,
-    right = factValue(fact),
+    right = String(factValue(fact)),
     ok = value === right;
   play.done = true;
   play.tried++;
@@ -315,25 +359,35 @@ function answer(value) {
   $("choices")
     .querySelectorAll(".choice")
     .forEach((b) => {
-      const v = +b.dataset.v;
-      if (v === right) b.classList.add("yes");
-      else if (v === value) b.classList.add("no");
+      if (b.dataset.v === right) b.classList.add("yes");
+      else if (b.dataset.v === value) b.classList.add("no");
       b.disabled = true;
     });
+  /* why a wrong answer is wrong: the picked choice's reason, or for a typed fraction equal to the right one, that it
+     isn't simplest */
+  const picked = play.choices.find((c) => String(c.value) === value),
+    [top, bottom] = value.split("/").map(Number),
+    equalButNot = wantsFraction() && bottom && top * fact.b === bottom * fact.a,
+    why = picked
+      ? picked.why
+      : equalButNot
+        ? `${value} is equal to ${factText(fact)}, but not simplest: divide again.`
+        : "";
   drawCounts();
   const help = factHelp(fact);
   if (ok) {
-    $("feedback").innerHTML = `<div class="fb good"><h4>Yes! ${factFull(fact)}</h4></div>`;
+    $("feedback").innerHTML = `<div class="fb good"><h4>Yes! ${stack(factFull(fact))}</h4></div>`;
     play.timer = setTimeout(nextFact, play.options.sprint ? 300 : 700);
   } else if (play.options.sprint) {
     /* a sprint keeps going: the right answer for a second, then the next fact */
-    $("feedback").innerHTML = `<div class="fb bad"><h4>${factFull(fact)}</h4></div>`;
+    $("feedback").innerHTML = `<div class="fb bad"><h4>${stack(factFull(fact))}</h4></div>`;
     play.timer = setTimeout(nextFact, 1000);
   } else {
     $("feedback").innerHTML =
-      `<div class="fb bad"><h4>${factFull(fact)}</h4>` +
-      (mine.input === "type" ? `<p>You typed ${value}.</p>` : "") +
-      `<p>${help.text}</p>` +
+      `<div class="fb bad"><h4>${stack(factFull(fact))}</h4>` +
+      (mine.input === "type" ? `<p>You typed ${stack(value)}.</p>` : "") +
+      (why ? `<p>${stack(why)}</p>` : "") +
+      `<p>${stack(help.text)}</p>` +
       (help.fig ? `<div class="fig">${help.fig}</div>` : "") +
       `<p>It’ll come back soon.</p><button type="button" class="btn" id="nextBtn">Next fact →</button></div>`;
     $("nextBtn").onclick = nextFact;
@@ -343,24 +397,35 @@ function answer(value) {
 $("choices").addEventListener("click", (e) => {
   const b = e.target.closest(".choice"),
     key = e.target.closest("[data-key]");
-  if (b && !b.disabled) answer(+b.dataset.v);
+  if (b && !b.disabled) answer(b.dataset.v);
   if (key && !key.disabled) typeKey(key.dataset.key);
 });
-/* a key on the number pad (or keyboard): a digit (at most 3), 'del', or 'go' to check a typed answer */
+/* A key on the number pad (or keyboard): a digit (at most 3 in a number), 'del', '/' to go from the top of a fraction to
+   the bottom, or 'go' to check what's typed. A 0 on its own is replaced by the next digit. */
 function typeKey(key) {
   if (!play || play.done || mine.input !== "type") return;
+  const fraction = wantsFraction(),
+    [top, bottom] = play.typed.split("/");
   if (key === "go") {
-    if (play.typed) answer(+play.typed);
+    /* a fraction needs both numbers */
+    if (fraction ? top && bottom : play.typed) answer(fraction ? `${+top}/${+bottom}` : String(+play.typed));
     return;
   }
   if (key === "del") play.typed = play.typed.slice(0, -1);
-  else if (play.typed.length < 3) play.typed = play.typed === "0" ? key : play.typed + key;
-  $("typed").textContent = play.typed || "?";
+  else if (key === "/") {
+    if (fraction && top && bottom === undefined) play.typed += "/";
+  } else {
+    /* the number being typed: the bottom once / is in, otherwise the top */
+    const current = bottom !== undefined ? bottom : top || "";
+    if (current.length < 3) play.typed = current === "0" ? play.typed.slice(0, -1) + key : play.typed + key;
+  }
+  const [nowTop, nowBottom] = play.typed.split("/");
+  $("typed").innerHTML = !play.typed ? "?" : nowBottom !== undefined ? fr(nowTop, nowBottom || "?") : play.typed;
 }
 /* a keyboard types too: digits, Backspace, and Enter (only while a fact is waiting for its answer) */
 document.addEventListener("keydown", (e) => {
   if ($("play").hidden || !play || play.done || mine.input !== "type") return;
-  if (/^[0-9]$/.test(e.key)) typeKey(e.key);
+  if (/^[0-9/]$/.test(e.key)) typeKey(e.key);
   else if (e.key === "Backspace") typeKey("del");
   else if (e.key === "Enter") {
     e.preventDefault();
@@ -372,10 +437,9 @@ $("hintBtn").onclick = () => {
   const help = factHelp(play.fact);
   play.hinted = true;
   $("hintBtn").disabled = true;
-  $("hint").innerHTML = `<p>${factHint(play.fact)}</p>` + (help.fig ? `<div class="fig">${help.fig}</div>` : "");
+  $("hint").innerHTML = `<p>${stack(factHint(play.fact))}</p>` + (help.fig ? `<div class="fig">${help.fig}</div>` : "");
   $("hint").hidden = false;
 };
-/* Stop: a summary of this time */
 /* The end of playing: a summary of this time. finished: a sprint ran its full minute (only then can it be a new best). */
 function finish(finished = false) {
   const { sprint } = play.options;
@@ -406,7 +470,7 @@ function finish(finished = false) {
   }
   const work = [...play.missed.values()];
   $("sumWork").innerHTML = work.length
-    ? `<p class="fnote">Facts to work on:</p><p class="worklist">${work.map((f) => `<span>${factFull(f)}</span>`).join("")}</p>`
+    ? `<p class="fnote">Facts to work on:</p><p class="worklist">${work.map((f) => `<span>${stack(factFull(f))}</span>`).join("")}</p>`
     : "";
   $("again").textContent = sprint ? "Sprint again" : "Keep going";
   $("practiceMissed").hidden = !work.length;
