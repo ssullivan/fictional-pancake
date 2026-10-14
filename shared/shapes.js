@@ -7,7 +7,10 @@
    shareFig(shape, n, how, {shade})  a circle or rectangle cut into halves, thirds, or fourths
    PB, pbFig(big, small, {show})     pattern blocks: a hexagon, trapezoid, or rhombus filled with smaller blocks
    rectFig(length, width, {…})       a rectangle with its side lengths, in unit squares when it's small enough (svg)
-   splitFig(rows, cols, cut, {grid, sides, products, ask, label})   a rectangle cut into two parts in two colors (svg) */
+   splitFig(rows, cols, cut, {grid, sides, products, ask, label})   a rectangle cut into two parts in two colors (svg)
+   lCells(wide, tall, cutWide, cutTall), lFig(wide, tall, cutWide, cutTall, {corner, sides, grid, cut, size, label})   an L-shaped
+                                     figure: a rectangle with a corner cut away, with its side lengths and a cut into two
+                                     rectangles (svg) */
 /* Flat shapes in a 100 × 100 box, by number of sides. Some are tilted, stretched, or bent in, so the name comes from counting sides. */
 /* Flat shapes in a 100 × 100 box, by number of sides. Some are tilted, stretched, or bent in, so the name comes from counting sides. */
 /* the corners of a regular n-gon in the box, the first at angle a0 (degrees; −90 is straight up) */
@@ -175,11 +178,11 @@ const shapeFig = (pts, { s = 180, ...o } = {}, label) => {
    read as "<tap> 1", "<tap> 2", …). label: what each picture is (numbered, or lettered). */
 function picRow(n, w, h, draw, { letters = false, tap = null, label = "Picture" } = {}) {
   const picture = (i) => {
-    const letter = letters ? `<text class="lbl" x="${w / 2}" y="${h + 14}">${"ABCD"[i]}</text>` : "",
+    const letter = letters ? `<text class="lbl" x="${w / 2}" y="${h + 14}">${"ABCDEF"[i]}</text>` : "",
       target = tap
         ? `<rect class="cand hit" data-id="${i}" tabindex="0" role="button" aria-label="${tap} ${i + 1}" x="4" y="4" width="${w - 8}" height="${h - 8}" rx="10"/>`
         : "";
-    return svgWrap(w, h + (letters ? 30 : 0), draw(i) + letter + target, `${label} ${letters ? "ABCD"[i] : i + 1}`);
+    return svgWrap(w, h + (letters ? 30 : 0), draw(i) + letter + target, `${label} ${letters ? "ABCDEF"[i] : i + 1}`);
   };
   return `<div class="picrow">${range(n).map(picture).join("")}</div>`;
 }
@@ -536,5 +539,81 @@ function rectFig(length, width, { unit = "", ask = null, grid = true, label } = 
     markup,
     label ||
       `A rectangle ${ask === "length" ? "?" : length} by ${ask === "width" ? "?" : width}${unit ? " " + unit : ""}`,
+  );
+}
+
+/* ---------- L-shaped figures ---------- */
+/* The squares of an L-shaped figure, as [col, row]: a rectangle `wide` × `tall` with its top right corner cut away,
+   `cutWide` × `cutTall`. */
+const lCells = (wide, tall, cutWide, cutTall) =>
+  range(tall).flatMap((r) =>
+    range(wide)
+      .filter((c) => !(r < cutTall && c >= wide - cutWide))
+      .map((c) => [c, r]),
+  );
+/* An L-shaped figure: a rectangle `wide` × `tall` with a corner cut away, `cutWide` × `cutTall`.
+   corner: which corner is cut away ('tr' top right, 'tl', 'br', 'bl'). The sides are numbered as they are for 'tr', from the
+   top left going clockwise: 0 top, 1 the cut's up-down side, 2 the cut's across side, 3 right, 4 bottom, 5 left; another corner
+   is the same figure flipped, so its sides keep their numbers.
+   sides: the text for each side (null for none; '?' is written in cyan). grid: draw the unit squares.
+   cut: 'down' splits it with an up-down line from the inside corner, 'across' with a line across; the two rectangles get
+   two colors. */
+function lFig(wide, tall, cutWide, cutTall, { corner = "tr", sides = [], grid = false, cut = null, size, label } = {}) {
+  /* a unit square is up to 30 pixels on a side, smaller to fit 300 wide and 240 tall */
+  size = size || Math.min(30, 300 / wide, 240 / tall);
+  const pad = 44,
+    flipX = corner[1] === "l",
+    flipY = corner[0] === "b",
+    inner = wide - cutWide;
+  /* a point in squares (for the 'tr' figure) to pixels, flipped for the other corners */
+  const px = (x) => pad + (flipX ? wide - x : x) * size,
+    py = (y) => pad + (flipY ? tall - y : y) * size;
+  /* a rectangle in squares (for 'tr') as markup, flipped */
+  const box = (x, y, w, h, cls) =>
+    `<rect class="${cls}" x="${Math.min(px(x), px(x + w))}" y="${Math.min(py(y), py(y + h))}" width="${w * size}" height="${h * size}"/>`;
+  const corners = [
+    [0, 0],
+    [inner, 0],
+    [inner, cutTall],
+    [wide, cutTall],
+    [wide, tall],
+    [0, tall],
+  ];
+  let markup = "";
+  /* the two rectangles in two colors when it's cut, or the whole figure in one */
+  if (cut === "down")
+    markup += box(0, 0, inner, tall, "apart") + box(inner, cutTall, cutWide, tall - cutTall, "apart b");
+  else if (cut === "across")
+    markup += box(0, 0, inner, cutTall, "apart") + box(0, cutTall, wide, tall - cutTall, "apart b");
+  else markup += `<polygon class="awhole" points="${corners.map(([x, y]) => `${px(x)},${py(y)}`).join(" ")}"/>`;
+  if (grid) lCells(wide, tall, cutWide, cutTall).forEach(([c, r]) => (markup += box(c, r, 1, 1, "agridsq")));
+  markup += `<polygon class="aoutline" points="${corners.map(([x, y]) => `${px(x)},${py(y)}`).join(" ")}"/>`;
+  if (cut === "down")
+    markup += `<line class="acut" x1="${px(inner)}" y1="${py(cutTall)}" x2="${px(inner)}" y2="${py(tall)}"/>`;
+  if (cut === "across")
+    markup += `<line class="acut" x1="${px(0)}" y1="${py(cutTall)}" x2="${px(inner)}" y2="${py(cutTall)}"/>`;
+  /* each side's text, just outside the middle of the side: across sides above or below, up-down sides to the left or right */
+  const isInside = (x, y) => x > 0 && x < wide && y > 0 && y < tall && !(x > inner && y < cutTall);
+  corners.forEach(([x1, y1], i) => {
+    const text = sides[i];
+    if (text === null || text === undefined) return;
+    const [x2, y2] = corners[(i + 1) % 6],
+      midX = (x1 + x2) / 2,
+      midY = (y1 + y2) / 2,
+      across = y1 === y2,
+      /* step a little off the side and see which way is outside */
+      out = across ? (isInside(midX, midY + 0.1) ? -1 : 1) : isInside(midX + 0.1, midY) ? -1 : 1,
+      screenOut = out * (across ? (flipY ? -1 : 1) : flipX ? -1 : 1),
+      cls = `lbl${text === "?" ? " cy" : ""}${across ? "" : screenOut < 0 ? " en" : " st"}`;
+    markup += across
+      ? `<text class="${cls}" x="${px(midX)}" y="${py(midY) + screenOut * 16}">${text}</text>`
+      : `<text class="${cls}" x="${px(midX) + screenOut * 8}" y="${py(midY)}">${text}</text>`;
+  });
+  return svgWrap(
+    pad * 2 + wide * size,
+    pad * 2 + tall * size,
+    markup,
+    label ||
+      `An L-shaped figure. Its sides, going around: ${corners.map((_, i) => sides[i] ?? "not marked").join(", ")}`,
   );
 }

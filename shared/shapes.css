@@ -24,3 +24,9 @@
 .agrid{fill:none;stroke:rgba(243,246,251,.28);stroke-width:1}
 .acut{stroke:var(--pink);stroke-width:3;stroke-dasharray:8 5}
 .aprod{fill:var(--chalk)}
+/* L-shaped figures (lFig): awhole a figure in one piece, aoutline its outline, agridsq the unit squares inside it; its two parts
+   and the cut between them are splitFig's apart and acut */
+.awhole{fill:rgba(95,224,168,.16)}
+.agridsq{fill:none;stroke:rgba(243,246,251,.28);stroke-width:1}
+.aoutline{fill:none;stroke:var(--good);stroke-width:3;stroke-linejoin:round}
+.awhole.aoutline{fill:rgba(95,224,168,.16)}

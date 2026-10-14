@@ -1,0 +1,14 @@
+/* Styles for the unit's Learn pages, on top of ../figs.css. cring a circle around the corner being checked; shp.dimshp a shape
+   that isn't in the group picked; the shape builder's empty squares (gempty, to tap) and its outline (gline); the diagram of
+   rhombuses and rectangles (vbox the quadrilaterals around them, vring a circle, vlbl its name); gdotgrid the dots of a dot grid. */
+.cring{fill:none;stroke:var(--pink);stroke-width:3}
+.shp.dimshp{opacity:.3}
+.gempty{fill:rgba(170,205,255,.04);stroke:rgba(170,205,255,.35);stroke-width:1;stroke-dasharray:3 3;cursor:pointer}
+.gempty:hover{fill:rgba(255,201,60,.15)}
+.gcell.tap{cursor:pointer}
+.gline{fill:none;stroke:var(--gold);stroke-width:3;stroke-linecap:round}
+.vbox{fill:none;stroke:var(--dim);stroke-width:2;stroke-dasharray:6 5}
+.vring{fill:rgba(170,205,255,.06);stroke:var(--chalk);stroke-width:2.5}
+.vring.on{fill:rgba(255,138,196,.14);stroke:var(--pink)}
+.lbl.vlbl{font-size:13px}
+.gdotgrid{fill:rgba(170,205,255,.45)}

@@ -391,6 +391,7 @@ const CALLS = {
     ),
     `picRow(3, 100, 80, i => '<g>' + i + '</g>')`,
     `picRow(4, 100, 80, i => 'x', {letters: true, tap: 'Shape', label: 'Pic'})`,
+    `picRow(6, 100, 80, i => 'x', {letters: true})`,
     `shapeRow([[SHAPES[3][0], {nums: true}], [SHAPES[4][1], {lens: [1, 2, 3, 4]}], [SHAPES[5][0]]], {tap: 'Shape'})`,
     ...each(["cube", "box", "pyramid", "prism"], (k) =>
       each(TF, (back) => [110, 60].map((s) => `solidFig('${k}', {back: ${back}, s: ${s}})`)),
@@ -429,6 +430,14 @@ const CALLS = {
     `splitFig(6, 8, 5, {ask: 'right'})`,
     `splitFig(9, 7, 5, {ask: 'left', sides: false, label: 'L'})`,
     `splitFig(4, 21, 10, {grid: false, products: true})`,
+    // L-shaped figures: each corner cut away, sides written (a ? among them) or left off, a cut each way, the grid, a set size
+    ...each(["tr", "tl", "br", "bl"], (corner) => [
+      `lFig(8, 6, 3, 2, {corner: '${corner}', sides: [5, 2, 3, 4, 8, 6]})`,
+      `lFig(8, 6, 3, 2, {corner: '${corner}', sides: ['?', 2, null, 4, '8 m', 6], cut: 'down', grid: true})`,
+      `lFig(9, 7, 4, 3, {corner: '${corner}', cut: 'across'})`,
+    ]),
+    `lFig(10, 4, 2, 1, {size: 20, label: 'L'})`,
+    `lCells(5, 4, 2, 1)`,
   ],
   measure: [
     "hm(3, 5)",
