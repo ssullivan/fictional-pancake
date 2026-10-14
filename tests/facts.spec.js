@@ -213,7 +213,10 @@ for (const op of ["add", "sub", "mult", "div", "simp"])
       if (!(sign === "×" && (a === 0 || b === 0)) && !(sign === "÷" && a === 0) && !(sign === "/" && gcd(a, b) === 1))
         expect(text).not.toMatch(/= \?$/);
       await press(page.locator(".choice", { hasText: new RegExp(`^${value}$`) }));
-      await expect(page.locator(".fb.good")).toContainText(sign === "/" ? `${a}/${b} = ` : `${a} ${sign} ${b} = `);
+      // the worked answer: a fraction already simplest is said to be, rather than written as an equation
+      await expect(page.locator(".fb.good")).toContainText(
+        sign !== "/" ? `${a} ${sign} ${b} = ` : gcd(a, b) === 1 ? `${a}/${b} is already simplest` : `${a}/${b} = `,
+      );
       last = text;
     }
     await noSideways(page);
