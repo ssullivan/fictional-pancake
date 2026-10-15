@@ -1,7 +1,7 @@
 /* Fraction Farm (Grade 3 Unit 5): the problem generators, station list, and icons. Loaded by index.html and by tools/fuzz.mjs.
-   Fraction strips (strips) and fraction number lines (fracLine) come from shared/fractions.js; shapes cut into parts (shareFig)
-   from shared/shapes.js; fr, PART, and partName from shared/pictures.js; DENS, partsOf, aPart, cap, compareFr, and SIGN_HTML
-   from figs.js; mcOf and miscOf from shared/util.js.
+   Fraction strips (strips), fraction number lines (fracLine), and comparing fractions (compareFr, SIGN_HTML) come from
+   shared/fractions.js; shapes cut into parts (shareFig) from shared/shapes.js; fr, PART, and partName from shared/pictures.js;
+   DENS, partsOf, aPart, and cap from figs.js; mcOf and miscOf from shared/util.js.
    Each generator deals one of a few kinds of problem (variant), each with a comment saying what it asks. Every problem also
    carries facts for checks.js: its kind (t) and the fractions it was made from, as [numerator, denominator]. */
 const KIDS = ["Mai", "Diego", "Lin", "Han", "Priya", "Kiran", "Elena", "Jada", "Noah", "Clare", "Andre", "Tyler"];

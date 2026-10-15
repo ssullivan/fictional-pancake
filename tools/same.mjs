@@ -323,6 +323,7 @@ const CALLS = {
     `strips([{d: 6, k: 6, grp: 3}, {d: 5, k: 12, grp: [4, 4, 4], out: 2, cls: 'b'}])`,
     `strips([{d: 3, k: 8, out: 4}, {d: 12, k: 9, parts: false}], {stack: true, wholes: 3, W: 400})`,
     `strips([{d: 100, k: 37}])`,
+    `[compareFr([3, 4], [6, 8]), compareFr([2, 3], [3, 4]), compareFr([5, 4], [1, 1]), SIGN_HTML]`,
     `fracLine([{d: 8, labs: true, pts: [{k: 3, cls: 'g'}], hops: [[1, 4, ''], [4, 6, 'q']], tap: true}, {d: 4, pts: [{k: 7}]}], {wholes: 3, W: 600, marks: [{v: 2, t: '2'}]})`,
     `fracLine([{d: 3, hops: 5}, {d: 6, labs: true}, {d: 12}], {wholes: 2})`,
     `hundredGrid(cellsOf([30, 'a'], [25, 'b']))`,

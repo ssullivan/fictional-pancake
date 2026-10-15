@@ -1,0 +1,5 @@
+/* Styles for figs.js, on top of shared/fractions.css and shared/shapes.css: gcut a line cut across a strip to check a guess;
+   plan a floor plan's outside walls and wall a wall between two rooms. */
+.gcut{stroke:var(--chalk);stroke-width:2.5;stroke-dasharray:6 4}
+.plan{fill:none;stroke:var(--chalk);stroke-width:4}
+.wall{stroke:var(--chalk);stroke-width:2.5}

@@ -3,7 +3,8 @@
 
    strips(rows, {wholes, W})         fraction strips: wholes cut into d equal parts, k of them shaded, in groups or taken away (svg)
    fracLine(rows, {wholes, …})       number lines from 0 marked in fractions, one under another, with points and tappable ticks (svg)
-   hundredGrid(cells)                1 whole as 10 tenths of 10 hundredths, with squares shaded (svg) */
+   hundredGrid(cells)                1 whole as 10 tenths of 10 hundredths, with squares shaded (svg)
+   compareFr(a, b), SIGN_HTML        how fraction a ([n, d]) compares to b ('<', '=', or '>'), and those signs as html */
 /* Fraction strips, one row under another, every whole the same width so rows line up.
    rows: [{d, k, cls, lab, parts, grp, out}]: each whole cut into d equal parts and the first k shaded (cls 'b' blue, 'g' green; gold by default);
    k more than d draws more wholes. lab: [n, d] written to the left of the row. parts: false leaves 1/d out of the parts.
@@ -145,3 +146,7 @@ function hundredGrid(cells, { label } = {}) {
     label || `A hundred grid with ${cells.filter(Boolean).length} of 100 squares shaded`,
   );
 }
+/* how fraction a compares to b: '<', '>', or '='. Cross-multiplying puts both over the same denominator. */
+const compareFr = ([n1, d1], [n2, d2]) => (n1 * d2 < n2 * d1 ? "<" : n1 * d2 > n2 * d1 ? ">" : "=");
+/* <, >, and = as html */
+const SIGN_HTML = { "<": "&lt;", ">": "&gt;", "=": "=" };
