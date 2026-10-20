@@ -13,6 +13,7 @@ const UNIT = {
   saveKey: "g2u3-learn",
   readAloud: true,
   icons: ICON,
+  game: "Inchworm Trail",
   /* the order of the chapters when the unit was one page (learn.html#c2s1), for progress saved then and old links */
   legacy: ["units", "cm-and-m", "inches-and-feet", "length-stories", "line-plots"],
   chapters: [
@@ -23,6 +24,7 @@ const UNIT = {
       lessons: "Lessons 1–3",
       blurb: "Measure with same-size units, line up centimeter cubes, and use a ruler the right way.",
       steps: 3,
+      game: { zone: "units", name: "Cube Creek" },
     },
     {
       id: "cm-and-m",
@@ -31,6 +33,7 @@ const UNIT = {
       lessons: "Lessons 4–6",
       blurb: "Estimate lengths, use meters for long things, and find how much longer one reptile is than another.",
       steps: 3,
+      game: { zone: "cm", name: "Gecko Rocks" },
     },
     {
       id: "inches-and-feet",
@@ -39,6 +42,7 @@ const UNIT = {
       lessons: "Lessons 8–10",
       blurb: "Measure in inches, see that a foot is 12 inches, and measure with a torn tape.",
       steps: 3,
+      game: { zone: "inches", name: "Inch Hill" },
     },
     {
       id: "length-stories",
@@ -47,6 +51,7 @@ const UNIT = {
       lessons: "Lessons 11–12",
       blurb: "Tie pieces of silk together, cut some off, and compare with number lines.",
       steps: 2,
+      game: { zone: "silk", name: "Silk Bridge" },
     },
     {
       id: "line-plots",
@@ -55,6 +60,7 @@ const UNIT = {
       lessons: "Lessons 14–16",
       blurb: "Read a line plot, make one from measurements, and see what the data says.",
       steps: 3,
+      game: { zone: "plots", name: "Plot Pond" },
     },
   ],
 };

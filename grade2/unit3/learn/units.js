@@ -1,38 +1,4 @@
 /* Learn Measuring Length (Grade 2 Unit 3), chapter 1: Units of length. Its widgets and steps; loaded by units.html. */
-/* units laid end to end: cubes (1 cm), paper clips (3 cm), erasers (5 cm) */
-const UNITK = {
-  cube: { cm: 1, name: "cubes" },
-  clip: { cm: 3, name: "paper clips" },
-  eraser: { cm: 5, name: "erasers" },
-};
-/* `count` units of one kind end to end from x, y; u: pixels per cm */
-const unitRow = (kind, count, x, y, u) =>
-  range(count)
-    .map((i) => {
-      const size = UNITK[kind].cm * u,
-        left = x + i * size;
-      return kind === "cube"
-        ? `<rect class="cube a" x="${left + 1}" y="${y}" width="${size - 2}" height="${size - 2}" rx="2"/>`
-        : kind === "clip"
-          ? `<g class="clip"><rect x="${left + 2}" y="${y}" width="${size - 4}" height="16" rx="8"/><rect x="${left + 7}" y="${y + 4}" width="${size - 16}" height="8" rx="4"/></g>`
-          : `<rect class="eraser" x="${left + 1}" y="${y}" width="${size - 2}" height="18" rx="4"/>`;
-    })
-    .join("");
-/* an object len cm long with rows of units under it: rows [[unit, how many], …]; u: pixels per cm */
-function unitsFig(kind, len, rows, u) {
-  let markup = thing(kind, 10, 8, len * u),
-    y = 46;
-  rows.forEach(([unit, count]) => {
-    markup += unitRow(unit, count, 10, y, u);
-    y += (unit === "cube" ? u : 18) + 14;
-  });
-  return svgWrap(
-    20 + len * u,
-    y,
-    markup,
-    `A ${NAME[kind]} measured with ` + rows.map(([unit, count]) => `${count} ${UNITK[unit].name}`).join(" and "),
-  );
-}
 /* The same pencil measured in cubes, paper clips, or erasers: longer units take fewer. */
 function wUnits(el) {
   const q = Q(el);

@@ -1,31 +1,4 @@
 /* Learn Measuring Length (Grade 2 Unit 3), chapter 3: Inches and feet. Its widgets and steps; loaded by inches-and-feet.html. */
-/* `count` foot rulers end to end from x, y (8 pixels per inch), with the inches so far under each join, or "12 in" under each one (each) */
-const footRow = (x, y, count, each) =>
-  range(count)
-    .map((i) => {
-      const left = x + i * 96;
-      return (
-        `<rect class="rul" x="${left}" y="${y}" width="96" height="30" rx="2"/>` +
-        range(11)
-          .map(
-            (j) =>
-              `<line class="tick" x1="${left + (j + 1) * 8}" y1="${y}" x2="${left + (j + 1) * 8}" y2="${y + (j === 5 ? 14 : 8)}"/>`,
-          )
-          .join("") +
-        (each
-          ? `<text class="lbl s" x="${left + 48}" y="${y + 46}">12 in</text>`
-          : `<text class="lbl cy" x="${left + 96}" y="${y + 46}">${12 * (i + 1)}</text>`)
-      );
-    })
-    .join("");
-/* a thing ft feet long with `count` foot rulers under it, room for most of them */
-const feetFig = (kind, ft, count, most = ft, each = false) =>
-  svgWrap(
-    40 + most * 96,
-    110,
-    thing(kind, 20, 10, ft * 96) + footRow(20, 52, count, each),
-    `A ${NAME[kind]} with ${count} foot rulers under it`,
-  );
 /* objects measured both ways: [kind, inches, centimeters] */
 const INCH = [
   ["crayon", 4, 10],

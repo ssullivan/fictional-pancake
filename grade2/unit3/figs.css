@@ -1,4 +1,5 @@
-/* Grade 2 Unit 3 Learn pages: figures and widgets used by its chapters. Loaded by learn.html and every page in learn/. */
+/* Pictures that Grade 2 Unit 3's game and its Learn pages both use (figs.js): things to measure, rulers, and units. Loaded by
+   the game, learn.html, and every page in learn/. */
 /* things to measure */
 .ob .body,.ob .er,.ob .cap{stroke:rgba(10,35,64,.8);stroke-width:1.5}
 .ob .body{fill:var(--gold)}

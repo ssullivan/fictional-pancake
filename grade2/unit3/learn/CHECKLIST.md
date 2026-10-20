@@ -2,7 +2,7 @@
 
 What the Learn pages for this unit must do, chapter by chapter and step by step. Each item is a test: the part in backticks is what `tests/checklists.spec.js` does and checks (the commands are in `tools/checklists.mjs`). Every step also gets the tests in `tests/learn-steps.spec.js`: no errors or sideways scrolling, every widget button pressed twice, steppers pushed past their limits, every named mistake in the quick check, empty and formatted answers, and progress kept after a reload. The quick-check lines come from the chapters' code; `node tools/check.mjs --fix` refreshes them.
 
-Not covered: Center Days (Lessons 7, 13, and 17) and Make a Yard Stick (Lesson 18) are hands-on, optional lessons that work better in class. There’s no practice game for this unit yet.
+Not covered: Center Days (Lessons 7, 13, and 17) and Make a Yard Stick (Lesson 18) are hands-on, optional lessons that work better in class. Practice it all in Inchworm Trail, the game for this unit.
 
 ## Chapter 1: Units of length · `learn/units.html` · Lessons 1–3
 

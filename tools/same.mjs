@@ -665,10 +665,11 @@ const fileAt = (path, atRev) => {
     return null;
   }
 };
-// the local scripts a page loads, in order, as paths from the repo root, leaving out the ones that need a page
+// the local scripts a page loads at the revision (or now), in order, as paths from the repo root, leaving out the ones that
+// need a page; reading the page as it was keeps a script that has since moved (learn/common.js to figs.js) in the list
 const NEEDS_PAGE = ["engine.js", "learn.js", "speak.js"];
-const scriptsOf = (page) =>
-  [...readFileSync(join(ROOT, page), "utf8").matchAll(/<script src="([^"?]+)(?:\?[^"]*)?"><\/script>/g)]
+const scriptsOf = (page, atRev) =>
+  [...(fileAt(page, atRev) || "").matchAll(/<script src="([^"?]+)(?:\?[^"]*)?"><\/script>/g)]
     .map((m) => normalize(join(dirname(page), m[1])))
     .filter((path) => !NEEDS_PAGE.includes(basename(path)));
 // a page's scripts loaded into one context, as they are at atRev (or now); Game.stars stands in for saved progress
@@ -682,7 +683,7 @@ function loadPage(page, atRev, globals = {}) {
     matchMedia: () => ({ matches: false }),
     ...globals,
   });
-  for (const path of scriptsOf(page)) {
+  for (const path of scriptsOf(page, atRev)) {
     const src = fileAt(path, atRev);
     if (src !== null) vm.runInContext(src, context, { filename: `${atRev || "now"}:${path}` });
   }
@@ -717,7 +718,10 @@ const seeded = (context, f) => {
   }
 };
 for (const unit of units) {
-  if (existsSync(join(ROOT, unit, "stations.js")))
+  // a game added since the revision has nothing to compare with
+  const gameIsNew = !fileAt(`${unit}/stations.js`, rev);
+  if (gameIsNew && existsSync(join(ROOT, unit, "stations.js"))) console.log(`${unit} game is new since ${rev}`);
+  if (existsSync(join(ROOT, unit, "stations.js")) && !gameIsNew)
     for (const stars of [0, 3]) {
       const [before, now] = [rev, null].map((atRev) =>
         loadPage(`${unit}/index.html`, atRev, { Game: { stars: () => stars } }),

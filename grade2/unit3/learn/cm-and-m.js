@@ -1,13 +1,4 @@
 /* Learn Measuring Length (Grade 2 Unit 3), chapter 2: Centimeters and meters. Its widgets and steps; loaded by cm-and-m.html. */
-/* an object with a 10 cm strip under it, for estimating (24 pixels per cm, like the 20 cm ruler it's measured on) */
-const estFig = (kind, len) =>
-  svgWrap(
-    Math.max(len, 10) * 24 + 110,
-    90,
-    thing(kind, 22, 12, len * 24) +
-      `<rect class="ref" x="22" y="56" width="240" height="20" rx="3"/><text class="lbl st" x="274" y="66">10 cm</text>`,
-    `A ${NAME[kind]} above a strip 10 centimeters long`,
-  );
 /* objects to estimate [kind, cm], and the estimates to choose from */
 const EST = [
     ["eraser", 6],
