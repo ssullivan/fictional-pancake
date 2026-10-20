@@ -1,0 +1,4 @@
+/* Pictures that Grade 2 Unit 8's game and its Learn pages both use (figs.js): pairs and square tiles. */
+.pairbox{fill:none;stroke:rgba(170,205,255,.55);stroke-width:2}
+.tile{fill:var(--gold);stroke:#0a2340;stroke-width:1.5}
+.rim{fill:none;stroke:#fff;stroke-width:3}

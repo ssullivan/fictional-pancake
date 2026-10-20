@@ -15,7 +15,7 @@ When a unit gets a game or Learn page, add a row here and turn its "Coming soon"
 | `unit5/` | Dragon Duel (`index.html`, 5 stations + the Dragon’s Lair) | `learn.html` + `learn/` (5 chapters, Lessons 1–12) | Grade 2 Unit 5 |
 | `unit6/` | Clockwork Carnival (`index.html`, 5 stations + the Big Wheel) | `learn.html` + `learn/` (5 chapters, Lessons 1–19) | Grade 2 Unit 6 |
 | `unit7/` | Robot Factory (`index.html`, 5 stations + Robot Rollout) | `learn.html` + `learn/` (5 chapters, Lessons 1–16) | Grade 2 Unit 7 |
-| `unit8/` | none yet | `learn.html` + `learn/` (5 chapters, Lessons 1–12) | Grade 2 Unit 8 |
+| `unit8/` | Sweet Shop (`index.html`, 5 stations + the Bake Sale) | `learn.html` + `learn/` (5 chapters, Lessons 1–12) | Grade 2 Unit 8 |
 
 ## Building for Grade 2
 

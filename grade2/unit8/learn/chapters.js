@@ -24,6 +24,7 @@ const UNIT = {
   saveKey: "g2u8-learn",
   readAloud: true,
   icons: ICON,
+  game: "Sweet Shop",
   /* the order of the chapters when the unit was one page (learn.html#c2s1), for progress saved then and old links */
   legacy: ["share-and-pair", "odd-and-even", "arrays", "equal-addends", "rectangles"],
   chapters: [
@@ -34,6 +35,7 @@ const UNIT = {
       lessons: "Lessons 1–2",
       blurb: "Share things fairly between 2 friends, and see if everyone gets a partner.",
       steps: 2,
+      game: { zone: "share", name: "Fair Shares" },
     },
     {
       id: "odd-and-even",
@@ -42,6 +44,7 @@ const UNIT = {
       lessons: "Lessons 3–4",
       blurb: "Tell if a number is odd or even with pairs, counting by 2s, and doubles.",
       steps: 4,
+      game: { zone: "oddeven", name: "Odd or Even" },
     },
     {
       id: "arrays",
@@ -50,6 +53,7 @@ const UNIT = {
       lessons: "Lessons 7–8",
       blurb: "Put things in rows and columns, and count them by rows or by columns.",
       steps: 3,
+      game: { zone: "arrays", name: "Cookie Trays" },
     },
     {
       id: "equal-addends",
@@ -58,6 +62,7 @@ const UNIT = {
       lessons: "Lessons 9–10",
       blurb: "Add the rows or the columns of an array, and build an array from an equation.",
       steps: 3,
+      game: { zone: "addends", name: "Cupcake Sums" },
     },
     {
       id: "rectangles",
@@ -66,6 +71,7 @@ const UNIT = {
       lessons: "Lessons 11–12",
       blurb: "Push square tiles into a rectangle, and cut a rectangle into same-size squares.",
       steps: 3,
+      game: { zone: "rects", name: "Brownie Pans" },
     },
   ],
 };

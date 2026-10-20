@@ -1,17 +1,4 @@
 /* Learn Equal Groups (Grade 2 Unit 8), chapter 3: Arrays. Its widgets and steps; loaded by arrays.html. */
-/* counters at [column, row] spots (fractions allowed), for pictures that aren't arrays; spaced like arrayFig's */
-function spots(points, label) {
-  const cols = Math.max(...points.map((point) => point[0])) + 1,
-    rows = Math.max(...points.map((point) => point[1])) + 1;
-  const gap = ARRAY.g,
-    pad = ARRAY.pad;
-  return svgWrap(
-    2 * pad + cols * gap,
-    2 * pad + rows * gap,
-    points.map(([x, y]) => ctr(pad + gap / 2 + x * gap, pad + gap / 2 + y * gap, "a", 16)).join(""),
-    label,
-  );
-}
 /* An array (a stepper for the rows and one for the columns), said both ways. */
 function wArray(el) {
   const q = Q(el),

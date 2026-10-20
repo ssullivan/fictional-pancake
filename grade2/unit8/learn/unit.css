@@ -1,8 +1,6 @@
-/* Grade 2 Unit 8 Learn pages: figures and widgets used by its chapters. Loaded by learn.html and every page in learn/. */
-/* pairs, square tiles, extra cubes, and the 1–20 number buttons */
-.pairbox{fill:none;stroke:rgba(170,205,255,.55);stroke-width:2}
-.tile{fill:var(--gold);stroke:#0a2340;stroke-width:1.5}
-.rim{fill:none;stroke:#fff;stroke-width:3}
+/* Grade 2 Unit 8 Learn pages: widgets used by its chapters (the pictures' styles are in ../figs.css). Loaded by learn.html and
+   every page in learn/. */
+/* the extra cubes on the end of a train (trainsFig), and the 1–20 number buttons */
 .cube.x{fill:var(--good)}
 .nums{display:grid;grid-template-columns:repeat(10,1fr);gap:6px;margin-bottom:12px}
 .nums button{min-height:52px;border-radius:10px;border:2px solid rgba(170,205,255,.4);background:#0a2340;color:var(--chalk);font:700 20px var(--mono)}
