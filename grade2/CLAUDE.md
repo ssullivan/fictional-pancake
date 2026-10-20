@@ -11,7 +11,7 @@ When a unit gets a game or Learn page, add a row here and turn its "Coming soon"
 | `unit1/` | Bug Hunt (`index.html`, 5 stations + Firefly Night) | `learn.html` + `learn/` (5 chapters, Lessons 1–16) | Grade 2 Unit 1 |
 | `unit2/` | Market Day (`index.html`, 5 stations + the Pumpkin Wagon) | `learn.html` + `learn/` (5 chapters, Lessons 1–14) | Grade 2 Unit 2 |
 | `unit3/` | Inchworm Trail (`index.html`, 5 stations + the Big Crawl) | `learn.html` + `learn/` (5 chapters, Lessons 1–16) | Grade 2 Unit 3 |
-| `unit4/` | none yet | `learn.html` + `learn/` (5 chapters, Lessons 1–13) | Grade 2 Unit 4 |
+| `unit4/` | Frog Hop (`index.html`, 5 stations + Across the Pond) | `learn.html` + `learn/` (5 chapters, Lessons 1–13) | Grade 2 Unit 4 |
 | `unit5/` | Dragon Duel (`index.html`, 5 stations + the Dragon’s Lair) | `learn.html` + `learn/` (5 chapters, Lessons 1–12) | Grade 2 Unit 5 |
 | `unit6/` | Clockwork Carnival (`index.html`, 5 stations + the Big Wheel) | `learn.html` + `learn/` (5 chapters, Lessons 1–19) | Grade 2 Unit 6 |
 | `unit7/` | none yet | `learn.html` + `learn/` (5 chapters, Lessons 1–16) | Grade 2 Unit 7 |

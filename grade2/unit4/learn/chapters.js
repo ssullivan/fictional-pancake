@@ -13,6 +13,7 @@ const UNIT = {
   saveKey: "g2u4-learn",
   readAloud: true,
   icons: ICON,
+  game: "Frog Hop",
   /* the order of the chapters when the unit was one page (learn.html#c2s1), for progress saved then and old links */
   legacy: ["number-line", "compare-and-estimate", "jumps", "tens-and-ones", "stories"],
   chapters: [
@@ -23,6 +24,7 @@ const UNIT = {
       lessons: "Lessons 1–3",
       blurb: "See each number as a length from 0, learn the parts of a number line, and find numbers at tick marks.",
       steps: 3,
+      game: { zone: "line", name: "Lily Pads" },
     },
     {
       id: "compare-and-estimate",
@@ -31,6 +33,7 @@ const UNIT = {
       lessons: "Lessons 4–5",
       blurb: "Use the number line to see which number is greater, and estimate where a dot is.",
       steps: 2,
+      game: { zone: "compare", name: "Twin Rocks" },
     },
     {
       id: "jumps",
@@ -39,6 +42,7 @@ const UNIT = {
       lessons: "Lessons 7–9",
       blurb: "Add by jumping right and subtract by jumping left, match jumps to equations, and find the difference.",
       steps: 3,
+      game: { zone: "jumps", name: "Hop Along" },
     },
     {
       id: "tens-and-ones",
@@ -47,6 +51,7 @@ const UNIT = {
       lessons: "Lessons 10–11",
       blurb: "Make big jumps of ten, then small jumps of ones, and jump to a ten to make it easy.",
       steps: 2,
+      game: { zone: "tens", name: "Ten Leap" },
     },
     {
       id: "stories",
@@ -55,6 +60,7 @@ const UNIT = {
       lessons: "Lessons 12–13",
       blurb: "Find the missing jump in an equation, and show story problems on a number line.",
       steps: 2,
+      game: { zone: "stories", name: "Story Pond" },
     },
   ],
 };

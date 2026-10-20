@@ -1,4 +1,10 @@
-/* Learn Addition and Subtraction on the Number Line (Grade 2 Unit 4): code used by more than one chapter. Loaded by the chapter pages in learn/, after chapters.js. */
+/* Number lines that Grade 2 Unit 4's game and its Learn pages both use. Needs util.js, figures.js (svgWrap), and numlines.js
+   (numLine), and pictures.css and numlines.css for the styles.
+
+   line(lo, hi, options)             a number line with every number labelled when there's room, else every 5 or 10 (svg)
+   sgn(n)                            a signed jump as written: "+3", "−10"
+   hopsFrom(start, steps)            jumps from start by each of steps, labelled +n or −n, for numLine's hops
+   around(a, b)                      the tens around a and b, so a line has room for both */
 /* a number line from lo to hi with every number shown when there's room, else every 5 or 10; options go to numLine */
 const line = (lo, hi, options = {}) =>
   numLine(lo, hi, {
