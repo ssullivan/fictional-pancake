@@ -13,6 +13,7 @@ const UNIT = {
   saveKey: "g2u7-learn",
   readAloud: true,
   icons: ICON,
+  game: "Robot Factory",
   /* the order of the chapters when the unit was one page (learn.html#c2s1), for progress saved then and old links */
   legacy: ["count-on-and-back", "by-place", "new-ten", "add", "subtract"],
   chapters: [
@@ -23,6 +24,7 @@ const UNIT = {
       lessons: "Lessons 1–3",
       blurb: "Jump by hundreds, tens, and ones, see which digit changes, and count on to find a difference.",
       steps: 3,
+      game: { zone: "count", name: "Conveyor Count" },
     },
     {
       id: "by-place",
@@ -31,6 +33,7 @@ const UNIT = {
       lessons: "Lesson 4",
       blurb: "Put hundreds with hundreds, tens with tens, and ones with ones, and find more than one way.",
       steps: 3,
+      game: { zone: "place", name: "Parts by Place" },
     },
     {
       id: "new-ten",
@@ -39,6 +42,7 @@ const UNIT = {
       lessons: "Lessons 6–8",
       blurb: "Trade 10 ones for a ten and 10 tens for a hundred when you add.",
       steps: 3,
+      game: { zone: "newten", name: "Gear Trades" },
     },
     {
       id: "add",
@@ -47,6 +51,7 @@ const UNIT = {
       lessons: "Lessons 9–10",
       blurb: "Make a new ten and a new hundred in one problem, and pick the easiest way to add.",
       steps: 2,
+      game: { zone: "add", name: "Bolt Builders" },
     },
     {
       id: "subtract",
@@ -55,6 +60,7 @@ const UNIT = {
       lessons: "Lessons 12–16",
       blurb: "Break a ten or a hundred when you need to, and think before you subtract.",
       steps: 4,
+      game: { zone: "subtract", name: "Scrap Yard" },
     },
   ],
 };
