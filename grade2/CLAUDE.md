@@ -8,7 +8,7 @@ When a unit gets a game or Learn page, add a row here and turn its "Coming soon"
 
 | Folder | Game | Learn page | Unit |
 |---|---|---|---|
-| `unit1/` | none yet | `learn.html` + `learn/` (5 chapters, Lessons 1–16) | Grade 2 Unit 1 |
+| `unit1/` | Bug Hunt (`index.html`, 5 stations + Firefly Night) | `learn.html` + `learn/` (5 chapters, Lessons 1–16) | Grade 2 Unit 1 |
 | `unit2/` | none yet | `learn.html` + `learn/` (5 chapters, Lessons 1–14) | Grade 2 Unit 2 |
 | `unit3/` | none yet | `learn.html` + `learn/` (5 chapters, Lessons 1–16) | Grade 2 Unit 3 |
 | `unit4/` | none yet | `learn.html` + `learn/` (5 chapters, Lessons 1–13) | Grade 2 Unit 4 |

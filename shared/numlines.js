@@ -1,14 +1,14 @@
 /* Tape diagrams and number lines for K–5 pages. Styles are in numlines.css. Needs util.js and figures.js (svgWrap).
 
-   tapes(rows, {diff})               tape diagram comparing two amounts
+   tapes(rows, {diff, label})        tape diagram comparing two amounts
    partWhole(parts, total)           one tape split into parts, with the total above
    timesTape(rows, {label})          tapes for "times as many": each row is copies of one box, with its total (svg)
    numLine(lo, hi, {…})              a number line with arrows, jumps, dots, and tappable ticks (svg)
    jumps(start, moves, shown, ask)   an open number line: counting on or back in jumps, not drawn to scale (svg)
    roundLine(n, unit, label)         n on a number line between the multiples of unit around it, for rounding (svg) */
 /* Tape diagrams to compare two amounts. rows: [{label, n, show}] where show is the number to write (or '?').
-   diff: label for the difference piece after the shorter tape, or null for none. */
-function tapes(rows, { diff = null } = {}) {
+   diff: label for the difference piece after the shorter tape, or null for none. label: what a screen reader says. */
+function tapes(rows, { diff = null, label = "Tape diagram" } = {}) {
   /* unitW is pixels per 1, so the longest tape is at most 300 wide; the labels take labelW on the left */
   const longest = Math.max(...rows.map((r) => r.n)),
     unitW = Math.min(16, 300 / longest),
@@ -29,7 +29,7 @@ function tapes(rows, { diff = null } = {}) {
         `<text class="lbl cy" x="${labelW + ((r.n + longest) * unitW) / 2}" y="${y + tapeH / 2}">${diff}</text>`;
     }
   });
-  return svgWrap(width, 10 + rows.length * (tapeH + 18), markup, "Tape diagram");
+  return svgWrap(width, 10 + rows.length * (tapeH + 18), markup, label);
 }
 /* One tape split into parts, with a bracket and the total above. parts: [{n, show, hi}] (show: the number to write, or '?';
    hi: outline that part), total: what to write above (a number or '?'), label: what the picture says to a screen reader. */

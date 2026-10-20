@@ -301,6 +301,7 @@ const CALLS = {
     "roundLine(300, 100)",
     `tapes([{label: 'A', n: 5, show: 5}, {label: 'B', n: 5, show: 5}], {diff: 'diff'})`,
     `tapes([{label: 'Long label', n: 1, show: '?'}, {label: 'B', n: 13, show: 13}], {diff: '?'})`,
+    `tapes([{label: 'A', n: 30, show: '?'}, {label: 'B', n: 18, show: 18}], {diff: 12, label: 'Picture A'})`,
     `partWhole([{n: 7, show: 7}], '?')`,
     `partWhole([{n: 1, show: 1, hi: 1}, {n: 99, show: 99}], 100)`,
     `timesTape([{label: 'A', times: 1, each: 4, total: 4}, {label: 'B', times: 3, each: 4, total: '?'}])`,

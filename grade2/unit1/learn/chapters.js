@@ -12,6 +12,7 @@ const UNIT = {
   saveKey: "g2u1-learn",
   readAloud: true,
   icons: ICON,
+  game: "Bug Hunt",
   /* the order of the chapters when the unit was one page (learn.html#c2s1), for progress saved then and old links */
   legacy: ["within-20", "add-your-way", "picture-graphs", "bar-graphs", "compare"],
   chapters: [
@@ -22,6 +23,7 @@ const UNIT = {
       lessons: "Lessons 1–3",
       blurb: "Put groups together, take some away, and see how adding and subtracting fit together.",
       steps: 4,
+      game: { zone: "facts", name: "Ladybug Leaves" },
     },
     {
       id: "add-your-way",
@@ -30,6 +32,7 @@ const UNIT = {
       lessons: "Lessons 4–5",
       blurb: "Make a ten, use doubles, and add bigger numbers with tens and ones.",
       steps: 3,
+      game: { zone: "ten", name: "Anthill Tens" },
     },
     {
       id: "picture-graphs",
@@ -38,6 +41,7 @@ const UNIT = {
       lessons: "Lessons 7–8",
       blurb: "Sort votes into a picture graph, then read it to find the most, the fewest, and the total.",
       steps: 3,
+      game: { zone: "pics", name: "Picture Garden" },
     },
     {
       id: "bar-graphs",
@@ -46,6 +50,7 @@ const UNIT = {
       lessons: "Lessons 9–11",
       blurb: "Build bar graphs, read them with the scale, and ask questions a graph can answer.",
       steps: 4,
+      game: { zone: "bars", name: "Beehive Bars" },
     },
     {
       id: "compare",
@@ -54,6 +59,7 @@ const UNIT = {
       lessons: "Lessons 13–16",
       blurb: "Find how many more or fewer with bar graphs and tape diagrams.",
       steps: 3,
+      game: { zone: "compare", name: "Caterpillar Compare" },
     },
   ],
 };
