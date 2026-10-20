@@ -27,44 +27,13 @@ function wReadPlot(el) {
   draw();
 }
 /* Make a line plot: tap each leaf's length in turn to add its X. */
-function wMakePlot(el) {
-  /* placed: how many leaves have their X; counts: the Xs so far; miss: the last wrong tap */
-  const q = Q(el);
-  let placed = 0,
-    counts = {},
-    miss = null;
-  el.innerHTML = `<p class="story">We measured 8 leaves, in inches.</p><div class="chips" data-c></div><div class="fig" data-f></div><div class="wrow"><button type="button" class="ghost-btn" data-clr>Start over</button></div><p class="readout" data-r></p>`;
-  const draw = () => {
-    const done = placed === LEAVES.length;
-    q("c").innerHTML = LEAVES.map(
-      (n, j) => `<span class="chip${j < placed ? " done" : j === placed ? " cur" : ""}">${n} in</span>`,
-    ).join("");
-    q("f").innerHTML = lineplot(counts, 3, 8, { tap: !done });
-    q("r").innerHTML = done
-      ? `<span class="ok">You made a line plot! ${LEAVES.length} leaves, ${LEAVES.length} Xs.</span>`
-      : miss !== null
-        ? `<span class="no">That’s ${miss}.</span> This leaf is <b>${LEAVES[placed]} inches</b>. Find ${LEAVES[placed]} on the line.`
-        : `Next leaf: <b>${LEAVES[placed]} inches</b>. Tap ${LEAVES[placed]} on the line plot.`;
-  };
-  el.addEventListener("click", (e) => {
-    const spot = e.target.closest("[data-v]");
-    if (!spot || placed >= LEAVES.length) return;
-    const v = +spot.dataset.v;
-    if (v === LEAVES[placed]) {
-      counts[v] = (counts[v] || 0) + 1;
-      placed++;
-      miss = null;
-    } else miss = v;
-    draw();
-  });
-  q("clr").onclick = () => {
-    placed = 0;
-    counts = {};
-    miss = null;
-    draw();
-  };
-  draw();
-}
+const wMakePlot = plotMaker(LEAVES, 3, 8, {
+  story: "We measured 8 leaves, in inches.",
+  one: "leaf",
+  many: "leaves",
+  short: "in",
+  long: "inches",
+});
 /* questions the pencils' line plot answers: what to mark on it, and the answer */
 const ASKS = [
   { label: "Longest", mark: 8, say: "The longest pencil is <b>8 inches</b>. It’s the X farthest to the right." },

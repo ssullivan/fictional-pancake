@@ -16,12 +16,13 @@ When a unit gets a game or Learn page, add a row here and turn its "Coming soon"
 | `unit6/` | Clockwork Carnival (`index.html`, 5 stations + the Big Wheel) | `learn.html` + `learn/` (5 chapters, Lessons 1–19) | Grade 2 Unit 6 |
 | `unit7/` | Robot Factory (`index.html`, 5 stations + Robot Rollout) | `learn.html` + `learn/` (5 chapters, Lessons 1–16) | Grade 2 Unit 7 |
 | `unit8/` | Sweet Shop (`index.html`, 5 stations + the Bake Sale) | `learn.html` + `learn/` (5 chapters, Lessons 1–12) | Grade 2 Unit 8 |
+| `unit9/` | Field Trip (`index.html`, 5 stations + Ride Home) | `learn.html` + `learn/` (5 chapters, Lessons 1–13) | Grade 2 Unit 9 |
 
 ## Building for Grade 2
 
 Players are 7 and 8 years old, so on top of the root rules:
 - Short sentences and everyday words. Every problem has a picture (base-ten blocks, number lines, bar graphs, clocks, coins, arrays).
-- Whole numbers only, within the unit's range: within 20 for fluency, within 100 (Units 1–4), within 1,000 (Units 5 and 7). No fractions except halves, thirds, and fourths of shapes (Unit 6).
+- Whole numbers only, within the unit's range: within 20 for fluency, within 100 (Units 1–4), within 1,000 (Units 5 and 7, and the review in Unit 9). No fractions except halves, thirds, and fourths of shapes (Unit 6).
 - Money in cents and whole dollars (Unit 6): pennies, nickels, dimes, quarters, and dollar bills. No decimal prices.
 - Time to the nearest 5 minutes, with a.m. and p.m. (Unit 6).
 - Big tap targets, and pictures students can tap or drag instead of typed answers where the lesson allows it. Pages use `<body class="young">` (bigger text and buttons, in `shared/theme.css` and `learn.css`).

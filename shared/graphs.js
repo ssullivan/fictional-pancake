@@ -3,7 +3,8 @@
 
    lineplot(counts, lo, hi, {d, mixed, …})   a line plot: an X for each measurement, in whole numbers or fractions (svg)
    PIC, picGraph(rows, {scale, …})   picture graphs, where each picture shows 1 or a scale like 2, 5, or 10 (half pictures too) (svg)
-   barGraph(rows, {max, scale, …})   bar graphs with a line every 1, 2, 5, or 10; bars to read, set by tapping, or compare (svg) */
+   barGraph(rows, {max, scale, …})   bar graphs with a line every 1, 2, 5, or 10; bars to read, set by tapping, or compare (svg)
+   plotMaker(values, lo, hi, words)  a Learn widget: make a line plot by tapping each measurement's length in turn */
 /* A line plot: counts {k: how many} from lo to hi, one X for each, at k/d (d 1: whole numbers; otherwise every tick is a fraction).
    mark: highlight k. tap: ticks can be tapped (data-v = k). diff: [a, b] draws an arrow from a to b under the line, labelled with b − a.
    unit: written under the line. u: pixels between ticks. mixed: ticks past 1 are written as mixed numbers (4 1/2, not 9/2). */
@@ -214,3 +215,46 @@ function barGraph(
     label || "Bar graph: " + rows.map((r) => `${r.label} ${r.n}`).join(", "),
   );
 }
+/* Learn widget: make a line plot from lo to hi by tapping each of the measurements in values, in turn, to add its X.
+   words: {story, one, many, short, long}: the line above it ("We measured 8 leaves, in inches."), one thing and many ("leaf",
+   "leaves"), and the unit written short and long ("in", "inches"). Needs util.js (Q). */
+const plotMaker = (values, lo, hi, words) => (el) => {
+  /* placed: how many measurements have their X; counts: the Xs so far; miss: the last wrong tap */
+  const q = Q(el);
+  let placed = 0,
+    counts = {},
+    miss = null;
+  el.innerHTML = `<p class="story">${words.story}</p><div class="chips" data-c></div><div class="fig" data-f></div><div class="wrow"><button type="button" class="ghost-btn" data-clr>Start over</button></div><p class="readout" data-r></p>`;
+  const draw = () => {
+    const done = placed === values.length;
+    q("c").innerHTML = values
+      .map(
+        (n, j) => `<span class="chip${j < placed ? " done" : j === placed ? " cur" : ""}">${n} ${words.short}</span>`,
+      )
+      .join("");
+    q("f").innerHTML = lineplot(counts, lo, hi, { tap: !done, unit: words.long });
+    q("r").innerHTML = done
+      ? `<span class="ok">You made a line plot! ${values.length} ${words.many}, ${values.length} Xs.</span>`
+      : miss !== null
+        ? `<span class="no">That’s ${miss}.</span> This ${words.one} is <b>${values[placed]} ${words.long}</b>. Find ${values[placed]} on the line.`
+        : `Next ${words.one}: <b>${values[placed]} ${words.long}</b>. Tap ${values[placed]} on the line plot.`;
+  };
+  el.addEventListener("click", (e) => {
+    const spot = e.target.closest("[data-v]");
+    if (!spot || placed >= values.length) return;
+    const v = +spot.dataset.v;
+    if (v === values[placed]) {
+      counts[v] = (counts[v] || 0) + 1;
+      placed++;
+      miss = null;
+    } else miss = v;
+    draw();
+  });
+  q("clr").onclick = () => {
+    placed = 0;
+    counts = {};
+    miss = null;
+    draw();
+  };
+  draw();
+};
