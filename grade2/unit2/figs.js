@@ -1,4 +1,8 @@
-/* Learn Adding and Subtracting within 100 (Grade 2 Unit 2): code used by more than one chapter. Loaded by the chapter pages in learn/, after chapters.js. */
+/* Pictures that Grade 2 Unit 2's game and its Learn pages both use. Needs util.js, figures.js (svgWrap), pictures.js, and
+   blocks.js (blocks, BLOCK), and pictures.css and blocks.css for the styles.
+
+   tensOf(n)                         the tens in n
+   bpic(items, label)                base-ten blocks for several numbers in a row, with signs like + between them (svg) */
 /* the tens in n */
 const tensOf = (n) => Math.floor(n / 10);
 /* Base-ten blocks in a row. items: numbers, {n, cls, opt} or {t, u, cls, opt} (t tens and u ones; opt goes to blocks()),

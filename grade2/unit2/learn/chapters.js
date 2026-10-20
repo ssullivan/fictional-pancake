@@ -14,6 +14,7 @@ const UNIT = {
   saveKey: "g2u2-learn",
   readAloud: true,
   icons: ICON,
+  game: "Market Day",
   /* the order of the chapters when the unit was one page (learn.html#c2s1), for progress saved then and old links */
   legacy: ["compare", "subtract-your-way", "break-a-ten", "within-100", "story-problems"],
   chapters: [
@@ -24,6 +25,7 @@ const UNIT = {
       lessons: "Lessons 1–3",
       blurb: "Find how many more, count on to find a missing number, and decide whether a story adds or subtracts.",
       steps: 3,
+      game: { zone: "compare", name: "Apple Stand" },
     },
     {
       id: "subtract-your-way",
@@ -32,6 +34,7 @@ const UNIT = {
       lessons: "Lessons 5–6",
       blurb: "Take away tens and ones, and find different ways to subtract when there aren’t enough ones.",
       steps: 2,
+      game: { zone: "takeaway", name: "Berry Patch" },
     },
     {
       id: "break-a-ten",
@@ -40,6 +43,7 @@ const UNIT = {
       lessons: "Lessons 7–8",
       blurb: "Trade a ten for 10 ones so you can take away, and show one number in different ways.",
       steps: 2,
+      game: { zone: "break", name: "Carrot Bunches" },
     },
     {
       id: "within-100",
@@ -48,6 +52,7 @@ const UNIT = {
       lessons: "Lesson 9",
       blurb: "Make a new ten when you add, break a ten when you subtract, and know which one a problem needs.",
       steps: 2,
+      game: { zone: "within", name: "Flower Buckets" },
     },
     {
       id: "story-problems",
@@ -56,6 +61,7 @@ const UNIT = {
       lessons: "Lessons 11–14",
       blurb: "Show stories with tape diagrams and equations, find the missing part, and solve two-step stories.",
       steps: 3,
+      game: { zone: "stories", name: "Market Stories" },
     },
   ],
 };
