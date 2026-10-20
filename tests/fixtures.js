@@ -19,15 +19,26 @@ exports.test = base.test.extend({
           body: Buffer.from(body, "base64"),
         });
       }
-      const res = await route.fetch();
+      /* not cached yet (as on CI): fetch it. A test can end before the file arrives, which closes its page and throws the
+         response away; nothing is waiting for the file then, so that isn't an error */
+      let res, body;
+      try {
+        res = await route.fetch();
+        body = await res.body();
+      } catch (e) {
+        if (page.isClosed()) return;
+        throw e;
+      }
       if (res.status() === 200) {
         const headers = Object.entries(res.headers())
           .filter(([n]) => /^(content-type|access-control-allow-origin)$/i.test(n))
           .map(([name, value]) => ({ name, value }));
         fs.mkdirSync(CACHE, { recursive: true });
-        fs.writeFileSync(file, JSON.stringify({ headers, body: (await res.body()).toString("base64") }));
+        fs.writeFileSync(file, JSON.stringify({ headers, body: body.toString("base64") }));
       }
-      return route.fulfill({ response: res });
+      return route.fulfill({ status: res.status(), headers: res.headers(), body }).catch((e) => {
+        if (!page.isClosed()) throw e;
+      });
     });
     const errors = [];
     page.on("pageerror", (e) => errors.push(e.message));
