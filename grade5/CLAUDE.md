@@ -9,6 +9,7 @@ When a unit gets a game or Learn page, add a row here and turn its "Coming soon"
 | Folder | Game | Learn page | Unit |
 |---|---|---|---|
 | `unit1/` | Cargo Port (`index.html`, 5 stations + Full Load; `figs.js` holds the boxes and unit cubes at an angle, which its Learn pages use too) | `learn.html` + `learn/` (6 chapters, Lessons 1–11) | Grade 5 Unit 1 |
+| `unit2/` | Picnic Park (`index.html`, 5 stations + the Kite Festival; `figs.js` holds the sandwiches, tapes and strips for a fraction of a number, and rectangles on a grid of unit squares, which its Learn pages use too) | `learn.html` + `learn/` (5 chapters, Lessons 1–15) | Grade 5 Unit 2 |
 
 ## Building for Grade 5
 

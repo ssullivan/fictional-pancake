@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Picnic Park</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=JetBrains+Mono:wght@500;700&display=swap">
+<link rel="stylesheet" href="../../shared/theme.css?v=c2e276bb">
+<link rel="stylesheet" href="../../shared/game.css?v=57b7d039">
+<link rel="stylesheet" href="../../shared/pictures.css?v=7f680159">
+<link rel="stylesheet" href="../../shared/fractions.css?v=a126b20b">
+<link rel="stylesheet" href="../../shared/numlines.css?v=c057db89">
+<link rel="stylesheet" href="figs.css?v=2ea5fe55">
+<style>
+/* the kites in the final round: 10 kites, one flying for each right answer */
+.power{display:flex;align-items:center;gap:14px;background:rgba(95,224,168,.08);border:1.5px solid rgba(95,224,168,.45);border-radius:14px;padding:10px 14px}
+.power svg{width:72px;height:72px;flex:none}
+.power b{font:800 20px var(--display);color:var(--good)}
+.power p{margin:4px 0 0;font:700 14px var(--mono);color:var(--dim)}
+.power.hit svg{animation:lift .6s}
+@keyframes lift{50%{transform:translateY(-4px)}}
+@media (prefers-reduced-motion:reduce){.power.hit svg{animation:none}}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <section id="home">
+    <a class="back" href="../">← Grade 5</a>
+    <header class="hero">
+      <p class="eyebrow">Illustrative Mathematics K–5 · Grade 5 · Unit 2 · Fractions as Quotients and Fraction Multiplication</p>
+      <h1>Picnic <span>Park</span></h1>
+      <p class="lede">Welcome to the picnic! Share sandwiches fairly, pour lemonade into pitchers, pick berries, and lay out blankets and garden beds. Then fly the kites. Each station matches lessons from class.</p>
+      <div class="stats">
+        <span class="pill">Points <b id="hp">0</b></span>
+        <span class="pill">Stars <b id="hs">0</b>/<span id="hsMax">18</span></span>
+      </div>
+    </header>
+    <div class="zones" id="zones"></div>
+    <section class="grownups">
+      <h2>For grown-ups</h2>
+      <div><h4>How a round works</h4><p>Each station deals 8 fresh problems (the Kite Festival deals 10). A right answer on the first try earns 10 points. After a wrong answer, the game names the likely mistake and gives one more try for 5 points. At the Kite Festival, each right answer sends one of 10 kites into the sky.</p></div>
+      <div><h4>The "Show me" hint</h4><p>Hints use the pictures from class: sandwiches cut into a piece for each person, fraction strips, tape diagrams split into equal parts, and rectangles on a grid of unit squares, split into a whole-number part and a fraction part. A used hint caps that problem at 5 points.</p></div>
+      <div><h4>Mistakes it catches</h4><p>Dividing the wrong way around (b ÷ a), giving one piece of one sandwich instead of a piece of each, stopping at a remainder or at the whole-number part, multiplying instead of dividing to find a fraction of a number, taking one part instead of several, adding the side lengths instead of multiplying, and multiplying only the whole-number part of a mixed number.</p></div>
+      <div><h4>Numbers</h4><p>Denominators are 2, 3, 4, 5, 6, and 8. Shares come from at most 12 things, fractions of a number divide evenly or stay under 5 wholes, and rectangles are at most 5 units on a side. Answers can be typed as fractions (7/4) or mixed numbers (1 3/4).</p></div>
+      <div><h4>Learn it first</h4><p>Each station matches a chapter of the <a href="learn.html">Learn page</a> for this unit, which walks through the ideas step by step.</p></div>
+      <div><h4>Not covered</h4><p>Estimate Products (Lesson 16) and Mosaic Pictures (Lesson 17) are optional lessons, so there are no stations for them.</p></div>
+    </section>
+  </section>
+  <section id="play" hidden>
+    <div class="bar">
+      <button id="quit" class="ghost-btn" type="button">← Stations</button>
+      <div class="bar-mid"><div class="zn" id="zname"></div><div class="track"><div id="prog"></div></div></div>
+      <div class="bar-stats"><span class="pill" id="streak">Streak <b>0</b></span><span class="pill">Pts <b id="pts">0</b></span></div>
+    </div>
+    <div class="power" id="power" hidden></div>
+    <article class="card">
+      <p class="eyebrow" id="qnum"></p>
+      <h2 id="prompt"></h2>
+      <div class="fig" id="fig"></div>
+      <div id="answer"></div>
+      <div id="hint" class="hintbox" hidden></div>
+      <div id="feedback" role="status" aria-live="polite"></div>
+    </article>
+  </section>
+
+  <section id="done" hidden>
+    <div class="card done">
+      <p class="eyebrow" id="dzone"></p>
+      <div class="bigstars stars" id="dstars"></div>
+      <h2 id="dtitle"></h2>
+      <p id="dmsg"></p>
+      <div class="row">
+        <button class="btn" id="again" type="button">Play again</button>
+        <button class="ghost-btn" id="tomap" type="button">Back to stations</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script src="../../shared/util.js?v=6fcbe1bb"></script>
+<script src="../../shared/figures.js?v=d2337c45"></script>
+<script src="../../shared/pictures.js?v=f857849d"></script>
+<script src="../../shared/fractions.js?v=53325bd7"></script>
+<script src="../../shared/numlines.js?v=bd853df2"></script>
+<script src="figs.js?v=6fdb588b"></script>
+<script src="../../shared/engine.js?v=4b1b2373"></script>
+<script src="stations.js?v=bddf04f7"></script>
+<script>
+/* the kites in the final round: one kite flies for each right answer */
+let flying=0;
+/* the kites beside a boss problem (hidden at the other stations); hit: the last answer was right */
+function drawKites(state,hit){
+  const el=$('power');el.hidden=state.z.id!=='boss';if(el.hidden)return;
+  el.innerHTML=`<svg viewBox="0 0 64 64" role="img" aria-label="${flying} of 10 kites flying">${kites(flying)}</svg><div><b>${flying} of 10 kites flying</b><p>${flying===10?'Every kite is up. What a show!':hit?'Right! Another kite takes off.':'Answer right to fly a kite.'}</p></div>`;
+  el.classList.toggle('hit',!!hit);
+}
+Game.init({
+  saveKey:'g5u2-save',
+  zones:ZONES,icons:ICON,
+  words:{
+    right:'Nailed it!',
+    miss:'Not quite. Check it with the picture.',
+    titles:['Keep practicing','Good start','Picnic pro','Picnic champion!'],
+    next:'Try the next station, or fly the kites.',
+    stuck:'Use “Show me a hint” when you’re stuck. It shows the picture from class.',
+    tap:'Tap your answer on the number line.'
+  },
+  /* no kites are up at the start of a round */
+  onQuestion:state=>{if(state.i===0)flying=0;drawKites(state,false);},
+  onAnswer:(state,ok)=>{if(ok)flying++;drawKites(state,ok);}
+});
+</script>
+</body>
+</html>
