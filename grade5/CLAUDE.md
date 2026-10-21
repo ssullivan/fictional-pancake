@@ -11,6 +11,7 @@ When a unit gets a game or Learn page, add a row here and turn its "Coming soon"
 | `unit1/` | Cargo Port (`index.html`, 5 stations + Full Load; `figs.js` holds the boxes and unit cubes at an angle, which its Learn pages use too) | `learn.html` + `learn/` (6 chapters, Lessons 1–11) | Grade 5 Unit 1 |
 | `unit2/` | Picnic Park (`index.html`, 5 stations + the Kite Festival; `figs.js` holds the sandwiches, tapes and strips for a fraction of a number, and rectangles on a grid of unit squares, which its Learn pages use too) | `learn.html` + `learn/` (5 chapters, Lessons 1–15) | Grade 5 Unit 2 |
 | `unit3/` | Community Garden (`index.html`, 5 stations + the Harvest Fair; `figs.js` holds the fraction strips for dividing, which its Learn pages use too; squares for multiplying are `areaFig` in `shared/fractions.js`) | `learn.html` + `learn/` (5 chapters, Lessons 1–8, 11–19) | Grade 5 Unit 3 |
+| `unit4/` | Record Breakers (`index.html`, 6 stations + World Record; `figs.js` holds the standard algorithm with a two-digit factor, `mul2Fig`, which its Learn pages use too) | `learn.html` + `learn/` (6 chapters, Lessons 1–16, 18–20) | Grade 5 Unit 4 |
 
 ## Building for Grade 5
 

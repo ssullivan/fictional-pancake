@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Record Breakers</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=JetBrains+Mono:wght@500;700&display=swap">
+<link rel="stylesheet" href="../../shared/theme.css?v=c2e276bb">
+<link rel="stylesheet" href="../../shared/game.css?v=57b7d039">
+<link rel="stylesheet" href="../../shared/pictures.css?v=7f680159">
+<link rel="stylesheet" href="../../shared/blocks.css?v=ef8d48f1">
+<link rel="stylesheet" href="../../shared/shapes.css?v=f6eb8043">
+<link rel="stylesheet" href="../../shared/multiply.css?v=2a49b04d">
+<style>
+/* the medal board in the final round: 10 medals, one won for each right answer */
+.power{display:flex;align-items:center;gap:14px;background:rgba(95,224,168,.08);border:1.5px solid rgba(95,224,168,.45);border-radius:14px;padding:10px 14px}
+.power svg{width:72px;height:72px;flex:none}
+.power b{font:800 20px var(--display);color:var(--good)}
+.power p{margin:4px 0 0;font:700 14px var(--mono);color:var(--dim)}
+.power.hit svg{animation:bump .5s}
+@keyframes bump{50%{transform:scale(1.08)}}
+@media (prefers-reduced-motion:reduce){.power.hit svg{animation:none}}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <section id="home">
+    <a class="back" href="../">← Grade 5</a>
+    <header class="hero">
+      <p class="eyebrow">Illustrative Mathematics K–5 · Grade 5 · Unit 4 · Wrapping Up Multiplication and Division with Multi-digit Numbers</p>
+      <h1>Record <span>Breakers</span></h1>
+      <p class="lede">Welcome to the record hall! Guess big products, build them with partial products, stack them with the standard algorithm, line up dancers, fill bowls of noodle soup, and run the recycling center. Then go for the world record. Each station matches lessons from class.</p>
+      <div class="stats">
+        <span class="pill">Points <b id="hp">0</b></span>
+        <span class="pill">Stars <b id="hs">0</b>/<span id="hsMax">18</span></span>
+      </div>
+    </header>
+    <div class="zones" id="zones"></div>
+    <section class="grownups">
+      <h2>For grown-ups</h2>
+      <div><h4>How a round works</h4><p>Each station deals 8 fresh problems (World Record deals 10). A right answer on the first try earns 10 points. After a wrong answer, the game names the likely mistake and gives one more try for 5 points. In World Record, each right answer earns one of 10 medals.</p></div>
+      <div><h4>The "Show me" hint</h4><p>Hints use the pictures from class: area diagrams split by place value, the standard algorithm worked row by row, partial quotients taken away in chunks, and rectangles with a missing side. A used hint caps that problem at 5 points.</p></div>
+      <div><h4>Mistakes it catches</h4><p>Estimates with a zero too many or too few, multiplying only some of the parts, leaving out the carries, leaving out the 0 in the tens row of the standard algorithm, stopping after the first partial quotient, subtracting or multiplying instead of dividing, stopping after one step of a two-step problem, and leaving paper behind instead of making one more trip.</p></div>
+      <div><h4>Numbers</h4><p>Multiplying goes up to 4 digits × 1 digit and 3 digits × 2 digits, with few nonzero digits and at most two carries. Dividing goes up to 2,500 by friendly two-digit numbers (11, 12, 15, 20, 25, 30, 40, 50), with no remainder unless the story says what to do with it.</p></div>
+      <div><h4>Learn it first</h4><p>Each station matches a chapter of the <a href="learn.html">Learn page</a> for this unit, which walks through the ideas step by step.</p></div>
+      <div><h4>Not covered</h4><p>Fractions as Partial Quotients (Lesson 17) and Food Waste Journal (Lesson 21) are optional lessons, so there are no stations for them.</p></div>
+    </section>
+  </section>
+  <section id="play" hidden>
+    <div class="bar">
+      <button id="quit" class="ghost-btn" type="button">← Stations</button>
+      <div class="bar-mid"><div class="zn" id="zname"></div><div class="track"><div id="prog"></div></div></div>
+      <div class="bar-stats"><span class="pill" id="streak">Streak <b>0</b></span><span class="pill">Pts <b id="pts">0</b></span></div>
+    </div>
+    <div class="power" id="power" hidden></div>
+    <article class="card">
+      <p class="eyebrow" id="qnum"></p>
+      <h2 id="prompt"></h2>
+      <div class="fig" id="fig"></div>
+      <div id="answer"></div>
+      <div id="hint" class="hintbox" hidden></div>
+      <div id="feedback" role="status" aria-live="polite"></div>
+    </article>
+  </section>
+
+  <section id="done" hidden>
+    <div class="card done">
+      <p class="eyebrow" id="dzone"></p>
+      <div class="bigstars stars" id="dstars"></div>
+      <h2 id="dtitle"></h2>
+      <p id="dmsg"></p>
+      <div class="row">
+        <button class="btn" id="again" type="button">Play again</button>
+        <button class="ghost-btn" id="tomap" type="button">Back to stations</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script src="../../shared/util.js?v=6fcbe1bb"></script>
+<script src="../../shared/figures.js?v=d2337c45"></script>
+<script src="../../shared/pictures.js?v=f857849d"></script>
+<script src="../../shared/blocks.js?v=8836c7d3"></script>
+<script src="../../shared/shapes.js?v=f44efe22"></script>
+<script src="../../shared/multiply.js?v=3d03c2c1"></script>
+<script src="figs.js?v=f42f4e53"></script>
+<script src="../../shared/engine.js?v=4b1b2373"></script>
+<script src="stations.js?v=6b95f902"></script>
+<script>
+/* the medal board in the final round: one medal for each right answer */
+let won=0;
+/* the medals beside a boss problem (hidden at the other stations); hit: the last answer was right */
+function drawMedals(state,hit){
+  const el=$('power');el.hidden=state.z.id!=='boss';if(el.hidden)return;
+  el.innerHTML=`<svg viewBox="0 0 64 64" role="img" aria-label="${won} of 10 medals won">${medals(won)}</svg><div><b>${won} of 10 medals won</b><p>${won===10?'All 10 medals. A new world record!':hit?'Right! Another medal for the board.':'Answer right to win a medal.'}</p></div>`;
+  el.classList.toggle('hit',!!hit);
+}
+Game.init({
+  saveKey:'g5u4-save',
+  zones:ZONES,icons:ICON,
+  words:{
+    right:'Nailed it!',
+    miss:'Not quite. Check it with the picture.',
+    titles:['Keep practicing','Good start','Record setter','World champion!'],
+    next:'Try the next station, or go for the World Record.',
+    stuck:'Use “Show me a hint” when you’re stuck. It shows the picture from class.',
+    tap:'Tap your answer.'
+  },
+  /* the board is empty at the start of a round */
+  onQuestion:state=>{if(state.i===0)won=0;drawMedals(state,false);},
+  onAnswer:(state,ok)=>{if(ok)won++;drawMedals(state,ok);}
+});
+</script>
+</body>
+</html>
