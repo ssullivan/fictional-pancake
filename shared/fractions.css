@@ -1,4 +1,4 @@
-/* Styles for shared/fractions.js: fraction strips and hundred grids. */
+/* Styles for shared/fractions.js: fraction strips, hundred grids, and rectangles on a grid of unit squares. */
 /* fraction strips (strips): fs one part, on when shaded (b blue, g green), gone when taken away */
 .fs{fill:rgba(170,205,255,.08);stroke:var(--chalk);stroke-width:2}
 .fs.on{fill:var(--gold)}.fs.on.b{fill:var(--cyan)}.fs.on.g{fill:var(--good)}
@@ -8,3 +8,12 @@
 .hg.a{fill:var(--gold)}.hg.b{fill:var(--cyan)}
 .hgt{stroke:var(--chalk);stroke-width:2}
 .hgw{fill:none;stroke:var(--chalk);stroke-width:2.5}
+/* rectangles on a grid of unit squares (areaFig): the grid, its shaded parts (gold, cyan, and a light strip under them), the
+   thin lines between parts, the bold lines around unit squares, and the rectangle's outline */
+.ag{fill:rgba(169,196,228,.08)}
+.ag.on{fill:rgba(255,201,60,.8)}
+.ag.on.b{fill:rgba(127,227,255,.75)}
+.ag.lt{fill:rgba(127,227,255,.3)}
+.agl{stroke:#7d93b3;stroke-width:1.2}
+.agu{stroke:var(--chalk);stroke-width:2.5}
+.agr{fill:none;stroke:#fff;stroke-width:3.5}

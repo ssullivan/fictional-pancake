@@ -10,16 +10,18 @@ When a unit gets a game or Learn page, add a row here and turn its "Coming soon"
 |---|---|---|---|
 | `unit1/` | Cargo Port (`index.html`, 5 stations + Full Load; `figs.js` holds the boxes and unit cubes at an angle, which its Learn pages use too) | `learn.html` + `learn/` (6 chapters, Lessons 1–11) | Grade 5 Unit 1 |
 | `unit2/` | Picnic Park (`index.html`, 5 stations + the Kite Festival; `figs.js` holds the sandwiches, tapes and strips for a fraction of a number, and rectangles on a grid of unit squares, which its Learn pages use too) | `learn.html` + `learn/` (5 chapters, Lessons 1–15) | Grade 5 Unit 2 |
+| `unit3/` | Community Garden (`index.html`, 5 stations + the Harvest Fair; `figs.js` holds the fraction strips for dividing, which its Learn pages use too; squares for multiplying are `areaFig` in `shared/fractions.js`) | `learn.html` + `learn/` (5 chapters, Lessons 1–8, 11–19) | Grade 5 Unit 3 |
 
 ## Building for Grade 5
 
 Players are 10 and 11 years old, so on top of the root rules:
 - Plain sentences. Give a problem a picture whenever the lesson uses one (unit cubes and prisms, area diagrams, fraction strips, number lines, tape diagrams, thousandths grids, the coordinate grid).
-- Fractions: denominators 2, 3, 4, 5, 6, 8, 10, 12, and 100 only. A whole number divided by a whole number can be a fraction (a ÷ b = a/b). Multiply a fraction by a whole number or by a fraction (both less than 1, or a small mixed number). Divide only a unit fraction by a whole number or a whole number by a unit fraction. Add and subtract with unlike denominators whose common denominator is 24 or less.
+- Fractions: denominators 2, 3, 4, 5, 6, 8, 10, 12, and 100 only. A whole number divided by a whole number can be a fraction (a ÷ b = a/b). Multiply a fraction by a whole number or by a fraction (both less than 1, with denominators 2 to 6, so a product's denominator can be up to 36). Divide only a unit fraction by a whole number or a whole number by a unit fraction. Add and subtract with unlike denominators whose common denominator is 24 or less.
 - Decimals: read, compare, and round to thousandths; add, subtract, multiply, and divide to hundredths, with a basic fact at the core (0.6 × 0.4, 2.4 ÷ 0.3).
 - Whole numbers: multiply up to 3-digit × 2-digit with at most two regroups; divide up to 4-digit ÷ 2-digit with partial quotients, using friendly divisors (multiples of 10, 11, 12, 15, 25). Powers of 10 written with exponents (10³).
 - Volume: whole-number edge lengths up to about 10, in cubic centimeters, inches, feet, or meters.
 - Measurement: convert metric units both ways (km, m, cm, mm; kg, g; L, mL) and customary length (yd, ft, in) from larger to smaller.
+- Rectangles on a grid of unit squares (`areaFig`, for fraction sides and fraction × fraction) are in `shared/fractions.js`.
 - The coordinate grid: the first quadrant only, with whole numbers up to 10 (or a scale of 2, 5, or 10).
 - Pages use the standard body (no `young` class) and no `readAloud`; those are for K–2. Learn pages and games load the K–5 picture files in `shared/` (see the root `CLAUDE.md`).
 - Games are built like Grade 4 Unit 1's Factor Factory (`grade4/unit1/index.html`, `stations.js`, `checks.js`): standard body, K–5 pictures, and typed, multiple-choice, and tap answers.

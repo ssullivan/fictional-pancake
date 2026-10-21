@@ -1,12 +1,4 @@
-/* Styles for figs.js: sandwiches (one person's pieces gold) and the cuts between pieces; rectangles on a grid of unit squares
-   (the grid, its shaded parts in gold and cyan, the thin lines between parts, the bold lines around unit squares, and the
-   rectangle's outline). */
+/* Styles for figs.js: sandwiches (one person's pieces gold) and the cuts between pieces. */
 .sw{fill:#e9d2a0;stroke:#8a6a2c;stroke-width:2}
 .sw.mine{fill:var(--gold);stroke:#fff1b8}
 .swcut{stroke:#5b4520;stroke-width:2;stroke-dasharray:4 3}
-.ag{fill:rgba(169,196,228,.08)}
-.ag.on{fill:rgba(255,201,60,.8)}
-.ag.on.b{fill:rgba(127,227,255,.75)}
-.agl{stroke:#7d93b3;stroke-width:1.2}
-.agu{stroke:var(--chalk);stroke-width:2.5}
-.agr{fill:none;stroke:#fff;stroke-width:3.5}

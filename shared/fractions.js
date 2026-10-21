@@ -1,10 +1,13 @@
-/* Fractions and decimals for K–5 pages: fraction strips, fraction number lines, and hundred grids. Fractions written stacked
+/* Fractions and decimals for K–5 pages: fraction strips, fraction number lines, hundred grids, and rectangles with fraction
+   sides on a grid of unit squares (Grade 5). Fractions written stacked
    (fr, frT) and part names (PART) are in pictures.js. Styles are in fractions.css. Needs util.js, figures.js (svgWrap), and pictures.js.
 
    strips(rows, {wholes, W})         fraction strips: wholes cut into d equal parts, k of them shaded, in groups or taken away (svg)
    fracLine(rows, {wholes, …})       number lines from 0 marked in fractions, one under another, with points and tappable ticks (svg)
    hundredGrid(cells)                1 whole as 10 tenths of 10 hundredths, with squares shaded (svg)
-   compareFr(a, b), SIGN_HTML        how fraction a ([n, d]) compares to b ('<', '=', or '>'), and those signs as html */
+   compareFr(a, b), SIGN_HTML        how fraction a ([n, d]) compares to b ('<', '=', or '>'), and those signs as html
+   mixT(x, y, [n, d], cls)           n/d in a picture as a whole number, a fraction, or a mixed number, centered on x, y (markup)
+   areaFig(w, h, {split, under, labels})   a rectangle w by h (fractions) shaded on a grid of unit squares cut into parts (svg) */
 /* Fraction strips, one row under another, every whole the same width so rows line up.
    rows: [{d, k, cls, lab, parts, grp, out}]: each whole cut into d equal parts and the first k shaded (cls 'b' blue, 'g' green; gold by default);
    k more than d draws more wholes. lab: [n, d] written to the left of the row. parts: false leaves 1/d out of the parts.
@@ -150,3 +153,94 @@ function hundredGrid(cells, { label } = {}) {
 const compareFr = ([n1, d1], [n2, d2]) => (n1 * d2 < n2 * d1 ? "<" : n1 * d2 > n2 * d1 ? ">" : "=");
 /* <, >, and = as html */
 const SIGN_HTML = { "<": "&lt;", ">": "&gt;", "=": "=" };
+
+/* n/d in a picture: the whole number, then the fraction stacked beside it; about 10 px a digit */
+function mixT(x, y, [n, d], cls = "") {
+  const whole = Math.floor(n / d),
+    rest = n % d,
+    wholeText = whole || !rest ? String(whole) : "",
+    /* fracW: the stacked fraction's width; the whole thing is totalW wide, centered on x */
+    fracW = rest ? 10 + 9 * Math.max(String(rest).length, String(d).length) : 0,
+    totalW = wholeText.length * 10 + (wholeText && rest ? 4 : 0) + fracW,
+    left = x - totalW / 2;
+  return (
+    (wholeText ? `<text class="lbl ${cls}" x="${left + wholeText.length * 5}" y="${y}">${wholeText}</text>` : "") +
+    (rest ? frT(left + totalW - fracW / 2, y, rest, d, cls) : "")
+  );
+}
+
+/* A rectangle w by h ([n, d] each; a whole number k is [k, 1]) on a grid of unit squares: each square is cut into w's
+   denominator columns and h's denominator rows, and the rectangle is shaded from the bottom left corner. split 'w': the
+   whole-number part of the width gold and the rest cyan (split 'h' does the same up the height). under: first shade a strip
+   h tall all the way across the grid in light cyan, so the rectangle shows as w of that strip (1/2 of 1/3). labels: w under
+   the rectangle and h to its left (each part under its own color when split). */
+function areaFig([wn, wd], [hn, hd], { split = null, under = false, labels = true, label } = {}) {
+  /* the grid is cols by rows unit squares, each `size` pixels; xOf and yOf turn lengths into screen points (y from the bottom) */
+  const cols = Math.max(1, Math.ceil(wn / wd)),
+    rows = Math.max(1, Math.ceil(hn / hd)),
+    /* a single unit square can be bigger, since its parts are small */
+    size = Math.min(cols * rows === 1 ? 160 : 110, 360 / cols, 230 / rows),
+    left = labels ? 70 : 6,
+    top = 8,
+    bottom = labels ? 46 : 6,
+    xOf = (v) => left + v * size,
+    yOf = (v) => top + (rows - v) * size,
+    w = wn / wd,
+    h = hn / hd;
+  /* shaded pieces: [x from, x to, y from, y to, class] */
+  const wholeW = Math.floor(w),
+    wholeH = Math.floor(h),
+    pieces =
+      split === "w" && wholeW && w > wholeW
+        ? [
+            [0, wholeW, 0, h, "on"],
+            [wholeW, w, 0, h, "on b"],
+          ]
+        : split === "h" && wholeH && h > wholeH
+          ? [
+              [0, w, 0, wholeH, "on"],
+              [0, w, wholeH, h, "on b"],
+            ]
+          : [[0, w, 0, h, "on"]];
+  let markup = `<rect class="ag" x="${xOf(0)}" y="${yOf(rows)}" width="${cols * size}" height="${rows * size}"/>`;
+  if (under) markup += `<rect class="ag lt" x="${xOf(0)}" y="${yOf(h)}" width="${cols * size}" height="${h * size}"/>`;
+  for (const [x1, x2, y1, y2, cls] of pieces)
+    markup += `<rect class="ag ${cls}" x="${xOf(x1)}" y="${yOf(y2)}" width="${(x2 - x1) * size}" height="${(y2 - y1) * size}"/>`;
+  /* thin lines for the parts, bold ones around each unit square */
+  for (let i = 1; i < cols * wd; i++)
+    if (i % wd)
+      markup += `<line class="agl" x1="${xOf(i / wd)}" y1="${yOf(0)}" x2="${xOf(i / wd)}" y2="${yOf(rows)}"/>`;
+  for (let j = 1; j < rows * hd; j++)
+    if (j % hd)
+      markup += `<line class="agl" x1="${xOf(0)}" y1="${yOf(j / hd)}" x2="${xOf(cols)}" y2="${yOf(j / hd)}"/>`;
+  for (let i = 0; i <= cols; i++)
+    markup += `<line class="agu" x1="${xOf(i)}" y1="${yOf(0)}" x2="${xOf(i)}" y2="${yOf(rows)}"/>`;
+  for (let j = 0; j <= rows; j++)
+    markup += `<line class="agu" x1="${xOf(0)}" y1="${yOf(j)}" x2="${xOf(cols)}" y2="${yOf(j)}"/>`;
+  markup += `<rect class="agr" x="${xOf(0)}" y="${yOf(h)}" width="${w * size}" height="${h * size}"/>`;
+  if (labels) {
+    /* the width under the rectangle (each part under its own color when the width is split), the height to its left */
+    const widths =
+      pieces.length === 2 && split === "w"
+        ? [
+            [0, wholeW, [wholeW, 1]],
+            [wholeW, w, [wn - wholeW * wd, wd]],
+          ]
+        : [[0, w, [wn, wd]]];
+    for (const [from, to, length] of widths) markup += mixT((xOf(from) + xOf(to)) / 2, yOf(0) + 24, length);
+    const heights =
+      pieces.length === 2 && split === "h"
+        ? [
+            [0, wholeH, [wholeH, 1]],
+            [wholeH, h, [hn - wholeH * hd, hd]],
+          ]
+        : [[0, h, [hn, hd]]];
+    for (const [from, to, length] of heights) markup += mixT(left - 30, (yOf(from) + yOf(to)) / 2, length);
+  }
+  return svgWrap(
+    Math.ceil(left + cols * size + (labels ? 40 : 6)),
+    Math.ceil(top + rows * size + bottom),
+    markup,
+    label || `A rectangle ${wn}/${wd} by ${hn}/${hd} on a grid of unit squares`,
+  );
+}
