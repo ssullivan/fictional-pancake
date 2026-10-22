@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Deep Dive</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=JetBrains+Mono:wght@500;700&display=swap">
+<link rel="stylesheet" href="../../shared/theme.css?v=c2e276bb">
+<link rel="stylesheet" href="../../shared/game.css?v=57b7d039">
+<link rel="stylesheet" href="../../shared/figures.css?v=20dca2b0">
+<link rel="stylesheet" href="../../shared/pictures.css?v=7f680159">
+<link rel="stylesheet" href="../../shared/algebra.css?v=05a86779">
+<link rel="stylesheet" href="../../shared/signed.css?v=7a156243">
+</head>
+<body>
+
+<div class="app">
+  <section id="home">
+    <a class="back" href="../">← Grade 7</a>
+    <header class="hero">
+      <p class="eyebrow">Illustrative Mathematics · Grade 7 · Unit 5 · Rational Number Arithmetic</p>
+      <h1>Deep <span>Dive</span></h1>
+      <p class="lede">Dive below zero. Track temperatures and depths, jump along the number line, subtract by adding the opposite, multiply and divide signed numbers, ride negative rates, and decode equations with negative numbers. Each station matches lessons from class. <a href="learn.html">New to this? Learn it first →</a></p>
+      <div class="stats">
+        <span class="pill">Points <b id="hp">0</b></span>
+        <span class="pill">Stars <b id="hs">0</b>/<span id="hsMax">21</span></span>
+      </div>
+    </header>
+    <div class="zones" id="zones"></div>
+    <section class="grownups">
+      <h2>For grown-ups</h2>
+      <div><h4>How a round works</h4><p>Each station deals 8 fresh problems (The Abyss deals 10). A right answer on the first try earns 10 points. After a wrong answer, the game names the likely mistake and gives one more try for 5 points. A question with only two choices (positive or negative?) gets one try.</p></div>
+      <div><h4>Typing negative numbers</h4><p>Answers can be negative, so the answer box opens the full keyboard, which has a minus sign (phone number pads don’t). Either a hyphen or a true minus sign works.</p></div>
+      <div><h4>The "Show me" hint</h4><p>Hints draw sums as jumps on a number line, mark temperatures on a thermometer and depths below sea level, and turn subtraction into adding the opposite.</p></div>
+      <div><h4>Numbers you can do in your head</h4><p>Numbers stay between −20 and 20 (depths and heights in friendly tens), and multiplying and dividing stay within the 12 × 12 facts, so the challenge is the signs, not the arithmetic.</p></div>
+      <div><h4>Mistakes it catches</h4><p>The wrong sign on a sum, adding the distances from zero when the signs differ, subtracting a negative as if it were positive, a difference taken the wrong way round, a negative times a negative called negative, a past position on the wrong side, and undoing multiplication by subtracting.</p></div>
+      <div><h4>Not covered</h4><p>Lesson 17 (The Stock Market) is a research project, so it works better in class than as scored problems.</p></div>
+    </section>
+  </section>
+
+  <section id="play" hidden>
+    <div class="bar">
+      <button id="quit" class="ghost-btn" type="button">← Stations</button>
+      <div class="bar-mid"><div class="zn" id="zname"></div><div class="track"><div id="prog"></div></div></div>
+      <div class="bar-stats"><span class="pill" id="streak">Streak <b>0</b></span><span class="pill">Pts <b id="pts">0</b></span></div>
+    </div>
+    <article class="card">
+      <p class="eyebrow" id="qnum"></p>
+      <h2 id="prompt"></h2>
+      <div class="fig" id="fig"></div>
+      <div id="answer"></div>
+      <div id="hint" class="hintbox" hidden></div>
+      <div id="feedback" role="status" aria-live="polite"></div>
+    </article>
+  </section>
+
+  <section id="done" hidden>
+    <div class="card done">
+      <p class="eyebrow" id="dzone"></p>
+      <div class="bigstars stars" id="dstars"></div>
+      <h2 id="dtitle"></h2>
+      <p id="dmsg"></p>
+      <div class="row">
+        <button class="btn" id="again" type="button">Play again</button>
+        <button class="ghost-btn" id="tomap" type="button">Back to stations</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script src="../../shared/util.js?v=6fcbe1bb"></script>
+<script src="../../shared/figures.js?v=d2337c45"></script>
+<script src="../../shared/algebra.js?v=ed58da1e"></script>
+<script src="../../shared/signed.js?v=0d648d45"></script>
+<script src="figs.js?v=e27dd2a6"></script>
+<script src="../../shared/engine.js?v=4b1b2373"></script>
+<script src="stations.js?v=67667ef2"></script>
+<script>
+Game.init({
+  saveKey:'g7u5-save',
+  zones:ZONES,icons:ICON,
+  words:{
+    right:'Splash!',
+    miss:'Not quite. Check the sign: which way did you move on the number line?',
+    titles:['Keep diving','Good start','Deep diver','Abyss explorer!'],
+    next:'Try the next station, or dive into The Abyss.',
+    stuck:'Use "Show me a hint" when you’re stuck. The number line shows which way to go.'
+  }
+});
+</script>
+</body>
+</html>

@@ -1,4 +1,4 @@
-/* Styles for figs.js: number lines through negative numbers and up-and-down number lines. */
+/* Styles for signed.js: number lines through negative numbers and up-and-down number lines. Load after pictures.css. */
 /* the tick at 0 is a little bolder */
 .tick.zero{stroke-width:3.5}
 /* an inequality's ray and the circle at its end (open: hollow), a hollow dot, and brackets for distances */
@@ -8,6 +8,11 @@
 .sl-end.open{fill:#0a2340}
 .pt.sl-hollow{fill:#0a2340}
 .sl-span{fill:none;stroke:var(--cyan);stroke-width:2.5}
+/* moves along the line: an arrow from where it starts (a short bar) to where it lands, gold or cyan (b) */
+.sl-jump,.sl-jump0{stroke:var(--gold);stroke-width:3.5;stroke-linecap:round}
+.sl-jumph{fill:var(--gold)}
+.sl-jump.b,.sl-jump0.b{stroke:var(--cyan)}
+.sl-jumph.b{fill:var(--cyan)}
 /* up-and-down lines: sky and sea, and a thermometer's tube, bulb, and liquid (cold: below zero) */
 .vl-sky{fill:rgba(127,227,255,.06)}
 .vl-sea{fill:rgba(64,140,255,.28)}

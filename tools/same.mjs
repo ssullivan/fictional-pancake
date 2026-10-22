@@ -33,6 +33,7 @@ const FILES = [
   "figures",
   "fracmath",
   "algebra",
+  "signed",
   "blocks",
   "numlines",
   "fractions",
@@ -614,6 +615,19 @@ const CALLS = {
     `coordPlane([{x: -3, y: 2, id: 'a', t: 'A'}, {x: 4, y: -5, id: 'b', cls: 'r'}], {xMin: -6, xMax: 6, yMin: -6, yMax: 6, width: 300, height: 300, quads: true, shade: 'II', tap: true})`,
     `coordPlane([{x: -2.5, y: 0}], {xMin: -5, xMax: 5, yMin: -10, yMax: 10, xStep: 0.5, yStep: 5, shapes: [{pts: [[-4, 5], [3, 5], [3, -5]], closed: true, cls: 'fill'}, {pts: [[0, 0], [-4, 0], [-4, 5]], cls: 'walk'}]})`,
     `coordPlane([], {xMin: -4, xMax: 4, yMin: -3, yMax: 3, shade: 'IV', line: [1, 0]})`,
+  ],
+  signed: [
+    `signedLine(-10, 10)`,
+    `signedLine(-20, 20, {every: 5, pts: [{v: -12, t: 'A'}, {v: 7, cls: 'b', t: 'B', lv: 1}, {v: 0, cls: 'r', open: true}]})`,
+    `signedLine(-5, 5, {step: 0.5, every: 1, lab: v => v !== 2, ray: {v: -2, dir: 1, open: true}, tap: 'cand'})`,
+    `signedLine(-8, 2, {ray: {v: 1, dir: -1}, spans: [{a: -6, b: 0, t: '6'}, {a: 0, b: 2, t: '2', lv: 1}], tap: true, width: 360, label: 'L'})`,
+    `signedLine(-100, 100, {step: 10, every: 50})`,
+    `signedLine(-10, 10, {moves: [{a: 0, b: 6, t: '+6'}, {a: 6, b: -3, t: '−9', lv: 1, cls: 'b'}], pts: [{v: -3, t: '−3'}]})`,
+    `signedLine(-6, 6, {moves: [{a: -2, b: -5}], spans: [{a: 0, b: 3, t: '3', lv: 1}]})`,
+    `vLine(-20, 20, {kind: 'temp', value: -8, unit: '°', pts: [{v: -8, t: 'now'}]})`,
+    `vLine(-15, 10, {kind: 'temp', value: 6, every: 5, step: 1})`,
+    `vLine(-400, 200, {kind: 'sea', every: 100, step: 50, unit: ' m', pts: [{v: -250, t: 'diver', cls: 'b'}, {v: 150, t: 'bird', cls: 'r'}]})`,
+    `vLine(-50, 50, {kind: 'money', every: 10, label: 'Balance'})`,
   ],
 };
 function range(a, b, step = 1) {
