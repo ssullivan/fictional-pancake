@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mall Rush</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=JetBrains+Mono:wght@500;700&display=swap">
+<link rel="stylesheet" href="../../shared/theme.css?v=c2e276bb">
+<link rel="stylesheet" href="../../shared/game.css?v=57b7d039">
+<link rel="stylesheet" href="../../shared/figures.css?v=20dca2b0">
+<link rel="stylesheet" href="../../shared/pictures.css?v=7f680159">
+<link rel="stylesheet" href="../../shared/algebra.css?v=05a86779">
+</head>
+<body>
+
+<div class="app">
+  <section id="home">
+    <a class="back" href="../">← Grade 7</a>
+    <header class="hero">
+      <p class="eyebrow">Illustrative Mathematics · Grade 7 · Unit 4 · Proportional Relationships &amp; Percentages</p>
+      <h1>Mall <span>Rush</span></h1>
+      <p class="lede">The mall is open. Work out rates from fractions of an hour, grow things by half again, change price tags by a percent, ring up tax and tips, hunt the sale rack, and check how far off a measurement is. Each station matches lessons from class. <a href="learn.html">New to this? Learn it first →</a></p>
+      <div class="stats">
+        <span class="pill">Points <b id="hp">0</b></span>
+        <span class="pill">Stars <b id="hs">0</b>/<span id="hsMax">21</span></span>
+      </div>
+    </header>
+    <div class="zones" id="zones"></div>
+    <section class="grownups">
+      <h2>For grown-ups</h2>
+      <div><h4>How a round works</h4><p>Each station deals 8 fresh problems (Mall Madness deals 10). A right answer on the first try earns 10 points. After a wrong answer, the game names the likely mistake and gives one more try for 5 points.</p></div>
+      <div><h4>The "Show me" hint</h4><p>Hints use the tools from class: a double number line from 0% to 100% and past it, finding 1% or 10% first, and multiplying by 1 plus the fraction or percent.</p></div>
+      <div><h4>Numbers you can do in your head</h4><p>Prices are friendly ($40, $60, $120), percents are multiples of 5 (plus tax rates like 6% and fees like 0.5%), and fractions of an hour are halves, thirds, and quarters, so the challenge is the percent reasoning, not the arithmetic. Money answers are checked to the cent.</p></div>
+      <div><h4>Mistakes it catches</h4><p>Giving only the increase or the tax instead of the new total, taking a percent of the new price when it was of the old one, treating 20% as $20, multiplying by 0.2 instead of 1.2, dividing time by distance, and comparing an error to the measurement instead of the real size.</p></div>
+      <div><h4>Not covered</h4><p>Lesson 16 (Posing Percentage Problems) asks students to write their own problems, so it works better in class than as scored problems.</p></div>
+    </section>
+  </section>
+
+  <section id="play" hidden>
+    <div class="bar">
+      <button id="quit" class="ghost-btn" type="button">← Stations</button>
+      <div class="bar-mid"><div class="zn" id="zname"></div><div class="track"><div id="prog"></div></div></div>
+      <div class="bar-stats"><span class="pill" id="streak">Streak <b>0</b></span><span class="pill">Pts <b id="pts">0</b></span></div>
+    </div>
+    <article class="card">
+      <p class="eyebrow" id="qnum"></p>
+      <h2 id="prompt"></h2>
+      <div class="fig" id="fig"></div>
+      <div id="answer"></div>
+      <div id="hint" class="hintbox" hidden></div>
+      <div id="feedback" role="status" aria-live="polite"></div>
+    </article>
+  </section>
+
+  <section id="done" hidden>
+    <div class="card done">
+      <p class="eyebrow" id="dzone"></p>
+      <div class="bigstars stars" id="dstars"></div>
+      <h2 id="dtitle"></h2>
+      <p id="dmsg"></p>
+      <div class="row">
+        <button class="btn" id="again" type="button">Play again</button>
+        <button class="ghost-btn" id="tomap" type="button">Back to stations</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script src="../../shared/util.js?v=6fcbe1bb"></script>
+<script src="../../shared/figures.js?v=d2337c45"></script>
+<script src="../../shared/pictures.js?v=f857849d"></script>
+<script src="../../shared/fracmath.js?v=af104f91"></script>
+<script src="../../shared/algebra.js?v=ed58da1e"></script>
+<script src="../../shared/engine.js?v=4b1b2373"></script>
+<script src="stations.js?v=5be6d7fe"></script>
+<script>
+Game.init({
+  saveKey:'g7u4-save',
+  near:(x,y)=>Math.abs(x-y)<0.005,
+  zones:ZONES,icons:ICON,
+  words:{
+    right:'Ka-ching!',
+    miss:'Not quite. Check what the percent is of, and whether to add it on or take it off.',
+    titles:['Keep shopping','Good start','Smart shopper','Mall master!'],
+    next:'Try the next station, or brave Mall Madness.',
+    stuck:'Use "Show me a hint" when you’re stuck. The number line shows every percent.'
+  }
+});
+</script>
+</body>
+</html>
