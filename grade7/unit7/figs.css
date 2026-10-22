@@ -1,0 +1,15 @@
+/* Grade 7 Unit 7 (Skate Park Builders and its Learn pages): triangles from three sides, prisms at an angle, and the shapes
+   slices make. Rays and angle marks are styled in shared/angles.css. */
+/* a triangle, or sides that can't meet: the long side, the short ones (b, cyan), and the gap between them (dashed red) */
+.tri{fill:rgba(255,201,60,.25);stroke:var(--gold);stroke-width:3;stroke-linejoin:round}
+.tri-side{stroke:var(--gold);stroke-width:4;stroke-linecap:round}
+.tri-side.b{stroke:var(--cyan)}
+.tri-gap{stroke:var(--bad);stroke-width:2.5;stroke-dasharray:5 4}
+/* a prism: the back face and the edges going back (dim), and the base in front */
+.pr-back{fill:rgba(127,227,255,.08);stroke:var(--dim);stroke-width:1.5}
+.pr-edge{stroke:var(--dim);stroke-width:1.5}
+.pr-front{fill:rgba(255,201,60,.3);stroke:var(--gold);stroke-width:2.5;stroke-linejoin:round}
+/* the shape a slice makes */
+.cut{fill:rgba(127,227,255,.3);stroke:var(--cyan);stroke-width:3;stroke-linejoin:round}
+/* a letter for a number inside a picture's text */
+.mvt{fill:var(--cyan);font-style:italic}

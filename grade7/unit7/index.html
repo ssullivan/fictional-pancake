@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Skate Park Builders</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=JetBrains+Mono:wght@500;700&display=swap">
+<link rel="stylesheet" href="../../shared/theme.css?v=c2e276bb">
+<link rel="stylesheet" href="../../shared/game.css?v=57b7d039">
+<link rel="stylesheet" href="../../shared/figures.css?v=20dca2b0">
+<link rel="stylesheet" href="../../shared/pictures.css?v=7f680159">
+<link rel="stylesheet" href="../../shared/algebra.css?v=05a86779">
+<link rel="stylesheet" href="../../shared/angles.css?v=c6f008f2">
+<link rel="stylesheet" href="../../shared/solids.css?v=845625d7">
+<link rel="stylesheet" href="figs.css?v=51e0dcf9">
+</head>
+<body>
+
+<div class="app">
+  <section id="home">
+    <a class="back" href="../">← Grade 7</a>
+    <header class="hero">
+      <p class="eyebrow">Illustrative Mathematics · Grade 7 · Unit 7 · Angles, Triangles &amp; Prisms</p>
+      <h1>Skate Park <span>Builders</span></h1>
+      <p class="lede">The town is building a skate park. Measure ramp angles, solve angle equations, test which boards make a triangle, slice solids, and work out how much concrete and paint the ramps need. Each station matches lessons from class. <a href="learn.html">New to this? Learn it first →</a></p>
+      <div class="stats">
+        <span class="pill">Points <b id="hp">0</b></span>
+        <span class="pill">Stars <b id="hs">0</b>/<span id="hsMax">21</span></span>
+      </div>
+    </header>
+    <div class="zones" id="zones"></div>
+    <section class="grownups">
+      <h2>For grown-ups</h2>
+      <div><h4>How a round works</h4><p>Each station deals 8 fresh problems (the Skate Jam deals 10). A right answer on the first try earns 10 points. After a wrong answer, the game names the likely mistake and gives one more try for 5 points. A question with only two choices (surface area or volume?) gets one try.</p></div>
+      <div><h4>The "Show me" hint</h4><p>Hints name the angle relationship (complementary, supplementary, vertical), add the two shortest sides of a triangle, draw the cut face beside a sliced solid, and split a base into rectangles and triangles.</p></div>
+      <div><h4>Numbers you can do in your head</h4><p>Angles are multiples of 5, equations have whole-number solutions, sides are at most 15, and prisms have whole-number edges, so the challenge is the geometry, not the arithmetic.</p></div>
+      <div><h4>Mistakes it catches</h4><p>Using 180° for a right angle (or 90° for a straight line), taking vertical angles for supplementary ones, solving for x when the angle is asked (and the other way round), sides that can’t reach, a triangle’s area without the half, forgetting a cut-out corner, counting only three faces of a box, and volume when the job needs surface area.</p></div>
+      <div><h4>Not covered</h4><p>Lessons 6 and 7 (building polygons from straws and paper) and Lesson 17 (building prisms) are hands-on, so they work better in class than as scored problems.</p></div>
+    </section>
+  </section>
+
+  <section id="play" hidden>
+    <div class="bar">
+      <button id="quit" class="ghost-btn" type="button">← Stations</button>
+      <div class="bar-mid"><div class="zn" id="zname"></div><div class="track"><div id="prog"></div></div></div>
+      <div class="bar-stats"><span class="pill" id="streak">Streak <b>0</b></span><span class="pill">Pts <b id="pts">0</b></span></div>
+    </div>
+    <article class="card">
+      <p class="eyebrow" id="qnum"></p>
+      <h2 id="prompt"></h2>
+      <div class="fig" id="fig"></div>
+      <div id="answer"></div>
+      <div id="hint" class="hintbox" hidden></div>
+      <div id="feedback" role="status" aria-live="polite"></div>
+    </article>
+  </section>
+
+  <section id="done" hidden>
+    <div class="card done">
+      <p class="eyebrow" id="dzone"></p>
+      <div class="bigstars stars" id="dstars"></div>
+      <h2 id="dtitle"></h2>
+      <p id="dmsg"></p>
+      <div class="row">
+        <button class="btn" id="again" type="button">Play again</button>
+        <button class="ghost-btn" id="tomap" type="button">Back to stations</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script src="../../shared/util.js?v=6fcbe1bb"></script>
+<script src="../../shared/figures.js?v=d2337c45"></script>
+<script src="../../shared/algebra.js?v=ed58da1e"></script>
+<script src="../../shared/angles.js?v=40488584"></script>
+<script src="../../shared/solids.js?v=ef3449b0"></script>
+<script src="figs.js?v=86c05158"></script>
+<script src="../../shared/engine.js?v=4b1b2373"></script>
+<script src="stations.js?v=a3f53022"></script>
+<script>
+Game.init({
+  saveKey:'g7u7-save',
+  zones:ZONES,icons:ICON,
+  words:{
+    right:'Nailed the landing!',
+    miss:'Not quite. Check which angles add to 90° or 180°, and which faces or layers you counted.',
+    titles:['Keep building','Good start','Park designer','Skate park legend!'],
+    next:'Try the next station, or drop into the Skate Jam.',
+    stuck:'Use "Show me a hint" when you’re stuck. The pictures show the angles and faces.'
+  }
+});
+</script>
+</body>
+</html>
