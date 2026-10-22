@@ -1,4 +1,4 @@
-/* Letters for numbers and coordinate planes, for Grade 6 (Units 6 and 7) and up. Styles are in algebra.css.
+/* Letters for numbers and coordinate planes, for Grade 6 (Units 6 and 7) and up; Grade 5 Unit 7 uses the first-quadrant plane. Styles are in algebra.css.
    Needs util.js (range) and figures.js (svgWrap).
 
    mathVar(letter)                   a letter that stands for a number, in italics (html)

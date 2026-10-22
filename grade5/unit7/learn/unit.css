@@ -1,0 +1,12 @@
+/* Styles for the unit's Learn pages: the family of quadrilateral names, one inside the next (on: the name picked; up: a name
+   it also has). */
+.family{list-style:none;margin:12px auto 0;padding:0;max-width:420px;display:grid;gap:6px}
+.family li{padding:8px 14px;border:1.5px solid rgba(170,205,255,.3);border-radius:10px;font:700 15px var(--mono);color:var(--dim)}
+.family li:nth-child(2){margin-left:12px}.family li:nth-child(3){margin-left:24px}.family li:nth-child(4),.family li:nth-child(5){margin-left:36px}.family li:nth-child(6){margin-left:48px}
+.family li.up{color:var(--cyan);border-color:rgba(127,227,255,.6)}
+.family li.on{color:#1a1300;background:var(--gold);border-color:var(--gold)}
+/* two patterns side by side, one rule a row */
+.pattern{border-collapse:collapse;margin:12px auto 0;font:700 16px var(--mono)}
+.pattern th{color:var(--dim);font-size:13px;text-align:right;padding:6px 10px}
+.pattern td{border:1px solid rgba(170,205,255,.3);padding:6px 10px;text-align:center;min-width:36px}
+.pattern tr:first-child td{color:var(--gold)}.pattern tr:last-child td{color:var(--cyan)}

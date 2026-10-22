@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Map Makers</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=JetBrains+Mono:wght@500;700&display=swap">
+<link rel="stylesheet" href="../../shared/theme.css?v=c2e276bb">
+<link rel="stylesheet" href="../../shared/game.css?v=57b7d039">
+<link rel="stylesheet" href="../../shared/pictures.css?v=7f680159">
+<link rel="stylesheet" href="../../shared/algebra.css?v=05a86779">
+<style>
+/* the treasure chest in the final round: 10 coins, one found for each right answer */
+.power{display:flex;align-items:center;gap:14px;background:rgba(95,224,168,.08);border:1.5px solid rgba(95,224,168,.45);border-radius:14px;padding:10px 14px}
+.power svg{width:72px;height:72px;flex:none}
+.power b{font:800 20px var(--display);color:var(--good)}
+.power p{margin:4px 0 0;font:700 14px var(--mono);color:var(--dim)}
+.power.hit svg{animation:bump .5s}
+@keyframes bump{50%{transform:scale(1.08)}}
+@media (prefers-reduced-motion:reduce){.power.hit svg{animation:none}}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <section id="home">
+    <a class="back" href="../">← Grade 5</a>
+    <header class="hero">
+      <p class="eyebrow">Illustrative Mathematics K–5 · Grade 5 · Unit 7 · Shapes on the Coordinate Plane</p>
+      <h1>Map <span>Makers</span></h1>
+      <p class="lede">Welcome, map makers! Find spots on the grid at base camp, survey the shapes of fields, sort the triangle peaks, follow two trail patterns at once, and measure land plots. Then go on the treasure hunt. Each station matches lessons from class.</p>
+      <div class="stats">
+        <span class="pill">Points <b id="hp">0</b></span>
+        <span class="pill">Stars <b id="hs">0</b>/<span id="hsMax">18</span></span>
+      </div>
+    </header>
+    <div class="zones" id="zones"></div>
+    <section class="grownups">
+      <h2>For grown-ups</h2>
+      <div><h4>How a round works</h4><p>Each station deals 8 fresh problems (the Treasure Hunt deals 10). A right answer on the first try earns 10 points. After a wrong answer, the game names the likely mistake and gives one more try for 5 points. On the Treasure Hunt, each right answer digs up one of 10 gold coins.</p></div>
+      <div><h4>The "Show me" hint</h4><p>Hints point back to the grid: count across first, then up; check each corner against a square corner of the grid; and look for opposite sides that run the same way. A used hint caps that problem at 5 points.</p></div>
+      <div><h4>Mistakes it catches</h4><p>Swapping the two coordinates, adding instead of subtracting to find a distance, giving a true name that isn’t the most specific one, thinking every rectangle is a square or every trapezoid a parallelogram, mixing up isosceles and scalene or acute and obtuse, counting the start of a pattern as a step, and mixing up perimeter and area.</p></div>
+      <div><h4>Numbers</h4><p>The grid is the first quadrant, 10 across and 8 up, with whole-number coordinates. A trapezoid is any quadrilateral with at least one pair of parallel sides, as in the unit, so every parallelogram is a trapezoid. Patterns start at 0 and add up to 16.</p></div>
+      <div><h4>Learn it first</h4><p>Each station matches a chapter of the <a href="learn.html">Learn page</a> for this unit, which walks through the ideas step by step.</p></div>
+      <div><h4>Not covered</h4><p>Points on the Coordinate Grid (Lesson 2), Trapezoids (Lesson 5), and Patterns and Ordered Pairs (Lesson 11) are optional lessons, so there are no stations for them.</p></div>
+    </section>
+  </section>
+  <section id="play" hidden>
+    <div class="bar">
+      <button id="quit" class="ghost-btn" type="button">← Stations</button>
+      <div class="bar-mid"><div class="zn" id="zname"></div><div class="track"><div id="prog"></div></div></div>
+      <div class="bar-stats"><span class="pill" id="streak">Streak <b>0</b></span><span class="pill">Pts <b id="pts">0</b></span></div>
+    </div>
+    <div class="power" id="power" hidden></div>
+    <article class="card">
+      <p class="eyebrow" id="qnum"></p>
+      <h2 id="prompt"></h2>
+      <div class="fig" id="fig"></div>
+      <div id="answer"></div>
+      <div id="hint" class="hintbox" hidden></div>
+      <div id="feedback" role="status" aria-live="polite"></div>
+    </article>
+  </section>
+
+  <section id="done" hidden>
+    <div class="card done">
+      <p class="eyebrow" id="dzone"></p>
+      <div class="bigstars stars" id="dstars"></div>
+      <h2 id="dtitle"></h2>
+      <p id="dmsg"></p>
+      <div class="row">
+        <button class="btn" id="again" type="button">Play again</button>
+        <button class="ghost-btn" id="tomap" type="button">Back to stations</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script src="../../shared/util.js?v=6fcbe1bb"></script>
+<script src="../../shared/figures.js?v=d2337c45"></script>
+<script src="../../shared/algebra.js?v=ed58da1e"></script>
+<script src="figs.js?v=1489c690"></script>
+<script src="../../shared/engine.js?v=4b1b2373"></script>
+<script src="stations.js?v=2d84689a"></script>
+<script>
+/* the treasure chest in the final round: one coin is found for each right answer */
+let found=0;
+/* the chest beside a boss problem (hidden at the other stations); hit: the last answer was right */
+function drawChest(state,hit){
+  const el=$('power');el.hidden=state.z.id!=='boss';if(el.hidden)return;
+  el.innerHTML=`<svg viewBox="0 0 64 64" role="img" aria-label="${found} of 10 coins found">${chest(found)}</svg><div><b>${found} of 10 coins found</b><p>${found===10?'All 10 coins. The treasure is yours!':hit?'Right! Another gold coin.':'Answer right to dig up a coin.'}</p></div>`;
+  el.classList.toggle('hit',!!hit);
+}
+Game.init({
+  saveKey:'g5u7-save',
+  zones:ZONES,icons:ICON,
+  words:{
+    right:'Nailed it!',
+    miss:'Not quite. Check it with the grid.',
+    titles:['Keep practicing','Good start','Map pro','Master map maker!'],
+    next:'Try the next station, or go on the Treasure Hunt.',
+    stuck:'Use “Show me a hint” when you’re stuck. It points back to the grid.',
+    tap:'Tap your answer on the grid.'
+  },
+  /* the chest is empty at the start of a round */
+  onQuestion:state=>{if(state.i===0)found=0;drawChest(state,false);},
+  onAnswer:(state,ok)=>{if(ok)found++;drawChest(state,ok);}
+});
+</script>
+</body>
+</html>

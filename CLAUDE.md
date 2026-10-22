@@ -17,14 +17,14 @@ shared/                   used by every grade; each file's header comment docume
   pictures.css, .js       K–5 pictures: labels, number-line marks, tap targets, counters, stacked fractions (fr, frT), part names (PART)
     blocks                ten-frames, cubes, base-ten blocks, place-value charts, number words, the standard algorithms, sharing blocks, partial quotients
     numlines              tape diagrams, number lines, open number lines (jumps), rounding number lines
-    fractions             fraction strips, fraction number lines, hundred grids
+    fractions             fraction strips, fraction number lines, hundred grids, rectangles on a grid of unit squares (areaFig)
     graphs                line plots, scaled picture and bar graphs
     shapes                flat shapes, pictures in a row, solid shapes, equal parts, pattern blocks, rectangles with their sides, rectangles cut in two, L-shaped figures
     measure               clocks, the day bar, coins and dollar bills
     multiply              factors, hops of n, tiles, number charts, arrays, equal groups, area diagrams, partial products
     angles                points, lines, rays, segments, angles and their marks, protractors, parallel and perpendicular lines
   solids.css, solids.js   prisms and pyramids (faces, edges, vertices, names), their drawings, curved solids, and nets: Grade 6
-  algebra.css, .js        letters for numbers (mathVar, withVars) and coordinate planes, one quadrant or four (coordPlane): Grade 6
+  algebra.css, .js        letters for numbers (mathVar, withVars) and coordinate planes, one quadrant or four (coordPlane): Grade 6, and Grade 5 Unit 7's grid
   landing.css             grade cards (root page) and unit cards (grade pages)
   util.js                 R, pick, range, shuffle, miscOf, mcOf, problemKey, gcd, lcm, roundTo, $, Q, parseNum, and Learn controls (seg, press, onPick, segHit, stepper)
   speak.js                Read to me buttons for K–2 Learn pages and games (readAloud)

@@ -14,6 +14,7 @@ When a unit gets a game or Learn page, add a row here and turn its "Coming soon"
 | `unit4/` | Record Breakers (`index.html`, 6 stations + World Record; `figs.js` holds the standard algorithm with a two-digit factor, `mul2Fig`, which its Learn pages use too) | `learn.html` + `learn/` (6 chapters, Lessons 1–16, 18–20) | Grade 5 Unit 4 |
 | `unit5/` | Track Meet (`index.html`, 6 stations + the Victory Lap; `figs.js` holds the decimals in thousandths (`dec`, `decWords`), thousandths grids, number lines, rounding lines, and tenths strips, which its Learn pages use too) | `learn.html` + `learn/` (6 chapters, Lessons 1–3, 5–25) | Grade 5 Unit 5 |
 | `unit6/` | Trail Rangers (`index.html`, 6 stations + the Summit; no pictures of its own: place-value charts, strips, line plots, and tapes are shared) | `learn.html` + `learn/` (6 chapters, Lessons 1–19) | Grade 5 Unit 6 |
+| `unit7/` | Map Makers (`index.html`, 5 stations + the Treasure Hunt; `figs.js` holds the first-quadrant grid (`gridFig`, on `coordPlane` from `shared/algebra.js`) and what's true of a quadrilateral or triangle from its corners (`quadFacts`, `triFacts`), which its Learn pages use too) | `learn.html` + `learn/` (5 chapters, Lessons 1, 3–4, 6–10, 12–13) | Grade 5 Unit 7 |
 
 ## Building for Grade 5
 
@@ -25,7 +26,7 @@ Players are 10 and 11 years old, so on top of the root rules:
 - Volume: whole-number edge lengths up to about 10, in cubic centimeters, inches, feet, or meters.
 - Measurement: convert metric units both ways (km, m, cm, mm; kg, g; L, mL) and customary length (yd, ft, in) from larger to smaller.
 - Rectangles on a grid of unit squares (`areaFig`, for fraction sides and fraction × fraction) are in `shared/fractions.js`.
-- The coordinate grid: the first quadrant only, with whole numbers up to 10 (or a scale of 2, 5, or 10).
+- The coordinate grid: the first quadrant only, with whole numbers up to 10 (or a scale of 2, 5, or 10). Shapes are drawn on the grid, so parallel sides and right angles can be checked by counting; a trapezoid has at least one pair of parallel sides, as in IM.
 - Pages use the standard body (no `young` class) and no `readAloud`; those are for K–2. Learn pages and games load the K–5 picture files in `shared/` (see the root `CLAUDE.md`).
 - Games are built like Grade 4 Unit 1's Factor Factory (`grade4/unit1/index.html`, `stations.js`, `checks.js`): standard body, K–5 pictures, and typed, multiple-choice, and tap answers.
 - No gendered pronouns for named students: repeat the name instead.
