@@ -1,4 +1,5 @@
-/* Styles for figs.js: dot plots (with mean and median lines, distances, and a fulcrum), box plots, and histograms. */
+/* Styles for stats.js: dot plots (with mean and median lines, distances, and a fulcrum), box plots, and histograms. Load after
+   pictures.css. */
 /* dots (cy: blue), the mean line and its label (cyan), the median line and its label (gold), and distances to the mean */
 .dp-dot{fill:var(--gold);stroke:#0a2340;stroke-width:1.5}
 .dp-dot.cy{fill:var(--cyan)}

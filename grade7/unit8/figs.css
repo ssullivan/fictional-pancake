@@ -1,0 +1,21 @@
+/* Grade 7 Unit 8 (Carnival of Chance and its Learn pages): spinners, bags of marbles, outcome tables, and tree diagrams. Dot
+   plots are styled in shared/stats.css. */
+/* the colors things come in */
+.c-red{fill:#ff7b7b}
+.c-blue{fill:#6fb8ff}
+.c-green{fill:#5fe0a8}
+.c-yellow{fill:#ffc93c}
+.c-purple{fill:#b69cff}
+/* a spinner's sections, its pointer, and its pin */
+.sp{stroke:#0a2340;stroke-width:2.5}
+.sp-arrow{stroke:var(--chalk);stroke-width:5;stroke-linecap:round}
+.sp-pin{fill:var(--chalk)}
+/* a bag and the marbles in it */
+.bag{fill:rgba(243,246,251,.08);stroke:var(--dim);stroke-width:2.5;stroke-linejoin:round}
+.marble{stroke:#0a2340;stroke-width:2}
+/* the outcome table's cells (on: an outcome that counts), and a tree's nodes and branches (on: a path that counts) */
+.oc{fill:rgba(9,32,61,.6);stroke:rgba(170,205,255,.3);stroke-width:1}
+.oc.on{fill:rgba(255,201,60,.5)}
+.tr-node{fill:var(--chalk)}
+.tr-br{stroke:var(--dim);stroke-width:2}
+.tr-br.on{stroke:var(--gold);stroke-width:3.5}

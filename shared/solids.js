@@ -42,7 +42,7 @@ function basePoly(n, { a = 2, rect = null } = {}) {
 const sub3 = (p, q) => [p[0] - q[0], p[1] - q[1], p[2] - q[2]];
 const cross3 = (u, v) => [u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0]];
 const dot3 = (u, v) => u[0] * v[0] + u[1] * v[1] + u[2] * v[2];
-const mean = (P) => P[0].map((_, i) => P.reduce((s, p) => s + p[i], 0) / P.length);
+const centroid = (P) => P[0].map((_, i) => P.reduce((s, p) => s + p[i], 0) / P.length);
 
 function solidOf(kind, n, { a = 2, h = 3, rect = null } = {}) {
   const base = basePoly(rect ? 4 : n, { a, rect });
@@ -60,11 +60,11 @@ function solidOf(kind, n, { a = 2, h = 3, rect = null } = {}) {
     F = [bottom, ...bottom.map((k) => [k, (k + 1) % n, n])];
   }
   /* turn every face so its corners go counterclockwise seen from outside: its normal must point away from the center */
-  const center = mean(V);
+  const center = centroid(V);
   F = F.map((f) => {
     const P = f.map((i) => V[i]),
       normal = cross3(sub3(P[1], P[0]), sub3(P[2], P[0]));
-    return dot3(normal, sub3(mean(P), center)) < 0 ? f.slice().reverse() : f;
+    return dot3(normal, sub3(centroid(P), center)) < 0 ? f.slice().reverse() : f;
   });
   /* the edges: each side of each face, once (as [smaller corner, larger corner]) */
   const E = [],

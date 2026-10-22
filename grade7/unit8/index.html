@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Carnival of Chance</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=JetBrains+Mono:wght@500;700&display=swap">
+<link rel="stylesheet" href="../../shared/theme.css?v=c2e276bb">
+<link rel="stylesheet" href="../../shared/game.css?v=57b7d039">
+<link rel="stylesheet" href="../../shared/figures.css?v=20dca2b0">
+<link rel="stylesheet" href="../../shared/pictures.css?v=7f680159">
+<link rel="stylesheet" href="../../shared/stats.css?v=24f37cc8">
+<link rel="stylesheet" href="figs.css?v=586f986f">
+</head>
+<body>
+
+<div class="app">
+  <section id="home">
+    <a class="back" href="../">← Grade 7</a>
+    <header class="hero">
+      <p class="eyebrow">Illustrative Mathematics · Grade 7 · Unit 8 · Probability &amp; Sampling</p>
+      <h1>Carnival of <span>Chance</span></h1>
+      <p class="lede">Step right up! Judge how likely a spin is, find probabilities from marbles and number cubes, estimate from repeated tries, count outcomes in two-step games, pick fair samples, and compare crowds. Each station matches lessons from class. <a href="learn.html">New to this? Learn it first →</a></p>
+      <div class="stats">
+        <span class="pill">Points <b id="hp">0</b></span>
+        <span class="pill">Stars <b id="hs">0</b>/<span id="hsMax">24</span></span>
+      </div>
+    </header>
+    <div class="zones" id="zones"></div>
+    <section class="grownups">
+      <h2>For grown-ups</h2>
+      <div><h4>How a round works</h4><p>Each station deals 8 fresh problems (the Grand Prize deals 10). A right answer on the first try earns 10 points. After a wrong answer, the game names the likely mistake and gives one more try for 5 points. A question with only two choices (is the difference meaningful?) gets one try.</p></div>
+      <div><h4>Typing probabilities</h4><p>Probabilities can be typed as fractions (3/8) or decimals (0.375). The answer box opens a keyboard with a slash on phones.</p></div>
+      <div><h4>The "Show me" hint</h4><p>Hints mark the outcomes that count in the table of 36 sums for two number cubes, light up the path in a tree diagram, and draw the mean line on a dot plot.</p></div>
+      <div><h4>Mistakes it catches</h4><p>A count instead of a probability, comparing to the other outcomes instead of all of them, the probability of the opposite, adding the outcomes of two steps instead of multiplying, treating sums of two cubes as equally likely, samples that aren’t random, the sample instead of the whole population, and a gap in means not measured in MADs.</p></div>
+      <div><h4>Not covered</h4><p>Lesson 10 (designing simulations) and Lesson 20 (a class memory test) are hands-on experiments, so they work better in class than as scored problems.</p></div>
+    </section>
+  </section>
+
+  <section id="play" hidden>
+    <div class="bar">
+      <button id="quit" class="ghost-btn" type="button">← Stations</button>
+      <div class="bar-mid"><div class="zn" id="zname"></div><div class="track"><div id="prog"></div></div></div>
+      <div class="bar-stats"><span class="pill" id="streak">Streak <b>0</b></span><span class="pill">Pts <b id="pts">0</b></span></div>
+    </div>
+    <article class="card">
+      <p class="eyebrow" id="qnum"></p>
+      <h2 id="prompt"></h2>
+      <div class="fig" id="fig"></div>
+      <div id="answer"></div>
+      <div id="hint" class="hintbox" hidden></div>
+      <div id="feedback" role="status" aria-live="polite"></div>
+    </article>
+  </section>
+
+  <section id="done" hidden>
+    <div class="card done">
+      <p class="eyebrow" id="dzone"></p>
+      <div class="bigstars stars" id="dstars"></div>
+      <h2 id="dtitle"></h2>
+      <p id="dmsg"></p>
+      <div class="row">
+        <button class="btn" id="again" type="button">Play again</button>
+        <button class="ghost-btn" id="tomap" type="button">Back to stations</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script src="../../shared/util.js?v=6fcbe1bb"></script>
+<script src="../../shared/figures.js?v=d2337c45"></script>
+<script src="../../shared/pictures.js?v=f857849d"></script>
+<script src="../../shared/fracmath.js?v=af104f91"></script>
+<script src="figs.js?v=0dba9a2c"></script>
+<script src="../../shared/stats.js?v=cb976378"></script>
+<script src="../../shared/engine.js?v=4b1b2373"></script>
+<script src="stations.js?v=7a7d2f6f"></script>
+<script>
+Game.init({
+  saveKey:'g7u8-save',
+  zones:ZONES,icons:ICON,
+  words:{
+    right:'Winner!',
+    miss:'Not quite. Count the outcomes that count, out of all the equally likely ones.',
+    titles:['Keep playing','Good start','Lucky and smart','Carnival champion!'],
+    next:'Try the next station, or go for the Grand Prize.',
+    stuck:'Use "Show me a hint" when you’re stuck. The tables and trees show every outcome.'
+  }
+});
+</script>
+</body>
+</html>

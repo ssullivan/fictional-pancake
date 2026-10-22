@@ -27,6 +27,7 @@ shared/                   used by every grade; each file's header comment docume
   algebra.css, .js        letters for numbers (mathVar, withVars) and coordinate planes, one quadrant or four (coordPlane): Grade 6, and Grade 5 Unit 7's grid
   signed.css, .js         number lines through negative numbers (signedLine: dots, rays, distances, moves) and up-and-down ones (vLine): Grade 6 Unit 7 and Grade 7
   hanger.css, .js         hanger diagrams for solving equations (hanger): Grade 6 Unit 6 and Grade 7 Unit 6
+  stats.css, .js          means, medians, MADs, quartiles, dot plots, box plots, and histograms: Grade 6 Unit 8 and Grade 7 Unit 8
   landing.css             grade cards (root page) and unit cards (grade pages)
   util.js                 R, pick, range, shuffle, miscOf, mcOf, problemKey, gcd, lcm, roundTo, $, Q, parseNum, and Learn controls (seg, press, onPick, segHit, stepper)
   speak.js                Read to me buttons for K–2 Learn pages and games (readAloud)
