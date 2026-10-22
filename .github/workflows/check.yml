@@ -23,9 +23,10 @@ jobs:
       - run: npm ci
       - run: node tools/check.mjs
 
-  # The tests run in 12 jobs side by side: the whole suite is close to 3 hours of test time, and a runner does 2 at once.
+  # The tests run in 14 jobs side by side: the whole suite is over 3 hours of test time, and a runner does 2 at once.
   # The slow files (every Learn step, every checklist item, every game station) are split by screen and into shards of about
-  # 15 minutes each (timed 2026-10-20); "Everything else" runs every other test file, so a new one is never left out.
+  # 12 minutes or less each (timed 2026-10-22, with Grade 5); "Everything else" runs every other test file, so a new one is
+  # never left out.
   # When a job nears its time limit, give that file another shard.
   playwright:
     name: playwright (${{ matrix.name }})
@@ -35,11 +36,13 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { name: "Learn steps, desktop 1/3", args: "tests/learn-steps.spec.js --project=desktop --shard=1/3" }
-          - { name: "Learn steps, desktop 2/3", args: "tests/learn-steps.spec.js --project=desktop --shard=2/3" }
-          - { name: "Learn steps, desktop 3/3", args: "tests/learn-steps.spec.js --project=desktop --shard=3/3" }
-          - { name: "Learn steps, phone 1/2", args: "tests/learn-steps.spec.js --project=phone --shard=1/2" }
-          - { name: "Learn steps, phone 2/2", args: "tests/learn-steps.spec.js --project=phone --shard=2/2" }
+          - { name: "Learn steps, desktop 1/4", args: "tests/learn-steps.spec.js --project=desktop --shard=1/4" }
+          - { name: "Learn steps, desktop 2/4", args: "tests/learn-steps.spec.js --project=desktop --shard=2/4" }
+          - { name: "Learn steps, desktop 3/4", args: "tests/learn-steps.spec.js --project=desktop --shard=3/4" }
+          - { name: "Learn steps, desktop 4/4", args: "tests/learn-steps.spec.js --project=desktop --shard=4/4" }
+          - { name: "Learn steps, phone 1/3", args: "tests/learn-steps.spec.js --project=phone --shard=1/3" }
+          - { name: "Learn steps, phone 2/3", args: "tests/learn-steps.spec.js --project=phone --shard=2/3" }
+          - { name: "Learn steps, phone 3/3", args: "tests/learn-steps.spec.js --project=phone --shard=3/3" }
           - { name: "Checklists, desktop 1/2", args: "tests/checklists.spec.js --project=desktop --shard=1/2" }
           - { name: "Checklists, desktop 2/2", args: "tests/checklists.spec.js --project=desktop --shard=2/2" }
           - { name: "Checklists, phone 1/2", args: "tests/checklists.spec.js --project=phone --shard=1/2" }
