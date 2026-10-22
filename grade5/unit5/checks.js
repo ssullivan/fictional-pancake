@@ -15,9 +15,11 @@ const dec = (k) => String(+(k / 1000).toFixed(3));
 // every chain like "6 × 0.4 = 2.4" or "1.2 ÷ 4 = 0.3" whose sides aren't all equal (a chain after an operator or "?" is skipped)
 function wrongEquations(text) {
   const bad = [];
-  for (const [chain] of text.matchAll(/(?<![×+−÷?./\d]\s*)[\d(][\d./\s()×+−÷]*(?:=\s*[\d(][\d./\s()×+−÷]*)+/g)) {
+  // a decimal point counts only between digits, so a sentence's period ends the chain
+  const part = String.raw`[\d(](?:[\d/\s()×+−÷]|\.(?=\d))*`;
+  for (const [chain] of text.matchAll(new RegExp(String.raw`(?<![×+−÷?./\d]\s*)${part}(?:=\s*${part})+`, "g"))) {
     const values = chain.split("=").map((side) => {
-      const js = side.trim().replace(/\.$/, "").replace(/×/g, "*").replace(/÷/g, "/").replace(/−/g, "-");
+      const js = side.trim().replace(/×/g, "*").replace(/÷/g, "/").replace(/−/g, "-");
       if (!/^[\d.\s()+\-*/]+$/.test(js) || /\d\s+\d/.test(js)) return NaN;
       try {
         return Function(`return (${js})`)();

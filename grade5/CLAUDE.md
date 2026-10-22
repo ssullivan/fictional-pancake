@@ -13,6 +13,7 @@ When a unit gets a game or Learn page, add a row here and turn its "Coming soon"
 | `unit3/` | Community Garden (`index.html`, 5 stations + the Harvest Fair; `figs.js` holds the fraction strips for dividing, which its Learn pages use too; squares for multiplying are `areaFig` in `shared/fractions.js`) | `learn.html` + `learn/` (5 chapters, Lessons 1–8, 11–19) | Grade 5 Unit 3 |
 | `unit4/` | Record Breakers (`index.html`, 6 stations + World Record; `figs.js` holds the standard algorithm with a two-digit factor, `mul2Fig`, which its Learn pages use too) | `learn.html` + `learn/` (6 chapters, Lessons 1–16, 18–20) | Grade 5 Unit 4 |
 | `unit5/` | Track Meet (`index.html`, 6 stations + the Victory Lap; `figs.js` holds the decimals in thousandths (`dec`, `decWords`), thousandths grids, number lines, rounding lines, and tenths strips, which its Learn pages use too) | `learn.html` + `learn/` (6 chapters, Lessons 1–3, 5–25) | Grade 5 Unit 5 |
+| `unit6/` | Trail Rangers (`index.html`, 6 stations + the Summit; no pictures of its own: place-value charts, strips, line plots, and tapes are shared) | `learn.html` + `learn/` (6 chapters, Lessons 1–19) | Grade 5 Unit 6 |
 
 ## Building for Grade 5
 
