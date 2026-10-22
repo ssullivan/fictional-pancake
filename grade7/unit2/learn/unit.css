@@ -1,0 +1,9 @@
+/* Grade 7 Unit 2 Learn pages: statements, stories, and the four representations side by side. Loaded by every page in
+   learn/. */
+.eq{margin:0 0 10px;font:700 22px var(--mono);text-align:center}
+.eq.sm{font-size:17px}
+.story{margin:6px 0 10px;font-size:18px}
+/* a stepper's value stays on one line */
+.stepper b{white-space:nowrap}
+/* the table and the graph side by side, or one under the other on a phone */
+.four{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px;align-items:center}

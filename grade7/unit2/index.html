@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Food Truck Rally</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=JetBrains+Mono:wght@500;700&display=swap">
+<link rel="stylesheet" href="../../shared/theme.css?v=c2e276bb">
+<link rel="stylesheet" href="../../shared/game.css?v=57b7d039">
+<link rel="stylesheet" href="../../shared/figures.css?v=20dca2b0">
+<link rel="stylesheet" href="../../shared/pictures.css?v=7f680159">
+<link rel="stylesheet" href="../../shared/algebra.css?v=05a86779">
+</head>
+<body>
+
+<div class="app">
+  <section id="home">
+    <a class="back" href="../">← Grade 7</a>
+    <header class="hero">
+      <p class="eyebrow">Illustrative Mathematics · Grade 7 · Unit 2 · Introducing Proportional Relationships</p>
+      <h1>Food Truck <span>Rally</span></h1>
+      <p class="lede">The food trucks are lining up. Find the constant of proportionality in tables, write and use equations like <i>y</i> = <i>kx</i>, spot relationships that aren’t proportional, read graphs, compare trucks, and match all four ways of showing one relationship. Each station matches lessons from class. <a href="learn.html">New to this? Learn it first →</a></p>
+      <div class="stats">
+        <span class="pill">Points <b id="hp">0</b></span>
+        <span class="pill">Stars <b id="hs">0</b>/<span id="hsMax">21</span></span>
+      </div>
+    </header>
+    <div class="zones" id="zones"></div>
+    <section class="grownups">
+      <h2>For grown-ups</h2>
+      <div><h4>How a round works</h4><p>Each station deals 8 fresh problems (the Rally Finals deal 10). A right answer on the first try earns 10 points. After a wrong answer, the game names the likely mistake and gives one more try for 5 points. A question with only two choices (proportional or not?) gets one try.</p></div>
+      <div><h4>The "Show me" hint</h4><p>Hints write the “× <i>k</i>” beside each row of a table, mark the point (1, <i>k</i>) on a graph, and suggest dividing a <i>y</i> by its <i>x</i> to find the constant.</p></div>
+      <div><h4>Numbers you can do in your head</h4><p>Constants are friendly (2.50 dollars per taco, 50 miles per hour, 2/3 cup of sugar per cup of flour), tables use small whole numbers, and graphs stay in the first quadrant with gridlines that fit, so the challenge is the relationship, not the arithmetic.</p></div>
+      <div><h4>Mistakes it catches</h4><p>Dividing <i>x</i> by <i>y</i> instead of <i>y</i> by <i>x</i>, adding the same amount down a table instead of multiplying, an equation with the letters swapped, a line that misses (0, 0) taken for proportional, the numbers of a point swapped, and forgetting that swapping a graph’s axes turns the constant into its reciprocal.</p></div>
+      <div><h4>Not covered</h4><p>Lesson 15 (Using Water Efficiently) is an open-ended project, so it works better in class than as scored problems.</p></div>
+    </section>
+  </section>
+
+  <section id="play" hidden>
+    <div class="bar">
+      <button id="quit" class="ghost-btn" type="button">← Stations</button>
+      <div class="bar-mid"><div class="zn" id="zname"></div><div class="track"><div id="prog"></div></div></div>
+      <div class="bar-stats"><span class="pill" id="streak">Streak <b>0</b></span><span class="pill">Pts <b id="pts">0</b></span></div>
+    </div>
+    <article class="card">
+      <p class="eyebrow" id="qnum"></p>
+      <h2 id="prompt"></h2>
+      <div class="fig" id="fig"></div>
+      <div id="answer"></div>
+      <div id="hint" class="hintbox" hidden></div>
+      <div id="feedback" role="status" aria-live="polite"></div>
+    </article>
+  </section>
+
+  <section id="done" hidden>
+    <div class="card done">
+      <p class="eyebrow" id="dzone"></p>
+      <div class="bigstars stars" id="dstars"></div>
+      <h2 id="dtitle"></h2>
+      <p id="dmsg"></p>
+      <div class="row">
+        <button class="btn" id="again" type="button">Play again</button>
+        <button class="ghost-btn" id="tomap" type="button">Back to stations</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script src="../../shared/util.js?v=6fcbe1bb"></script>
+<script src="../../shared/figures.js?v=d2337c45"></script>
+<script src="../../shared/pictures.js?v=f857849d"></script>
+<script src="../../shared/fracmath.js?v=af104f91"></script>
+<script src="../../shared/algebra.js?v=ed58da1e"></script>
+<script src="../../shared/engine.js?v=4b1b2373"></script>
+<script src="stations.js?v=5103be25"></script>
+<script>
+Game.init({
+  saveKey:'g7u2-save',
+  zones:ZONES,icons:ICON,
+  words:{
+    right:'Order up!',
+    miss:'Not quite. Divide a y by its x to find the constant, then multiply by it.',
+    titles:['Keep cooking','Good start','Line cook','Head chef!'],
+    next:'Try the next station, or roll into the Rally Finals.',
+    stuck:'Use "Show me a hint" when you’re stuck. The hints mark the constant in the table or graph.'
+  }
+});
+</script>
+</body>
+</html>
