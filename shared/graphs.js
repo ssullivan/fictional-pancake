@@ -57,8 +57,10 @@ function lineplot(
       markup += `<rect class="hit" data-v="${v}" x="${xOf(v) - u / 2}" y="0" width="${u}" height="${lineY + (isFraction ? 50 : 34)}"/>`;
   });
   if (diff) {
-    /* a two-headed arrow from a to b, with b − a above it */
+    /* a two-headed arrow from a to b, with b − a above it; on a fraction plot the arrow goes lower, so its stacked label
+       clears the fractions under the ticks */
     const [a, b] = diff;
+    if (isFraction) belowY += 24;
     markup +=
       `<line class="arr" x1="${xOf(a) + 6}" y1="${belowY}" x2="${xOf(b) - 6}" y2="${belowY}"/>` +
       `<polygon class="arrh" points="${xOf(a)},${belowY} ${xOf(a) + 10},${belowY - 6} ${xOf(a) + 10},${belowY + 6}"/>` +

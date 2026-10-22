@@ -476,7 +476,7 @@ function genPlots() {
       facts: { t: "spread", counts },
       prompt:
         "The line plot shows how much rain fell each day. How much more rain fell on the wettest day than on the driest?",
-      fig: () => plot(),
+      fig: (show) => plot(show ? { diff: [lo, hi] } : {}),
       misc: apart((hi - lo) / 8, [
         [(hi + lo) / 8, "That adds. How much more: subtract the least from the most."],
         [hi / 8, "That’s the wettest day. Subtract the driest day’s rain."],

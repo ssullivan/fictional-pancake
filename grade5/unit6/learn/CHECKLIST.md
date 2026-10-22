@@ -65,7 +65,7 @@ IM lessons: 1–19. Not covered: Lessons 20 (Will it Always Work?) and 21 (Weeke
 ## Chapter 5: Line plots · `learn/line-plots.html` · Lessons 14–15
 
 ### Step 1: Read a line plot of fractions
-- [ ] It starts with the wettest and driest days: `see The wettest day had 7/8 inch and the driest 1/8 inch: 7/8 − 1/8 = 6/8 = 3/4 inch more.; count text.xm = 10`
+- [ ] It starts with the wettest and driest days, an arrow between them: `see The wettest day had 7/8 inch and the driest 1/8 inch: 7/8 − 1/8 = 6/8 = 3/4 inch more.; count text.xm = 10; count line.arr = 1`
 - [ ] One column, marked: `click Rain on 3/8 days; see 3 days had 3/8 inch each: 3 × 3/8 = 9/8 = 1 1/8 inches in all.; count text.xm.hi = 3`
 - [ ] More than a half: `click Days over 1/2 inch; see 1/2 inch is 4/8.; see 2 + 1 + 1 = 4 days.`
 - [ ] All the rain: `click All the rain; see = 36/8 = 4 1/2 inches.`

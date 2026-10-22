@@ -6,7 +6,7 @@ const RAIN = { 1: 2, 2: 1, 3: 3, 5: 2, 6: 1, 7: 1 };
 const QUESTIONS = [
   [
     "Wettest − driest",
-    {},
+    { diff: [1, 7] },
     "The wettest day had 7/8 inch and the driest 1/8 inch: <b>7/8 − 1/8 = 6/8 = 3/4 inch</b> more.",
   ],
   ["Rain on 3/8 days", { mark: 3 }, "3 days had 3/8 inch each: <b>3 × 3/8 = 9/8 = 1 1/8 inches</b> in all."],
