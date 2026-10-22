@@ -1,6 +1,6 @@
 /* Learn Finding Volume (Grade 5 Unit 1): the unit's chapters and their icons. Loaded by learn.html and every chapter page in
-   learn/, after ../figs.js (the icons' cubes). Each chapter is learn/<id>.html with its widgets and steps in learn/<id>.js;
-   shared/learn.js has the format. */
+   learn/, after shared/shapes.js (the icons' cubes, iconCube). Each chapter is learn/<id>.html with its widgets and steps in
+   learn/<id>.js; shared/learn.js has the format. */
 const ICON = {
   volume: iconCube(10, 56, 16) + iconCube(26, 56, 16) + iconCube(10, 40, 16) + iconCube(42, 56, 16),
   layers:

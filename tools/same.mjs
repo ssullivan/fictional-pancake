@@ -226,6 +226,8 @@ const CALLS = {
     ...each([0.325, 4.07, 0.001, 2.5], (v) => [-3, -2, -1, 0].map((e) => `digitAt(${v}, ${e})`)),
     "pvChart([['A', 0.325], ['B', 4.07], ['C', 12.5]], 1, {places: [1, 0, -1, -2, -3]})",
     "commas(305020)",
+    ...each([0, 1, 2, 3], (done) => [`mul2Fig(347, 26, ${done})`, `mul2Fig(1205, 34, ${done}, 'L')`]),
+    "mul2Steps(214, 23)",
     ...each([0, 1, 2, 3, 4, 5], (e) => [`placeWord(${e}, 1)`, `placeWord(${e}, 3)`, `placeWord(${e})`]),
     ...each(
       [
@@ -402,6 +404,12 @@ const CALLS = {
     ...["square", "rectangle", "rhombus", "trapezoid"].map(
       (q) => `shapeFig(QUADS.${q}, {sq: true, lens: [1, 2, 3, 4]})`,
     ),
+    `prismFig([prismBox(4, 3, 2, {grid: true, lab: {l: '4 cm', h: '3 cm', w: '2 cm'}})])`,
+    `prismFig(columnsOf([[3, 2, 1], [3, 2, 1]]), {label: 'L', max: 30})`,
+    ...["up", "back", "side"].map((dir) => `prismFig(layersOf(4, 3, 2, 2, {dir: '${dir}'}))`),
+    `prismFig([prismBox(2, 4, 3, {lab: {l: '2', h: '4', lt: '2', hr: '4'}}), prismBox(3, 2, 3, {at: [2, 0, 0], cls: 'b'})], {notes: [['5 ft', [2.5, 0, 0], 'below'], ['3', [5, 0, 1.5], 'edge'], ['x', [0, 1, 0], 'left'], ['y', [5, 1, 3], 'right'], ['z', [1, 4, 3], 'above']]})`,
+    `prismFig([prismBox(3, 2, 3, {at: [2, 2, 0], ghost: true}), ...cubesOf([[0, 0, 0], [1, 0, 1]], 'g')])`,
+    `iconCube(10, 56, 16) + iconCube(8, 44, 14, '#7fe3ff')`,
     `picRow(3, 100, 80, i => '<g>' + i + '</g>')`,
     `picRow(4, 100, 80, i => 'x', {letters: true, tap: 'Shape', label: 'Pic'})`,
     `picRow(6, 100, 80, i => 'x', {letters: true})`,

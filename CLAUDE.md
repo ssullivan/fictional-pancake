@@ -19,7 +19,7 @@ shared/                   used by every grade; each file's header comment docume
     numlines              tape diagrams, number lines, open number lines (jumps), rounding number lines
     fractions             fraction strips, fraction number lines, hundred grids, rectangles on a grid of unit squares (areaFig)
     graphs                line plots, scaled picture and bar graphs
-    shapes                flat shapes, pictures in a row, solid shapes, equal parts, pattern blocks, rectangles with their sides, rectangles cut in two, L-shaped figures
+    shapes                flat shapes, pictures in a row, solid shapes, equal parts, pattern blocks, rectangles with their sides, rectangles cut in two, L-shaped figures, boxes of unit cubes at an angle (prismFig)
     measure               clocks, the day bar, coins and dollar bills
     multiply              factors, hops of n, tiles, number charts, arrays, equal groups, area diagrams, partial products
     angles                points, lines, rays, segments, angles and their marks, protractors, parallel and perpendicular lines

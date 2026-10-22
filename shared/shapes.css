@@ -30,3 +30,12 @@
 .agridsq{fill:none;stroke:rgba(243,246,251,.28);stroke-width:1}
 .aoutline{fill:none;stroke:var(--good);stroke-width:3;stroke-linejoin:round}
 .awhole.aoutline{fill:rgba(95,224,168,.16)}
+/* boxes and unit cubes at an angle (prismFig): faces front f, top t, right r (gold, or b cyan, g green, p pink), solid so nearer
+   ones hide farther ones; pg the lines between cubes; pgh the dashed outline of a box's empty part */
+.pf{stroke:#0a2340;stroke-width:1.5;stroke-linejoin:round}
+.pf.f{fill:#e3b23c}.pf.t{fill:#ffd766}.pf.r{fill:#a9822a}
+.pf.b.f{fill:#5ab9d4}.pf.b.t{fill:#9ce9ff}.pf.b.r{fill:#3b8399}
+.pf.g.f{fill:#47b585}.pf.g.t{fill:#7fe6b6}.pf.g.r{fill:#317f5e}
+.pf.p.f{fill:#e077ab}.pf.p.t{fill:#ffa6d2}.pf.p.r{fill:#a5537c}
+.pg{stroke:#0a2340;stroke-width:1;opacity:.7}
+.pgh{stroke:var(--chalk);stroke-width:2;stroke-dasharray:5 4;opacity:.8}

@@ -1,7 +1,7 @@
 /* Record Breakers (Grade 5 Unit 4): the problem generators, station list, and icons. Loaded by index.html and by
-   tools/fuzz.mjs. Area diagrams and partial products come from shared/multiply.js; the standard algorithm for a one-digit
-   factor, partial quotients, and commas from shared/blocks.js; the standard algorithm for a two-digit factor from figs.js;
-   rectangles from shared/shapes.js; mcOf, miscOf, and roundTo from shared/util.js.
+   tools/fuzz.mjs. Area diagrams and partial products come from shared/multiply.js; the standard algorithm (for one-digit and
+   two-digit factors), partial quotients, and commas from shared/blocks.js; rectangles from shared/shapes.js; mcOf, miscOf,
+   and roundTo from shared/util.js.
    Each generator deals one of a few kinds of problem (variant), each with a comment saying what it asks. Every problem also
    carries facts for checks.js: its kind (t) and the numbers it was made from, so the answer can be worked out again. */
 const KIDS = ["Mai", "Diego", "Lin", "Han", "Priya", "Kiran", "Elena", "Jada", "Noah", "Clare", "Andre", "Tyler"];

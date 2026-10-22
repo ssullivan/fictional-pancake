@@ -21,7 +21,7 @@ function wMissing(el) {
     q("height").textContent = height;
     q("f").innerHTML = prismFig(
       [
-        box(4, height, 3, {
+        prismBox(4, height, 3, {
           grid: true,
           cls: volume === target ? "g" : "",
           lab: { l: "4 ft", w: "3 ft", h: `${height} ft` },
@@ -76,7 +76,7 @@ function wCompare(el) {
     press(el, pairIndex);
     q("f").innerHTML = pair
       .map(([l, w, h], i) =>
-        prismFig([box(l, h, w, { cls: i ? "b" : "", lab: { l: `${l} in`, h: `${h} in`, w: `${w} in` } })], {
+        prismFig([prismBox(l, h, w, { cls: i ? "b" : "", lab: { l: `${l} in`, h: `${h} in`, w: `${w} in` } })], {
           max: 26,
           label: `Box ${i ? "B" : "A"}: ${l} by ${w} by ${h} inches`,
         }),

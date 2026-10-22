@@ -13,19 +13,19 @@ const CUTS = [
   [
     "upright",
     "Cut up and down",
-    [box(2, 4, 3), box(3, 2, 3, { at: [2, 0, 0], cls: "b" })],
+    [prismBox(2, 4, 3), prismBox(3, 2, 3, { at: [2, 0, 0], cls: "b" })],
     "Gold: 2 × 3 × 4 = 24. Blue: 3 × 3 × 2 = 18. Add: 24 + 18 = <b>42 cubic feet</b>.",
   ],
   [
     "across",
     "Cut across",
-    [box(5, 2, 3), box(2, 2, 3, { at: [0, 2, 0], cls: "b" })],
+    [prismBox(5, 2, 3), prismBox(2, 2, 3, { at: [0, 2, 0], cls: "b" })],
     "Gold: 5 × 3 × 2 = 30 (the bottom is 2 + 3 = 5 ft long). Blue: 2 × 3 × 2 = 12 (the top is 4 − 2 = 2 ft tall). Add: 30 + 12 = <b>42 cubic feet</b>.",
   ],
   [
     "subtract",
     "Fill in and subtract",
-    [box(3, 2, 3, { at: [2, 2, 0], ghost: true }), box(2, 4, 3), box(3, 2, 3, { at: [2, 0, 0] })],
+    [prismBox(3, 2, 3, { at: [2, 2, 0], ghost: true }), prismBox(2, 4, 3), prismBox(3, 2, 3, { at: [2, 0, 0] })],
     "Fill in the corner to make a box: 5 × 3 × 4 = 60. Take away the empty corner: 3 × 3 × 2 = 18. 60 − 18 = <b>42 cubic feet</b>.",
   ],
 ];
@@ -66,8 +66,8 @@ function wExpr(el) {
     q("height").textContent = height;
     q("f").innerHTML = prismFig(
       [
-        box(2, 4, 3, { lab: { l: "2", h: "4" } }),
-        box(length, height, 3, { at: [2, 0, 0], cls: "b", lab: { l: `${length}`, w: "3", hr: `${height}` } }),
+        prismBox(2, 4, 3, { lab: { l: "2", h: "4" } }),
+        prismBox(length, height, 3, { at: [2, 0, 0], cls: "b", lab: { l: `${length}`, w: "3", hr: `${height}` } }),
       ],
       { label: `A gold box 2 by 3 by 4 and a blue box ${length} by 3 by ${height}` },
     );
@@ -87,8 +87,8 @@ const STEPS = [
       q: "This figure is made of two boxes, gold and blue. What is its volume?",
       fig: prismFig(
         [
-          box(6, 2, 2, { lab: { l: "6 cm", w: "2 cm", hr: "2 cm" } }),
-          box(2, 3, 2, { at: [0, 2, 0], cls: "b", lab: { lt: "2 cm", h: "3 cm" } }),
+          prismBox(6, 2, 2, { lab: { l: "6 cm", w: "2 cm", hr: "2 cm" } }),
+          prismBox(2, 3, 2, { at: [0, 2, 0], cls: "b", lab: { lt: "2 cm", h: "3 cm" } }),
         ],
         { label: "A gold box 6 by 2 by 2 cm with a blue box 2 by 2 by 3 cm on its left end" },
       ),
@@ -110,8 +110,8 @@ const STEPS = [
       q: "This figure is made of two boxes, gold and blue. Which expression gives its volume?",
       fig: prismFig(
         [
-          box(4, 2, 2, { lab: { l: "4 in", w: "2 in", hr: "2 in" } }),
-          box(2, 3, 2, { at: [0, 2, 0], cls: "b", lab: { lt: "2 in", h: "3 in" } }),
+          prismBox(4, 2, 2, { lab: { l: "4 in", w: "2 in", hr: "2 in" } }),
+          prismBox(2, 3, 2, { at: [0, 2, 0], cls: "b", lab: { lt: "2 in", h: "3 in" } }),
         ],
         { label: "A gold box 4 by 2 by 2 in with a blue box 2 by 2 by 3 in on its left end" },
       ),

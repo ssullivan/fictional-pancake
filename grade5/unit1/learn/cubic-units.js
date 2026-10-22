@@ -18,7 +18,7 @@ function wUnits(el) {
   const draw = () => {
     const [u, button, plural, size, things] = CUBIC_UNITS[unitIndex];
     press(el, unitIndex);
-    q("f").innerHTML = prismFig([box(4, 3, 2, { grid: true, lab: { l: `4 ${u}`, h: `3 ${u}`, w: `2 ${u}` } })], {
+    q("f").innerHTML = prismFig([prismBox(4, 3, 2, { grid: true, lab: { l: `4 ${u}`, h: `3 ${u}`, w: `2 ${u}` } })], {
       label: `A box 4 ${u} long, 2 ${u} wide, and 3 ${u} tall`,
     });
     q("r").innerHTML =

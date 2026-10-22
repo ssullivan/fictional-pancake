@@ -49,7 +49,7 @@ function wBuild(el) {
     q("placed").textContent = values.placed;
     /* an empty table still needs something to draw: a dashed outline where the figure goes */
     q("f").innerHTML = prismFig(
-      [box(heights[0].length, Math.max(...heights.flat()), heights.length, { ghost: true }), ...cubesOf(cells)],
+      [prismBox(heights[0].length, Math.max(...heights.flat()), heights.length, { ghost: true }), ...cubesOf(cells)],
       { label: `${name}: ${values.placed} unit cubes` },
     );
     q("r").innerHTML =
@@ -91,7 +91,7 @@ function wFill(el) {
       cells = buildOrder(range(w).map(() => range(l).map(() => h))).slice(0, values.packed);
     press(el, boxIndex);
     q("packed").textContent = values.packed;
-    q("f").innerHTML = prismFig([box(l, h, w, { ghost: true }), ...cubesOf(cells)], {
+    q("f").innerHTML = prismFig([prismBox(l, h, w, { ghost: true }), ...cubesOf(cells)], {
       label: `A box ${l} cubes long, ${w} wide, and ${h} tall with ${values.packed} cubes in it`,
     });
     q("r").innerHTML =
@@ -145,7 +145,7 @@ const STEPS = [
     check: {
       kind: "num",
       q: "This box is packed full of unit cubes. What is its volume?",
-      fig: prismFig([box(3, 2, 2, { grid: true })], { label: "A box of unit cubes, 3 long, 2 wide, and 2 tall" }),
+      fig: prismFig([prismBox(3, 2, 2, { grid: true })], { label: "A box of unit cubes, 3 long, 2 wide, and 2 tall" }),
       answer: 12,
       unit: "cubic units",
       misc: [

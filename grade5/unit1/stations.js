@@ -1,5 +1,5 @@
 /* Cargo Port (Grade 5 Unit 1): the problem generators, station list, and icons. Loaded by index.html and by tools/fuzz.mjs.
-   Boxes, unit cubes, and the icons' cubes come from figs.js; mcOf and miscOf from shared/util.js.
+   Boxes, unit cubes, and the icons' cubes come from shared/shapes.js; mcOf and miscOf from shared/util.js.
    Each generator deals one of a few kinds of problem (variant), each with a comment saying what it asks. Every problem also
    carries facts for checks.js: its kind (t) and the numbers it was made from, so the answer can be worked out again. */
 const KIDS = ["Mai", "Diego", "Lin", "Han", "Priya", "Kiran", "Elena", "Jada", "Noah", "Clare", "Andre", "Tyler"];
@@ -38,7 +38,7 @@ const columnsFig = (heights, show) =>
   );
 /* a box l by h by w full of cubes; once a hint is shown, its layers bottom up in turns of gold and cyan */
 const fullBoxFig = (l, h, w, show) =>
-  prismFig(show ? layersOf(l, h, w, h).slice(1) : [box(l, h, w, { grid: true })], {
+  prismFig(show ? layersOf(l, h, w, h).slice(1) : [prismBox(l, h, w, { grid: true })], {
     label: `A box of unit cubes, ${l} long, ${w} wide, and ${h} tall`,
   });
 function genCount() {
@@ -195,7 +195,7 @@ function genLayers() {
     perLayer = edges[way.across] * edges[way.by],
     layers = edges[way.count],
     figure = (show) =>
-      prismFig(show ? layersOf(l, h, w, layers, { dir }).slice(1) : [box(l, h, w, { grid: true })], {
+      prismFig(show ? layersOf(l, h, w, layers, { dir }).slice(1) : [prismBox(l, h, w, { grid: true })], {
         label: `A box of unit cubes, ${l} long, ${w} wide, and ${h} tall`,
       });
   if (variant === 1) {
@@ -265,7 +265,7 @@ function boxEdges() {
 }
 /* a box with its edges labelled in unit u */
 const labelledFig = (l, h, w, u, thing) =>
-  prismFig([box(l, h, w, { lab: { l: `${l} ${u}`, h: `${h} ${u}`, w: `${w} ${u}` } })], {
+  prismFig([prismBox(l, h, w, { lab: { l: `${l} ${u}`, h: `${h} ${u}`, w: `${w} ${u}` } })], {
     label: `A ${thing} ${l} ${u} long, ${w} ${u} wide, and ${h} ${u} tall`,
   });
 /* things to measure and the best unit for their volume */
@@ -368,8 +368,8 @@ function twoPrisms(u, stacked) {
       topH = R(2, 3);
     return {
       boxes: [
-        box(longL, lowH, w, { lab: { l: `${longL} ${u}`, w: `${w} ${u}`, hr: `${lowH} ${u}` } }),
-        box(topL, topH, w, { at: [0, lowH, 0], cls: "b", lab: { lt: `${topL} ${u}`, h: `${topH} ${u}` } }),
+        prismBox(longL, lowH, w, { lab: { l: `${longL} ${u}`, w: `${w} ${u}`, hr: `${lowH} ${u}` } }),
+        prismBox(topL, topH, w, { at: [0, lowH, 0], cls: "b", lab: { lt: `${topL} ${u}`, h: `${topH} ${u}` } }),
       ],
       parts: [
         [longL, lowH, w],
@@ -384,8 +384,8 @@ function twoPrisms(u, stacked) {
     rightH = R(1, leftH - 1);
   return {
     boxes: [
-      box(leftL, leftH, w, { lab: { l: `${leftL} ${u}`, h: `${leftH} ${u}` } }),
-      box(rightL, rightH, w, {
+      prismBox(leftL, leftH, w, { lab: { l: `${leftL} ${u}`, h: `${leftH} ${u}` } }),
+      prismBox(rightL, rightH, w, {
         at: [leftL, 0, 0],
         cls: "b",
         lab: { l: `${rightL} ${u}`, w: `${w} ${u}`, hr: `${rightH} ${u}` },

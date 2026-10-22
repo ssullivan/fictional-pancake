@@ -12,7 +12,7 @@ function wEdges(el) {
       base = length * width;
     ["length", "width", "height"].forEach((k) => (q(k).textContent = values[k]));
     q("f").innerHTML = prismFig(
-      [box(length, height, width, { grid: true, lab: { l: `${length}`, h: `${height}`, w: `${width}` } })],
+      [prismBox(length, height, width, { grid: true, lab: { l: `${length}`, h: `${height}`, w: `${width}` } })],
       { label: `A box ${length} long, ${width} wide, and ${height} tall` },
     );
     q("r").innerHTML =
@@ -49,16 +49,16 @@ function wBase(el) {
     press(el, baseIndex);
     /* the layer against the base in cyan, the rest of the box gold */
     const baseLayer = {
-        bottom: box(l, 1, w, { cls: "b", grid: true }),
-        front: box(l, h, 1, { cls: "b", grid: true }),
-        side: box(1, h, w, { cls: "b", grid: true }),
+        bottom: prismBox(l, 1, w, { cls: "b", grid: true }),
+        front: prismBox(l, h, 1, { cls: "b", grid: true }),
+        side: prismBox(1, h, w, { cls: "b", grid: true }),
       }[id],
       rest = {
-        bottom: box(l, h - 1, w, { at: [0, 1, 0], grid: true }),
-        front: box(l, h, w - 1, { at: [0, 0, 1], grid: true }),
-        side: box(l - 1, h, w, { at: [1, 0, 0], grid: true }),
+        bottom: prismBox(l, h - 1, w, { at: [0, 1, 0], grid: true }),
+        front: prismBox(l, h, w - 1, { at: [0, 0, 1], grid: true }),
+        side: prismBox(l - 1, h, w, { at: [1, 0, 0], grid: true }),
       }[id];
-    q("f").innerHTML = prismFig([rest, baseLayer, box(l, h, w, { ghost: true, lab: labels })], {
+    q("f").innerHTML = prismFig([rest, baseLayer, prismBox(l, h, w, { ghost: true, lab: labels })], {
       label: `A box 5 long, 2 wide, and 3 tall, with its ${button.toLowerCase()} face as the base`,
     });
     q("r").innerHTML =
@@ -79,7 +79,7 @@ const STEPS = [
     check: {
       kind: "num",
       q: "What is the volume of this box?",
-      fig: prismFig([box(6, 3, 2, { lab: { l: "6 cm", h: "3 cm", w: "2 cm" } })], {
+      fig: prismFig([prismBox(6, 3, 2, { lab: { l: "6 cm", h: "3 cm", w: "2 cm" } })], {
         label: "A box 6 cm long, 2 cm wide, and 3 cm tall",
       }),
       answer: 36,
