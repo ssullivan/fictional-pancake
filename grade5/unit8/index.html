@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Moving Up Day</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=JetBrains+Mono:wght@500;700&display=swap">
+<link rel="stylesheet" href="../../shared/theme.css?v=c2e276bb">
+<link rel="stylesheet" href="../../shared/game.css?v=57b7d039">
+<link rel="stylesheet" href="../../shared/pictures.css?v=7f680159">
+<link rel="stylesheet" href="../../shared/blocks.css?v=ef8d48f1">
+<link rel="stylesheet" href="../../shared/fractions.css?v=254ad858">
+<link rel="stylesheet" href="../../shared/shapes.css?v=b6978f20">
+<style>
+/* the caps in the final round: 10 caps, one tossed for each right answer */
+.power{display:flex;align-items:center;gap:14px;background:rgba(95,224,168,.08);border:1.5px solid rgba(95,224,168,.45);border-radius:14px;padding:10px 14px}
+.power svg{width:72px;height:72px;flex:none}
+.power b{font:800 20px var(--display);color:var(--good)}
+.power p{margin:4px 0 0;font:700 14px var(--mono);color:var(--dim)}
+.power.hit svg{animation:bump .5s}
+@keyframes bump{50%{transform:scale(1.08)}}
+@media (prefers-reduced-motion:reduce){.power.hit svg{animation:none}}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <section id="home">
+    <a class="back" href="../">← Grade 5</a>
+    <header class="hero">
+      <p class="eyebrow">Illustrative Mathematics K–5 · Grade 5 · Unit 8 · Putting It All Together</p>
+      <h1>Moving Up <span>Day</span></h1>
+      <p class="lede">It’s the last day of fifth grade! Run the number booth, pack cupcakes, fill the big wagon, work the fraction fair, race in the decimal derby, and hand out ribbons. Then graduate to Grade 6. Each station matches lessons from class.</p>
+      <div class="stats">
+        <span class="pill">Points <b id="hp">0</b></span>
+        <span class="pill">Stars <b id="hs">0</b>/<span id="hsMax">18</span></span>
+      </div>
+    </header>
+    <div class="zones" id="zones"></div>
+    <section class="grownups">
+      <h2>For grown-ups</h2>
+      <div><h4>How a round works</h4><p>Each station deals 8 fresh problems (Graduation deals 10). A right answer on the first try earns 10 points. After a wrong answer, the game names the likely mistake and gives one more try for 5 points. At Graduation, each right answer sends one of 10 caps into the air.</p></div>
+      <div><h4>The "Show me" hint</h4><p>Hints use the pictures from the year: the standard algorithm row by row, partial quotients, boxes of cubes, fraction strips cut to a common denominator, and squares cut into parts for multiplying. A used hint caps that problem at 5 points.</p></div>
+      <div><h4>Mistakes it catches</h4><p>Leaving out the 0 in the tens row, stopping after one partial quotient, adding edges instead of multiplying, filling in the empty corner of a two-box figure, estimates 10 times too big, adding the tops and bottoms of fractions, lining up the last digits of decimals, and putting the decimal point in the wrong place.</p></div>
+      <div><h4>Numbers</h4><p>The same limits as the rest of the year: products up to 3 digits × 2 digits, friendly two-digit divisors, whole-number edges, common denominators of 24 or less, and decimals in tenths and hundredths. Answers can be typed as fractions or mixed numbers.</p></div>
+      <div><h4>Learn it first</h4><p>Each station matches a chapter of the <a href="learn.html">Learn page</a> for this unit, which walks through the ideas step by step.</p></div>
+      <div><h4>Not covered</h4><p>Problem Solving with Volume: Water (Lesson 9) is optional, and the Creation and Design lessons (Lessons 14–18) are open-ended, so there are no stations for them.</p></div>
+    </section>
+  </section>
+  <section id="play" hidden>
+    <div class="bar">
+      <button id="quit" class="ghost-btn" type="button">← Stations</button>
+      <div class="bar-mid"><div class="zn" id="zname"></div><div class="track"><div id="prog"></div></div></div>
+      <div class="bar-stats"><span class="pill" id="streak">Streak <b>0</b></span><span class="pill">Pts <b id="pts">0</b></span></div>
+    </div>
+    <div class="power" id="power" hidden></div>
+    <article class="card">
+      <p class="eyebrow" id="qnum"></p>
+      <h2 id="prompt"></h2>
+      <div class="fig" id="fig"></div>
+      <div id="answer"></div>
+      <div id="hint" class="hintbox" hidden></div>
+      <div id="feedback" role="status" aria-live="polite"></div>
+    </article>
+  </section>
+
+  <section id="done" hidden>
+    <div class="card done">
+      <p class="eyebrow" id="dzone"></p>
+      <div class="bigstars stars" id="dstars"></div>
+      <h2 id="dtitle"></h2>
+      <p id="dmsg"></p>
+      <div class="row">
+        <button class="btn" id="again" type="button">Play again</button>
+        <button class="ghost-btn" id="tomap" type="button">Back to stations</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script src="../../shared/util.js?v=6fcbe1bb"></script>
+<script src="../../shared/figures.js?v=d2337c45"></script>
+<script src="../../shared/pictures.js?v=f857849d"></script>
+<script src="../../shared/blocks.js?v=0b828f03"></script>
+<script src="../../shared/fractions.js?v=6e498d8d"></script>
+<script src="../../shared/shapes.js?v=03a2e913"></script>
+<script src="../../shared/engine.js?v=4b1b2373"></script>
+<script src="stations.js?v=3bed400a"></script>
+<script>
+/* the caps in the final round: one cap is tossed for each right answer */
+let tossed=0;
+/* the caps beside a boss problem (hidden at the other stations); hit: the last answer was right */
+function drawCaps(state,hit){
+  const el=$('power');el.hidden=state.z.id!=='boss';if(el.hidden)return;
+  el.innerHTML=`<svg viewBox="0 0 64 64" role="img" aria-label="${tossed} of 10 caps in the air">${caps(tossed)}</svg><div><b>${tossed} of 10 caps in the air</b><p>${tossed===10?'Congratulations, Grade 6 is next!':hit?'Right! Another cap flies up.':'Answer right to toss a cap.'}</p></div>`;
+  el.classList.toggle('hit',!!hit);
+}
+Game.init({
+  saveKey:'g5u8-save',
+  zones:ZONES,icons:ICON,
+  words:{
+    right:'Nailed it!',
+    miss:'Not quite. Check it with the picture.',
+    titles:['Keep practicing','Good start','Ready for Grade 6','Fifth-grade champion!'],
+    next:'Try the next station, or go to Graduation.',
+    stuck:'Use “Show me a hint” when you’re stuck. It shows the picture from class.',
+    tap:'Tap your answer.'
+  },
+  /* answers can be hundredths (0.42), so a typed number must match to the hundredth */
+  near:(x,y)=>Math.abs(x-y)<0.005,
+  /* no caps are up at the start of a round */
+  onQuestion:state=>{if(state.i===0)tossed=0;drawCaps(state,false);},
+  onAnswer:(state,ok)=>{if(ok)tossed++;drawCaps(state,ok);}
+});
+</script>
+</body>
+</html>
