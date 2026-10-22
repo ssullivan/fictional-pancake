@@ -7,7 +7,7 @@
    hundredGrid(cells)                1 whole as 10 tenths of 10 hundredths, with squares shaded (svg)
    compareFr(a, b), SIGN_HTML        how fraction a ([n, d]) compares to b ('<', '=', or '>'), and those signs as html
    mixT(x, y, [n, d], cls)           n/d in a picture as a whole number, a fraction, or a mixed number, centered on x, y (markup)
-   areaFig(w, h, {split, under, labels})   a rectangle w by h (fractions) shaded on a grid of unit squares cut into parts (svg) */
+   areaFig(w, h, {split, under, labels, dec})   a rectangle w by h (fractions) shaded on a grid of unit squares cut into parts (svg) */
 /* Fraction strips, one row under another, every whole the same width so rows line up.
    rows: [{d, k, cls, lab, parts, grp, out}]: each whole cut into d equal parts and the first k shaded (cls 'b' blue, 'g' green; gold by default);
    k more than d draws more wholes. lab: [n, d] written to the left of the row. parts: false leaves 1/d out of the parts.
@@ -173,8 +173,9 @@ function mixT(x, y, [n, d], cls = "") {
    denominator columns and h's denominator rows, and the rectangle is shaded from the bottom left corner. split 'w': the
    whole-number part of the width gold and the rest cyan (split 'h' does the same up the height). under: first shade a strip
    h tall all the way across the grid in light cyan, so the rectangle shows as w of that strip (1/2 of 1/3). labels: w under
-   the rectangle and h to its left (each part under its own color when split). */
-function areaFig([wn, wd], [hn, hd], { split = null, under = false, labels = true, label } = {}) {
+   the rectangle and h to its left (each part under its own color when split). dec: write the labels as decimals (0.3), for
+   tenths and hundredths. */
+function areaFig([wn, wd], [hn, hd], { split = null, under = false, labels = true, dec = false, label } = {}) {
   /* the grid is cols by rows unit squares, each `size` pixels; xOf and yOf turn lengths into screen points (y from the bottom) */
   const cols = Math.max(1, Math.ceil(wn / wd)),
     rows = Math.max(1, Math.ceil(hn / hd)),
@@ -227,7 +228,10 @@ function areaFig([wn, wd], [hn, hd], { split = null, under = false, labels = tru
             [wholeW, w, [wn - wholeW * wd, wd]],
           ]
         : [[0, w, [wn, wd]]];
-    for (const [from, to, length] of widths) markup += mixT((xOf(from) + xOf(to)) / 2, yOf(0) + 24, length);
+    /* a length as a fraction or mixed number, or as a decimal */
+    const lengthT = (x, y, [n, d]) =>
+      dec ? `<text class="lbl" x="${x}" y="${y}">${+(n / d).toFixed(3)}</text>` : mixT(x, y, [n, d]);
+    for (const [from, to, length] of widths) markup += lengthT((xOf(from) + xOf(to)) / 2, yOf(0) + 24, length);
     const heights =
       pieces.length === 2 && split === "h"
         ? [
@@ -235,7 +239,7 @@ function areaFig([wn, wd], [hn, hd], { split = null, under = false, labels = tru
             [wholeH, h, [hn - wholeH * hd, hd]],
           ]
         : [[0, h, [hn, hd]]];
-    for (const [from, to, length] of heights) markup += mixT(left - 30, (yOf(from) + yOf(to)) / 2, length);
+    for (const [from, to, length] of heights) markup += lengthT(left - 30, (yOf(from) + yOf(to)) / 2, length);
   }
   return svgWrap(
     Math.ceil(left + cols * size + (labels ? 40 : 6)),

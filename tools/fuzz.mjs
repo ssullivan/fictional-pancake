@@ -13,6 +13,8 @@
 //     check: (p, zoneId) => [messages],   optional real-world checks; an empty list when the problem is fine
 //     signed: true,                       optional: answers may be negative (from Grade 6 Unit 7 on), and max limits
 //                                        their size (absolute value); otherwise every answer must be positive
+//     near: (x, y) => boolean,            optional: the near the game passes to Game.init, when it isn't the default
+//                                        (a named mistake must not count as right by it)
 //   };
 import { readFileSync, existsSync, globSync } from "node:fs";
 import { join, resolve, dirname } from "node:path";
@@ -79,7 +81,7 @@ const mistakes = (list, isAnswer) =>
           .slice(0, 60)}" gives the right answer ${JSON.stringify(v)}`,
     );
 
-function check(p) {
+function check(p, close = near) {
   const bad = [];
   if (!p || typeof p !== "object") return ["gen() did not return a problem"];
   if (!KINDS.includes(p.kind)) bad.push(`unknown kind ${p.kind}`);
@@ -96,7 +98,7 @@ function check(p) {
     (p.misc || []).forEach(([v], i) => {
       if (!Number.isFinite(v)) bad.push(`misc[${i}] value is ${v}`);
     });
-    bad.push(...mistakes(p.misc, (v) => near(v, p.answer)));
+    bad.push(...mistakes(p.misc, (v) => close(v, p.answer)));
   }
   if (p.kind === "pair") {
     if (!Array.isArray(p.answer) || p.answer.length !== 2 || !p.answer.every(Number.isFinite))
@@ -175,7 +177,7 @@ for (const game of games) {
         let p, bad;
         try {
           p = z.gen();
-          bad = check(p);
+          bad = check(p, extra.near);
           different.add(problemKey(p));
           if (!bad.length && lim) bad = withinLimits(p, lim, extra.signed);
           if (!bad.length && extra.check) bad = extra.check(p, z.id);

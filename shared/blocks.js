@@ -11,7 +11,7 @@
    BT, flat, stick, cube1, hto(x, y, h, t, o, {cls, tr}), htoFig(h, t, o, opt, label)   small base-ten diagrams with hundreds;
                                      numBlocks(n) draws n
    digits(n), numWords(n)            [hundreds, tens, ones] of n, and its name up to 999,999 ("four hundred six")
-   pvChart(rows, hi, {places, tap}), PLACE, digitAt(n, e), commas(n)   a place-value chart (html table), hundredths to hundred-thousands; "305,020"
+   pvChart(rows, hi, {places, tap}), PLACE, digitAt(n, e), commas(n)   a place-value chart (html table), thousandths to hundred-thousands; "305,020"
    algSteps(a, b, op), algFig(a, b, op, done)   the standard algorithm to add or subtract, column by column (svg)
    algSay(step, op), algWidget(problems, op), placeWord(e, n)   what a worked column says, a Learn widget that works problems
                                      a column at a time, and a place's name ("ten", "hundreds")
@@ -268,9 +268,10 @@ const PLACE = {
   0: "Ones",
   "-1": "Tenths",
   "-2": "Hundredths",
+  "-3": "Thousandths",
 };
-/* the digit of n in the 10^e place (e = -1 for tenths); n is rounded to hundredths first so 0.3 isn't read as 0.29999… */
-const digitAt = (n, e) => Math.floor(Math.round(n * 100) / 10 ** (e + 2)) % 10;
+/* the digit of n in the 10^e place (e = -1 for tenths); n is rounded to thousandths first so 0.3 isn't read as 0.29999… */
+const digitAt = (n, e) => Math.floor(Math.round(n * 1000) / 10 ** (e + 3)) % 10;
 function pvChart(rows, hi = -1, { places = [2, 1, 0], tap = false } = {}) {
   const big = places[0] > 2,
     thousandsCols = places.filter((e) => e > 2).length;

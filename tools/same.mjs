@@ -223,6 +223,8 @@ const CALLS = {
         ),
       ),
     ),
+    ...each([0.325, 4.07, 0.001, 2.5], (v) => [-3, -2, -1, 0].map((e) => `digitAt(${v}, ${e})`)),
+    "pvChart([['A', 0.325], ['B', 4.07], ['C', 12.5]], 1, {places: [1, 0, -1, -2, -3]})",
     "commas(305020)",
     ...each([0, 1, 2, 3, 4, 5], (e) => [`placeWord(${e}, 1)`, `placeWord(${e}, 3)`, `placeWord(${e})`]),
     ...each(
@@ -327,6 +329,8 @@ const CALLS = {
     `areaFig([5, 2], [4, 1], {split: 'w', label: 'L'})`,
     `areaFig([1, 2], [1, 3], {under: true, labels: false})`,
     `areaFig([2, 1], [3, 1], {split: 'w'})`,
+    `areaFig([3, 10], [4, 10], {under: true, dec: true})`,
+    `areaFig([15, 10], [3, 10], {split: 'w', dec: true})`,
     `strips([{d: 2, k: 1, lab: [1, 2]}, {d: 4, k: 2, lab: [2, 4]}, {d: 8, k: 4, lab: [4, 8]}])`,
     `strips([{d: 6, k: 6, grp: 3}, {d: 5, k: 12, grp: [4, 4, 4], out: 2, cls: 'b'}])`,
     `strips([{d: 3, k: 8, out: 4}, {d: 12, k: 9, parts: false}], {stack: true, wholes: 3, W: 400})`,

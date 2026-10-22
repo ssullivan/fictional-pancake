@@ -20,9 +20,10 @@
    Learn.chapter(UNIT, id, steps)    on learn/<id>.html: draws the chapter, where steps are [{
        title, body,             body is HTML
        widget?: el => cleanup?, draws into el; may return a function that runs when the step is left
-       check?: {kind: 'num', q, answer, unit?, misc?: [[wrong value, message]], explain, fig?, frac?, neg?}   frac: the answer may
-                                be a fraction or mixed number (a keyboard with / and space on phones, instead of the decimal
-                                keypad); neg: answers in this unit may be negative (the full keyboard, which has a minus sign)
+       check?: {kind: 'num', q, answer, unit?, misc?: [[wrong value, message]], explain, fig?, frac?, neg?, tol?}   frac: the answer
+                                may be a fraction or mixed number (a keyboard with / and space on phones, instead of the decimal
+                                keypad); neg: answers in this unit may be negative (the full keyboard, which has a minus sign);
+                                tol: how close a typed number must be (default 0.011; 0.0005 for thousandths)
              | {kind: 'mc', q, answer, choices: [{id, label}], why: {id: message}, explain, fig?, stack?}
    }]
    Next unlocks once a step's quick check is answered (steps without a check unlock right away). */
@@ -41,8 +42,8 @@ const Learn = (() => {
     sayBtn = (label, els) => Say.btn(label, els);
 
   /* ---------- quick checks ---------- */
-  /* is a typed number close enough to the answer? */
-  const near = (a, b) => Math.abs(a - b) < 0.011;
+  /* is a typed number close enough to the answer (within tol; thousandths need a smaller one)? */
+  const near = (a, b, tol = 0.011) => Math.abs(a - b) < tol;
   /* Draws a quick check (see check? in the header) into el; onDone runs once it's answered, right or out of tries.
      Like a game problem: two tries (one with only two choices), and a wrong answer shows its named mistake. */
   function renderCheck(el, check, onDone) {
@@ -94,9 +95,9 @@ const Learn = (() => {
           feedback.innerHTML = '<div class="fb info"><p>Type a number first.</p></div>';
           return;
         }
-        ok = near(n, check.answer);
+        ok = near(n, check.answer, check.tol);
         if (!ok) {
-          const mistake = (check.misc || []).find(([wrong]) => near(n, wrong));
+          const mistake = (check.misc || []).find(([wrong]) => near(n, wrong, check.tol));
           msg = mistake ? mistake[1] : "Not quite. Look at the picture again.";
         }
       } else {

@@ -1,0 +1,4 @@
+/* Styles for figs.js: the hundredth that's blown up into thousandths (zm), and the dashed lines to its blow-up. The grid's own
+   squares use fractions.css's hundred-grid styles. */
+.hg.zm{fill:rgba(127,227,255,.35)}
+.zl{stroke:var(--cyan);stroke-width:1.5;stroke-dasharray:4 3}
