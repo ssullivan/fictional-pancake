@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Grand Opening</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=JetBrains+Mono:wght@500;700&display=swap">
+<link rel="stylesheet" href="../../shared/theme.css?v=c2e276bb">
+<link rel="stylesheet" href="../../shared/game.css?v=57b7d039">
+<link rel="stylesheet" href="../../shared/figures.css?v=20dca2b0">
+<link rel="stylesheet" href="../../shared/pictures.css?v=7f680159">
+<link rel="stylesheet" href="figs.css?v=4bccd340">
+</head>
+<body>
+
+<div class="app">
+  <section id="home">
+    <a class="back" href="../">← Grade 7</a>
+    <header class="hero">
+      <p class="eyebrow">Illustrative Mathematics · Grade 7 · Unit 9 · Putting It All Together</p>
+      <h1>Grand <span>Opening</span></h1>
+      <p class="lede">A new restaurant is opening, with a fun run to celebrate. Scale the recipes, price the menu, plan the dining room, see how crowded the neighborhood is, and measure the race course. Each station uses math from the whole year. <a href="learn.html">New to this? Learn it first →</a></p>
+      <div class="stats">
+        <span class="pill">Points <b id="hp">0</b></span>
+        <span class="pill">Stars <b id="hs">0</b>/<span id="hsMax">18</span></span>
+      </div>
+    </header>
+    <div class="zones" id="zones"></div>
+    <section class="grownups">
+      <h2>For grown-ups</h2>
+      <div><h4>How a round works</h4><p>Each station deals 8 fresh problems (Opening Night deals 10). A right answer on the first try earns 10 points. After a wrong answer, the game names the likely mistake and gives one more try for 5 points. A question with only two choices (which neighborhood is more crowded?) gets one try.</p></div>
+      <div><h4>Putting it all together</h4><p>This optional unit uses the year’s math in one setting: proportional relationships to scale recipes (Units 2 and 4), percents for markups (Unit 4), scale drawings for the floor plan (Unit 1), rates for how crowded a neighborhood is, circumference for a trundle wheel (Unit 3), percent error (Unit 4), and an equation for the race route (Unit 6).</p></div>
+      <div><h4>Numbers you can do in your head</h4><p>Recipe amounts are halves, thirds, and quarters of a cup, prices are friendly, and the course’s pieces come out even, so the challenge is choosing the right tool.</p></div>
+      <div><h4>Mistakes it catches</h4><p>Adding to scale a recipe instead of multiplying, the markup without the cost, dividing the wrong way for a unit price, forgetting to subtract costs for profit, a scaled area without both sides scaled, more people taken for more crowded, and dividing before taking off what’s already done.</p></div>
+      <div><h4>Not covered</h4><p>Lesson 6 (Fermi problems), Lesson 11 (building a trundle wheel), and Lesson 13 (designing a 5K course) are open-ended or hands-on, so they work better in class than as scored problems.</p></div>
+    </section>
+  </section>
+
+  <section id="play" hidden>
+    <div class="bar">
+      <button id="quit" class="ghost-btn" type="button">← Stations</button>
+      <div class="bar-mid"><div class="zn" id="zname"></div><div class="track"><div id="prog"></div></div></div>
+      <div class="bar-stats"><span class="pill" id="streak">Streak <b>0</b></span><span class="pill">Pts <b id="pts">0</b></span></div>
+    </div>
+    <article class="card">
+      <p class="eyebrow" id="qnum"></p>
+      <h2 id="prompt"></h2>
+      <div class="fig" id="fig"></div>
+      <div id="answer"></div>
+      <div id="hint" class="hintbox" hidden></div>
+      <div id="feedback" role="status" aria-live="polite"></div>
+    </article>
+  </section>
+
+  <section id="done" hidden>
+    <div class="card done">
+      <p class="eyebrow" id="dzone"></p>
+      <div class="bigstars stars" id="dstars"></div>
+      <h2 id="dtitle"></h2>
+      <p id="dmsg"></p>
+      <div class="row">
+        <button class="btn" id="again" type="button">Play again</button>
+        <button class="ghost-btn" id="tomap" type="button">Back to stations</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script src="../../shared/util.js?v=6fcbe1bb"></script>
+<script src="../../shared/figures.js?v=d2337c45"></script>
+<script src="../../shared/pictures.js?v=f857849d"></script>
+<script src="../../shared/fracmath.js?v=af104f91"></script>
+<script src="figs.js?v=82f1aa53"></script>
+<script src="../../shared/engine.js?v=4b1b2373"></script>
+<script src="stations.js?v=3d81e6b3"></script>
+<script>
+Game.init({
+  saveKey:'g7u9-save',
+  near:(x,y)=>Math.abs(x-y)<0.005,
+  zones:ZONES,icons:ICON,
+  words:{
+    right:'Order up!',
+    miss:'Not quite. Check which tool fits: scale, percent, rate, or equation.',
+    titles:['Keep cooking','Good start','Head chef','Grand opening star!'],
+    next:'Try the next station, or run Opening Night.',
+    stuck:'Use "Show me a hint" when you’re stuck. The hints name the tool to use.'
+  }
+});
+</script>
+</body>
+</html>

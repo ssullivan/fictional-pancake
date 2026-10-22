@@ -1,0 +1,7 @@
+/* Grade 7 Unit 9 (Grand Opening and its Learn pages): floor plans and trundle wheels. */
+.room{fill:rgba(255,201,60,.12);stroke:var(--gold);stroke-width:3}
+.table{fill:rgba(127,227,255,.35);stroke:var(--cyan);stroke-width:2}
+.wheel{fill:rgba(127,227,255,.12);stroke:var(--cyan);stroke-width:4}
+.handle{stroke:var(--chalk);stroke-width:4;stroke-linecap:round}
+.tr-pin{fill:var(--chalk)}
+.ground{stroke:rgba(170,205,255,.35);stroke-width:2}
