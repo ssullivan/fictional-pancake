@@ -1,0 +1,6 @@
+/* Styles for the unit's Learn pages: place-value charts to thousandths have four columns after the ones, so on a phone their
+   cells and headings get narrower to fit the screen. */
+@media (max-width:480px){
+  table.pv td{padding:8px 11px}
+  table.pv th{font-size:12px;padding:6px 3px}
+}
