@@ -1,0 +1,5 @@
+/* Grade 7 Unit 1 Learn pages: statements and readouts. Loaded by every page in learn/. */
+.eq{margin:0 0 10px;font:700 22px var(--mono);text-align:center}
+.eq.sm{font-size:17px}
+/* a stepper's value stays on one line */
+.stepper b{white-space:nowrap}

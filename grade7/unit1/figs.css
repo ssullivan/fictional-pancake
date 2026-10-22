@@ -1,0 +1,22 @@
+/* Grade 7 Unit 1 (Model Makers and its Learn pages): shapes on a grid, scale bars, and maps. */
+/* the grid, and shapes on it: gold, cyan, pink, green, or a dashed outline */
+.sg{stroke:rgba(170,205,255,.16);stroke-width:1}
+.shp{stroke-width:2.5;stroke-linejoin:round}
+.shp.a{fill:rgba(255,201,60,.3);stroke:var(--gold)}
+.shp.b{fill:rgba(127,227,255,.25);stroke:var(--cyan)}
+.shp.c{fill:rgba(255,138,196,.25);stroke:var(--pink)}
+.shp.d{fill:rgba(95,224,168,.25);stroke:var(--good)}
+.shp.ghost{fill:none;stroke:var(--dim);stroke-dasharray:6 5}
+/* a side drawn thick, the dashed tiles inside a copy, and the names over the shapes */
+.shp-hi{stroke:var(--gold);stroke-width:6;stroke-linecap:round}
+.tile{stroke:rgba(243,246,251,.55);stroke-width:1.5;stroke-dasharray:4 4}
+.lbl.nm{font-size:16px;fill:var(--chalk)}
+.lbl.vx{fill:var(--dim);font-style:italic}
+/* a scale bar, in two colors, and a map: the paper, roads, and towns */
+.sbar{fill:var(--chalk);stroke:var(--chalk);stroke-width:1.5}
+.sbar.alt{fill:rgba(9,32,61,.9)}
+.mapbg{fill:rgba(95,224,168,.07);stroke:rgba(170,205,255,.3);stroke-width:1.5}
+.road{stroke:var(--gold);stroke-width:4;stroke-linecap:round}
+.town{fill:var(--chalk);stroke:rgba(9,32,61,.9);stroke-width:2}
+/* a fraction and the punctuation after it stay on one line */
+.nw{white-space:nowrap}

@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Model Makers</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=JetBrains+Mono:wght@500;700&display=swap">
+<link rel="stylesheet" href="../../shared/theme.css?v=c2e276bb">
+<link rel="stylesheet" href="../../shared/game.css?v=57b7d039">
+<link rel="stylesheet" href="../../shared/figures.css?v=20dca2b0">
+<link rel="stylesheet" href="../../shared/pictures.css?v=7f680159">
+<link rel="stylesheet" href="figs.css?v=e6952625">
+</head>
+<body>
+
+<div class="app">
+  <section id="home">
+    <a class="back" href="../">← Grade 7</a>
+    <header class="hero">
+      <p class="eyebrow">Illustrative Mathematics · Grade 7 · Unit 1 · Scale Drawings</p>
+      <h1>Model <span>Makers</span></h1>
+      <p class="lede">Welcome to the model shop. Spot the true scaled copies, find scale factors, fill in missing sides and angles, scale up areas, read maps and floor plans, redraw at new scales, and build models from scales like 1 to 50. Each station matches lessons from class. <a href="learn.html">New to this? Learn it first →</a></p>
+      <div class="stats">
+        <span class="pill">Points <b id="hp">0</b></span>
+        <span class="pill">Stars <b id="hs">0</b>/<span id="hsMax">24</span></span>
+      </div>
+    </header>
+    <div class="zones" id="zones"></div>
+    <section class="grownups">
+      <h2>For grown-ups</h2>
+      <div><h4>How a round works</h4><p>Each station deals 8 fresh problems (the Model Expo deals 10). A right answer on the first try earns 10 points. After a wrong answer, the game names the likely mistake and gives one more try for 5 points. A question with only two choices (is it a scaled copy?) gets one try.</p></div>
+      <div><h4>The "Show me" hint</h4><p>Hints label the sides on the grid, mark the matching sides, cut a scaled-up shape into copies of the original to show why area grows by the scale factor times itself, and write the real length next to each road on a map.</p></div>
+      <div><h4>Numbers you can do in your head</h4><p>Shapes sit on a grid with whole-number sides, scale factors are whole numbers or halves (1/2, 3/2, 5/2), map lengths are whole or half centimeters, and scales use friendly numbers like 1 cm to 25 km or 1 to 50, so the challenge is the scaling, not the arithmetic.</p></div>
+      <div><h4>Mistakes it catches</h4><p>Adding the same amount to every side instead of multiplying, a stretched copy taken for a scaled one, the scale factor turned upside down, angles multiplied along with the sides, area multiplied by the scale factor only once, dividing by the scale when a real length needs multiplying, and a scale like 1 cm to 5 m read as 1 to 5.</p></div>
+      <div><h4>Not covered</h4><p>Lesson 13 (Draw It to Scale) is a project where students make their own floor plan, so it works better in class than as scored problems.</p></div>
+    </section>
+  </section>
+
+  <section id="play" hidden>
+    <div class="bar">
+      <button id="quit" class="ghost-btn" type="button">← Stations</button>
+      <div class="bar-mid"><div class="zn" id="zname"></div><div class="track"><div id="prog"></div></div></div>
+      <div class="bar-stats"><span class="pill" id="streak">Streak <b>0</b></span><span class="pill">Pts <b id="pts">0</b></span></div>
+    </div>
+    <article class="card">
+      <p class="eyebrow" id="qnum"></p>
+      <h2 id="prompt"></h2>
+      <div class="fig" id="fig"></div>
+      <div id="answer"></div>
+      <div id="hint" class="hintbox" hidden></div>
+      <div id="feedback" role="status" aria-live="polite"></div>
+    </article>
+  </section>
+
+  <section id="done" hidden>
+    <div class="card done">
+      <p class="eyebrow" id="dzone"></p>
+      <div class="bigstars stars" id="dstars"></div>
+      <h2 id="dtitle"></h2>
+      <p id="dmsg"></p>
+      <div class="row">
+        <button class="btn" id="again" type="button">Play again</button>
+        <button class="ghost-btn" id="tomap" type="button">Back to stations</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script src="../../shared/util.js?v=6fcbe1bb"></script>
+<script src="../../shared/figures.js?v=d2337c45"></script>
+<script src="../../shared/pictures.js?v=f857849d"></script>
+<script src="../../shared/fracmath.js?v=af104f91"></script>
+<script src="figs.js?v=10ac1cf4"></script>
+<script src="../../shared/engine.js?v=4b1b2373"></script>
+<script src="stations.js?v=337e7a36"></script>
+<script>
+Game.init({
+  saveKey:'g7u1-save',
+  zones:ZONES,icons:ICON,
+  words:{
+    right:'Built to scale!',
+    miss:'Not quite. Check whether to multiply or divide, and by what.',
+    titles:['Keep building','Good start','Skilled model maker','Master model maker!'],
+    next:'Try the next station, or enter the Model Expo.',
+    stuck:'Use "Show me a hint" when you’re stuck. The pictures show the sides and the scale.'
+  }
+});
+</script>
+</body>
+</html>
