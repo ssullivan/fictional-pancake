@@ -1,0 +1,16 @@
+/* Grade 7 Unit 3 (Wheel Works and its Learn pages): circles and their parts, wheels rolling, wedges, and pieces of circles. */
+/* a circle, its center, and segments in it (a gold one is the one asked about) */
+.cir{fill:rgba(127,227,255,.12);stroke:var(--cyan);stroke-width:3}
+.ctr{fill:var(--chalk)}
+.seg{stroke:var(--chalk);stroke-width:3;stroke-linecap:round}
+.seg.hi{stroke:var(--gold);stroke-width:4.5}
+.arc{fill:none;stroke:var(--chalk);stroke-width:6;stroke-linecap:round}
+.arc.hi{stroke:var(--gold)}
+.lbl.vx{fill:var(--dim);font-style:italic}
+/* the ground a wheel rolls on, and the track it leaves */
+.ground{stroke:rgba(170,205,255,.35);stroke-width:2}
+.track{stroke:var(--gold);stroke-width:4}
+/* wedges of a circle (every other one shaded), and half or a quarter of a circle */
+.wedge{fill:rgba(127,227,255,.18);stroke:var(--cyan);stroke-width:1.5;stroke-linejoin:round}
+.wedge.alt{fill:rgba(255,201,60,.45);stroke:var(--gold)}
+.piece{fill:rgba(255,201,60,.3);stroke:var(--gold);stroke-width:3;stroke-linejoin:round}
