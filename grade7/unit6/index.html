@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Code Breakers</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=JetBrains+Mono:wght@500;700&display=swap">
+<link rel="stylesheet" href="../../shared/theme.css?v=c2e276bb">
+<link rel="stylesheet" href="../../shared/game.css?v=57b7d039">
+<link rel="stylesheet" href="../../shared/figures.css?v=20dca2b0">
+<link rel="stylesheet" href="../../shared/pictures.css?v=7f680159">
+<link rel="stylesheet" href="../../shared/algebra.css?v=05a86779">
+<link rel="stylesheet" href="../../shared/signed.css?v=7a156243">
+<link rel="stylesheet" href="../../shared/hanger.css?v=b59fcaa9">
+<link rel="stylesheet" href="figs.css?v=db793fda">
+</head>
+<body>
+
+<div class="app">
+  <section id="home">
+    <a class="back" href="../">← Grade 7</a>
+    <header class="hero">
+      <p class="eyebrow">Illustrative Mathematics · Grade 7 · Unit 6 · Expressions, Equations &amp; Inequalities</p>
+      <h1>Code <span>Breakers</span></h1>
+      <p class="lede">Every lock has a code. Read tape diagrams, crack equations like 3<i>x</i> + 5 = −7 and 4(<i>x</i> − 2) = 12, solve story problems, open inequality locks, find the most a budget buys, and match equivalent expressions. Each station matches lessons from class. <a href="learn.html">New to this? Learn it first →</a></p>
+      <div class="stats">
+        <span class="pill">Points <b id="hp">0</b></span>
+        <span class="pill">Stars <b id="hs">0</b>/<span id="hsMax">21</span></span>
+      </div>
+    </header>
+    <div class="zones" id="zones"></div>
+    <section class="grownups">
+      <h2>For grown-ups</h2>
+      <div><h4>How a round works</h4><p>Each station deals 8 fresh problems (the Master Key deals 10). A right answer on the first try earns 10 points. After a wrong answer, the game names the likely mistake and gives one more try for 5 points. A question with only two choices (is it a solution?) gets one try.</p></div>
+      <div><h4>Typing negative numbers</h4><p>Answers can be negative, so the answer box opens the full keyboard, which has a minus sign. Either a hyphen or a true minus sign works.</p></div>
+      <div><h4>Two kinds of equations</h4><p>IM contrasts px + q = r (some equal parts plus one more) with p(x + q) = r (equal groups of two things). Tape diagrams and hangers show the difference, and the game asks students to match stories and diagrams to the right kind before solving.</p></div>
+      <div><h4>Numbers you can do in your head</h4><p>Solutions are whole numbers from −10 to 10, coefficients are small, and budgets and goals use friendly amounts, so the challenge is the reasoning, not the arithmetic.</p></div>
+      <div><h4>Mistakes it catches</h4><p>Undoing in the wrong order, dividing only part of p(x + q), the wrong sign when undoing a subtraction, forgetting to turn an inequality around when dividing by a negative, a hollow circle read as filled, rounding the wrong way for “most” and “fewest,” distributing to only the first term, and subtracting only part of a group.</p></div>
+      <div><h4>Not covered</h4><p>Lesson 23 (Applications of Expressions) is an open-ended project, so it works better in class than as scored problems.</p></div>
+    </section>
+  </section>
+
+  <section id="play" hidden>
+    <div class="bar">
+      <button id="quit" class="ghost-btn" type="button">← Stations</button>
+      <div class="bar-mid"><div class="zn" id="zname"></div><div class="track"><div id="prog"></div></div></div>
+      <div class="bar-stats"><span class="pill" id="streak">Streak <b>0</b></span><span class="pill">Pts <b id="pts">0</b></span></div>
+    </div>
+    <article class="card">
+      <p class="eyebrow" id="qnum"></p>
+      <h2 id="prompt"></h2>
+      <div class="fig" id="fig"></div>
+      <div id="answer"></div>
+      <div id="hint" class="hintbox" hidden></div>
+      <div id="feedback" role="status" aria-live="polite"></div>
+    </article>
+  </section>
+
+  <section id="done" hidden>
+    <div class="card done">
+      <p class="eyebrow" id="dzone"></p>
+      <div class="bigstars stars" id="dstars"></div>
+      <h2 id="dtitle"></h2>
+      <p id="dmsg"></p>
+      <div class="row">
+        <button class="btn" id="again" type="button">Play again</button>
+        <button class="ghost-btn" id="tomap" type="button">Back to stations</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script src="../../shared/util.js?v=6fcbe1bb"></script>
+<script src="../../shared/figures.js?v=d2337c45"></script>
+<script src="../../shared/algebra.js?v=ed58da1e"></script>
+<script src="../../shared/pictures.js?v=f857849d"></script>
+<script src="../../shared/fracmath.js?v=af104f91"></script>
+<script src="../../shared/signed.js?v=0d648d45"></script>
+<script src="../../shared/hanger.js?v=2258d076"></script>
+<script src="figs.js?v=65b787e2"></script>
+<script src="../../shared/engine.js?v=4b1b2373"></script>
+<script src="stations.js?v=42a76442"></script>
+<script>
+Game.init({
+  saveKey:'g7u6-save',
+  zones:ZONES,icons:ICON,
+  words:{
+    right:'Unlocked!',
+    miss:'Not quite. Undo the steps in reverse order, the same on both sides, and check by putting your answer back in.',
+    titles:['Keep cracking','Good start','Code cracker','Master codebreaker!'],
+    next:'Try the next station, or go for the Master Key.',
+    stuck:'Use "Show me a hint" when you’re stuck. Tape diagrams and hangers show the steps.'
+  }
+});
+</script>
+</body>
+</html>

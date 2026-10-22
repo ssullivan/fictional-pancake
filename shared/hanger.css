@@ -1,0 +1,9 @@
+/* Styles for hanger.js: hanger diagrams. Load after pictures.css. */
+/* hangers: the hook, the beam, strings, the unknown (a circle with its letter), unit squares, and labeled blocks */
+.hg-hook,.hg-str{stroke:var(--dim);stroke-width:2;fill:none}
+.hg-pin{fill:var(--chalk)}
+.hg-beam{stroke:var(--chalk);stroke-width:5;stroke-linecap:round}
+.hg-x{fill:rgba(127,227,255,.3);stroke:var(--cyan);stroke-width:2.5}
+.lbl.hg-let{fill:var(--cyan);font-style:italic;font-size:19px}
+.hg-one{fill:rgba(255,201,60,.4);stroke:var(--gold);stroke-width:2}
+.hg-w{fill:rgba(255,201,60,.2);stroke:var(--gold);stroke-width:2}

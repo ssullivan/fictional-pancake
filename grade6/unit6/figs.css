@@ -1,12 +1,4 @@
-/* Styles for figs.js: hanger diagrams and area diagrams. Graphs and letters for numbers are styled in shared/algebra.css. */
-/* hangers: the hook, the beam, strings, the unknown (a circle with its letter), unit squares, and labeled blocks */
-.hg-hook,.hg-str{stroke:var(--dim);stroke-width:2;fill:none}
-.hg-pin{fill:var(--chalk)}
-.hg-beam{stroke:var(--chalk);stroke-width:5;stroke-linecap:round}
-.hg-x{fill:rgba(127,227,255,.3);stroke:var(--cyan);stroke-width:2.5}
-.lbl.hg-let{fill:var(--cyan);font-style:italic;font-size:19px}
-.hg-one{fill:rgba(255,201,60,.4);stroke:var(--gold);stroke-width:2}
-.hg-w{fill:rgba(255,201,60,.2);stroke:var(--gold);stroke-width:2}
+/* Styles for figs.js: area diagrams. Hangers are styled in shared/hanger.css, and graphs and letters for numbers in shared/algebra.css. */
 /* area diagrams: parts in two colors by turns, and a dashed part taken away */
 .as-part{stroke:var(--chalk);stroke-width:2.5}
 .as-part.c0{fill:rgba(255,201,60,.3)}

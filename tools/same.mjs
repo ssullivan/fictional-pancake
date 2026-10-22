@@ -34,6 +34,7 @@ const FILES = [
   "fracmath",
   "algebra",
   "signed",
+  "hanger",
   "blocks",
   "numlines",
   "fractions",
@@ -615,6 +616,12 @@ const CALLS = {
     `coordPlane([{x: -3, y: 2, id: 'a', t: 'A'}, {x: 4, y: -5, id: 'b', cls: 'r'}], {xMin: -6, xMax: 6, yMin: -6, yMax: 6, width: 300, height: 300, quads: true, shade: 'II', tap: true})`,
     `coordPlane([{x: -2.5, y: 0}], {xMin: -5, xMax: 5, yMin: -10, yMax: 10, xStep: 0.5, yStep: 5, shapes: [{pts: [[-4, 5], [3, 5], [3, -5]], closed: true, cls: 'fill'}, {pts: [[0, 0], [-4, 0], [-4, 5]], cls: 'walk'}]})`,
     `coordPlane([], {xMin: -4, xMax: 4, yMin: -3, yMax: 3, shade: 'IV', line: [1, 0]})`,
+  ],
+  hanger: [
+    `hanger(['x', 'x', 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1])`,
+    `hanger(['x', 12], [[3, 4], 20], {tip: 1, letter: 'y'})`,
+    `hanger(['x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x'], [100, 250], {tip: -1, label: 'L'})`,
+    `hanger([], ['x'])`,
   ],
   signed: [
     `signedLine(-10, 10)`,

@@ -1,0 +1,7 @@
+/* Grade 7 Unit 6 (Code Breakers and its Learn pages): tape diagrams. */
+/* boxes for the unknown (cyan, its letter in italics) and for the number added (gold), and the line between groups */
+.tp{stroke:var(--chalk);stroke-width:2}
+.tp.tx{fill:rgba(127,227,255,.22)}
+.tp.tq{fill:rgba(255,201,60,.3)}
+.lbl.tp-x{fill:var(--cyan);font-style:italic}
+.tp-gap{stroke:var(--chalk);stroke-width:5}
