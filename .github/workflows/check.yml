@@ -13,7 +13,8 @@ permissions:
 jobs:
   check:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    # check.mjs takes about 7 to 8 minutes, most of it the fuzz test of every station (timed 2026-10-22, with Grade 7)
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
