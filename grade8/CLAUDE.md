@@ -1,6 +1,6 @@
 # Grade 8
 
-General rules for games and Learn pages are in the root `CLAUDE.md`. Grade 8 follows **IM 6–8 Math**, like Grades 6 and 7, and uses their styles: `figures.css` and `pictures.css` for labels, and exact fractions from `shared/fracmath.js`.
+General rules for games and Learn pages are in the root `CLAUDE.md`. Grade 8 follows **IM 6–8 Math**, like Grades 6 and 7, and uses their styles: `figures.css` and `pictures.css` for labels, and exact fractions (the math in `shared/util.js`, written out by `shared/fracmath.js`). Math past a simple fraction is typeset with KaTeX, and typed expression answers use `expr` problems (root `CLAUDE.md`, Typeset math).
 
 ## Grade 8 games
 

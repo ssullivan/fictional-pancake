@@ -60,6 +60,7 @@ const TYPES = {
   ".mjs": "text/javascript",
   ".css": "text/css",
   ".svg": "image/svg+xml",
+  ".woff2": "font/woff2",
   ".png": "image/png",
 };
 const server = createServer(async (req, res) => {

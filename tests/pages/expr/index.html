@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Typed Math (test page)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=JetBrains+Mono:wght@500;700&display=swap">
+<link rel="stylesheet" href="../../../shared/theme.css?v=c2e276bb">
+<link rel="stylesheet" href="../../../shared/game.css?v=57b7d039">
+<link rel="stylesheet" href="../../../shared/vendor/katex/katex.min.css?v=71eb1cd3">
+<link rel="stylesheet" href="../../../shared/tex.css?v=c22216b1">
+<link rel="stylesheet" href="../../../shared/mathbox.css?v=00d72d4d">
+</head>
+<body>
+
+<div class="app">
+  <section id="home">
+    <a class="back" href="../../../">← All grades</a>
+    <header class="hero">
+      <p class="eyebrow">Test page · not linked from the site</p>
+      <h1>Typed <span>Math</span></h1>
+      <p class="lede">Answers here are expressions and equations, typed with the math keys and judged by <code>shared/expr.js</code>. <code>tests/math.spec.js</code> plays it; <code>tools/fuzz.mjs</code> deals its problems. <a href="learn.html">The Learn page’s quick check →</a></p>
+      <div class="stats">
+        <span class="pill">Points <b id="hp">0</b></span>
+        <span class="pill">Stars <b id="hs">0</b>/<span id="hsMax">12</span></span>
+      </div>
+    </header>
+    <div class="zones" id="zones"></div>
+  </section>
+
+  <section id="play" hidden>
+    <div class="bar">
+      <button id="quit" class="ghost-btn" type="button">← Stations</button>
+      <div class="bar-mid"><div class="zn" id="zname"></div><div class="track"><div id="prog"></div></div></div>
+      <div class="bar-stats"><span class="pill" id="streak">Streak <b>0</b></span><span class="pill">Pts <b id="pts">0</b></span></div>
+    </div>
+    <article class="card">
+      <p class="eyebrow" id="qnum"></p>
+      <h2 id="prompt"></h2>
+      <div class="fig" id="fig"></div>
+      <div id="answer"></div>
+      <div id="hint" class="hintbox" hidden></div>
+      <div id="feedback" role="status" aria-live="polite"></div>
+    </article>
+  </section>
+
+  <section id="done" hidden>
+    <div class="card done">
+      <p class="eyebrow" id="dzone"></p>
+      <div class="bigstars stars" id="dstars"></div>
+      <h2 id="dtitle"></h2>
+      <p id="dmsg"></p>
+      <div class="row">
+        <button class="btn" id="again" type="button">Play again</button>
+        <button class="ghost-btn" id="tomap" type="button">Back to stations</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script src="../../../shared/util.js?v=2703eecd"></script>
+<script src="../../../shared/vendor/katex/katex.min.js?v=f5a2b1a7"></script>
+<script src="../../../shared/tex.js?v=68a1669c"></script>
+<script src="../../../shared/expr.js?v=046418df"></script>
+<script src="../../../shared/mathbox.js?v=4e72d0dd"></script>
+<script src="../../../shared/engine.js?v=508de74b"></script>
+<script src="stations.js?v=48b417e8"></script>
+<script>
+Game.init({
+  saveKey:'test-expr-save',
+  zones:ZONES,icons:ICON,
+  words:{
+    right:'Right!',
+    miss:'Not quite. Check each term again.',
+    titles:['Keep going','Good start','Nice work','All of it!'],
+    next:'Try the next station, or go for All Together.',
+    stuck:'Use "Show me a hint" when you’re stuck.'
+  }
+});
+</script>
+</body>
+</html>

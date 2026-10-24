@@ -184,6 +184,136 @@ for (const home of globSync("grade*/unit*/learn.html", { cwd: ROOT }).sort()) {
   }
 }
 
+// Expr (shared/expr.js) reads and judges every typed expression answer, and tex.js typesets the math: each way a student might
+// write an answer must read right, equal answers must match and unequal ones not, each form must pass what it asks for and
+// fail what it doesn't, and KaTeX must draw what the pages write.
+{
+  const ctx = vm.createContext({});
+  for (const f of ["vendor/katex/katex.min", "util", "tex", "expr"])
+    vm.runInContext(readFileSync(join(ROOT, `shared/${f}.js`), "utf8").replace(/^(const|let) /gm, "var "), ctx);
+  const { Expr } = ctx,
+    vars = ["x", "y"];
+  /* each text, and its value at x = 2, y = 3 */
+  const values = [
+    ["2x^2+3x-1", 13],
+    ["x²−4", 0],
+    ["(x+1)(x-2)", 0],
+    ["1/2x", 1],
+    ["-5x+3", -7],
+    ["-x^2", -4],
+    ["2^3^2", 512],
+    ["x^-1", 0.5],
+    ["3(x+1)y", 27],
+    ["xy", 6],
+    ["√(x+2)", 2],
+    ["sqrt x", Math.SQRT2],
+    ["|1-x|", 1],
+    ["2·x×y÷3", 4],
+    ["x**3", 8],
+    ["[x+1]{y}", 9],
+    ["X+Y", 5],
+    ["0.25x", 0.5],
+    ["πx", 2 * Math.PI],
+    ["ln e^x", 2],
+  ];
+  for (const [text, want] of values) {
+    let got;
+    try {
+      got = Expr.value(Expr.parse(text, vars), { x: 2, y: 3 });
+    } catch (e) {
+      got = e.message;
+    }
+    if (typeof got !== "number" || Math.abs(got - want) > 1e-9)
+      fail(`Expr: ${text} at x = 2, y = 3 is ${got}, not ${want}`);
+  }
+  /* what can't be read, and what each says */
+  const unreadable = [
+    ["", "Type an answer first."],
+    ["(x+1", "There’s a ( with no )."],
+    ["x+1)", "There’s a ) with no (."],
+    ["x2", "Write the number first, like 2x, or use ^ for a power, like x^2."],
+    ["2 3", "Put a sign between 2 and 3."],
+    ["x+*3", "Something’s missing after +."],
+    ["x=1=2", "Use just one =, <, or > in an answer."],
+    ["x#1", "I can’t read the “#”."],
+    ["sqrt", "Something’s missing after √."],
+  ];
+  for (const [text, want] of unreadable) {
+    let got = "(read it)";
+    try {
+      Expr.parse(text, vars);
+    } catch (e) {
+      got = e.message;
+    }
+    if (got !== want)
+      fail(`Expr.parse(${JSON.stringify(text)}) says ${JSON.stringify(got)}, not ${JSON.stringify(want)}`);
+  }
+  /* pairs that are equal, and pairs that aren't */
+  const pairs = [
+    ["x^2+5x+6", "(x+2)(x+3)", true],
+    ["x^2+5x+6", "(x+2)(x+2)", false],
+    ["x^2", "2x", false],
+    ["3x+2y", "2y+3x", true],
+    ["|x|", "x", false],
+    ["y=2x+3", "2x-y=-3", true],
+    ["y=2x+3", "y=3x+2", false],
+    ["x=3", "2x=6", true],
+    ["x^2=9", "x=3", false],
+    ["x>2", "2<x", true],
+    ["x>2", "x<2", false],
+    ["x>2", "x>=2", false],
+    ["-2x<4", "x>-2", true],
+    ["x+1", "x+1=0", false],
+  ];
+  for (const [a, b, want] of pairs) if (Expr.same(a, b, vars) !== want) fail(`Expr.same(${a}, ${b}) should be ${want}`);
+  /* each form: texts written that way (null), and texts that aren't (a message) */
+  const forms = [
+    ["expanded", "x^2+5x+6", true],
+    ["expanded", "-x^2+x/2-1", true],
+    ["expanded", "x^2+2x+3x+6", false],
+    ["expanded", "(x+2)(x+3)", false],
+    ["expanded", "x*x+5x", false],
+    ["factored", "(x+2)(x+3)", true],
+    ["factored", "2(x+3)", true],
+    ["factored", "-(x-1)^2", true],
+    ["factored", "(x-y)(x+y)", true],
+    ["factored", "(x+1)(x^2+1)", true],
+    ["factored", "x^2+5x+6", false],
+    ["factored", "2(x^2-4)", false],
+    ["factored", "(2x+4)(x+1)", false],
+    ["factored", "x(x^2+x)", false],
+    ["simplified", "5x+4", true],
+    ["simplified", "3x+4+2x", false],
+    ["simplified", "2*3x", false],
+    ["slopeIntercept", "y=2x+3", true],
+    ["slopeIntercept", "y=3-x", true],
+    ["slopeIntercept", "2x-y=-3", false],
+    ["slopeIntercept", "y=2(x+1)", false],
+    ["standardForm", "2x+3y=6", true],
+    ["standardForm", "y=2x+3", false],
+  ];
+  for (const [form, text, ok] of forms) {
+    const message = Expr.form[form](Expr.parse(text, vars), vars);
+    if ((message === null) !== ok) fail(`Expr.form.${form}(${text}) should ${ok ? "pass" : "fail"}, not ${message}`);
+  }
+  if (Expr.form.solvedFor("y")(Expr.parse("y=x+y", vars)) === null) fail("Expr.form.solvedFor('y') passes y = x + y");
+  /* TeX written out, after tidying */
+  const written = [
+    ["x^2+-3x+0+1x", "x^{2} - 3x + x"],
+    ["-1(x+-2)", "-\\left(x - 2\\right)"],
+    ["2*3x", "2 \\cdot 3x"],
+    ["x<=3", "x \\le 3"],
+  ];
+  for (const [text, want] of written)
+    if (Expr.tex(text) !== want) fail(`Expr.tex(${text}) is ${Expr.tex(text)}, not ${want}`);
+  /* KaTeX draws what pages write, marks what it can't read, and typeset leaves money alone */
+  for (const source of ["x^2 + \\frac{1}{2}", "\\sqrt{x + 1}", "y = mx + b", "x \\le 3", "\\left|x\\right|"])
+    if (!ctx.tex(source).includes('class="katex"') || ctx.tex(source).includes("katex-error"))
+      fail(`tex(${source}) isn't drawn`);
+  if (!ctx.tex("\\frac{1}{").includes("katex-error")) fail("tex() doesn't mark TeX it can't read");
+  if (ctx.typeset("$4.50 and $5") !== "$4.50 and $5") fail("typeset() changes text with no \\( \\)");
+}
+
 // Shared scripts: each top-level name in shared/*.js belongs to one file, a page loads every shared file its code uses (and the
 // files those use), and no shared file it doesn't use (pages load only the picture files they need). Uses are read from the code
 // with strings and comments taken out, so words in sentences don't count, and a name the page's own code declares again (a local
@@ -274,9 +404,11 @@ for (const home of globSync("grade*/unit*/learn.html", { cwd: ROOT }).sort()) {
     };
     return code();
   };
-  /* names used in code (not .property, not an object key), and names it declares: variables, functions, and parameters */
+  /* names used in code (not .property, not an object key), and names it declares: variables, functions, and parameters. A name
+     is matched whole ((?![\w$])), so one before a : isn't cut short to a shorter name (text in "c ? text : …" isn't tex). */
   const ID = /[A-Za-z_$][\w$]*/g;
-  const usedIn = (c) => new Set([...c.matchAll(/(?<![\w$.])([A-Za-z_$][\w$]*)(?!\s*:(?!:))/g)].map((m) => m[1]));
+  const usedIn = (c) =>
+    new Set([...c.matchAll(/(?<![\w$.])([A-Za-z_$][\w$]*)(?![\w$])(?!\s*:(?!:))/g)].map((m) => m[1]));
   const declaredIn = (c) =>
     new Set([
       ...[
@@ -303,8 +435,15 @@ for (const home of globSync("grade*/unit*/learn.html", { cwd: ROOT }).sort()) {
   }
   for (const f of files) {
     if (SKELETON.includes(f)) continue;
-    const c = codeOnly(readFileSync(join(ROOT, `shared/${f}.js`), "utf8"));
-    deps[f] = new Set([...usedIn(c)].map((n) => owner.get(n)).filter((o) => o && o !== f));
+    /* a name the file declares for itself (a local inside a function, or Expr's helpers) isn't a use of another file's */
+    const c = codeOnly(readFileSync(join(ROOT, `shared/${f}.js`), "utf8")),
+      mine = declaredIn(c);
+    deps[f] = new Set(
+      [...usedIn(c)]
+        .filter((n) => !mine.has(n) || owner.get(n) === f)
+        .map((n) => owner.get(n))
+        .filter((o) => o && o !== f),
+    );
   }
   for (const page of pages) {
     const file = join(ROOT, page),
@@ -312,8 +451,7 @@ for (const home of globSync("grade*/unit*/learn.html", { cwd: ROOT }).sort()) {
       srcs = scriptsOf(html);
     const loaded = srcs.filter((s) => /(^|\/)shared\/[^/]+\.js$/.test(s)).map((s) => s.split("/").pop().slice(0, -3));
     if (!loaded.length) continue;
-    const own = codeOnly(
-      [...html.matchAll(/<script>([^]*?)<\/script>/g)]
+    const source = [...html.matchAll(/<script>([^]*?)<\/script>/g)]
         .map((m) => m[1])
         .concat(
           srcs
@@ -323,10 +461,27 @@ for (const home of globSync("grade*/unit*/learn.html", { cwd: ROOT }).sort()) {
             .map((f) => readFileSync(f, "utf8")),
         )
         .join("\n;\n"),
-    );
+      own = codeOnly(source);
     const mine = declaredIn(own),
       need = new Map();
     for (const n of usedIn(own)) if (owner.has(n) && !mine.has(n) && !need.has(owner.get(n))) need.set(owner.get(n), n);
+    /* engine.js and learn.js reach these only for what the page's problems hold: expr problems and checks need the MathBox
+       (which needs expr.js and tex.js), and math between \\( \\) in a string needs tex.js to be typeset */
+    if (/\bkind:\s*["']expr["']/.test(source)) for (const f of ["mathbox", "expr", "tex"]) need.set(f, "expr problems");
+    if (/\\\\[([]/.test(source) && !need.has("tex")) need.set("tex", "math between \\( \\)");
+    /* tex.js draws with KaTeX, loaded before it with its styles; tex.js and mathbox.js have styles of their own */
+    const styles = [...html.matchAll(/<link rel="stylesheet" href="([^"?]+)/g)].map((m) => m[1]);
+    const katexAt = srcs.findIndex((s) => s.endsWith("shared/vendor/katex/katex.min.js")),
+      texAt = srcs.findIndex((s) => /(^|\/)shared\/tex\.js$/.test(s));
+    if (texAt >= 0 && !(katexAt >= 0 && katexAt < texAt))
+      fail(`${page}: loads shared/tex.js without shared/vendor/katex/katex.min.js before it`);
+    for (const [script, style] of [
+      ["shared/tex.js", "shared/tex.css"],
+      ["shared/tex.js", "shared/vendor/katex/katex.min.css"],
+      ["shared/mathbox.js", "shared/mathbox.css"],
+    ])
+      if (srcs.some((s) => s.endsWith(script)) && !styles.some((s) => s.endsWith(style)))
+        fail(`${page}: loads ${script} but not ${style}`);
     for (const f of loaded) for (const d of deps[f] || []) if (!need.has(d)) need.set(d, `shared/${f}.js`);
     for (const [f, why] of need)
       if (!loaded.includes(f))

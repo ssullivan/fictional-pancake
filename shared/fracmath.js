@@ -1,32 +1,13 @@
-/* Exact fractions for Grade 6 pages: the math, fractions as labels in pictures, and rectangles and boxes with fractional sides.
-   Needs util.js (gcd, range), figures.js (svgWrap), and pictures.js (fr, frT, mixed). Styles are in fracmath.css.
+/* Exact fractions for Grade 6 pages: fractions written out, as labels in pictures, and rectangles and boxes with fractional sides.
+   Needs util.js (range, and the fraction math: frac, fAdd, …), figures.js (svgWrap), and pictures.js (fr, frT, mixed).
+   Styles are in fracmath.css.
 
-   A fraction is a pair [n, d] in lowest terms, with d > 0.
-   frac(n, d)                        [n, d] in lowest terms; frac(3) is [3, 1]
-   fAdd, fSub, fMul, fDiv (a, b)     a + b, a − b, a × b, a ÷ b, in lowest terms
-   fVal(a), fInv(a), isWhole(a)      its value as a number, its reciprocal, and whether it's a whole number
+   A fraction is a pair [n, d] in lowest terms, with d > 0 (util.js has the math).
    fx(a), ftx(a)                     written as a whole number, a fraction, or a mixed number: html (stacked), and plain text "4 2/3"
    fim(a)                            written as a fraction even when it's more than 1 (html): 14/3
    fT(x, y, a, {cls, unit})          a fraction or mixed number in a picture, centered on x, y (markup)
    rectGrid(w, h, p, {…})            a rectangle w by h tiled in squares 1/p on a side (svg)
    cubeBox(l, w, h, p, {…})          a box l by w by h filled with cubes 1/p on an edge, drawn at an angle (svg) */
-/* the sign goes on the numerator; dividing by the greatest common factor puts it in lowest terms */
-const frac = (n, d = 1) => {
-  if (d < 0) {
-    n = -n;
-    d = -d;
-  }
-  const g = gcd(Math.abs(n), d) || 1;
-  return [n / g, d / g];
-};
-/* a/b + c/d over the common denominator b × d (and likewise for −); × multiplies across; ÷ multiplies by the reciprocal */
-const fAdd = ([a, b], [c, d]) => frac(a * d + c * b, b * d);
-const fSub = ([a, b], [c, d]) => frac(a * d - c * b, b * d);
-const fMul = ([a, b], [c, d]) => frac(a * c, b * d);
-const fDiv = ([a, b], [c, d]) => frac(a * d, b * c);
-const fVal = ([n, d]) => n / d;
-const fInv = ([n, d]) => frac(d, n);
-const isWhole = (f) => f[1] === 1;
 const fx = ([n, d]) => mixed(n, d);
 const ftx = ([n, d]) => {
   const whole = Math.floor(n / d),

@@ -6,8 +6,9 @@
 //   node tools/same.mjs HEAD blocks shapes only those files' calls
 //   node tools/same.mjs HEAD grade3/unit1  a unit's own code: its game's problems and its Learn chapters' quick checks
 //
-// The shared files that don't need a page (everything but engine.js, learn.js, and speak.js) are loaded twice, as they are
-// at the revision and as they are now, each set in its own context like a page's scripts. Every call in CALLS below then
+// The shared files that don't need a page (everything but engine.js, learn.js, speak.js, and mathbox.js) are loaded twice, as
+// they are at the revision and as they are now, each set in its own context like a page's scripts (with KaTeX, from
+// shared/vendor/katex, for tex.js). Every call in CALLS below then
 // runs in both, with the same seeded Math.random, and the results (markup, numbers, objects) must match exactly.
 // A function's calls should reach every option and branch; add calls when you add a function or an option.
 // This only covers what CALLS covers, so a change that should look the same still needs snap.mjs --compare before it ships.
@@ -45,6 +46,8 @@ const FILES = [
   "multiply",
   "angles",
   "solids",
+  "tex",
+  "expr",
 ];
 
 function load(atRev) {
@@ -57,7 +60,7 @@ function load(atRev) {
     window: {},
     fmt: (v) => String(+(+v).toFixed(2)),
   });
-  for (const f of FILES) {
+  for (const f of ["vendor/katex/katex.min", ...FILES]) {
     const path = `shared/${f}.js`;
     let src;
     try {
@@ -159,6 +162,109 @@ const CALLS = {
     "mixColor(2, 3)",
     "mixColor(5, 0)",
     `coinsFig([COIN_SET[0], COIN_SET[3], COIN_SET[1]])()`,
+  ],
+  tex: [
+    "math('x^2')",
+    "tex('x^2 + \\\\frac{1}{2}')",
+    "tex('y = mx + b', true)",
+    "tex('\\\\frac{1}{')",
+    "typeset('Factor \\\\(x^2 + 5x + 6\\\\) for $4.50, and \\\\[x &lt; 3\\\\] on its own line.')",
+    "typeset('no math here')",
+  ],
+  expr: [
+    /* each typed text: its tree, TeX, and plain text, or the message saying what's wrong */
+    ...[
+      "2x^2+3x-1",
+      "x²−4",
+      "(x+1)(x-2)",
+      "1/2x",
+      "-5x+3",
+      "3(x+-1)",
+      "√x+sqrt(x+1)",
+      "sin^2 x+cos x",
+      "|x-3|+abs(x)",
+      "2πr",
+      "e^x",
+      "X+1",
+      "[x+1]{2}",
+      "y = 2x+3",
+      "x ≤ 4",
+      "x>=-2",
+      "x**2÷3·2×1",
+      "0.25x+1x+0",
+      "x2",
+      "2 3",
+      "(x+1",
+      "x+1)",
+      "",
+      "x+*3",
+      "sqrt",
+      "x=1=2",
+      "x#2",
+    ].map(
+      (t) =>
+        `(() => { try { const e = Expr.parse(${JSON.stringify(t)}, ['x', 'y', 'r']); return [e, Expr.tex(e), Expr.text(e), Expr.tex(Expr.tidy(e))] } catch (error) { return error.message } })()`,
+    ),
+    "Expr.value(Expr.parse('x^2+3y'), {x: 2, y: -1})",
+    "Expr.value(Expr.parse('sqrt(x)'), {x: -4})",
+    "[...Expr.letters(Expr.parse('a+b*c+a'))]",
+    ...[
+      ["x^2+5x+6", "(x+2)(x+3)"],
+      ["x^2+5x+6", "(x+2)(x+2)"],
+      ["y=2x+3", "2x-y=-3"],
+      ["x>2", "2<x"],
+      ["x>2", "x<2"],
+      ["x<=2", "2>=x"],
+      ["x=3", "2x=6"],
+      ["x^2=9", "x=3"],
+      ["|x|", "x"],
+      ["x/x", "1"],
+      ["3x+2y", "2y+3x"],
+      ["sqrt(x)", "sqrt(-x)"],
+    ].map(([a, b]) => `Expr.same(${JSON.stringify(a)}, ${JSON.stringify(b)}, ['x', 'y'])`),
+    "Expr.terms(Expr.parse('(x+y)^2-x/2'))",
+    "Expr.terms(Expr.parse('2/x'))",
+    "Expr.poly('(x+1)^3', 'x')",
+    "Expr.poly('x+y', 'x')",
+    ...[
+      ["expanded", "x^2+5x+6"],
+      ["expanded", "x^2+2x+3x+6"],
+      ["expanded", "(x+2)(x+3)"],
+      ["expanded", "x*x+5x"],
+      ["expanded", "3+x+4"],
+      ["factored", "(x+2)(x+3)"],
+      ["factored", "x^2+5x+6"],
+      ["factored", "2(x^2-4)"],
+      ["factored", "(2x+4)(x+1)"],
+      ["factored", "x(x^2+x)"],
+      ["factored", "-(x+1)^2"],
+      ["factored", "(x-y)(x+y)"],
+      ["factored", "(x+1)(x^2+1)"],
+      ["factored", "y=x"],
+      ["simplified", "3x+4+2x"],
+      ["simplified", "2*3x"],
+      ["simplified", "2^3+x"],
+      ["simplified", "5x+4"],
+      ["slopeIntercept", "y=2x+3"],
+      ["slopeIntercept", "2x-y=-3"],
+      ["slopeIntercept", "y=2(x+1)"],
+      ["slopeIntercept", "y=x^2"],
+      ["standardForm", "2x+3y=6"],
+      ["standardForm", "y=2x+3"],
+      ["standardForm", "x+y+1=6"],
+    ].map(([form, t]) => `Expr.form.${form}(Expr.parse(${JSON.stringify(t)}, ['x', 'y']), ['x', 'y'])`),
+    ...["y=x+y", "x+1=y", "y=3", "y<3"].map(
+      (t) => `Expr.form.solvedFor('y')(Expr.parse(${JSON.stringify(t)}, ['x', 'y']))`,
+    ),
+    ...["(x+3)(x+2)", "x^2+5x+6", "(x+1)(x+6)", "(x+1)(x+5)", "(x+2", "t+1", "x=1"].map(
+      (t) =>
+        `Expr.judge(${JSON.stringify(t)}, {answer: '(x+2)(x+3)', vars: ['x'], form: Expr.form.factored, misc: [['(x+1)(x+6)', 'Adds to 7.']]})`,
+    ),
+    "Expr.judge('x+1', {answer: 'y=x+1', vars: ['x', 'y']})",
+    "Expr.judge('x+1', {answer: 'y>x+1', vars: ['x', 'y']})",
+    "Expr.judge('x+1', {answer: 'x+1'})",
+    "Expr.tex('x^2+-3x+0+1x')",
+    "Expr.text('x^2+-3x+1/2+sqrt(x+1)+2*3')",
   ],
   fracmath: [
     "frac(-6, -8)",

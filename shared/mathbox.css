@@ -1,0 +1,12 @@
+/* Styles for mathbox.js: the box for typing an expression, its row of math keys, and the line showing how the answer reads. */
+/* the box takes the row's free width, so long answers fit; the unit and the Check button wrap under it on a phone */
+.mbox{display:grid;gap:8px;flex:1 1 260px;min-width:0}
+.ans .mbox input{width:100%}
+.mbox-keys{display:flex;flex-wrap:wrap;gap:6px}
+.mbox-keys button{min-width:44px;min-height:40px;padding:4px 10px;border-radius:9px;border:1.5px solid rgba(170,205,255,.4);background:#0a2340;font:700 18px var(--mono)}
+.mbox-keys button:hover:not(:disabled){border-color:var(--gold)}
+.mbox-keys button:disabled{opacity:.4;cursor:default}
+/* how the answer reads, quietly under the box; what can't be read is in the miss color */
+.mbox-read{margin:0;min-height:1.7em;color:var(--dim);font-size:15px;overflow-x:auto;overflow-y:hidden}
+.mbox-read .katex{color:var(--chalk)}
+.mbox-read.err{color:var(--bad)}

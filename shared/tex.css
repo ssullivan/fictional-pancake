@@ -1,0 +1,9 @@
+/* Styles for tex.js: math typeset by KaTeX, sized and colored to sit in the site's text (KaTeX's own styles are in
+   vendor/katex/katex.min.css, which loads before this file). */
+/* KaTeX's text is 1.21em of its line by default; a touch smaller sits better beside Atkinson Hyperlegible */
+.katex{font-size:1.12em;color:inherit}
+/* math on a line of its own: centered, and scrolls sideways on a narrow phone instead of widening the page */
+.katex-display{margin:.6em 0;overflow-x:auto;overflow-y:hidden;padding:2px 0}
+/* TeX KaTeX couldn't read (tools/fuzz.mjs fails on it), and TeX shown as typed when KaTeX didn't load */
+.katex-error{color:var(--bad)!important}
+.tex-plain{font:500 .95em var(--mono);color:var(--cyan)}

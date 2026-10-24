@@ -41,6 +41,26 @@ function mcOf(list, extra = {}) {
 /* greatest common factor and least common multiple */
 const gcd = (a, b) => (b ? gcd(b, a % b) : a);
 const lcm = (a, b) => (a * b) / gcd(a, b);
+/* Exact fractions, for fracmath.js's pictures and expr.js's coefficients. A fraction is a pair [n, d] in lowest terms, with d > 0.
+   frac(n, d) is [n, d] in lowest terms (frac(3) is [3, 1]); fAdd, fSub, fMul, fDiv (a, b) are a + b, a − b, a × b, a ÷ b;
+   fVal(a) is its value as a number, fInv(a) its reciprocal, and isWhole(a) whether it's a whole number. */
+/* the sign goes on the numerator; dividing by the greatest common factor puts it in lowest terms */
+const frac = (n, d = 1) => {
+  if (d < 0) {
+    n = -n;
+    d = -d;
+  }
+  const g = gcd(Math.abs(n), d) || 1;
+  return [n / g, d / g];
+};
+/* a/b + c/d over the common denominator b × d (and likewise for −); × multiplies across; ÷ multiplies by the reciprocal */
+const fAdd = ([a, b], [c, d]) => frac(a * d + c * b, b * d);
+const fSub = ([a, b], [c, d]) => frac(a * d - c * b, b * d);
+const fMul = ([a, b], [c, d]) => frac(a * c, b * d);
+const fDiv = ([a, b], [c, d]) => frac(a * d, b * c);
+const fVal = ([n, d]) => n / d;
+const fInv = ([n, d]) => frac(d, n);
+const isWhole = (f) => f[1] === 1;
 /* n rounded to the nearest multiple of unit (halfway rounds up): roundTo(245, 10) is 250, roundTo(1340, 1000) is 1000 */
 const roundTo = (n, unit) => Math.floor(n / unit + 0.5) * unit;
 const $ = (id) => document.getElementById(id);

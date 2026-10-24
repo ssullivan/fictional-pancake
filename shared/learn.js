@@ -1,6 +1,8 @@
 /* Learn pages. A unit's Learn page (learn.html) lists its chapters, and each chapter is a page of its own (learn/<id>.html) with
    steps: one idea each, something to move, and a quick check (#s2 is step 2, #done the end of the chapter). Progress for the whole
-   unit is saved in localStorage. Needs util.js (and speak.js with readAloud). Styles are in learn.css.
+   unit is saved in localStorage. Needs util.js (and speak.js with readAloud; tex.js for math in the text; expr.js, tex.js, and
+   mathbox.js for expr checks). Styles are in learn.css. With tex.js loaded, chapter blurbs, step bodies, and everything in a quick
+   check have their math between \( \) and \[ \] typeset (step and chapter titles stay plain text).
 
    The unit is described once, in learn/chapters.js, which its Learn page and every chapter page load:
    const UNIT={
@@ -25,6 +27,8 @@
                                 keypad); neg: answers in this unit may be negative (the full keyboard, which has a minus sign);
                                 tol: how close a typed number must be (default 0.011; 0.0005 for thousandths)
              | {kind: 'mc', q, answer, choices: [{id, label}], why: {id: message}, explain, fig?, stack?}
+             | {kind: 'expr', q, answer, vars, form?, misc?, keys?, placeholder?, unit?, explain, fig?}   typed in a MathBox and
+                                judged by Expr.judge, as in a game's expr problem (engine.js)
    }]
    Next unlocks once a step's quick check is answered (steps without a check unlock right away). */
 const Learn = (() => {
@@ -44,10 +48,12 @@ const Learn = (() => {
   /* ---------- quick checks ---------- */
   /* is a typed number close enough to the answer (within tol; thousandths need a smaller one)? */
   const near = (a, b, tol = 0.011) => Math.abs(a - b) < tol;
+  /* html with its math typeset, when the page loads tex.js; otherwise as it is */
+  const show = (html) => (typeof typeset === "function" ? typeset(html) : html);
   /* Draws a quick check (see check? in the header) into el; onDone runs once it's answered, right or out of tries.
      Like a game problem: two tries (one with only two choices), and a wrong answer shows its named mistake. */
   function renderCheck(el, check, onDone) {
-    el.innerHTML = `<section class="check" aria-label="Quick check"><p class="eyebrow">Quick check</p><p class="cq">${check.q}</p>${check.fig ? `<div class="fig">${check.fig}</div>` : ""}<div data-a></div><div data-fb role="status" aria-live="polite"></div></section>`;
+    el.innerHTML = `<section class="check" aria-label="Quick check"><p class="eyebrow">Quick check</p><p class="cq">${show(check.q)}</p>${check.fig ? `<div class="fig">${show(check.fig)}</div>` : ""}<div data-a></div><div data-fb role="status" aria-live="polite"></div></section>`;
     const q = Q(el),
       answerBox = q("a"),
       feedback = q("fb");
@@ -65,13 +71,22 @@ const Learn = (() => {
         : check.neg
           ? 'inputmode="text" placeholder="like −3"'
           : 'inputmode="decimal" placeholder="?"';
-      answerBox.innerHTML = `<form class="ans" autocomplete="off"><label class="sr" for="cin">Your answer</label><input id="cin" ${keyboard}><span class="unit">${check.unit || ""}</span><button class="btn">Check</button></form>`;
+      answerBox.innerHTML = `<form class="ans" autocomplete="off"><label class="sr" for="cin">Your answer</label><input id="cin" ${keyboard}><span class="unit">${show(check.unit || "")}</span><button class="btn">Check</button></form>`;
+      answerBox.querySelector("form").addEventListener("submit", (e) => {
+        e.preventDefault();
+        submit($("cin").value);
+      });
+    } else if (check.kind === "expr") {
+      const box = MathBox.html({ id: "cin", vars: check.vars, keys: check.keys, placeholder: check.placeholder }),
+        unit = check.unit ? `<span class="unit">${show(check.unit)}</span>` : "";
+      answerBox.innerHTML = `<form class="ans" autocomplete="off">${box}${unit}<button class="btn">Check</button></form>`;
+      MathBox.wire(answerBox);
       answerBox.querySelector("form").addEventListener("submit", (e) => {
         e.preventDefault();
         submit($("cin").value);
       });
     } else {
-      answerBox.innerHTML = `<div class="choices${check.stack ? " stack" : ""}">${check.choices.map((c) => `<button type="button" class="choice" data-c="${c.id}">${c.label}</button>`).join("")}</div>`;
+      answerBox.innerHTML = `<div class="choices${check.stack ? " stack" : ""}">${check.choices.map((c) => `<button type="button" class="choice" data-c="${c.id}">${show(c.label)}</button>`).join("")}</div>`;
       answerBox.querySelectorAll(".choice").forEach((b) =>
         b.addEventListener("click", () => {
           if (!done && !b.disabled) submit(b.dataset.c);
@@ -100,6 +115,19 @@ const Learn = (() => {
           const mistake = (check.misc || []).find(([wrong]) => near(n, wrong, check.tol));
           msg = mistake ? mistake[1] : "Not quite. Look at the picture again.";
         }
+      } else if (check.kind === "expr") {
+        /* an answer that can't be read, or is equal but not in the asked form, gets a note and keeps its try */
+        const judged = Expr.judge(value, check);
+        if (judged.verdict === "unread" || judged.verdict === "form") {
+          const note =
+            judged.verdict === "form"
+              ? "<p>That’s equal to the answer, but not written the way the question asks.</p>"
+              : "";
+          feedback.innerHTML = `<div class="fb info">${note}<p>${show(judged.message)}</p></div>`;
+          return;
+        }
+        ok = judged.verdict === "right";
+        if (!ok) msg = judged.message || "Not quite. Look at it again.";
       } else {
         ok = value === check.answer;
         if (!ok) msg = check.why[value] || "Not quite.";
@@ -113,7 +141,7 @@ const Learn = (() => {
       /* with only two choices, a second try would give the answer away */
       const maxTries = check.kind === "mc" && check.choices.length === 2 ? 1 : 2;
       if (tries < maxTries) {
-        feedback.innerHTML = `<div class="fb bad"><h4>Not yet</h4><p>${msg}</p><p>Try once more.</p></div>`;
+        feedback.innerHTML = `<div class="fb bad"><h4>Not yet</h4><p>${show(msg)}</p><p>Try once more.</p></div>`;
         const input = $("cin");
         if (input) input.select();
         return;
@@ -126,7 +154,7 @@ const Learn = (() => {
       done = true;
       answerBox.querySelectorAll("button").forEach((b) => (b.disabled = true));
       answerBox.querySelectorAll("input").forEach((i) => (i.readOnly = true));
-      feedback.innerHTML = `<div class="fb ${ok ? "good" : "bad"}"><h4>${title}</h4>${msg ? `<p>${msg}</p>` : ""}<p class="work">${check.explain}</p></div>`;
+      feedback.innerHTML = `<div class="fb ${ok ? "good" : "bad"}"><h4>${title}</h4>${msg ? `<p>${show(msg)}</p>` : ""}<p class="work">${show(check.explain)}</p></div>`;
       onDone();
     }
   }
@@ -173,7 +201,7 @@ const Learn = (() => {
           finished = stepsDone === ch.steps;
         const progress = finished ? "✓ Done" : `${stepsDone}/${ch.steps} steps`,
           go = stepsDone ? (finished ? "Review →" : "Continue →") : "Start →";
-        return `<a class="zone" href="learn/${ch.id}.html#s${firstUnfinished < 0 ? 1 : firstUnfinished + 1}"><svg class="icon" viewBox="0 0 64 64" aria-hidden="true">${cfg.icons[ch.icon]}</svg><p class="eyebrow">Chapter ${chapterIndex + 1} · ${ch.lessons}</p><h3>${ch.title}</h3><p>${ch.blurb}</p><span class="meta"><span class="prog${finished ? " full" : ""}">${progress}</span><span class="go">${go}</span></span></a>`;
+        return `<a class="zone" href="learn/${ch.id}.html#s${firstUnfinished < 0 ? 1 : firstUnfinished + 1}"><svg class="icon" viewBox="0 0 64 64" aria-hidden="true">${cfg.icons[ch.icon]}</svg><p class="eyebrow">Chapter ${chapterIndex + 1} · ${ch.lessons}</p><h3>${ch.title}</h3><p>${show(ch.blurb)}</p><span class="meta"><span class="prog${finished ? " full" : ""}">${progress}</span><span class="go">${go}</span></span></a>`;
       })
       .join("");
   }
@@ -206,7 +234,7 @@ const Learn = (() => {
     dots(stepIndex);
     $("snum").textContent = `Step ${stepIndex + 1} of ${steps.length} · ${ch.lessons}`;
     $("stitle").textContent = step.title;
-    $("sbody").innerHTML = step.body;
+    $("sbody").innerHTML = show(step.body);
     if (canSpeak()) $("sbody").prepend(sayBtn("Read to me", () => [$("stitle"), ...$("sbody").querySelectorAll("p")]));
     /* a fresh, empty #widget each step, so listeners a widget added to it don't outlive its step */
     const old = $("widget"),

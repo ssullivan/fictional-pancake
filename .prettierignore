@@ -8,3 +8,4 @@ node_modules/
 tools/.cache/
 test-results/
 playwright-report/
+shared/vendor/

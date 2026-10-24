@@ -1,10 +1,10 @@
-// Every station of every game, played to the end with real typing, clicks, and taps, answering each problem right,
-// with no problem dealt twice in the round.
+// Every station of every game (and the test pages' games in tests/pages), played to the end with real typing, clicks, and taps,
+// answering each problem right, with no problem dealt twice in the round.
 const { test, expect } = require("./fixtures");
 const { globSync, readFileSync } = require("node:fs");
 const { dirname } = require("node:path");
 
-const games = globSync("grade*/unit*/stations.js", { cwd: `${__dirname}/..` })
+const games = globSync(["grade*/unit*/stations.js", "tests/pages/*/stations.js"], { cwd: `${__dirname}/..` })
   .map(dirname)
   .sort();
 for (const game of games) {
@@ -31,7 +31,7 @@ for (const game of games) {
         });
         expect(seen.has(p.key), `problem ${i + 1} repeats an earlier one: ${p.key.slice(0, 120)}`).toBe(false);
         seen.add(p.key);
-        if (p.kind === "num") {
+        if (p.kind === "num" || p.kind === "expr") {
           await page.locator("#inp").fill(String(p.answer));
           await page.locator("#inp").press("Enter");
         } else if (p.kind === "pair") {

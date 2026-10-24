@@ -1,6 +1,7 @@
 /* Game engine shared by every game: a home screen of stations (zones), rounds of 8 problems (10 for the boss, never the same
    one twice in a round), 10 points for a first-try answer and 5 after a miss or a hint, stars saved in localStorage.
-   Needs util.js (and speak.js with readAloud). Screens and ids are in the page's HTML (#home, #play, #done); styles are in game.css.
+   Needs util.js (and speak.js with readAloud; tex.js for math in the text; expr.js, tex.js, and mathbox.js for expr problems).
+   Screens and ids are in the page's HTML (#home, #play, #done); styles are in game.css.
 
    Game.init({
      saveKey: 'g6u3-save',          localStorage key; unique across the whole site
@@ -32,7 +33,14 @@
            pmisc must match exactly (no equivalent ratios)
      mc:   answer: choice id, choices: [{id, label}], why?: {choice id: message}, stack?: one choice per row
      tap:  answer: id of the right .cand element in the figure (data-id), why?: {id: message}
+     expr: an expression, equation, or inequality typed in a MathBox (mathbox.js) and judged by Expr.judge (expr.js):
+           answer: its text ('x^2+5x+6', 'y=2x+3'), vars: the letters it may use (['x']), form?: how it must be written
+           (Expr.form.factored, or a unit's own (tree, vars) => message | null), misc?: [[wrong text, message]] matched by being
+           equal (so (x+6)(x+1) matches x^2+7x+6), keys?: the box's keys, placeholder?, unit?. An answer that can't be read, has a
+           letter the problem doesn't, or is equal but not in the asked form gets a note and doesn't use a try.
    A 2-choice mc problem gets one try; everything else gets two.
+   With tex.js loaded, every string shown (zone names and blurbs, prompt, figure, choices, hint, unit, messages, explain) has its
+   math between \( \) and \[ \] typeset; without it they're shown as they are.
    Links can start a station directly: index.html#<zone id>.
 
    Also: Game.state (the round in progress), Game.stars(zoneId) (best stars so far), and
@@ -49,6 +57,8 @@ const Game = (() => {
     round = null;
   /* is a typed number x close enough to y? */
   const near = (x, y) => (cfg.near || ((a, b) => Math.abs(a - b) < 0.011))(x, y);
+  /* html with its math typeset, when the page loads tex.js; otherwise as it is */
+  const show = (html) => (typeof typeset === "function" ? typeset(html) : html);
   /* is u : v the same ratio as x : y (both positive)? Compared by cross-multiplying, so no dividing by zero */
   const sameRatio = (u, v, x, y) => u > 0 && v > 0 && near(u * y, v * x);
   /* do typed numbers u, v match the pair x, y? A point's coordinates must match exactly; otherwise the same ratio counts */
@@ -84,8 +94,8 @@ const Game = (() => {
     <button class="zone ${zone.id === "boss" ? "boss" : ""}" data-z="${zone.id}" type="button">
       <svg class="icon" viewBox="0 0 64 64" aria-hidden="true">${cfg.icons[zone.id]}</svg>
       <p class="eyebrow">${zone.lessons}</p>
-      <h3>${zone.name}</h3>
-      <p>${zone.blurb}</p>${cfg.zoneNote ? cfg.zoneNote(zone) : ""}
+      <h3>${show(zone.name)}</h3>
+      <p>${show(zone.blurb)}</p>${cfg.zoneNote ? cfg.zoneNote(zone) : ""}
       <span class="meta"><span class="stars" aria-label="${stars} of 3 stars">${starRow(stars)}</span><span class="go">Play →</span></span>
     </button>`;
       })
@@ -130,7 +140,7 @@ const Game = (() => {
     fig.hidden = !problem.fig;
     if (!problem.fig) return;
     const reveal = round.hinted || round.done;
-    fig.innerHTML = cfg.figure ? cfg.figure(problem, reveal) : problem.fig(reveal, round.done);
+    fig.innerHTML = show(cfg.figure ? cfg.figure(problem, reveal) : problem.fig(reveal, round.done));
     Object.entries(round.marks).forEach(([id, cls]) => {
       const el = fig.querySelector(`.cand[data-id="${id}"]`);
       if (el) el.classList.add(cls);
@@ -140,7 +150,8 @@ const Game = (() => {
     $("streak").innerHTML = `Streak <b>${round.streak}</b>`;
     $("streak").classList.toggle("hot", round.streak >= 3);
   }
-  /* the answer area for a problem: number boxes and Check (num, pair), choice buttons (mc), or a note to tap the picture (tap) */
+  /* the answer area for a problem: number boxes and Check (num, pair), a MathBox and Check (expr), choice buttons (mc), or a note
+     to tap the picture (tap) */
   function answerHtml(problem) {
     const hintBtn = problem.hint ? `<button type="button" class="link-btn" id="hintBtn">Show me a hint</button>` : "";
     if (problem.kind === "num") {
@@ -151,8 +162,13 @@ const Game = (() => {
         : problem.neg
           ? 'inputmode="text" placeholder="like −3"'
           : 'inputmode="decimal" placeholder="?"';
-      const fields = `<label for="inp" class="sr">Your answer</label><input id="inp" ${keyboard}><span class="unit">${problem.unit}</span>`;
+      const fields = `<label for="inp" class="sr">Your answer</label><input id="inp" ${keyboard}><span class="unit">${show(problem.unit)}</span>`;
       return `<form class="ans" id="af" autocomplete="off">${fields}<button class="btn" id="checkBtn">Check</button></form><div class="tools" style="margin-top:12px">${hintBtn}</div>`;
+    }
+    if (problem.kind === "expr") {
+      const box = MathBox.html({ id: "inp", vars: problem.vars, keys: problem.keys, placeholder: problem.placeholder }),
+        unit = problem.unit ? `<span class="unit">${show(problem.unit)}</span>` : "";
+      return `<form class="ans" id="af" autocomplete="off">${box}${unit}<button class="btn" id="checkBtn">Check</button></form><div class="tools" style="margin-top:12px">${hintBtn}</div>`;
     }
     if (problem.kind === "pair" && problem.point) {
       /* ( x , y ), with the full keyboard for a minus sign */
@@ -173,7 +189,7 @@ const Game = (() => {
     }
     if (problem.kind === "mc") {
       const buttons = problem.choices
-        .map((c) => `<button type="button" class="choice" data-c="${c.id}">${c.label}</button>`)
+        .map((c) => `<button type="button" class="choice" data-c="${c.id}">${show(c.label)}</button>`)
         .join("");
       return `<div class="choices${problem.stack ? " stack" : ""}">${buttons}</div><div class="tools" style="margin-top:12px">${hintBtn}</div>`;
     }
@@ -182,7 +198,7 @@ const Game = (() => {
   function renderProblem() {
     const problem = round.p;
     $("qnum").textContent = `Problem ${round.i + 1} of ${round.n}`;
-    $("prompt").innerHTML = problem.prompt;
+    $("prompt").innerHTML = show(problem.prompt);
     $("prog").style.width = (round.i / round.n) * 100 + "%";
     $("pts").textContent = round.pts;
     setStreak();
@@ -190,12 +206,13 @@ const Game = (() => {
     $("feedback").innerHTML = "";
     drawFig();
     $("answer").innerHTML = answerHtml(problem);
-    if (problem.kind === "num" || problem.kind === "pair") {
+    if (problem.kind === "num" || problem.kind === "pair" || problem.kind === "expr") {
+      if (problem.kind === "expr") MathBox.wire($("answer"));
       /* Enter checks the answer, or goes on once the problem is over */
       $("af").addEventListener("submit", (e) => {
         e.preventDefault();
         if (round.done) return advance();
-        submit(problem.kind === "num" ? $("inp").value : [$("inp").value, $("inp2").value]);
+        submit(problem.kind === "pair" ? [$("inp").value, $("inp2").value] : $("inp").value);
       });
       /* focus the first box for a mouse and keyboard (not on a phone, where it would pop up the keyboard),
          unless the player is already in one */
@@ -221,7 +238,7 @@ const Game = (() => {
     if (round.hinted) return;
     round.hinted = true;
     drawFig();
-    $("hint").innerHTML = round.p.hint;
+    $("hint").innerHTML = show(round.p.hint);
     $("hint").hidden = false;
     const hintBtn = $("hintBtn");
     if (hintBtn) hintBtn.disabled = true;
@@ -238,8 +255,9 @@ const Game = (() => {
       if (verdict === "no") b.disabled = true;
     }
   }
-  /* Checks an answer: a typed string (num), two typed strings (pair), or a choice or .cand id (mc, tap). A right answer ends the
-     problem. A wrong one shows its named mistake (misc, pmisc, why) and allows another try, or ends the problem when out of tries. */
+  /* Checks an answer: a typed string (num, expr), two typed strings (pair), or a choice or .cand id (mc, tap). A right answer ends
+     the problem. A wrong one shows its named mistake (misc, pmisc, why) and allows another try, or ends the problem when out of
+     tries. */
   function submit(value) {
     if (round.done) return;
     const problem = round.p;
@@ -255,6 +273,19 @@ const Game = (() => {
         const mistake = (problem.misc || []).find(([wrong]) => near(n, wrong));
         msg = mistake ? mistake[1] : cfg.words.miss;
       }
+    } else if (problem.kind === "expr") {
+      /* an answer that can't be read, or is equal but not in the asked form, gets a note and keeps its try */
+      const judged = Expr.judge(value, problem);
+      if (judged.verdict === "unread" || judged.verdict === "form") {
+        const note =
+          judged.verdict === "form"
+            ? "<p>That’s equal to the answer, but not written the way the problem asks.</p>"
+            : "";
+        $("feedback").innerHTML = `<div class="fb info">${note}<p>${show(judged.message)}</p></div>`;
+        return;
+      }
+      ok = judged.verdict === "right";
+      if (!ok) msg = judged.message || cfg.words.miss;
     } else if (problem.kind === "pair") {
       const [u, v] = value.map(parseNum);
       if (isNaN(u) || isNaN(v)) {
@@ -288,7 +319,7 @@ const Game = (() => {
     if (cfg.onMiss && cfg.onMiss(msg)) return;
     if (round.tries < maxTries) {
       $("feedback").innerHTML =
-        `<div class="fb bad"><h4>Not yet</h4><p>${msg}</p><p>Try once more${round.hinted || !problem.hint ? "" : ", or tap <b>Show me a hint</b>"}.</p></div>`;
+        `<div class="fb bad"><h4>Not yet</h4><p>${show(msg)}</p><p>Try once more${round.hinted || !problem.hint ? "" : ", or tap <b>Show me a hint</b>"}.</p></div>`;
       const input = $("inp");
       if (input) input.select();
       return;
@@ -311,7 +342,7 @@ const Game = (() => {
       .forEach((i) => (i.readOnly = true));
     const last = round.i + 1 >= round.n;
     $("feedback").innerHTML =
-      `<div class="fb ${ok ? "good" : "bad"}"><h4>${title}</h4>${msg ? `<p>${msg}</p>` : ""}<p class="work">${round.p.explain}</p><button type="button" class="btn" id="nextBtn">${last ? "See results" : "Next problem →"}</button></div>`;
+      `<div class="fb ${ok ? "good" : "bad"}"><h4>${title}</h4>${msg ? `<p>${show(msg)}</p>` : ""}<p class="work">${show(round.p.explain)}</p><button type="button" class="btn" id="nextBtn">${last ? "See results" : "Next problem →"}</button></div>`;
     $("nextBtn").addEventListener("click", advance);
     $("nextBtn").focus({ preventScroll: true });
     $("feedback").scrollIntoView({ behavior: "smooth", block: "nearest" });

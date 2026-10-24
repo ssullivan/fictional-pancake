@@ -1,12 +1,16 @@
 // Deals thousands of problems from every station of every game and checks each one.
 //
-//   node tools/fuzz.mjs                 every game (grade*/unit*/stations.js)
+//   node tools/fuzz.mjs                 every game (grade*/unit*/stations.js, and the test pages' tests/pages/*/stations.js)
 //   node tools/fuzz.mjs grade6/unit3    one game
 //   N=20000 node tools/fuzz.mjs         more problems per station (default 5000)
 //
 // Each game's stations.js is loaded the way its index.html loads it: the shared scripts it lists
 // (except engine.js, which needs a page) and then stations.js, all in one context like browser scripts.
-// Every problem gets the checks below. A game adds its own limits in checks.js next to stations.js:
+// Every problem gets the checks below, including its math: each \( … \) closes, KaTeX (shared/tex.js, which the page must load)
+// can draw it, and no TeX command lost its backslash ("\frac" in a plain string is a form feed and "rac"). An expr problem's
+// answer and named mistakes are read with shared/expr.js (which the page must load, with mathbox.js): the answer is written the
+// way its form asks and uses only its letters, and no named mistake is equal to it.
+// A game adds its own limits in checks.js next to stations.js:
 //   module.exports = {
 //     limits: {zoneId: {dp, nz, max}},   most decimal places, most nonzero digits, largest value, for the
 //                                        answer and every number in the prompt (the boss gets the widest)
@@ -24,11 +28,11 @@ const ROOT = resolve(import.meta.dirname, "..");
 const N = +process.env.N || 5000;
 const games = process.argv.slice(2).length
   ? process.argv.slice(2)
-  : globSync("grade*/unit*/stations.js", { cwd: ROOT }).map(dirname).sort();
+  : globSync(["grade*/unit*/stations.js", "tests/pages/*/stations.js"], { cwd: ROOT }).map(dirname).sort();
 
 // the text a student sees must never show a broken value
 const BROKEN = /NaN|undefined|Infinity|\[object |\bnull\b/;
-const KINDS = ["num", "pair", "mc", "tap"];
+const KINDS = ["num", "pair", "mc", "tap", "expr"];
 
 function load(game, stars) {
   const html = readFileSync(join(ROOT, game, "index.html"), "utf8");
@@ -39,7 +43,12 @@ function load(game, stars) {
   const ctx = vm.createContext({ console, Game: { stars: () => stars } });
   for (const src of srcs)
     vm.runInContext(readFileSync(join(ROOT, game, src), "utf8"), ctx, { filename: join(game, src) });
-  return vm.runInContext('({zones: ZONES, icons: ICON, problemKey, fmt: typeof fmt === "function" ? fmt : null})', ctx);
+  const loaded = vm.runInContext(
+    `({zones: ZONES, icons: ICON, problemKey, fmt: typeof fmt === "function" ? fmt : null,
+      typeset: typeof typeset === "function" ? typeset : null, Expr: typeof Expr === "object" ? Expr : null})`,
+    ctx,
+  );
+  return { ...loaded, hasMathBox: srcs.some((s) => s.endsWith("/mathbox.js")) };
 }
 
 // every string a student can see for this problem, labelled
@@ -81,7 +90,52 @@ const mistakes = (list, isAnswer) =>
           .slice(0, 60)}" gives the right answer ${JSON.stringify(v)}`,
     );
 
-function check(p, close = near) {
+// The math in a problem's text: every \( and \[ closes, no TeX command lost its backslash to a JavaScript escape (\f, \t, \b,
+// \v, \r), the page loads tex.js when there's math, and KaTeX can draw it all.
+function mathProblems(name, t, page) {
+  const bad = [];
+  if (/[\f\t\b\v\r]/.test(t))
+    bad.push(`${name} has a control character: a TeX command lost its backslash (write \\\\frac)`);
+  const unclosed = t.replace(/\\\([^]*?\\\)|\\\[[^]*?\\\]/g, "");
+  if (/\\[()[\]]/.test(unclosed)) bad.push(`${name} has a \\( or \\[ that doesn't close: ${t.slice(0, 120)}`);
+  if (!/\\[([]/.test(t)) return bad;
+  if (!page.typeset) bad.push(`${name} has math, but the page doesn't load shared/tex.js`);
+  else if (page.typeset(t).includes("katex-error")) bad.push(`${name} has TeX KaTeX can't draw: ${t.slice(0, 160)}`);
+  return bad;
+}
+// An expr problem: its answer reads and is written as its form asks, it and its named mistakes use only its letters, and no
+// named mistake is equal to the answer.
+function exprProblems(p, page) {
+  if (!page.Expr || !page.hasMathBox)
+    return ["expr problem, but the page doesn't load shared/expr.js and shared/mathbox.js"];
+  const { Expr } = page,
+    vars = p.vars || [],
+    bad = [];
+  if (!Array.isArray(p.vars)) bad.push("expr problem has no vars");
+  let answer;
+  try {
+    answer = Expr.parse(p.answer, vars);
+  } catch (e) {
+    return [`answer ${JSON.stringify(p.answer)} can't be read: ${e.message}`];
+  }
+  const strays = (tree) => [...Expr.letters(tree)].filter((name) => !vars.includes(name));
+  if (strays(answer).length) bad.push(`answer ${p.answer} uses ${strays(answer)}, which isn't in vars`);
+  const formMessage = p.form && p.form(answer, vars);
+  if (formMessage) bad.push(`answer ${p.answer} isn't written as its form asks: ${formMessage}`);
+  (p.misc || []).forEach(([text, message], i) => {
+    let wrong;
+    try {
+      wrong = Expr.parse(text, vars);
+    } catch (e) {
+      return bad.push(`misc[${i}] ${JSON.stringify(text)} can't be read: ${e.message}`);
+    }
+    if (strays(wrong).length) bad.push(`misc[${i}] ${text} uses ${strays(wrong)}, which isn't in vars`);
+    if (Expr.same(wrong, answer, vars)) bad.push(...mistakes([[text, message]], () => true));
+  });
+  return bad;
+}
+
+function check(p, close = near, page = {}) {
   const bad = [];
   if (!p || typeof p !== "object") return ["gen() did not return a problem"];
   if (!KINDS.includes(p.kind)) bad.push(`unknown kind ${p.kind}`);
@@ -92,7 +146,9 @@ function check(p, close = near) {
     }
     if (BROKEN.test(t.replace(/<[^>]*>/g, " ").replace(/data-[a-z]+="[^"]*"/g, "")))
       bad.push(`${name} shows a broken value: ${t.slice(0, 160)}`);
+    bad.push(...mathProblems(name, t, page));
   }
+  if (p.kind === "expr") bad.push(...exprProblems(p, page));
   if (p.kind === "num") {
     if (!Number.isFinite(p.answer)) bad.push(`answer is ${p.answer}`);
     (p.misc || []).forEach(([v], i) => {
@@ -133,6 +189,8 @@ function withinLimits(p, lim, signed) {
   const bad = [],
     nums = [...p.prompt.replace(/<[^>]*>/g, " ").matchAll(/\d[\d,]*(?:\.\d+)?/g)].map((m) => +m[0].replace(/,/g, ""));
   const answers = p.kind === "num" ? [p.answer] : p.kind === "pair" ? p.answer : [];
+  /* an expr answer's numbers are held to the same limits as the prompt's */
+  if (p.kind === "expr") nums.push(...[...String(p.answer).matchAll(/\d+(?:\.\d+)?/g)].map((m) => +m[0]));
   if (!signed) for (const a of answers) if (!(a > 0)) bad.push(`answer ${a} is not positive`);
   for (const [what, v] of [...answers.map((a) => ["answer", a]), ...nums.map((n) => ["prompt number", n])]) {
     if (dp(v) > lim.dp) bad.push(`${what} ${v} has more than ${lim.dp} decimal places`);
@@ -151,7 +209,8 @@ for (const game of games) {
     failures++;
   }
   for (const stars of [0, 3]) {
-    const { zones, icons, problemKey } = load(game, stars);
+    const page = load(game, stars),
+      { zones, icons, problemKey } = page;
     for (const z of zones) {
       if (stars === 0 && !icons[z.id]) {
         console.log(`FAIL ${game} ${z.id}: no icon`);
@@ -177,7 +236,7 @@ for (const game of games) {
         let p, bad;
         try {
           p = z.gen();
-          bad = check(p, extra.near);
+          bad = check(p, extra.near, page);
           different.add(problemKey(p));
           if (!bad.length && lim) bad = withinLimits(p, lim, extra.signed);
           if (!bad.length && extra.check) bad = extra.check(p, z.id);
