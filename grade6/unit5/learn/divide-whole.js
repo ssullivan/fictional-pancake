@@ -21,11 +21,18 @@ function wChunks(el) {
   const draw = () => {
     const [N, d, chunks] = CHUNKS[problemIndex];
     press(el, problemIndex);
+    /* digits: the dividend's width; indent and minus line each number's ones up under the dividend's ones */
+    const digits = String(N).length,
+      indent = " ".repeat(String(d).length + 3),
+      minus = " ".repeat(String(d).length + 1) + "− ";
     let rest = N;
-    const lines = [`${d} ) ${N}`];
+    const lines = [`${d} )<span class="ldv"> ${N}</span>`];
     chunks.slice(0, taken).forEach((chunk) => {
       rest -= chunk * d;
-      lines.push(`  − ${chunk * d}   <span class="rev">${chunk} × ${d}</span>`, `    ${rest}`);
+      lines.push(
+        `${minus}${String(chunk * d).padStart(digits)}   <span class="rev">${chunk} × ${d}</span>`,
+        `${indent}${String(rest).padStart(digits)}`,
+      );
     });
     q("f").innerHTML =
       `<pre class="vert" role="img" aria-label="Partial quotients for ${N} divided by ${d}">${lines.join("\n")}</pre>`;

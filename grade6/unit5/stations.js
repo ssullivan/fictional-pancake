@@ -161,7 +161,7 @@ function pqFig(dividend, d, chunks) {
       indent = " ".repeat(divisor.length + 3),
       minus = " ".repeat(divisor.length + 1) + "− ";
     let rest = dividend;
-    const lines = [`${divisor} ) ${dividend}`];
+    const lines = [`${divisor} )<span class="ldv"> ${dividend}</span>`];
     const shown = done ? chunks.length : show ? 1 : 0;
     for (let i = 0; i < shown; i++) {
       const chunk = chunks[i],

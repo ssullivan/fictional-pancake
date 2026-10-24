@@ -32,3 +32,7 @@ table.rt td+td{border-left:2px solid rgba(243,246,251,.5)}
 table.rt td.note{border:0;color:var(--cyan);font-size:15px;text-align:left;padding-left:12px;white-space:nowrap}
 table.rt tr.rev td:not(.note){color:var(--cyan)}
 table.rt .q{display:inline-block;min-width:1.8em;background:var(--gold);color:#1a1300;border-radius:6px;padding:0 6px}
+/* long division written as text, "12 )<span class="ldv"> 156</span>": the bar over the dividend, reaching back to the top of
+   the ")" (the negative margin and the padding cancel, so the columns below stay lined up); line-height 1 brings the bar down
+   to just above the digits */
+.ldv{display:inline-block;line-height:1;border-top:2.5px solid currentColor;margin-left:-.45em;padding-left:.45em;padding-right:.15em}
