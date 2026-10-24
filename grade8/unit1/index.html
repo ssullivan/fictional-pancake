@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sprite Studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=JetBrains+Mono:wght@500;700&display=swap">
+<link rel="stylesheet" href="../../shared/theme.css?v=c2e276bb">
+<link rel="stylesheet" href="../../shared/game.css?v=57b7d039">
+<link rel="stylesheet" href="../../shared/vendor/katex/katex.min.css?v=71eb1cd3">
+<link rel="stylesheet" href="../../shared/tex.css?v=c22216b1">
+<link rel="stylesheet" href="../../shared/figures.css?v=20dca2b0">
+<link rel="stylesheet" href="../../shared/pictures.css?v=7f680159">
+<link rel="stylesheet" href="../../shared/angles.css?v=c6f008f2">
+<link rel="stylesheet" href="figs.css?v=ed5c909a">
+</head>
+<body>
+
+<div class="app">
+  <section id="home">
+    <a class="back" href="../">← Grade 8</a>
+    <header class="hero">
+      <p class="eyebrow">Illustrative Mathematics · Grade 8 · Unit 1 · Rigid Transformations and Congruence</p>
+      <h1>Sprite <span>Studio</span></h1>
+      <p class="lede">You’re building a video game, and every sprite has to move just right. Slide, turn, and flip shapes on grids and coordinate planes, describe moves with rules, check what stays the same, spot congruent shapes, and find angles along parallel lines and inside triangles. Each station matches lessons from class. <a href="learn.html">New to this? Learn it first →</a></p>
+      <div class="stats">
+        <span class="pill">Points <b id="hp">0</b></span>
+        <span class="pill">Stars <b id="hs">0</b>/<span id="hsMax">27</span></span>
+      </div>
+    </header>
+    <div class="zones" id="zones"></div>
+    <section class="grownups">
+      <h2>For grown-ups</h2>
+      <div><h4>How a round works</h4><p>Each station deals 8 fresh problems (Launch Day deals 10). A right answer on the first try earns 10 points. After a wrong answer, the game names the likely mistake and gives one more try for 5 points. A question with only two choices (is it congruent?) gets one try.</p></div>
+      <div><h4>The "Show me" hint</h4><p>Hints say how to check a move one corner at a time (count the squares, turn the segment from the center, measure the distance to the mirror line), give the coordinate rule, and name the angle pair that makes two angles equal or add to 180°. After each problem the picture shows the move itself: the arrow, the center of rotation, or the line of reflection.</p></div>
+      <div><h4>Numbers you can do in your head</h4><p>Shapes sit on a grid with whole-number corners between −7 and 7, translations are whole squares, rotations are quarter and half turns around a grid point, and reflections are over the axes or a grid line. Angles are multiples of 5 degrees, so the challenge is the geometry, not the arithmetic.</p></div>
+      <div><h4>Mistakes it catches</h4><p>Turning the wrong way, mixing up the x-axis and the y-axis, swapping the across and up-and-down moves, sliding a shape across a mirror line instead of flipping it, doing two moves in the wrong order, calling a scaled or stretched copy congruent, matching the wrong corners of congruent polygons, taking supplementary angles for equal ones (and the other way round), and adding a triangle’s angles to 360°.</p></div>
+      <div><h4>Not covered</h4><p>Lesson 17 (Rotate and Tessellate) is a design project where students make their own tessellations, so it works better in class than as scored problems.</p></div>
+    </section>
+  </section>
+
+  <section id="play" hidden>
+    <div class="bar">
+      <button id="quit" class="ghost-btn" type="button">← Stations</button>
+      <div class="bar-mid"><div class="zn" id="zname"></div><div class="track"><div id="prog"></div></div></div>
+      <div class="bar-stats"><span class="pill" id="streak">Streak <b>0</b></span><span class="pill">Pts <b id="pts">0</b></span></div>
+    </div>
+    <article class="card">
+      <p class="eyebrow" id="qnum"></p>
+      <h2 id="prompt"></h2>
+      <div class="fig" id="fig"></div>
+      <div id="answer"></div>
+      <div id="hint" class="hintbox" hidden></div>
+      <div id="feedback" role="status" aria-live="polite"></div>
+    </article>
+  </section>
+
+  <section id="done" hidden>
+    <div class="card done">
+      <p class="eyebrow" id="dzone"></p>
+      <div class="bigstars stars" id="dstars"></div>
+      <h2 id="dtitle"></h2>
+      <p id="dmsg"></p>
+      <div class="row">
+        <button class="btn" id="again" type="button">Play again</button>
+        <button class="ghost-btn" id="tomap" type="button">Back to stations</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script src="../../shared/util.js?v=2703eecd"></script>
+<script src="../../shared/vendor/katex/katex.min.js?v=f5a2b1a7"></script>
+<script src="../../shared/tex.js?v=68a1669c"></script>
+<script src="../../shared/figures.js?v=d2337c45"></script>
+<script src="../../shared/angles.js?v=40488584"></script>
+<script src="figs.js?v=ce1ec44c"></script>
+<script src="../../shared/engine.js?v=508de74b"></script>
+<script src="stations.js?v=f4417601"></script>
+<script>
+Game.init({
+  saveKey:'g8u1-save',
+  zones:ZONES,icons:ICON,
+  words:{
+    right:'Sprite placed!',
+    miss:'Not quite. Follow one corner through the move, then check the rest.',
+    titles:['Keep coding','Good start','Skilled designer','Lead designer!'],
+    next:'Try the next station, or ship it on Launch Day.',
+    stuck:'Use "Show me a hint" when you’re stuck. Each hint says how to check a move one corner at a time.',
+    tap:'Tap the picture that shows it.'
+  }
+});
+</script>
+</body>
+</html>

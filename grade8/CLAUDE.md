@@ -4,15 +4,17 @@ General rules for games and Learn pages are in the root `CLAUDE.md`. Grade 8 fol
 
 ## Grade 8 games
 
-None yet. When a unit gets a game or Learn page, add a row here and turn its "Coming soon" card on `index.html` into a real one (see `grade7/index.html`), and update the Grade 8 card on the root `index.html` to say what's there. Save keys are `g8u<M>-save` and `g8u<M>-learn`.
+When a unit gets a game or Learn page, add a row here and turn its "Coming soon" card on `index.html` into a real one (see `grade7/index.html`), and update the Grade 8 card on the root `index.html` to say what's there. Save keys are `g8u<M>-save` and `g8u<M>-learn`.
 
 | Folder | Game | Unit |
 |---|---|---|
+| `unit1/` | Sprite Studio (8 stations + Launch Day); Learn page with 8 chapters (Lessons 1–16). Answers can be negative (`signed`, `neg`), and points are `pair` problems with `point: true`. Grid Moves is a `tap` problem: four small grids (`panelsFig`), one per choice. Every page loads KaTeX, since `figs.js` writes lines and rules with `math`. `figs.js` has what the game and Learn pages share: `SPRITES` (shapes with no symmetry, so each image comes from one move), the moves (`movePt`, `movePts`, `moveAll`: translate, rotate by 90°, −90°, or 180° around a grid point, reflect over x = k or y = k), `moveText` and `ruleTex` (a move in words and as a coordinate rule), `planeFig` (a grid or coordinate plane with shapes, corner names, centers, mirror lines, arrows, and turns), `panelsFig`, `transversalFig` (parallel lines crossed by a line, angles numbered 0–7), and `triangleFig` (a triangle from two angles, with the line through its top corner parallel to its base) | Grade 8 Unit 1 |
 
 Pictures earlier grades already draw, to reuse rather than copy (move one to `shared/` when a Grade 8 unit needs it):
 - Coordinate planes, one quadrant or four: `coordPlane` (`shared/algebra.js`). Number lines through negative numbers: `signedLine` and `vLine` (`shared/signed.js`). Hangers: `hanger` (`shared/hanger.js`). Dot plots, box plots, and means: `shared/stats.js`. Prisms, pyramids, and curved solids: `shared/solids.js`.
 - Grade 7 Unit 1's `figs.js`: polygons on a grid (`SHAPE_LIB`, `gridFig`), scaling (`scalePts`), turning and flipping (`turnPts`, `sameShape`), side lengths, angles, and areas. Units 1 and 2 (transformations, dilations) will want these.
 - Grade 7 Unit 3's `piText` and `circleFig`, and Grade 7 Unit 7's `raysFig` and `crossFig` (angles at crossing lines), for Units 1, 5, and 8.
+- Grade 8 Unit 1's `figs.js`: the moves (`movePts`), `planeFig` (shapes on a grid or coordinate plane, with corner names, centers, and lines), and `triangleFig`. Unit 2 (dilations, similar triangles) will want these: move them to `shared/` then.
 - Grade 7 Unit 5's and Unit 6's number formats (`fmt` and `money` with a true minus sign, `par`, `lin` for a·x + b with tidy signs).
 
 ## Building for Grade 8

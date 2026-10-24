@@ -1,0 +1,37 @@
+/* Grade 8 Unit 1 (Sprite Studio and its Learn pages): shapes on grids and coordinate planes, their moves, and pictures to tap.
+   Lines, arrows, and angle marks are styled in shared/angles.css. */
+/* the grid and the axes, with their numbers */
+.tf-grid{stroke:rgba(170,205,255,.16);stroke-width:1}
+.tf-axis{stroke:rgba(243,246,251,.7);stroke-width:2}
+.lbl.tf-num{font-size:11px;fill:var(--dim)}
+/* shapes: gold, cyan, pink, green, or a dashed outline; a side drawn thick; corner names */
+.tf{stroke-width:2.5;stroke-linejoin:round}
+.tf.a{fill:rgba(255,201,60,.3);stroke:var(--gold)}
+.tf.b{fill:rgba(127,227,255,.25);stroke:var(--cyan)}
+.tf.c{fill:rgba(255,138,196,.25);stroke:var(--pink)}
+.tf.d{fill:rgba(95,224,168,.25);stroke:var(--good)}
+.tf.ghost{fill:none;stroke:var(--dim);stroke-dasharray:6 5}
+.tf-hi{stroke:var(--gold);stroke-width:6;stroke-linecap:round}
+.lbl.tf-vx{fill:var(--chalk);font-style:italic}
+/* a line of reflection (or any whole line), dashed segments from a center, a translation's arrow, a rotation's curved arrow,
+   and points (a center of rotation) */
+.tf-line{stroke:var(--cyan);stroke-width:2.5;stroke-dasharray:8 6}
+.tf-line.solid{stroke-dasharray:none;stroke:var(--chalk)}
+.tf-line.c{stroke:var(--pink)}
+.tf-seg{stroke:var(--chalk);stroke-width:1.5;stroke-dasharray:4 4}
+.tf-seg.b{stroke:var(--cyan)}
+.tf-arrow{stroke:var(--chalk);stroke-width:2.5}
+.tf-turn{fill:none;stroke:var(--chalk);stroke-width:2.5}
+.tf-pt{fill:var(--gold);stroke:#0a2340;stroke-width:2}
+.tf-pt.b{fill:var(--cyan)}
+/* pictures to tap: each in a box with its letter; a right one turns green and a wrong one fades */
+.tf-box{fill:rgba(9,32,61,.55);stroke:rgba(170,205,255,.3);stroke-width:2}
+.lbl.tf-tag{font-size:15px;fill:var(--gold)}
+.tf-panel:hover .tf-box,.tf-panel:focus .tf-box{stroke:var(--chalk)}
+.tf-panel.right .tf-box{stroke:var(--good);stroke-width:4}
+.tf-panel.wrong{opacity:.45}
+/* parallel lines' chevrons, and an angle shaded to pick it out */
+.tf-chev{fill:none;stroke:var(--chalk);stroke-width:2.5}
+.tf-wedge{fill:rgba(255,201,60,.35)}
+/* a math letter and the word after it ("x-axis") stay on one line */
+.nw{white-space:nowrap}

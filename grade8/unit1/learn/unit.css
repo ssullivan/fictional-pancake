@@ -1,0 +1,7 @@
+/* Grade 8 Unit 1 Learn pages: readouts. Loaded by every page in learn/. */
+/* a stepper's value stays on one line */
+.stepper b{white-space:nowrap}
+/* a table of corners before and after a move */
+.corners{border-collapse:collapse;margin:6px auto 0;font:700 14px var(--mono)}
+.corners td,.corners th{padding:3px 10px;text-align:center}
+.corners th{color:var(--dim);font-weight:700}
