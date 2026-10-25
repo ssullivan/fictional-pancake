@@ -8,6 +8,7 @@ Maintainability comes first: anything two pages share belongs in `shared/`, not 
 
 ```
 index.html                grade picker (one card per grade)
+sitemap.xml               every page, for search engines; written by node tools/check.mjs --fix (don't edit it by hand)
 shared/                   used by every grade; each file's header comment documents its API
   theme.css               colors, fonts, page header, pills, buttons, rows of choice buttons (seg), feedback boxes: every page
   game.css, engine.js     game screens and the game engine (Game.init)
@@ -64,6 +65,7 @@ grade4/unit1/figs.js      pictures a unit's game and its Learn pages both use, a
 - The old top-level folders (`area_and_surface_area/`, `introducing_ratios/`, `unit_rates_and_percentages/`, `arithmetic_in_base_ten/`) are redirect stubs so old links and bookmarks keep working (the hash is kept). Don't put new content there.
 - Use relative links only (the site is served under `/fictional-pancake/`, not `/`).
 - `.nojekyll` disables Jekyll processing so files are served as-is.
+- The root `index.html` carries the Google Search Console verification tag (`google-site-verification`); keep it there. `sitemap.xml` lists every page but test pages and redirect stubs, and `check.mjs` fails when it's out of date, so a new page only needs `--fix`.
 - `localStorage` is shared by the whole site, so keys must be unique across grades. Existing pages keep their keys (`bb-save`, `mm-save`, `rr-save`, `dd-save`, `bb-learn`) so saved progress survives; new ones use `g<N>u<M>-save` / `g<N>u<M>-learn`, and the math facts use `facts-save`.
 - Local CSS and JS are loaded with a `?v=<hash>` cache stamp; `node tools/check.mjs --fix` writes them. Never edit a stamp by hand.
 

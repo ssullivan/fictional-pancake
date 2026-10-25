@@ -1,7 +1,7 @@
 // Run before every commit:
 //
 //   node tools/check.mjs          check formatting, links, cache stamps, Learn chapter pages, and generators (tools/fuzz.mjs)
-//   node tools/check.mjs --fix    also format the JavaScript with Prettier and rewrite stale cache stamps
+//   node tools/check.mjs --fix    also format the JavaScript with Prettier, rewrite stale cache stamps, and write sitemap.xml
 //
 // Cache stamps: every local stylesheet and script a page loads is referenced as file.js?v=<hash of its contents>.
 // GitHub Pages lets browsers cache files for 10 minutes, so without the stamp a returning visitor could get new
@@ -80,6 +80,30 @@ for (const page of pages) {
   if (changed) {
     writeFileSync(file, html);
     console.log(`stamped ${page}`);
+  }
+}
+
+// sitemap.xml: every page a visitor can reach, for search engines (submit SITE + "sitemap.xml" in Google Search Console).
+// Test pages and the old folders' redirect stubs (a meta refresh) are left out, and a folder's index.html is listed as the
+// folder, the way the site links to it. --fix writes it.
+{
+  const SITE = "https://ssullivan.github.io/fictional-pancake/";
+  const listed = pages.filter(
+    (page) => !page.startsWith("tests/") && !/http-equiv="refresh"/.test(readFileSync(join(ROOT, page), "utf8")),
+  );
+  const sitemap = [
+    '<?xml version="1.0" encoding="UTF-8"?>',
+    '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+    ...listed.map((page) => `  <url><loc>${SITE}${page.replace(/(^|\/)index\.html$/, "$1")}</loc></url>`),
+    "</urlset>",
+    "",
+  ].join("\n");
+  const file = join(ROOT, "sitemap.xml");
+  if (!existsSync(file) || readFileSync(file, "utf8") !== sitemap) {
+    if (fix) {
+      writeFileSync(file, sitemap);
+      console.log("wrote sitemap.xml");
+    } else fail("sitemap.xml is out of date (run node tools/check.mjs --fix)");
   }
 }
 
