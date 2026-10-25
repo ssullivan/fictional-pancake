@@ -1,5 +1,5 @@
 /* The Unit 5 study guide (study.html): its diagrams. Each <figure data-fig="name"> in the page gets the picture FIGURES[name]
-   draws, with shared/study.js's Diagram: laid out in units with y going up, and drawn as inline SVG with the classes styled
+   draws, with shared/study.js's Diagram and splitArea: laid out in units with y going up, and drawn as inline SVG with the classes styled
    in shared/study.css (sh a shaded part, g grid lines, out an outline, lb a label, …). Column work (adding, dividing) is
    HTML in the page. Nothing else uses this file. */
 
@@ -18,21 +18,6 @@ function hundredthsGrid(tenthsWide, tenthsTall, label, [widthWords, heightWords]
     .text([0.5, 1], unit, { dy: -8, cls: "lb sm" })
     .text([1, 0.5], unit, { dx: 8, dy: 5, cls: "lb sm", anchor: "start" })
     .svg();
-}
-
-/* An area diagram of a product split into parts side by side: one rectangle for each [width, topWords, insideWords] in parts
-   (widths in units, topWords over it, insideWords in it), all `height` units tall with heightWords on the left. */
-function splitArea(parts, height, heightWords, label, { scale = 60 } = {}) {
-  const total = parts.reduce((sum, [width]) => sum + width, 0),
-    d = new Diagram(0, total, 0, height, scale, { pad: 28, label, left: 44 });
-  let left = 0;
-  parts.forEach(([width, topWords, insideWords], i) => {
-    d.box(left, 0, width, height, i % 2 ? "sh2" : "sh")
-      .text([left + width / 2, height], topWords, { dy: -8, cls: "lb sm" })
-      .text([left + width / 2, height / 2], insideWords, { dy: 5 });
-    left += width;
-  });
-  return d.text([0, height / 2], heightWords, { dx: -8, dy: 5, cls: "lb sm", anchor: "end" }).svg();
 }
 
 const FIGURES = {

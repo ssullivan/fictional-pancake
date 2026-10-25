@@ -752,6 +752,8 @@ const CALLS = {
     `partsTape(10, 7, 'T', {marks: [[0, '0%'], [7, '70%'], [10, '100%']], part: '? L', whole: '40 L'})`,
     `partsTape(4, 3, 'P', {marks: [[3, '3/4']], each: '1/2', part: '1 1/2', whole: '2', hl: true, scale: 24})`,
     `partsTape(3, 0, 'E')`,
+    `splitArea([[2, '1 lb', '$2.40'], [1, '0.5 lb', '$1.20']], 1.5, '$2.40', 'A')`,
+    `splitArea([[3, 'x', '4x'], [2, '5', '20'], [1, '', '']], 1, '4', 'B', {scale: 40})`,
   ],
   signed: [
     `signedLine(-10, 10)`,

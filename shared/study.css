@@ -11,6 +11,7 @@
    .m, .m.f          math in the mono font, and a formula to remember on a tint
    a.ch              in header.th, after a div of the eyebrow and h2: a link to the part's Learn chapter (left off paper)
    main.keep-math    each .m stays on one line (for a guide whose math is short: ratios, a step of work)
+   span.fr           a fraction in the text: sup (its top), a fraction slash (⁄), and sub (its bottom)
    table.rt          a table of equivalent amounts: th headings, td.note beside a row (× 4), td.fill a box to fill in;
                      .wide fills its column
    figure, .pair     a diagram (drawn by the unit's study.js into <figure data-fig>), and diagrams side by side
@@ -48,6 +49,10 @@ body{background-image:none;color:#111a2b}
 .m{font-family:var(--mono);font-weight:500;font-size:.92em;font-variant-numeric:tabular-nums}
 .m.f{font-weight:700;background:var(--tint);padding:1px 5px;border-radius:4px}
 .keep-math .m{white-space:nowrap}
+.fr{white-space:nowrap}
+.fr sup,.fr sub{font-size:.85em;line-height:0}
+.fr sup{vertical-align:.45em}
+.fr sub{vertical-align:-.1em}
 .topic{padding-top:26px;border-top:1px solid var(--rule);margin-top:26px}
 .th h2{font-size:28px;font-weight:800}
 .th:has(> .ch){display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:4px 16px}

@@ -17,7 +17,8 @@
 
    namesWidth(names)                     pixels to leave on a diagram's left for these names written there
    doubleLine([topName, bottomName], ticks, label, {length, scale, hl})   a double number line (svg)
-   partsTape(parts, shaded, label, {marks, each, part, whole, scale, hl})   a whole cut into equal parts, some shaded (svg) */
+   partsTape(parts, shaded, label, {marks, each, part, whole, scale, hl})   a whole cut into equal parts, some shaded (svg)
+   splitArea(parts, height, heightWords, label, {scale})   an area diagram of a product split into parts (svg) */
 
 /* A diagram covering x0…x1 by y0…y1 units, `scale` pixels per unit, with `pad` pixels around it (left and right add more
    on that side, for labels). Its methods add parts and return the diagram, so calls chain; svg() gives the markup. */
@@ -177,4 +178,19 @@ function partsTape(
       .line([10, wholeY], [10, wholeY + nub])
       .text([5, wholeY], whole, { dy: 18, cls: hl ? "lb hl" : "lb" });
   return d.svg();
+}
+
+/* An area diagram of a product split into parts side by side: one rectangle for each [width, topWords, insideWords] in parts
+   (widths in units, topWords over it, insideWords in it), all `height` units tall with heightWords on the left. */
+function splitArea(parts, height, heightWords, label, { scale = 60 } = {}) {
+  const total = parts.reduce((sum, [width]) => sum + width, 0),
+    d = new Diagram(0, total, 0, height, scale, { pad: 28, label, left: 44 });
+  let left = 0;
+  parts.forEach(([width, topWords, insideWords], i) => {
+    d.box(left, 0, width, height, i % 2 ? "sh2" : "sh")
+      .text([left + width / 2, height], topWords, { dy: -8, cls: "lb sm" })
+      .text([left + width / 2, height / 2], insideWords, { dy: 5 });
+    left += width;
+  });
+  return d.text([0, height / 2], heightWords, { dx: -8, dy: 5, cls: "lb sm", anchor: "end" }).svg();
 }
