@@ -16,7 +16,8 @@
    Each method but at() and svg() returns the diagram, so calls chain.
 
    namesWidth(names)                     pixels to leave on a diagram's left for these names written there
-   doubleLine([topName, bottomName], ticks, label, {length, scale, hl})   a double number line (svg) */
+   doubleLine([topName, bottomName], ticks, label, {length, scale, hl})   a double number line (svg)
+   partsTape(parts, shaded, label, {marks, each, part, whole, scale, hl})   a whole cut into equal parts, some shaded (svg) */
 
 /* A diagram covering x0…x1 by y0…y1 units, `scale` pixels per unit, with `pad` pixels around it (left and right add more
    on that side, for labels). Its methods add parts and return the diagram, so calls chain; svg() gives the markup. */
@@ -141,4 +142,39 @@ function doubleLine([topName, bottomName], ticks, label, { length = 8, scale = 4
     .text([0, topY], topName, { dx: -12, dy: 5, cls: "lb sm", anchor: "end" })
     .text([0, 0], bottomName, { dx: -12, dy: 5, cls: "lb sm", anchor: "end" })
     .svg();
+}
+
+/* A tape of a whole cut into `parts` equal parts, the first `shaded` of them shaded. marks: [[parts along, words]] written under
+   the tape; each: words in every shaded part; part: what the shaded parts hold, over a bracket above them; whole: what the
+   whole tape holds, under a bracket below it. hl: the words in the parts and the whole are blue. */
+function partsTape(
+  parts,
+  shaded,
+  label,
+  { marks = [], each = "", part = "", whole = "", scale = 30, hl = false } = {},
+) {
+  /* the tape fills 0…10 by 0…1, each part partWidth wide; the part's bracket is partY above it, and the whole's is wholeY
+     below (under the marks) */
+  const partWidth = 10 / parts,
+    shadedEnd = shaded * partWidth,
+    partY = 1.35,
+    wholeY = -0.95,
+    nub = 0.15,
+    d = new Diagram(0, 10, -1.7, 2.1, scale, { pad: 14, label });
+  for (let i = 0; i < parts; i++) {
+    d.box(i * partWidth, 0, partWidth, 1, i < shaded ? "sh" : "bx");
+    if (each && i < shaded) d.text([(i + 0.5) * partWidth, 0.5], each, { dy: 5, cls: hl ? "lb sm hl" : "lb sm" });
+  }
+  marks.forEach(([along, words]) => d.text([along * partWidth, 0], words, { dy: 17, cls: "lb sm" }));
+  if (part)
+    d.line([0, partY], [shadedEnd, partY])
+      .line([0, partY], [0, partY - nub])
+      .line([shadedEnd, partY], [shadedEnd, partY - nub])
+      .text([shadedEnd / 2, partY], part, { dy: -7 });
+  if (whole)
+    d.line([0, wholeY], [10, wholeY])
+      .line([0, wholeY], [0, wholeY + nub])
+      .line([10, wholeY], [10, wholeY + nub])
+      .text([5, wholeY], whole, { dy: 18, cls: hl ? "lb hl" : "lb" });
+  return d.svg();
 }

@@ -749,6 +749,9 @@ const CALLS = {
     `namesWidth(['cups', 'cups of flour'])`,
     `doubleLine(['pounds', 'cost ($)'], [[0, '0', '0'], [1, '1', '3'], [3, null, null], [5, '5', '_']], 'L', {hl: [1]})`,
     `doubleLine(['a', 'b'], [[0, '_', null], [50, '6', '_'], [150, null, '150%']], 'M', {length: 7, scale: 30})`,
+    `partsTape(10, 7, 'T', {marks: [[0, '0%'], [7, '70%'], [10, '100%']], part: '? L', whole: '40 L'})`,
+    `partsTape(4, 3, 'P', {marks: [[3, '3/4']], each: '1/2', part: '1 1/2', whole: '2', hl: true, scale: 24})`,
+    `partsTape(3, 0, 'E')`,
   ],
   signed: [
     `signedLine(-10, 10)`,

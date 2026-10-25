@@ -34,9 +34,12 @@ body{min-height:0;font-size:10pt}
 .pair figure svg{max-width:100%}
 
 .test,.answers{break-before:page;border-top:none;margin-top:0;padding-top:0}
-/* the key runs on from page to page, but never splits an answer or leaves a heading at the foot of a page */
+/* the key runs on from page to page, but never splits an answer or leaves a heading at the foot of a page; its answers are a
+   little smaller than on screen, so a long key still fits on two pages */
+.keygroup{margin-top:12px}
 .keygroup h3{break-after:avoid}
-ol.key li{break-inside:avoid}
+ol.key li{break-inside:avoid;font-size:13px;line-height:1.4;padding:2px 0}
+ol.key .num{line-height:1.5}
 .name-line{display:flex;gap:28px;margin:4px 0 14px;font-size:10.5pt}
 .name-line span{display:flex;align-items:flex-end;gap:8px}
 .name-line .blank{width:2.4in;flex:none;max-width:none}
