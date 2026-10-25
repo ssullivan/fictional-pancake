@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Arithmetic in Base Ten Study Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=JetBrains+Mono:wght@500;700&display=swap">
+<link rel="stylesheet" href="../../shared/theme.css?v=c2e276bb">
+<link rel="stylesheet" href="../../shared/study.css?v=538b377e">
+<link rel="stylesheet" href="../../shared/study-print.css?v=61f9704b" media="print">
+<style>
+/* column work: numbers lined up on the right, so the decimal points line up, with a rule over the answer; .two adds a column
+   of notes beside the numbers (what each chunk of a division is) */
+.work{display:inline-grid;grid-template-columns:auto;gap:2px 16px;margin:8px 24px 0 0;font:500 16px/1.4 var(--mono);font-variant-numeric:tabular-nums}
+.work.two{grid-template-columns:auto auto}
+.work span{text-align:right;white-space:pre}
+.work .rule{border-top:2px solid var(--ink)}
+.work .note{text-align:left;color:var(--hl);font-size:13px;align-self:center}
+/* the place-value table on the toolkit sheet, its cells tighter on a phone so all five places fit */
+.sheet .rt{margin:0 0 12px}
+@media (max-width:640px){
+  .sheet .rt th,.sheet .rt td{padding:4px 6px;min-width:0;font-size:12px}
+}
+</style>
+</head>
+<body>
+
+<main class="guide keep-math">
+  <a class="back" href="../">← Grade 6</a>
+  <header class="cover">
+    <p class="eyebrow">Study guide · Illustrative Mathematics · Grade 6 · Unit 5</p>
+    <h1>Arithmetic in Base Ten</h1>
+    <p class="sub">One part for each chapter of the unit: what to know, a worked example, the mistake to watch for, and practice. A 15-question practice test and a worked answer key are at the end.</p>
+    <p class="howto"><b>To print:</b> use your browser’s Print (Ctrl+P, or ⌘P on a Mac). It prints in dark ink on white letter paper, and the practice test and the answer key each start on a new page, so you can print them separately.</p>
+    <ul class="plan">
+      <li><b>Night 1</b><span>The toolkit, then Parts A–C: adding and subtracting, where the decimal point goes, area diagrams.</span></li>
+      <li><b>Night 2</b><span>Parts D–F: dividing whole numbers, dividing decimals, putting it together.</span></li>
+      <li><b>Night 3</b><span>Take the practice test without notes, check it, and redo anything missed.</span></li>
+    </ul>
+  </header>
+
+<section class="sheet" aria-labelledby="sheet-h">
+  <h2 id="sheet-h">Toolkit</h2>
+  <table class="rt wide"><thead><tr><th>tens</th><th>ones</th><th>tenths</th><th>hundredths</th><th>thousandths</th></tr></thead><tbody>
+<tr><td>10</td><td>1</td><td>0.1</td><td>0.01</td><td>0.001</td></tr>
+</tbody></table>
+  <div class="formulas">
+    <div><span>Add or subtract</span><span class="m">line up the decimal points</span></div>
+    <div><span>Fill in zeros</span><span class="m">3 = 3.00</span></div>
+    <div><span>Tenths × tenths</span><span class="m">hundredths: 0.3 × 0.2 = 0.06</span></div>
+    <div><span>Decimal places in a product</span><span class="m">add the factors’ places</span></div>
+    <div><span>Split a factor</span><span class="m">2.4 × 1.5 = 2.4 + 1.2</span></div>
+    <div><span>Partial quotients</span><span class="m">take away easy chunks</span></div>
+    <div><span>Past the ones</span><span class="m">1 one = 10 tenths</span></div>
+    <div><span>Decimal divisor</span><span class="m">1.8 ÷ 0.3 = 18 ÷ 3</span></div>
+  </div>
+  <div class="vocab">
+    <p><b>Bundle:</b> ten of a place make one of the place to its left: 10 hundredths = 1 tenth.</p>
+    <p><b>Regroup:</b> unbundle one of a place into ten of the next place to subtract.</p>
+    <p><b>Product, factor:</b> in 0.4 × 0.2 = 0.08, 0.08 is the product.</p>
+    <p><b>Quotient, divisor:</b> in 12 ÷ 5 = 2.4, 2.4 is the quotient and 5 the divisor.</p>
+    <p><b>Estimate first:</b> 2.5 × 0.12 is about 2.5 × 0.1 = 0.25.</p>
+    <p><b>Check:</b> quotient × divisor = dividend, and a difference plus what you took away gives back the start.</p>
+  </div>
+</section>
+
+<section class="topic" id="a">
+  <header class="th"><div><p class="eyebrow">Part A · Lessons 1–4</p><h2>Adding and subtracting decimals</h2></div><a class="ch" href="learn/add-subtract.html">Learn chapter →</a></header>
+  <div class="ke">
+    <div class="know"><h3>Know it</h3><ul>
+<li>Add tenths to tenths and hundredths to hundredths. <b>Ten</b> hundredths bundle into 1 tenth, and ten tenths into 1 one.</li>
+<li>In columns, <b>line up the decimal points</b>, so each digit sits over the same place.</li>
+<li>Fill in zeros so the numbers have the same number of places: 2 is 2.00.</li>
+<li>To subtract a bigger digit, <b>regroup</b>: 1 one is 10 tenths, and 1 tenth is 10 hundredths.</li>
+</ul></div>
+    <div class="example"><h3>Example</h3><p>Find 0.47 + 0.38, and 2 − 0.75.</p>
+<div class="pair"><div class="work"><span>0.47</span><span>+ 0.38</span><span class="rule">0.85</span></div><div class="work"><span>2.00</span><span>− 0.75</span><span class="rule">1.25</span></div></div>
+<p>7 + 8 = 15 hundredths: 1 tenth and 5 hundredths. For 2 − 0.75, write 2 as 2.00 and regroup.</p></div>
+  </div>
+  <p class="watch"><b>Watch out:</b> 0.75 forgets the bundled tenth, and 2 − 0.75 = 0.55 lines the 2 up with the tenths. Line up the decimal points.</p>
+  <h3 class="try">Try it</h3>
+  <div class="probs">
+      <div class="prob"><span class="num">A1</span><div class="pbody"><p>Find 0.68 + 0.57.</p><span class="answer-line">Answer: <span class="blank"></span></span></div></div>
+      <div class="prob"><span class="num">A2</span><div class="pbody"><p>Find 5 − 1.36.</p><span class="answer-line">Answer: <span class="blank"></span></span></div></div>
+      <div class="prob"><span class="num">A3</span><div class="pbody"><p>Find 12.5 + 3.75.</p><span class="answer-line">Answer: <span class="blank"></span></span></div></div>
+      <div class="prob"><span class="num">A4</span><div class="pbody"><p>A bag holds 1.2 kilograms of rice. A cook uses 0.35 kilogram. How much is left?</p><span class="answer-line">Answer: <span class="blank"></span></span></div></div>
+  </div>
+</section>
+<section class="topic" id="b">
+  <header class="th"><div><p class="eyebrow">Part B · Lessons 5–6</p><h2>Where the decimal point goes</h2></div><a class="ch" href="learn/decimal-point.html">Learn chapter →</a></header>
+  <div class="ke">
+    <div class="know"><h3>Know it</h3><ul>
+<li>Write the decimals as fractions: <span class="m">0.3 × 0.2</span> = <span class="m">3/10 × 2/10</span> = <span class="m">6/100</span> = <span class="m">0.06</span>.</li>
+<li>Tenths × tenths make <b>hundredths</b>; tenths × hundredths make thousandths. So the product can be smaller than both factors.</li>
+<li>Quick way: multiply as if there were no decimal points, then put back as many decimal places as the factors have <b>together</b>.</li>
+<li>2.5 × 0.12: <span class="m">25 × 12 = 300</span>, and 1 + 2 = 3 places: 0.300, which is 0.3.</li>
+</ul></div>
+    <div class="example"><h3>Example</h3><p>Find 0.3 × 0.2.</p><figure data-fig="grid32"></figure>
+<p>The rectangle covers <span class="m">3 × 2 = 6</span> of the 100 small squares: <span class="m">0.06</span>.</p></div>
+  </div>
+  <p class="watch"><b>Watch out:</b> 0.4 × 0.2 is 0.08, not 0.8. Count the places: 1 + 1 = 2.</p>
+  <h3 class="try">Try it</h3>
+  <div class="probs">
+      <div class="prob"><span class="num">B1</span><div class="pbody"><p>Find 0.6 × 0.3.</p><span class="answer-line">Answer: <span class="blank"></span></span></div></div>
+      <div class="prob"><span class="num">B2</span><div class="pbody"><p>Find 1.2 × 0.4.</p><span class="answer-line">Answer: <span class="blank"></span></span></div></div>
+      <div class="prob"><span class="num">B3</span><div class="pbody"><p>Find 0.05 × 0.7.</p><span class="answer-line">Answer: <span class="blank"></span></span></div></div>
+      <div class="prob"><span class="num">B4</span><div class="pbody"><p>36 × 24 = 864. Use that to find 3.6 × 2.4 and 0.36 × 2.4.</p><span class="answer-line">Answer: <span class="blank"></span></span></div></div>
+  </div>
+</section>
+<section class="topic" id="c">
+  <header class="th"><div><p class="eyebrow">Part C · Lessons 7–8</p><h2>Area diagrams and grids</h2></div><a class="ch" href="learn/area-models.html">Learn chapter →</a></header>
+  <div class="ke">
+    <div class="know"><h3>Know it</h3><ul>
+<li>A 1 meter by 1 meter square cut into 100 small squares shows hundredths: each small square is 0.01 square meter.</li>
+<li>A rectangle 0.6 m by 0.3 m covers <span class="m">6 × 3 = 18</span> small squares: 0.18 square meter.</li>
+<li>To multiply by a number like 1.5, <b>split</b> it into easy parts (1 and 0.5), find each partial product, and add.</li>
+<li>Whole numbers split the same way: <span class="m">3.2 × 4</span> = <span class="m">3 × 4 + 0.2 × 4</span> = <span class="m">12.8</span>.</li>
+</ul></div>
+    <div class="example"><h3>Example</h3><p>Grapes cost $2.40 a pound. How much do 1.5 pounds cost?</p><figure data-fig="grapes"></figure>
+<p>1 pound: $2.40. Half a pound: $1.20. Together: <span class="m">$2.40 + $1.20 = $3.60</span>.</p></div>
+  </div>
+  <p class="watch"><b>Watch out:</b> $2.40 + 1.5 adds instead of multiplying. And 0.4 × 0.7 is 0.28: not 28, and not 0.028.</p>
+  <h3 class="try">Try it</h3>
+  <div class="probs">
+      <div class="prob"><span class="num">C1</span><div class="pbody"><p>What is the area of the shaded rectangle?</p><figure data-fig="grid47"></figure><span class="answer-line">Answer: <span class="blank"></span></span></div></div>
+      <div class="prob"><span class="num">C2</span><div class="pbody"><p>Cheese costs $3.20 a pound. How much do 1.5 pounds cost?</p><span class="answer-line">Answer: <span class="blank"></span></span></div></div>
+      <div class="prob"><span class="num">C3</span><div class="pbody"><p>Split 1.2 into 1 and 0.2 to find 2.5 × 1.2.</p><span class="answer-line">Answer: <span class="blank"></span></span></div></div>
+      <div class="prob"><span class="num">C4</span><div class="pbody"><p>A room is 3.5 meters by 4 meters. What is its area?</p><span class="answer-line">Answer: <span class="blank"></span></span></div></div>
+  </div>
+</section>
+<section class="topic" id="d">
+  <header class="th"><div><p class="eyebrow">Part D · Lessons 9–11</p><h2>Dividing whole numbers</h2></div><a class="ch" href="learn/divide-whole.html">Learn chapter →</a></header>
+  <div class="ke">
+    <div class="know"><h3>Know it</h3><ul>
+<li><b>Partial quotients:</b> take away groups of the divisor in easy chunks (10 groups, 20, 100) until nothing is left, then add up the groups.</li>
+<li>Long division does the same thing one place at a time.</li>
+<li>When something is left over, <b>keep going</b>: 1 one is 10 tenths, so divide the tenths, then the hundredths.</li>
+<li>Check: quotient × divisor = dividend.</li>
+</ul></div>
+    <div class="example"><h3>Example</h3><p>156 cookies go in boxes of 12. And 5 friends share $12.</p>
+<div class="pair"><div class="work two"><span>156</span><span></span><span>− 120</span><span class="note">10 × 12</span><span>36</span><span></span><span>− 36</span><span class="note">3 × 12</span><span class="rule">0</span><span class="note">13 boxes</span></div><div class="work two"><span>12.0</span><span></span><span>− 10.0</span><span class="note">2 × 5</span><span>2.0</span><span></span><span>− 2.0</span><span class="note">0.4 × 5</span><span class="rule">0.0</span><span class="note">$2.40 each</span></div></div>
+<p>Each friend gets $2 with $2 left over; $2 is 20 tenths, and <span class="m">20 ÷ 5 = 4</span> tenths more.</p></div>
+  </div>
+  <p class="watch"><b>Watch out:</b> 2 left over doesn’t make 2.2. Keep dividing: the 2 ones left are 20 tenths, and 20 tenths ÷ 5 = 0.4.</p>
+  <h3 class="try">Try it</h3>
+  <div class="probs">
+      <div class="prob"><span class="num">D1</span><div class="pbody"><p>Find 288 ÷ 12.</p><span class="answer-line">Answer: <span class="blank"></span></span></div></div>
+      <div class="prob"><span class="num">D2</span><div class="pbody"><p>Find 945 ÷ 15.</p><span class="answer-line">Answer: <span class="blank"></span></span></div></div>
+      <div class="prob"><span class="num">D3</span><div class="pbody"><p>4 friends share $10 equally. How much does each friend get?</p><span class="answer-line">Answer: <span class="blank"></span></span></div></div>
+      <div class="prob"><span class="num">D4</span><div class="pbody"><p>Find 3 ÷ 8 as a decimal.</p><span class="answer-line">Answer: <span class="blank"></span></span></div></div>
+  </div>
+</section>
+<section class="topic" id="e">
+  <header class="th"><div><p class="eyebrow">Part E · Lessons 12–13</p><h2>Dividing decimals</h2></div><a class="ch" href="learn/divide-decimals.html">Learn chapter →</a></header>
+  <div class="ke">
+    <div class="know"><h3>Know it</h3><ul>
+<li>Multiplying <b>both</b> numbers in a division by the same number doesn’t change the quotient: <span class="m">1.8 ÷ 0.3 = 18 ÷ 3 = 6</span>.</li>
+<li>So multiply both by 10 or 100 until the divisor is a whole number, then divide.</li>
+<li>Dividing a decimal by a whole number works like whole numbers; the decimal point stays in its place: <span class="m">7.2 ÷ 4 = 1.8</span>.</li>
+</ul></div>
+    <div class="example"><h3>Example</h3><p>How many 0.25-liter cups can be filled from 3 liters of juice?</p>
+<table class="rt"><thead><tr><th>division</th><th></th></tr></thead><tbody>
+<tr><td>3 ÷ 0.25</td><td class="note"></td></tr>
+<tr><td>30 ÷ 2.5</td><td class="note">both × 10</td></tr>
+<tr><td>300 ÷ 25</td><td class="note">both × 100</td></tr>
+</tbody></table>
+<p><span class="m">300 ÷ 25 = 12</span> cups. Check: <span class="m">12 × 0.25 = 3</span>.</p></div>
+  </div>
+  <p class="watch"><b>Watch out:</b> multiply <i>both</i> numbers by the same thing. 30 ÷ 25 = 1.2 multiplies only the 3.</p>
+  <h3 class="try">Try it</h3>
+  <div class="probs">
+      <div class="prob"><span class="num">E1</span><div class="pbody"><p>Find 4.8 ÷ 0.6.</p><span class="answer-line">Answer: <span class="blank"></span></span></div></div>
+      <div class="prob"><span class="num">E2</span><div class="pbody"><p>How many 0.2-liter cups can be filled all the way from 1.5 liters?</p><span class="answer-line">Answer: <span class="blank"></span></span></div></div>
+      <div class="prob"><span class="num">E3</span><div class="pbody"><p>Find 6.3 ÷ 0.09.</p><span class="answer-line">Answer: <span class="blank"></span></span></div></div>
+      <div class="prob"><span class="num">E4</span><div class="pbody"><p>Find 9.6 ÷ 4.</p><span class="answer-line">Answer: <span class="blank"></span></span></div></div>
+  </div>
+</section>
+<section class="topic" id="f">
+  <header class="th"><div><p class="eyebrow">Part F · Lesson 14</p><h2>Putting it together</h2></div><a class="ch" href="learn/put-together.html">Learn chapter →</a></header>
+  <div class="ke">
+    <div class="know"><h3>Know it</h3><ul>
+<li>Real problems take a few steps: <b>multiply</b> for more than one of something, <b>add</b> up the order, then <b>subtract</b> to make change.</li>
+<li>Line up the decimal points every time you add or subtract.</li>
+<li>Estimate first, so you can tell if the answer makes sense: 3 tacos at about $2 is about $6.</li>
+</ul></div>
+    <div class="example"><h3>Example</h3><p>Lin buys 3 tacos at $2.25 each and a lemonade for $1.40, and pays with a $10 bill. How much change?</p>
+<table class="rt wide"><tbody>
+<tr><td>3 tacos</td><td>3 × $2.25 = $6.75</td></tr>
+<tr><td>lemonade</td><td>$1.40</td></tr>
+<tr><td>total</td><td>$6.75 + $1.40 = $8.15</td></tr>
+<tr><td>change</td><td>$10.00 − $8.15 = $1.85</td></tr>
+</tbody></table></div>
+  </div>
+  <p class="watch"><b>Watch out:</b> $8.15 is the total, not the change. And 3 tacos cost 3 × $2.25, not $2.25.</p>
+  <h3 class="try">Try it</h3>
+  <div class="probs">
+      <div class="prob"><span class="num">F1</span><div class="pbody"><p>Noah buys 2 notebooks at $3.75 each and a pen for $1.20, and pays with $10. How much change?</p><span class="answer-line">Answer: <span class="blank"></span></span></div></div>
+      <div class="prob"><span class="num">F2</span><div class="pbody"><p>Fabric costs $4.50 a yard. How much do 2.5 yards cost?</p><span class="answer-line">Answer: <span class="blank"></span></span></div></div>
+      <div class="prob"><span class="num">F3</span><div class="pbody"><p>How many 0.25-liter glasses does a 2-liter bottle fill?</p><span class="answer-line">Answer: <span class="blank"></span></span></div></div>
+      <div class="prob"><span class="num">F4</span><div class="pbody"><p>Gas costs $3.20 a gallon. How many gallons does $20 buy?</p><span class="answer-line">Answer: <span class="blank"></span></span></div></div>
+  </div>
+</section>
+  <section class="test" id="test">
+    <p class="eyebrow">Practice test · about 40 minutes</p>
+    <h2>Practice test</h2>
+    <p class="sub">Show your work: line up decimal points, count places, or write the chunks of a division.</p>
+    <p class="name-line"><span>Name <span class="blank"></span></span><span>Date <span class="blank short"></span></span></p>
+    <div class="probs">
+      <div class="prob"><span class="num">1</span><div class="pbody"><p>Find 3.47 + 2.8.</p><span class="answer-line">Answer: <span class="blank"></span></span></div></div>
+      <div class="prob"><span class="num">2</span><div class="pbody"><p>Find 10 − 4.65.</p><span class="answer-line">Answer: <span class="blank"></span></span></div></div>
+      <div class="prob"><span class="num">3</span><div class="pbody"><p>Find 0.7 × 0.6.</p><span class="answer-line">Answer: <span class="blank"></span></span></div></div>
+      <div class="prob"><span class="num">4</span><div class="pbody"><p>Find 1.25 × 0.4.</p><span class="answer-line">Answer: <span class="blank"></span></span></div></div>
+      <div class="prob"><span class="num">5</span><div class="pbody"><p>48 × 15 = 720. Use that to find 4.8 × 1.5 and 0.48 × 0.15.</p><span class="answer-line">Answer: <span class="blank"></span></span></div></div>
+      <div class="prob"><span class="num">6</span><div class="pbody"><p>What is the area of the shaded rectangle?</p><figure data-fig="test6"></figure><span class="answer-line">Answer: <span class="blank"></span></span></div></div>
+      <div class="prob"><span class="num">7</span><div class="pbody"><p>Apples cost $3.60 a pound. How much do 2.5 pounds cost?</p><span class="answer-line">Answer: <span class="blank"></span></span></div></div>
+      <div class="prob"><span class="num">8</span><div class="pbody"><p>Find 384 ÷ 16.</p><span class="answer-line">Answer: <span class="blank"></span></span></div></div>
+      <div class="prob"><span class="num">9</span><div class="pbody"><p>Find 7 ÷ 4 as a decimal.</p><span class="answer-line">Answer: <span class="blank"></span></span></div></div>
+      <div class="prob"><span class="num">10</span><div class="pbody"><p>Find 2.4 ÷ 0.3.</p><span class="answer-line">Answer: <span class="blank"></span></span></div></div>
+      <div class="prob"><span class="num">11</span><div class="pbody"><p>Find 4.5 ÷ 0.15.</p><span class="answer-line">Answer: <span class="blank"></span></span></div></div>
+      <div class="prob"><span class="num">12</span><div class="pbody"><p>Elena says 0.3 × 0.3 = 0.9. Is that right? Explain.</p><span class="answer-line">Answer: <span class="blank"></span></span></div></div>
+      <div class="prob"><span class="num">13</span><div class="pbody"><p>6 friends split a $49.50 bill equally. How much does each pay?</p><span class="answer-line">Answer: <span class="blank"></span></span></div></div>
+      <div class="prob"><span class="num">14</span><div class="pbody"><p>Jada buys 4 juice boxes at $1.15 each and a sandwich for $4.90, and pays with $10. How much change?</p><span class="answer-line">Answer: <span class="blank"></span></span></div></div>
+      <div class="prob"><span class="num">15</span><div class="pbody"><p>A track’s lap is 0.4 kilometer. How many laps make 6 kilometers?</p><span class="answer-line">Answer: <span class="blank"></span></span></div></div>
+    </div>
+  </section>
+  <section class="answers" id="answers">
+    <p class="eyebrow">For checking</p>
+    <h2>Answer key</h2>
+    <p class="sub">Worked answers for every practice problem and the practice test.</p>
+    <div class="keygroup"><h3>Part A</h3><ol class="key">
+<li><span class="num">A1</span><span>8 + 7 = 15 hundredths, so 1 tenth to bundle: <b>1.25</b>.</span></li>
+<li><span class="num">A2</span><span><span class="m">5.00 − 1.36 =</span> <b>3.64</b>.</span></li>
+<li><span class="num">A3</span><span><span class="m">12.50 + 3.75 =</span> <b>16.25</b>.</span></li>
+<li><span class="num">A4</span><span><span class="m">1.20 − 0.35 =</span> <b>0.85 kilogram</b>.</span></li>
+</ol></div>
+    <div class="keygroup"><h3>Part B</h3><ol class="key">
+<li><span class="num">B1</span><span><span class="m">6 × 3 = 18</span> hundredths: <b>0.18</b>.</span></li>
+<li><span class="num">B2</span><span><span class="m">12 × 4 = 48</span>, 2 places: <b>0.48</b>.</span></li>
+<li><span class="num">B3</span><span><span class="m">5 × 7 = 35</span>, 3 places: <b>0.035</b>.</span></li>
+<li><span class="num">B4</span><span>2 places: <b>8.64</b>. 3 places: <b>0.864</b>.</span></li>
+</ol></div>
+    <div class="keygroup"><h3>Part C</h3><ol class="key">
+<li><span class="num">C1</span><span><span class="m">4 × 7 = 28</span> small squares: <b>0.28 square meter</b>.</span></li>
+<li><span class="num">C2</span><span><span class="m">$3.20 + $1.60 =</span> <b>$4.80</b>.</span></li>
+<li><span class="num">C3</span><span><span class="m">2.5 × 1 + 2.5 × 0.2</span> = <span class="m">2.5 + 0.5 =</span> <b>3</b>.</span></li>
+<li><span class="num">C4</span><span><span class="m">3 × 4 + 0.5 × 4 = 12 + 2 =</span> <b>14 square meters</b>.</span></li>
+</ol></div>
+    <div class="keygroup"><h3>Part D</h3><ol class="key">
+<li><span class="num">D1</span><span>20 twelves are 240, 48 left; 4 twelves are 48: <b>24</b>.</span></li>
+<li><span class="num">D2</span><span>60 fifteens are 900, 45 left; 3 fifteens are 45: <b>63</b>.</span></li>
+<li><span class="num">D3</span><span>$2 each with $2 left; $2 is 20 tenths, 5 tenths each: <b>$2.50</b>.</span></li>
+<li><span class="num">D4</span><span>3 is 30 tenths: 3 tenths each, 6 tenths left; 60 hundredths: 7 each, 4 left; 40 thousandths: 5 each. <b>0.375</b>.</span></li>
+</ol></div>
+    <div class="keygroup"><h3>Part E</h3><ol class="key">
+<li><span class="num">E1</span><span><span class="m">48 ÷ 6 =</span> <b>8</b>.</span></li>
+<li><span class="num">E2</span><span><span class="m">15 ÷ 2 = 7.5</span>, so <b>7 cups</b> filled all the way.</span></li>
+<li><span class="num">E3</span><span><span class="m">630 ÷ 9 =</span> <b>70</b>.</span></li>
+<li><span class="num">E4</span><span><span class="m">9.6 ÷ 4 =</span> <b>2.4</b> (8 ÷ 4 = 2, and 1.6 ÷ 4 = 0.4).</span></li>
+</ol></div>
+    <div class="keygroup"><h3>Part F</h3><ol class="key">
+<li><span class="num">F1</span><span><span class="m">2 × $3.75 = $7.50</span>, total <span class="m">$8.70</span>, change <b>$1.30</b>.</span></li>
+<li><span class="num">F2</span><span><span class="m">2 × $4.50 + 0.5 × $4.50</span> = <span class="m">$9.00 + $2.25 =</span> <b>$11.25</b>.</span></li>
+<li><span class="num">F3</span><span><span class="m">2 ÷ 0.25 = 200 ÷ 25 =</span> <b>8 glasses</b>.</span></li>
+<li><span class="num">F4</span><span><span class="m">20 ÷ 3.20 = 2000 ÷ 320 =</span> <b>6.25 gallons</b>.</span></li>
+</ol></div>
+    <div class="keygroup"><h3>Practice test</h3><ol class="key">
+<li><span class="num">1</span><span><span class="m">3.47 + 2.80 =</span> <b>6.27</b>.</span></li>
+<li><span class="num">2</span><span><span class="m">10.00 − 4.65 =</span> <b>5.35</b>.</span></li>
+<li><span class="num">3</span><span><span class="m">7 × 6 = 42</span> hundredths: <b>0.42</b>.</span></li>
+<li><span class="num">4</span><span><span class="m">125 × 4 = 500</span>, 3 places: 0.500 = <b>0.5</b>.</span></li>
+<li><span class="num">5</span><span>2 places: <b>7.2</b> (7.20). 4 places: <b>0.072</b> (0.0720).</span></li>
+<li><span class="num">6</span><span><span class="m">5 × 8 = 40</span> small squares: <b>0.4 square meter</b>.</span></li>
+<li><span class="num">7</span><span><span class="m">2 × $3.60 + 0.5 × $3.60</span> = <span class="m">$7.20 + $1.80 =</span> <b>$9.00</b>.</span></li>
+<li><span class="num">8</span><span>20 sixteens are 320, 64 left; 4 sixteens are 64: <b>24</b>.</span></li>
+<li><span class="num">9</span><span>1 with 3 left; 30 tenths: 7 each, 2 left; 20 hundredths: 5 each. <b>1.75</b>.</span></li>
+<li><span class="num">10</span><span><span class="m">24 ÷ 3 =</span> <b>8</b>.</span></li>
+<li><span class="num">11</span><span><span class="m">450 ÷ 15 =</span> <b>30</b>.</span></li>
+<li><span class="num">12</span><span><b>No.</b> Tenths times tenths make hundredths: <span class="m">3 × 3 = 9</span> hundredths, <b>0.09</b>.</span></li>
+<li><span class="num">13</span><span><span class="m">$49.50 ÷ 6 =</span> <b>$8.25</b> (6 × $8 = $48, and $1.50 ÷ 6 = $0.25).</span></li>
+<li><span class="num">14</span><span><span class="m">4 × $1.15 = $4.60</span>, total <span class="m">$9.50</span>, change <b>$0.50</b>.</span></li>
+<li><span class="num">15</span><span><span class="m">6 ÷ 0.4 = 60 ÷ 4 =</span> <b>15 laps</b>.</span></li>
+</ol></div>
+  </section>
+</main>
+
+<script src="../../shared/study.js?v=700ffe23"></script>
+<script src="study.js?v=d08c28ce"></script>
+</body>
+</html>

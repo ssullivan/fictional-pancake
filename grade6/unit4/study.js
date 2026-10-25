@@ -57,24 +57,7 @@ function areaGrid(width, height, cols, rows, label, [widthWords, heightWords], {
   for (let y = 0.5; y < rows; y++) d.line([0, y], [cols, y], "frame");
   d.grid(0, cols, 0, rows);
   /* the rectangle's outline goes over the grid */
-  [
-    [
-      [0, 0],
-      [width, 0],
-    ],
-    [
-      [width, 0],
-      [width, height],
-    ],
-    [
-      [width, height],
-      [0, height],
-    ],
-    [
-      [0, height],
-      [0, 0],
-    ],
-  ].forEach(([p, q]) => d.line(p, q));
+  d.box(0, 0, width, height, "out");
   return d.side([0, 0], [width, 0], widthWords, inside).side([0, 0], [0, height], heightWords, inside).svg();
 }
 

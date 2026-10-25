@@ -14,8 +14,8 @@
    table.rt          a table of equivalent amounts: th headings, td.note beside a row (× 4), td.fill a box to fill in;
                      .wide fills its column
    figure, .pair     a diagram (drawn by the unit's study.js into <figure data-fig>), and diagrams side by side
-   svg classes       .g grid lines, .sh a shape, .sh2 a second kind of shape (blue), .bx an empty box, .frame a dashed
-                     outline, .ed an edge, .tip an arrowhead, .lb a label (.sm smaller, .hl blue) */
+   svg classes       .g grid lines, .sh a shape, .sh2 a second kind of shape (blue), .bx an empty box, .out an outline,
+                     .frame a dashed outline, .ed an edge, .tip an arrowhead, .lb a label (.sm smaller, .hl blue) */
 :root{color-scheme:light}
 html,body{background:#fff}
 body{background-image:none;color:#111a2b}
@@ -94,6 +94,7 @@ ol.key .num{flex:none;min-width:30px;font:700 13px/1.7 var(--mono);color:var(--a
 .guide svg .sh{fill:var(--tint);stroke:var(--ink);stroke-width:2;stroke-linejoin:round}
 .guide svg .sh2{fill:#dcebf7;stroke:var(--ink);stroke-width:2;stroke-linejoin:round}
 .guide svg .bx{fill:#fff;stroke:var(--ink);stroke-width:2}
+.guide svg .out{fill:none;stroke:var(--ink);stroke-width:2;stroke-linejoin:round}
 .guide svg .frame{fill:none;stroke:var(--muted);stroke-width:1.5;stroke-dasharray:5 4}
 .guide svg .ed{stroke:var(--ink);stroke-width:2;stroke-linecap:round}
 .guide svg .tip{fill:var(--ink)}
