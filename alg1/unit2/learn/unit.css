@@ -15,3 +15,9 @@
 .shares span{flex:1;min-width:0;background:rgba(255,201,60,.18);border:1.5px solid var(--gold);border-radius:8px;padding:8px 2px;text-align:center;font:700 13px var(--mono);overflow:hidden}
 /* room between a row of steppers and the statement under it */
 .wrow + .eq{margin-top:14px}
+/* a chain of equations, one move to a line, each move named after its equation: green when it did the same to both sides, red when it didn't */
+.chain{margin:14px 0 10px;padding-left:28px;font-size:18px}
+.chain li{margin:6px 0}
+.chain .mv{margin-left:12px;font:700 13px var(--mono)}
+.chain .mv.ok{color:var(--good)}
+.chain .mv.no{color:var(--bad)}

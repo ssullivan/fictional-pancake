@@ -12,6 +12,8 @@ const ICON = {
     '<text x="32" y="28" fill="#f3f6fb" font-size="14" font-weight="800" text-anchor="middle" font-family="monospace">4c+5=27</text><path d="M18,40 L28,50 L48,30" fill="none" stroke="#5fe0a8" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>',
   graph:
     '<path d="M8,56 H58 M8,56 V6" stroke="#f3f6fb" stroke-width="2.5"/><path d="M8,14 L52,56" stroke="#ffc93c" stroke-width="3"/><circle cx="24" cy="29" r="4.5" fill="#5fe0a8"/><circle cx="44" cy="22" r="4.5" fill="#ff6b6b"/>',
+  equiv:
+    '<text x="32" y="26" fill="#f3f6fb" font-size="14" font-weight="800" text-anchor="middle" font-family="monospace">3a+6=15</text><text x="32" y="50" fill="#ffc93c" font-size="14" font-weight="800" text-anchor="middle" font-family="monospace">a+2=5</text><path d="M32,31 V37 M28,34 L32,38 L36,34" fill="none" stroke="#5fe0a8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>',
 };
 const UNIT = {
   saveKey: "alg1u2-learn",
@@ -59,6 +61,15 @@ const UNIT = {
       lessons: "Lesson 5",
       blurb:
         "The graph of an equation is all its solutions. Points on the line meet the constraint; points off it don’t.",
+      steps: 2,
+    },
+    {
+      id: "equivalent-equations",
+      icon: "equiv",
+      title: "Equivalent equations",
+      lessons: "Lesson 6",
+      blurb:
+        "Equivalent equations have the same solutions. Doing the same to both sides keeps them; doing different things changes them.",
       steps: 2,
     },
   ],

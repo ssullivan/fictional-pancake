@@ -2,7 +2,7 @@
 
 What the Learn pages for this unit must do, chapter by chapter and step by step. Each item is a test: the part in backticks is what `tests/checklists.spec.js` does and checks (the commands are in `tools/checklists.mjs`). Every step also gets the tests in `tests/learn-steps.spec.js`: no errors or sideways scrolling, every widget button pressed twice, steppers pushed past their limits, sliders end to end, every named mistake in the quick check, empty and formatted answers, and progress kept after a reload. The quick-check lines come from the chapters' code; `node tools/check.mjs --fix` refreshes them.
 
-IM lessons: 1–5 so far (Section 1, Writing and Modeling with Equations). Each chapter follows one IM lesson. Left out: Lesson 1's group project and Lesson 2's Platonic solids puzzle, which are open-ended.
+IM lessons: 1–6 so far (Section 1, Writing and Modeling with Equations, and Section 2's first lesson). Each chapter follows one IM lesson. Left out: Lesson 1's group project and Lesson 2's Platonic solids puzzle, which are open-ended.
 
 ## Chapter 1: Planning a pizza party · `learn/pizza-party.html` · Lesson 1
 
@@ -93,3 +93,25 @@ IM lessons: 1–5 so far (Section 1, Writing and Modeling with Equations). Each 
 - [ ] Edge: the last whole minute: `click Minutes (t): one more ×20; see After 22 minutes; see 10 gallons; see empty after 22.5 minutes`
 - [ ] Edge: the start: `click Minutes (t): one less ×6; see After 0 minutes: 450 − 20 × 0 = 450 gallons`
 - Quick check: A savings account starts with $475, and $125 goes in each week: \(b = 475 + 125w\). After how many weeks does it have $1,350? Answer: 7 weeks. Mistakes it names: 10.8, 14.6.
+
+## Chapter 6: Equivalent equations · `learn/equivalent-equations.html` · Lesson 6
+
+### Step 1: The same solution
+- [ ] It starts on Noah’s equation, solved by 60: `pressed Noah’s; see the price, minus the 10% coupon, plus $2.70 tax; see 60 is still the solution; see the jeans cost $60 before the coupon; count .eq .katex = 1`
+- [ ] A is the same amounts in cents: `click A; see in cents instead of dollars; see 60 is still the solution, so it’s equivalent to Noah’s equation`
+- [ ] B and C are equivalent too: `click B; see 2.70 taken off both sides; see equivalent to Noah’s equation; click C; see 10% off means paying 90% of the price; see equivalent to Noah’s equation`
+- [ ] D takes 2.70 off one side only: `click D; see 2.70 taken off the left side only; see not 56.70; see 60 isn’t a solution; see so it isn’t equivalent to Noah’s`
+- [ ] E takes it off one side and adds it to the other: `click E; see added to the right side; see not 59.40; see 60 isn’t a solution`
+- [ ] F doubles one side: `click F; see two pairs of jeans; see = 113.40; see 60 isn’t a solution`
+- [ ] Edge: picking the same equation twice keeps it: `click D ×2; pressed D; count .eq .katex = 1`
+- Quick check: Five tubs of yogurt cost $6: \(5y = 6\). Which equation is equivalent to it? Answer: “\(15y = 18\)”. Mistakes it names: “\(5y = 12\)”, “\(5y + 4 = 6\)”, “\(5y - 1 = 3\)”.
+
+### Step 2: Acceptable moves
+- [ ] It starts on 3a + 6 = 15, solved by 3: `see Still 3: pick a move; count .chain li = 1; nosee Start over to try more moves`
+- [ ] Moves on both sides keep the solution: `click − 6 both sides; click ÷ 3 both sides; see Still 3; see every equation here is equivalent; count .chain li = 3`
+- [ ] Dividing again gives fractions, still solved by 3: `click ÷ 3 both sides ×2; count .chain .mfrac = 3; see Still 3`
+- [ ] A move on one side only changes the solution: `click − 6 left only; see Not 3 any more; see “− 6 left only” did something different to each side`
+- [ ] Edge: moves after a one-sided one don't bring 3 back, and the first one-sided move is named: `click × 2 right only; click − 6 left only; click + 4 both sides; see Not 3 any more; see “× 2 right only” did something different`
+- [ ] Edge: five moves fill the chain: `click × 2 both sides ×5; count .chain li = 6; see Start over to try more moves; disabled × 2 both sides; disabled − 6 left only`
+- [ ] Start over goes back to 3a + 6 = 15: `click + 4 both sides ×5; click Start over; count .chain li = 1; enabled + 4 both sides; see Still 3: pick a move`
+- Quick check: Each equation was made from \(2x + 4 = 10\) in one move. Which one is not equivalent to it? Answer: “\(2x = 14\)”. Mistakes it names: “\(x + 2 = 5\)”, “\(2x = 6\)”, “\(4x + 8 = 20\)”.
