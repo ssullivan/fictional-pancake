@@ -14,14 +14,14 @@ import { tmpdir } from "node:os";
 import { createHash } from "node:crypto";
 
 const ROOT = resolve(import.meta.dirname, "..");
-const GAMES = globSync("grade*/unit*/stations.js", { cwd: ROOT }).map(dirname).sort();
+const GAMES = globSync("{grade*,alg1}/unit*/stations.js", { cwd: ROOT }).map(dirname).sort();
 const PAGES = [
   "",
-  ...globSync(["grade*/index.html", "alg1/index.html"], { cwd: ROOT })
+  ...globSync("{grade*,alg1}/index.html", { cwd: ROOT })
     .map((f) => dirname(f) + "/")
     .sort(),
 ];
-const LEARN = globSync("grade*/unit*/learn.html", { cwd: ROOT }).sort();
+const LEARN = globSync("{grade*,alg1}/unit*/learn.html", { cwd: ROOT }).sort();
 const WIDTHS = [1200, 390];
 
 if (process.argv[2] === "--compare") {

@@ -1,11 +1,11 @@
-// Every unit's printable study guide (grade*/unit*/study.html): it opens from the unit's card on the grade page, it's a plain
-// white page (not the site's navy grid), every diagram is drawn, and nothing scrolls sideways. Printed (shared/study-print.css),
-// it drops the links and printing tips, shows the test's name line, starts each part, the test, and the key on new pages, and
-// leaves room to work above each answer line.
+// Every unit's printable study guide ({grade*,alg1}/unit*/study.html): it opens from the unit's card on the grade (or
+// course) page, it's a plain white page (not the site's navy grid), every diagram is drawn, and nothing scrolls sideways.
+// Printed (shared/study-print.css), it drops the links and printing tips, shows the test's name line, starts each part, the
+// test, and the key on new pages, and leaves room to work above each answer line.
 const { test, expect } = require("./fixtures");
 const { globSync } = require("node:fs");
 
-const guides = globSync("grade*/unit*/study.html", { cwd: `${__dirname}/..` }).sort();
+const guides = globSync("{grade*,alg1}/unit*/study.html", { cwd: `${__dirname}/..` }).sort();
 for (const guide of guides) {
   test(`study guide ${guide}`, async ({ page }) => {
     // the grade page links to it

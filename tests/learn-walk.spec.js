@@ -3,7 +3,7 @@
 const { test, expect } = require("./fixtures");
 const { globSync } = require("node:fs");
 
-const units = globSync("grade*/unit*/learn.html", { cwd: `${__dirname}/..` }).sort();
+const units = globSync("{grade*,alg1}/unit*/learn.html", { cwd: `${__dirname}/..` }).sort();
 for (const unit of units) {
   test(`walk ${unit}`, async ({ page }) => {
     test.setTimeout(240000);

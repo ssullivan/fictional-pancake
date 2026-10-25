@@ -9,7 +9,7 @@ const { test, expect } = require("./fixtures");
 const { globSync } = require("node:fs");
 
 const ROOT = `${__dirname}/..`;
-const pages = globSync("grade*/unit*/learn/*.html", { cwd: ROOT }).sort();
+const pages = globSync("{grade*,alg1}/unit*/learn/*.html", { cwd: ROOT }).sort();
 const plain = (s) =>
   String(s)
     .replace(/<[^>]*>/g, "")

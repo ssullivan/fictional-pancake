@@ -131,7 +131,7 @@ const run = (page, srcs, inline) => {
 };
 const scriptsOf = (html) => [...html.matchAll(/<script src="([^"?]+)(?:\?[^"]*)?"><\/script>/g)].map((m) => m[1]);
 const inlineOf = (html) => (html.match(/<script>\n([^]*?)<\/script>/) || [])[1] || "";
-for (const home of globSync("grade*/unit*/learn.html", { cwd: ROOT }).sort()) {
+for (const home of globSync("{grade*,alg1}/unit*/learn.html", { cwd: ROOT }).sort()) {
   const file = join(ROOT, home),
     dir = dirname(file),
     html = readFileSync(file, "utf8");

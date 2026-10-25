@@ -2,7 +2,9 @@
 
 General rules for games and Learn pages are in the root `CLAUDE.md`. Algebra 1 follows **IM 9–12 Math** (Algebra 1) and uses the Grade 6–8 styles: `figures.css` and `pictures.css` for labels, and exact fractions (the math in `shared/util.js`). All math is typeset with KaTeX, and typed expressions, equations, and inequalities are `expr` problems (root `CLAUDE.md`, Typeset math).
 
-It's the first course past Grade 8, so it lives in a course folder (`alg1/`) rather than a `grade<N>/` one; later courses get their own (`geo/`, `alg2/`, …), each with `unit<M>/` folders inside laid out like a grade's. The tools and tests find units with `grade*/unit*` globs: when Unit 1 gets its first page, widen those (in `tools/check.mjs`, `fuzz.mjs`, `snap.mjs`, `same.mjs`, and `tests/*.spec.js`) to take course folders too, and check that each one picks the new unit up. (`snap.mjs` already lists `alg1/index.html` with the grade pages.)
+It's the first course past Grade 8, so it lives in a course folder (`alg1/`) rather than a `grade<N>/` one; later courses get their own (`geo/`, `alg2/`, …), each with `unit<M>/` folders inside laid out like a grade's. The tools and tests find units with `{grade*,alg1}/unit*` globs (in `tools/check.mjs`, `fuzz.mjs`, `snap.mjs`, and `tests/*.spec.js`; `same.mjs` has a pattern for unit folders): add a new course folder to each.
+
+Learn chapters follow IM's sections and lessons: one chapter per lesson (`lessons: 'Lesson 1'`), in lesson order, so a section is a run of chapters. The unit's `learn.html` says which sections are there so far.
 
 ## Algebra 1 games
 
@@ -10,6 +12,7 @@ When a unit gets a game or Learn page, add a row here and turn its "Coming soon"
 
 | Folder | Game | Unit |
 |---|---|---|
+| `unit1/` | No game yet. Learn page with 1 chapter so far (Section 1, Lesson 1: Getting to know you, 4 steps): the warm-up's four potato-chip questions sorted 2 × 2 (numbers or categories, one answer or answers that vary), a 15-classmate survey (statistical or not, variability), numerical or categorical data (dot plot and mean, or a tally; zip codes as numbers that are labels), and rewriting a question about one person as one about a group. The chapter script defines `fmt` (for `stats.js`); move it to `learn/common.js` when a second chapter needs it | Algebra 1 Unit 1 |
 
 Pictures and helpers earlier grades already have, to reuse rather than copy (move one to `shared/` when an Algebra 1 unit needs it):
 - Coordinate planes, one quadrant or four, with points, a line y = mx + b, and shapes: `coordPlane` (`shared/algebra.js`). Number lines through negative numbers, with dots and rays for inequalities: `signedLine` (`shared/signed.js`). Hangers for solving equations: `hanger` (`shared/hanger.js`).

@@ -1,6 +1,6 @@
 // Deals thousands of problems from every station of every game and checks each one.
 //
-//   node tools/fuzz.mjs                 every game (grade*/unit*/stations.js, and the test pages' tests/pages/*/stations.js)
+//   node tools/fuzz.mjs                 every game ({grade*,alg1}/unit*/stations.js, and the test pages' tests/pages/*/stations.js)
 //   node tools/fuzz.mjs grade6/unit3    one game
 //   N=20000 node tools/fuzz.mjs         more problems per station (default 5000)
 //
@@ -28,7 +28,7 @@ const ROOT = resolve(import.meta.dirname, "..");
 const N = +process.env.N || 5000;
 const games = process.argv.slice(2).length
   ? process.argv.slice(2)
-  : globSync(["grade*/unit*/stations.js", "tests/pages/*/stations.js"], { cwd: ROOT }).map(dirname).sort();
+  : globSync(["{grade*,alg1}/unit*/stations.js", "tests/pages/*/stations.js"], { cwd: ROOT }).map(dirname).sort();
 
 // the text a student sees must never show a broken value
 const BROKEN = /NaN|undefined|Infinity|\[object |\bnull\b/;

@@ -10,7 +10,7 @@ const pattern = (t) => {
   return m ? new RegExp(m[1]) : t;
 };
 
-for (const file of globSync("grade*/unit*/learn/CHECKLIST.md", { cwd: ROOT }).sort()) {
+for (const file of globSync("{grade*,alg1}/unit*/learn/CHECKLIST.md", { cwd: ROOT }).sort()) {
   const unit = dirname(dirname(file));
   let chapter = null,
     step = null;

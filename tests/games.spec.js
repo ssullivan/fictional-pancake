@@ -4,7 +4,7 @@ const { test, expect } = require("./fixtures");
 const { globSync, readFileSync } = require("node:fs");
 const { dirname } = require("node:path");
 
-const games = globSync(["grade*/unit*/stations.js", "tests/pages/*/stations.js"], { cwd: `${__dirname}/..` })
+const games = globSync(["{grade*,alg1}/unit*/stations.js", "tests/pages/*/stations.js"], { cwd: `${__dirname}/..` })
   .map(dirname)
   .sort();
 for (const game of games) {

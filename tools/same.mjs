@@ -13,10 +13,10 @@
 // A function's calls should reach every option and branch; add calls when you add a function or an option.
 // This only covers what CALLS covers, so a change that should look the same still needs snap.mjs --compare before it ships.
 //
-// A unit folder (grade<N>/unit<M>) loads that unit's pages instead, at the revision and now: its game's scripts as
-// index.html lists them, dealing PROBLEMS problems from every station (with 0 and 3 stars saved) with the same seed, and
-// each Learn chapter's scripts as its page lists them, comparing its steps (titles, text, quick checks) and quick-check
-// figures (F). Widgets need a page, so they aren't run: snap.mjs --compare and npm test cover them.
+// A unit folder (grade<N>/unit<M>, or a course's, like alg1/unit<M>) loads that unit's pages instead, at the revision and
+// now: its game's scripts as index.html lists them, dealing PROBLEMS problems from every station (with 0 and 3 stars saved)
+// with the same seed, and each Learn chapter's scripts as its page lists them, comparing its steps (titles, text, quick
+// checks) and quick-check figures (F). Widgets need a page, so they aren't run: snap.mjs --compare and npm test cover them.
 import { readFileSync, existsSync, globSync } from "node:fs";
 import { join, resolve, dirname, basename, normalize } from "node:path";
 import { execFileSync } from "node:child_process";
@@ -24,7 +24,7 @@ import vm from "node:vm";
 
 const ROOT = resolve(import.meta.dirname, "..");
 const [rev = "HEAD", ...args] = process.argv.slice(2);
-const isUnit = (a) => /^grade\d+\/unit\d+\/?$/.test(a);
+const isUnit = (a) => /^(grade\d+|alg1)\/unit\d+\/?$/.test(a);
 const only = args.filter((a) => !isUnit(a)),
   units = args.filter(isUnit).map((a) => a.replace(/\/$/, ""));
 // in load order: each file may use the ones before it
