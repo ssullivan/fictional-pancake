@@ -35,11 +35,17 @@ export function quickLine(step) {
   if (!c) return "- No quick check.";
   const q = (t) => `“${plain(t)}”`;
   const answer =
-    c.kind === "num" ? `${c.answer}${c.unit ? " " + c.unit : ""}` : q(c.choices.find((x) => x.id === c.answer).label);
+    c.kind === "num"
+      ? `${c.answer}${c.unit ? " " + c.unit : ""}`
+      : c.kind === "expr"
+        ? q(c.answer)
+        : q(c.choices.find((x) => x.id === c.answer).label);
   const wrong =
     c.kind === "num"
       ? (c.misc || []).map(([v]) => v)
-      : c.choices.filter((x) => x.id !== c.answer).map((x) => q(x.label));
+      : c.kind === "expr"
+        ? (c.misc || []).map(([text]) => q(text))
+        : c.choices.filter((x) => x.id !== c.answer).map((x) => q(x.label));
   return `- Quick check: ${plain(c.q)} Answer: ${answer}.${wrong.length ? ` Mistakes it names: ${wrong.join(", ")}.` : ""}`;
 }
 

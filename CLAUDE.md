@@ -1,6 +1,6 @@
 # Math games
 
-Static HTML math games served with GitHub Pages at https://ssullivan.github.io/fictional-pancake/ (from `main`, repo root). Grades so far: 2 (`grade2/`), 3 (`grade3/`), 4 (`grade4/`), 5 (`grade5/`), 6 (`grade6/`), 7 (`grade7/`), and 8 (`grade8/`, Unit 1 so far). High school courses come after Grade 8, each in a course folder laid out like a grade's: Algebra 1 (`alg1/`, Unit 1's first Learn chapter so far). The tools and tests find units in `{grade*,alg1}/unit*`; a new course folder is added to those patterns (`alg1/CLAUDE.md` lists where).
+Static HTML math games served with GitHub Pages at https://ssullivan.github.io/fictional-pancake/ (from `main`, repo root). Grades so far: 2 (`grade2/`), 3 (`grade3/`), 4 (`grade4/`), 5 (`grade5/`), 6 (`grade6/`), 7 (`grade7/`), and 8 (`grade8/`, Unit 1 so far). High school courses come after Grade 8, each in a course folder laid out like a grade's: Algebra 1 (`alg1/`: Learn chapters for Unit 1's Lesson 1 and Unit 2's Section 1 so far). The tools and tests find units in `{grade*,alg1}/unit*`; a new course folder is added to those patterns (`alg1/CLAUDE.md` lists where).
 
 Maintainability comes first: anything two pages share belongs in `shared/`, not in copies.
 

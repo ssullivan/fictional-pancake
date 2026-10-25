@@ -1,0 +1,17 @@
+/* Algebra 1 Unit 2 Learn pages: statements, what the letters stand for, tables of data, and shares of a prize. Loaded by
+   every page in learn/. */
+.eq{margin:0 0 10px;font:700 22px var(--mono);text-align:center}
+.eq.sm{font-size:17px}
+/* a stepper's value stays on one line */
+.stepper b{white-space:nowrap}
+/* what each letter stands for */
+.legend{margin:0 0 12px;padding-left:18px;font:500 15px/1.5 var(--mono)}
+/* a table of data, its rows checked ✓ or ✗ in the last column */
+.dtab{border-collapse:collapse;margin:0 auto;font:700 15px var(--mono)}
+.dtab th,.dtab td{border:1px solid rgba(170,205,255,.3);padding:6px 12px;text-align:center}
+.dtab th{color:var(--dim);font-size:13px}
+/* a prize split into equal shares, one box each */
+.shares{display:flex;gap:4px;margin:4px 0 12px}
+.shares span{flex:1;min-width:0;background:rgba(255,201,60,.18);border:1.5px solid var(--gold);border-radius:8px;padding:8px 2px;text-align:center;font:700 13px var(--mono);overflow:hidden}
+/* room between a row of steppers and the statement under it */
+.wrow + .eq{margin-top:14px}

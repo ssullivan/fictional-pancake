@@ -34,7 +34,13 @@ for (const unit of units) {
             }
           : null;
       });
-      if (c && c.kind === "num") {
+      if (c && c.kind === "expr") {
+        await page.locator("#cin").fill(`${c.answer}+1000`);
+        await page.locator("#cin").press("Enter");
+        await expect(page.locator("#check .fb.bad")).toBeVisible();
+        await page.locator("#cin").fill(c.answer);
+        await page.locator("#cin").press("Enter");
+      } else if (c && c.kind === "num") {
         await page.locator("#cin").fill(String(c.answer + 1000));
         await page.locator("#cin").press("Enter");
         await expect(page.locator("#check .fb.bad")).toBeVisible();

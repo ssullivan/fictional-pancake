@@ -4,18 +4,14 @@
 //   and tapping things in its picture throws nothing;
 // - Next stays locked until the quick check is answered, and stays open after a reload (progress is saved);
 // - the quick check: an empty or letters-only answer asks for a number, every named mistake shows its message, two misses
-//   show the worked answer, and the answer counts with its unit and spaces around it ("30 faces").
+//   show the worked answer, and the answer counts with its unit and spaces around it ("30 faces"). A typed-math (expr) check:
+//   an empty answer or a letter the problem doesn't use gets a note and keeps its try, every named mistake shows its message,
+//   two misses show the worked answer, and the answer counts with spaces around it.
 const { test, expect } = require("./fixtures");
 const { globSync } = require("node:fs");
 
 const ROOT = `${__dirname}/..`;
 const pages = globSync("{grade*,alg1}/unit*/learn/*.html", { cwd: ROOT }).sort();
-const plain = (s) =>
-  String(s)
-    .replace(/<[^>]*>/g, "")
-    .replace(/&amp;/g, "&")
-    .replace(/\s+/g, " ")
-    .trim();
 
 for (const url of pages) {
   test(`every step of ${url}`, async ({ page, tap, hasTouch }) => {
@@ -39,6 +35,13 @@ for (const url of pages) {
     );
     const fb = page.locator("#check [data-fb]"),
       next = page.locator("#next");
+    // a message's text as the page shows it: its math typeset when the page loads tex.js, its tags gone
+    const shown = (message) =>
+      page.evaluate((html) => {
+        const box = document.createElement("div");
+        box.innerHTML = typeof typeset === "function" ? typeset(html) : html;
+        return box.textContent.replace(/\s+/g, " ").trim();
+      }, message);
 
     for (const [i, st] of steps.entries()) {
       const at = async () => {
@@ -120,24 +123,53 @@ for (const url of pages) {
         for (const [v, msg] of c.misc) {
           await at();
           await answer(String(v));
-          await expect(fb, `${step}: typing ${v} names the mistake`).toContainText(plain(msg));
+          await expect(fb, `${step}: typing ${v} names the mistake`).toContainText(await shown(msg));
           await expect(fb).toContainText("Try once more");
         }
         await at();
         await answer(String(c.answer + 997));
         await answer(String(c.answer + 997));
         await expect(fb, `${step}: two misses show the worked answer`).toContainText("Here’s how it works");
-        await expect(fb).toContainText(plain(c.explain));
+        await expect(fb).toContainText(await shown(c.explain));
         await expect(next, `${step}: Next opens after the check`).toBeEnabled();
         await page.evaluate(() => localStorage.clear());
         await at();
         await answer(` ${c.answer} ${c.unit} `);
         await expect(fb, `${step}: the answer counts with its unit and spaces`).toContainText("Nice!");
+      } else if (c.kind === "expr") {
+        const input = page.locator("#cin");
+        const answer = async (v) => {
+          await input.fill(v);
+          await input.press("Enter");
+        };
+        // an answer that can't be read gets a note and keeps its try
+        for (const v of ["", "@"]) {
+          await answer(v);
+          await expect(fb.locator(".fb.info"), `${step}: "${v}" gets a note`).toBeVisible();
+        }
+        await expect(fb.locator(".fb.bad"), `${step}: a note doesn't use a try`).toHaveCount(0);
+        for (const [v, msg] of c.misc) {
+          await at();
+          await answer(v);
+          await expect(fb, `${step}: typing ${v} names the mistake`).toContainText(await shown(msg));
+          await expect(fb).toContainText("Try once more");
+        }
+        // a wrong answer of the same kind: the answer with 997 added to one side
+        await at();
+        await answer(`${c.answer}+997`);
+        await answer(`${c.answer}+997`);
+        await expect(fb, `${step}: two misses show the worked answer`).toContainText("Here’s how it works");
+        await expect(fb).toContainText(await shown(c.explain));
+        await expect(next, `${step}: Next opens after the check`).toBeEnabled();
+        await page.evaluate(() => localStorage.clear());
+        await at();
+        await answer(` ${c.answer} `);
+        await expect(fb, `${step}: the answer counts with spaces around it`).toContainText("Nice!");
       } else {
         for (const id of c.choices.filter((x) => x !== c.answer)) {
           await at();
           await press(page.locator(`#check .choice[data-c="${id}"]`));
-          await expect(fb, `${step}: choice ${id} names the mistake`).toContainText(plain(c.why[id]));
+          await expect(fb, `${step}: choice ${id} names the mistake`).toContainText(await shown(c.why[id]));
         }
         await page.evaluate(() => localStorage.clear());
         await at();
