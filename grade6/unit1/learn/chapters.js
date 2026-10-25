@@ -4,6 +4,7 @@ const ICON = {
   area: '<g fill="rgba(255,201,60,.45)" stroke="#ffc93c" stroke-width="2"><rect x="6" y="30" width="14" height="14"/><rect x="20" y="30" width="14" height="14"/><rect x="34" y="30" width="14" height="14"/><rect x="6" y="16" width="14" height="14"/><rect x="20" y="16" width="14" height="14"/></g><rect x="6" y="44" width="14" height="14" fill="none" stroke="#7fe3ff" stroke-width="2" stroke-dasharray="3 3"/>',
   para: '<polygon points="4,52 42,52 60,14 22,14" fill="rgba(255,201,60,.3)" stroke="#ffc93c" stroke-width="2.5"/><line x1="22" y1="14" x2="22" y2="52" stroke="#f3f6fb" stroke-width="2" stroke-dasharray="4 3"/>',
   tri: '<polygon points="6,54 46,54 20,12" fill="rgba(255,201,60,.35)" stroke="#ffc93c" stroke-width="2.5"/><polygon points="46,54 60,12 20,12" fill="rgba(127,227,255,.2)" stroke="#7fe3ff" stroke-width="2" stroke-dasharray="4 3"/>',
+  hgt: '<polygon points="6,54 34,54 54,14" fill="rgba(255,201,60,.35)" stroke="#ffc93c" stroke-width="2.5"/><line x1="34" y1="54" x2="60" y2="54" stroke="#f3f6fb" stroke-width="2" stroke-dasharray="2 4"/><line x1="54" y1="14" x2="54" y2="54" stroke="#f3f6fb" stroke-width="2.5" stroke-dasharray="5 4"/><polyline points="47,54 47,47 54,47" fill="none" stroke="#f3f6fb" stroke-width="1.8"/>',
   poly: '<polygon points="6,54 58,54 46,20 18,20" fill="rgba(255,201,60,.35)" stroke="#ffc93c" stroke-width="2.5"/><line x1="18" y1="20" x2="18" y2="54" stroke="#7fe3ff" stroke-width="2"/><line x1="46" y1="20" x2="46" y2="54" stroke="#7fe3ff" stroke-width="2"/>',
   net: '<g stroke="#f3f6fb" stroke-width="1.5"><rect x="22" y="4" width="18" height="14" fill="rgba(127,227,255,.5)"/><rect x="4" y="18" width="18" height="18" fill="rgba(255,138,196,.5)"/><rect x="22" y="18" width="18" height="18" fill="rgba(255,201,60,.6)"/><rect x="40" y="18" width="18" height="18" fill="rgba(255,138,196,.5)"/><rect x="22" y="36" width="18" height="14" fill="rgba(127,227,255,.5)"/><rect x="22" y="50" width="18" height="12" fill="rgba(255,201,60,.6)"/></g>',
   poly3:
@@ -44,6 +45,16 @@ const UNIT = {
       blurb: "Two copies of a triangle make a parallelogram, so a triangle is half of base × height.",
       game: { zone: "tri", name: "Triangle Tower" },
       steps: 3,
+    },
+    {
+      id: "heights",
+      icon: "hgt",
+      title: "Finding the height",
+      lessons: "Lessons 5 and 10",
+      blurb:
+        "Draw heights yourself: square to the base, sometimes outside the shape, and for any side you pick as the base.",
+      game: { zone: "tri", name: "Triangle Tower" },
+      steps: 5,
     },
     {
       id: "polygons",

@@ -72,7 +72,65 @@ Not covered: Lesson 19 (Designing a Tent) is an open-ended project, so it works 
 - [ ] Forgetting the half is named: `answer 20; feedback That’s the whole parallelogram.`
 - Quick check: What is the area of this triangle? Answer: 10 square units. Mistakes it names: 20, 17.5.
 
-## Chapter 4: Polygons · `learn/polygons.html` · Lesson 11
+## Chapter 4: Finding the height · `learn/heights.html` · Lessons 5 and 10
+
+### Step 1: Square to the base
+- [ ] The paper starts at the end of the base, missing the top corner: `see The paper’s edge misses the top corner. Slide it to the left.`
+- [ ] Slid under the top corner, the height appears: `slide Slide the paper = 2; see The paper’s edge touches the top corner. That’s the height: square to the base, 4 units tall.`
+- [ ] Edge: slid past the corner, it says to go back the other way: `slide Slide the paper = 1; see Slide it to the right.; nosee touches`
+- [ ] A new triangle starts at the end of its base again: `slide Slide the paper = 2; click New triangle; see misses the top corner; slide Slide the paper = 4; see 5 units tall`
+- [ ] Edge: on a right triangle the height runs along a side: `click New triangle ×3; slide Slide the paper = 0; see 4 units tall; see Here the height runs along a side: this is a right triangle.`
+- Quick check: Which segment is the height for this base? Answer: “B”. Mistakes it names: “A”, “C”.
+
+### Step 2: Draw it yourself
+- [ ] It says what to tap: `see Tap the top corner, then the point where the height meets the base line.`
+- [ ] Top corner, then straight down to the base, is the height: `tap [data-pt="2,5"]; see Now tap the other end.; tap [data-pt="2,0"]; see That’s the height: from the top corner, square to the base. It’s 5 units.`
+- [ ] Either order counts: `tap [data-pt="2,0"]; tap [data-pt="2,5"]; see That’s the height`
+- [ ] The slanted side is named: `tap [data-pt="2,5"]; tap [data-pt="0,0"]; see That’s a side of the shape. It’s slanted, so it isn’t square to the base.`
+- [ ] Almost square, 1 unit off, is named: `tap [data-pt="2,5"]; tap [data-pt="3,0"]; see That’s not square to the base: it leans.`
+- [ ] Stopping before the base line is named: `tap [data-pt="2,5"]; tap [data-pt="2,1"]; see It stops before the base line.`
+- [ ] Starting at a corner of the base is named: `tap [data-pt="0,0"]; tap [data-pt="0,3"]; see That starts at a corner of the base.`
+- [ ] As tall as the triangle but not at its top corner is named: `tap [data-pt="4,0"]; tap [data-pt="4,5"]; see That’s as tall as the triangle, but it doesn’t touch the top corner.`
+- [ ] Going past the top corner is named: `tap [data-pt="2,0"]; tap [data-pt="2,6"]; see It goes higher than the top corner.`
+- [ ] Along the base is named: `tap [data-pt="1,0"]; tap [data-pt="5,0"]; see That runs along the base line.`
+- [ ] Edge: tapping the same point twice takes it back: `tap [data-pt="3,3"]; tap [data-pt="3,3"]; see Tap the top corner, then; count .pick = 0`
+- [ ] Edge: a new segment replaces the last one: `tap [data-pt="2,5"]; tap [data-pt="0,0"]; count .hbad = 1; tap [data-pt="2,5"]; tap [data-pt="2,0"]; count .hbad = 0; count .hgt = 1`
+- [ ] Show me draws the height: `click Show me; see It’s 5 units.; count .hgt = 1`
+- [ ] Edge: on a right triangle the height is a side: `click New shape ×2; tap [data-pt="0,4"]; tap [data-pt="0,0"]; see Here the height is also a side of the triangle: it’s a right triangle.`
+- [ ] Drawing with a mouse, a finger, or the keyboard: `spec learn-drag.spec.js: Finding the height: draw a height by tapping near grid points`
+- Quick check: Kiran drew this height for the base. What went wrong? Answer: “It stops before the base line”. Mistakes it names: “It isn’t square to the base”, “It starts at the wrong corner”, “Nothing: it’s right”.
+
+### Step 3: When it lands outside
+- [ ] The base line is extended with dots: `count line.ext = 1`
+- [ ] The height lands on the extension: `tap [data-pt="6,4"]; tap [data-pt="6,0"]; see It’s 4 units.; see It lands outside the triangle, on the base line extended.`
+- [ ] Down to the end of the base is the slanted side: `tap [data-pt="6,4"]; tap [data-pt="3,0"]; see That’s a side of the shape.`
+- [ ] Edge: square to the base from the base’s end is named: `tap [data-pt="3,0"]; tap [data-pt="3,2"]; see That starts at a corner of the base.`
+- [ ] Edge: a triangle leaning the other way: `click New shape; tap [data-pt="0,5"]; tap [data-pt="0,0"]; see It’s 5 units.; see It lands outside the triangle`
+- [ ] Show me lands outside: `click New shape ×2; click Show me; see It’s 3 units.; see It lands outside the triangle`
+- Quick check: How tall is this triangle, for the base of 3? Count the grid squares. Answer: 4 units. Mistakes it names: 5, 7.2, 3, 6.
+
+### Step 4: Any side can be the base
+- [ ] It starts with the bottom side as the base: `see Base a = 6 · Height = 4.; see Area = ½ × 6 × 4 = 12 square units; pressed Base a`
+- [ ] Another side as the base has its own height, and the same area: `click Base b; pressed Base b; see Base b = 5 · Height = 4.8.; see Area = ½ × 5 × 4.8 = 12 square units`
+- [ ] Tapping a side in the picture makes it the base: `tap [data-i="2"]; pressed Base c; see Base c = 5`
+- [ ] Trying all three sides says the area is always the same: `click Base b; click Base c; see Every side gives 12: each base has its own height, and the area comes out the same.`
+- [ ] Edge: a height that lands outside: `click New triangle; click Base b; see Height = 4.8. It lands outside the triangle.; count line.ext = 1`
+- [ ] Edge: on a right triangle a height is a side: `click New triangle ×2; click Base c; see Base c = 6 · Height = 8. It’s a side of the triangle.; see = 24 square units`
+- [ ] Edge: a new triangle starts with side a again: `click Base c; click New triangle; pressed Base a; see Base a = 8 · Height = 3.; see Tap another side`
+- Quick check: Which height goes with side c? Answer: “R”. Mistakes it names: “P”, “Q”.
+
+### Step 5: Parallelograms and trapezoids
+- [ ] Both parallel sides are extended with dots: `count line.ext = 2`
+- [ ] A height inside counts: `tap [data-pt="3,4"]; tap [data-pt="3,0"]; see That’s a height: square to the base, from one parallel side to the other. It’s 4 units.; see Heights drawn: 1`
+- [ ] Every height drawn stays, and they’re all the same length, outside too: `tap [data-pt="3,4"]; tap [data-pt="3,0"]; tap [data-pt="7,4"]; tap [data-pt="7,0"]; see That one’s outside the shape, and it still counts.; see Heights drawn: 2, every one 4 units long.; count .hgt = 2`
+- [ ] Edge: the same height drawn twice counts once: `tap [data-pt="3,4"]; tap [data-pt="3,0"]; tap [data-pt="3,0"]; tap [data-pt="3,4"]; see Heights drawn: 1`
+- [ ] A slanted segment is named, and the heights stay: `tap [data-pt="3,4"]; tap [data-pt="3,0"]; tap [data-pt="5,4"]; tap [data-pt="4,0"]; see it leans; count .hgt = 1; count .hbad = 1`
+- [ ] Edge: stopping short of the side across: `tap [data-pt="3,0"]; tap [data-pt="3,2"]; see It’s square to the base, but it stops before the side across from it.`
+- [ ] Edge: a trapezoid: `click New shape; click Show me; see It’s 3 units.`
+- [ ] Edge: parallel sides that stand up, so the height runs across: `click New shape ×2; tap [data-pt="5,5"]; tap [data-pt="1,5"]; see It’s 4 units.; tap [data-pt="5,5"]; tap [data-pt="0,5"]; see That goes past the base line.`
+- Quick check: Which segments are heights of this trapezoid, for its parallel sides? Answer: “Both A and B”. Mistakes it names: “Only A”, “Only B”, “Neither”.
+
+## Chapter 5: Polygons · `learn/polygons.html` · Lesson 11
 
 ### Step 1: Break it into pieces
 - [ ] Rectangle and triangles: `see 4 + 16 + 4 = 24 square units.; pressed Rectangle + triangles`
@@ -98,7 +156,7 @@ Not covered: Lesson 19 (Designing a Tent) is an open-ended project, so it works 
 - [ ] Edge: a bigger hole that wouldn’t fit moves back inside: `click Move the hole right ×2; click Hole size: one more; see Base: 5 + 3 + 4 = 12.; see Shaded: 36 − 9 = 27`
 - Quick check: Find the area of the shaded region. The square is cut out of the triangle. Answer: 26 square units. Mistakes it names: 30, 34, 56, 16, 20, 28.
 
-## Chapter 5: Polyhedra · `learn/polyhedra.html` · Lesson 13
+## Chapter 6: Polyhedra · `learn/polyhedra.html` · Lesson 13
 
 ### Step 1: What is a polyhedron?
 - [ ] A cube: 6 faces, 12 edges, 8 vertices: `see A cube. A cube has 6 faces, 12 edges, and 8 vertices.; pressed Cube`
@@ -135,7 +193,7 @@ Not covered: Lesson 19 (Designing a Tent) is an open-ended project, so it works 
 - [ ] A hexagonal prism is one: `click Hexagonal prism; see A polyhedron! It’s closed, and all 8 faces are polygons: 2 hexagons and 6 rectangles.`
 - Quick check: Which one is a polyhedron? Answer: “A triangular pyramid”. Mistakes it names: “A cylinder”, “A cone”, “A sphere”.
 
-## Chapter 6: Prisms, pyramids & nets · `learn/prisms-and-pyramids.html` · Lesson 13
+## Chapter 7: Prisms, pyramids & nets · `learn/prisms-and-pyramids.html` · Lesson 13
 
 ### Step 1: Prisms and pyramids
 - [ ] A pentagonal prism: `see A pentagonal prism. Faces: 2 pentagons + 5 rectangles = 7. Edges: 5 + 5 + 5 = 15. Vertices: 5 + 5 = 10.`
@@ -160,7 +218,7 @@ Not covered: Lesson 19 (Designing a Tent) is an open-ended project, so it works 
 - [ ] A hexagonal prism: `click Hexagonal prism; see 2 hexagons and 6 rectangles; click Fold it; enabled Unfold it`
 - Quick check: What polyhedron does this net fold into? Answer: “A pentagonal prism”. Mistakes it names: “A pentagonal pyramid”, “A hexagonal prism”.
 
-## Chapter 7: Nets & surface area · `learn/nets.html` · Lessons 12–15
+## Chapter 8: Nets & surface area · `learn/nets.html` · Lessons 12–15
 
 ### Step 1: What is surface area?
 - [ ] It asks you to tap faces: `see Tap a face (or a button) to add its area.`
@@ -193,7 +251,7 @@ Not covered: Lesson 19 (Designing a Tent) is an open-ended project, so it works 
 - [ ] Edge: trying them all, waiting for each fold: `click Yes, a cube; click Fold it; see You predicted it!; click Net 2; click No; click Fold it; see You predicted it!; click Net 3; click Yes, a cube; click Fold it; see You predicted it!; click Net 4; click No; click Fold it; see You predicted it!; click Net 5; click Yes, a cube; click Fold it; see You predicted it!; click Net 6; click Yes, a cube; click Fold it; see You predicted it!; see You tried them all!`
 - Quick check: Will this net fold into a cube? Answer: “Yes”. Mistakes it names: “No”.
 
-## Chapter 8: Squares & cubes · `learn/cubes.html` · Lessons 16–18
+## Chapter 9: Squares & cubes · `learn/cubes.html` · Lessons 16–18
 
 ### Step 1: Squared and cubed
 - [ ] Edge 3: surface area 54, volume 27: `see One face: 3 × 3 = 3² = 9 square units; see Surface area: 6 × 9 = 54 square units; see Volume: 3 × 3 × 3 = 3³ = 27 cubic units; pressed Faces`

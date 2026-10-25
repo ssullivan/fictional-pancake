@@ -6,7 +6,7 @@ General rules for games and Learn pages are in the root `CLAUDE.md`.
 
 | Folder | Game | Unit |
 |---|---|---|
-| `unit1/` | Blueprint Builders (7 zones + the Final Blueprint); Learn page with 8 chapters, including Polyhedra and Prisms, pyramids & nets (Lesson 13); printable study guide (`study.html`, diagrams in `study.js`: Lessons 1–18, a 15-question practice test, and an answer key) | Grade 6 Unit 1 |
+| `unit1/` | Blueprint Builders (7 zones + the Final Blueprint); Learn page with 9 chapters, including Finding the height (Lessons 5 and 10: students draw heights by tapping grid points, and `judgeHeight` in `learn/heights.js` names what went wrong; it moves to `figs.js` when the game draws heights too), Polyhedra, and Prisms, pyramids & nets (Lesson 13); printable study guide (`study.html`, diagrams in `study.js`: Lessons 1–18, a 15-question practice test, and an answer key) | Grade 6 Unit 1 |
 | `unit2/` | Mix Masters; Learn page with 6 chapters (Lessons 1–16) | Grade 6 Unit 2 |
 | `unit3/` | Rate Racers; Learn page with 6 chapters (Lessons 1–16) | Grade 6 Unit 3 |
 | `unit4/` | Fraction Workshop (7 stations + the Big Build); Learn page with 8 chapters (Lessons 1–16). `figs.js` has the pictures the game and Learn pages share (`groupTape`, `oneGroup`); the fraction math is in `shared/util.js`, and `rectGrid` and `cubeBox` are in `shared/fracmath.js` | Grade 6 Unit 4 |

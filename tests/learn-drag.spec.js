@@ -64,3 +64,52 @@ test("Polygons: the hole moves with the arrow keys and keeps focus", async ({ pa
   for (let i = 0; i < 6; i++) await page.keyboard.press("ArrowUp");
   await expect(page.getByRole("button", { name: "Move the hole up" })).toBeDisabled();
 });
+
+test("Finding the height: draw a height by tapping near grid points", async ({ page, hasTouch }) => {
+  await page.goto("grade6/unit1/learn/heights.html#s2");
+  const readout = page.locator(".readout").first(),
+    point = (xy) => page.locator(`[data-pt="${xy}"]`).boundingBox(),
+    y0 = await page.evaluate(() => scrollY);
+  // a tap a little off a grid point still lands on it: each point's target is a whole grid square
+  const press = async (xy, dx, dy) => {
+    const b = await point(xy),
+      x = b.x + b.width / 2 + dx,
+      y = b.y + b.height / 2 + dy;
+    if (hasTouch) await page.touchscreen.tap(x, y);
+    else await page.mouse.click(x, y);
+  };
+  const square = (await point("1,0")).x - (await point("0,0")).x;
+  await press("2,5", square / 3, -square / 3);
+  await expect(readout).toContainText("Now tap the other end.");
+  await press("2,0", -square / 3, square / 4);
+  await expect(readout).toContainText("That’s the height: from the top corner, square to the base. It’s 5 units.");
+  await expect(page.locator("#widget .hgt")).toHaveCount(1);
+  // a wrong one replaces it and says what went wrong
+  await press("2,5", 0, 0);
+  await press("0,0", square / 4, 0);
+  await expect(readout).toContainText("That’s a side of the shape.");
+  await expect(page.locator("#widget .hbad")).toHaveCount(1);
+  await expect(page.locator("#widget .hgt")).toHaveCount(0);
+  expect(await page.evaluate(() => scrollY), "the page scrolled while tapping").toBe(y0);
+});
+
+test("Finding the height: draw a height with the arrow keys and Enter", async ({ page }) => {
+  await page.goto("grade6/unit1/learn/heights.html#s3");
+  const readout = page.locator(".readout").first(),
+    grid = page.locator("#widget [data-f]");
+  await grid.focus();
+  // the first key shows the ring in the middle of the grid, (4, 3) on a 7 × 5 grid (rounded up), without moving it
+  await page.keyboard.press("ArrowRight");
+  await expect(page.locator("#widget .cursor")).toHaveCount(1);
+  for (const key of ["ArrowRight", "ArrowRight", "ArrowUp"]) await page.keyboard.press(key);
+  await page.keyboard.press("Enter");
+  await expect(readout).toContainText("Now tap the other end.");
+  // down past the bottom of the grid: the ring stops at the base line
+  for (let i = 0; i < 7; i++) await page.keyboard.press("ArrowDown");
+  await page.keyboard.press(" ");
+  await expect(readout).toContainText("It lands outside the triangle, on the base line extended.");
+  await expect(grid).toBeFocused();
+  // the ring goes away when the grid loses focus
+  await page.getByRole("button", { name: "Show me" }).focus();
+  await expect(page.locator("#widget .cursor")).toHaveCount(0);
+});
