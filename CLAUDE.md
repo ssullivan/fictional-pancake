@@ -1,6 +1,6 @@
 # Math games
 
-Static HTML math games served with GitHub Pages at https://ssullivan.github.io/fictional-pancake/ (from `main`, repo root). Grades so far: 2 (`grade2/`), 3 (`grade3/`), 4 (`grade4/`), 5 (`grade5/`), 6 (`grade6/`), 7 (`grade7/`), and 8 (`grade8/`, a skeleton so far: every unit "Coming soon").
+Static HTML math games served with GitHub Pages at https://ssullivan.github.io/fictional-pancake/ (from `main`, repo root). Grades so far: 2 (`grade2/`), 3 (`grade3/`), 4 (`grade4/`), 5 (`grade5/`), 6 (`grade6/`), 7 (`grade7/`), and 8 (`grade8/`, Unit 1 so far). High school courses come after Grade 8, each in a course folder laid out like a grade's: Algebra 1 (`alg1/`, a skeleton so far: every unit "Coming soon"; its `CLAUDE.md` says what to change in the tools when its first unit is built).
 
 Maintainability comes first: anything two pages share belongs in `shared/`, not in copies.
 
@@ -62,7 +62,7 @@ grade4/unit1/figs.js      pictures a unit's game and its Learn pages both use, a
 
 - Everything for a unit lives in `grade<N>/unit<M>/`. Pages load `shared/` with `../../shared/...`.
 - K–5 pictures come in topic files (`shared/<topic>.js` and `.css`, listed above under `pictures`). Every K–5 page loads `pictures.css`; a page loads the topic files it uses (`.js` and `.css`) in the order listed, and `pictures.js` when it or one of those files uses it (each file's header says what it needs). `node tools/check.mjs` fails when a page uses a shared file it doesn't load or loads one it doesn't use. A picture only one unit draws goes in that unit (`figs.js`, or `learn/common.js` when only its Learn pages use it); move it to `shared/` when a second unit needs it.
-- When adding a game or tutorial, add its link to that unit's card on `grade<N>/index.html` (and turn a "Coming soon" card into a real one). When adding a grade, create `grade<N>/index.html` and `grade<N>/CLAUDE.md` from Grade 6's (or Grade 2's for K–5), add a card to the root `index.html` in grade order, and update its "Grades …" eyebrow.
+- When adding a game or tutorial, add its link to that unit's card on `grade<N>/index.html` (and turn a "Coming soon" card into a real one). When adding a grade, create `grade<N>/index.html` and `grade<N>/CLAUDE.md` from Grade 6's (or Grade 2's for K–5), add a card to the root `index.html` in grade order, and update its "Grades …" eyebrow. A high school course works the same way (from `alg1/`), with its card after the grades.
 - Games and tutorials link back to their grade page with `href="../"` ("← Grade N").
 - The old top-level folders (`area_and_surface_area/`, `introducing_ratios/`, `unit_rates_and_percentages/`, `arithmetic_in_base_ten/`) are redirect stubs so old links and bookmarks keep working (the hash is kept). Don't put new content there.
 - Use relative links only (the site is served under `/fictional-pancake/`, not `/`).

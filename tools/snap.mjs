@@ -17,7 +17,7 @@ const ROOT = resolve(import.meta.dirname, "..");
 const GAMES = globSync("grade*/unit*/stations.js", { cwd: ROOT }).map(dirname).sort();
 const PAGES = [
   "",
-  ...globSync("grade*/index.html", { cwd: ROOT })
+  ...globSync(["grade*/index.html", "alg1/index.html"], { cwd: ROOT })
     .map((f) => dirname(f) + "/")
     .sort(),
 ];
