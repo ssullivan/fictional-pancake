@@ -746,6 +746,9 @@ const CALLS = {
     `new Diagram(-1, 9, -0.5, 3, 18, {pad: 12, label: 'L', left: 40, right: 20}).box(0, 0, 2, 1).box(3, 0, 1, 1, 'sh2').circle([5, 2], 0.4).circle([6, 2], 0.5, 'x').line([0, 3], [8, 3]).line([0, 0], [1, 1], 'ht').svg()`,
     `new Diagram(0, 10, 0, 5, 20).text([2, 2], 'a').text([4, 4], 'b', {dx: 3, dy: -2, cls: 'lb sm', anchor: 'end'}).side([0, 0], [10, 0], '10', [5, 3]).side([0, 0], [4, 5], 's', [5, 1], {gap: -8, cls: 'lb hl'}).right([0, 0], [1, 0], [0, 1], 12).svg()`,
     `new Diagram(0, 2, 0, 2, 10).at([1.234, 0.5])`,
+    `namesWidth(['cups', 'cups of flour'])`,
+    `doubleLine(['pounds', 'cost ($)'], [[0, '0', '0'], [1, '1', '3'], [3, null, null], [5, '5', '_']], 'L', {hl: [1]})`,
+    `doubleLine(['a', 'b'], [[0, '_', null], [50, '6', '_'], [150, null, '150%']], 'M', {length: 7, scale: 30})`,
   ],
   signed: [
     `signedLine(-10, 10)`,

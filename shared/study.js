@@ -13,7 +13,10 @@
      .text(p, words, {dx, dy, cls, anchor})   a label (lb)
      .side(p, q, words, inside, {gap, cls})   a label beside a side, away from the point inside
      .svg()                              the markup
-   Each method but at() and svg() returns the diagram, so calls chain. */
+   Each method but at() and svg() returns the diagram, so calls chain.
+
+   namesWidth(names)                     pixels to leave on a diagram's left for these names written there
+   doubleLine([topName, bottomName], ticks, label, {length, scale, hl})   a double number line (svg) */
 
 /* A diagram covering x0…x1 by y0…y1 units, `scale` pixels per unit, with `pad` pixels around it (left and right add more
    on that side, for labels). Its methods add parts and return the diagram, so calls chain; svg() gives the markup. */
@@ -97,4 +100,45 @@ class Diagram {
   svg() {
     return `<svg viewBox="0 0 ${this.width} ${this.height}" width="${this.width}" role="img" aria-label="${this.label}">${this.parts.join("")}</svg>`;
   }
+}
+
+/* pixels to leave on the left for row or line names written there (small labels are about 7.4 pixels a letter) */
+const namesWidth = (names) => 14 + Math.ceil(7.4 * Math.max(...names.map((name) => name.length)));
+
+/* A double number line: two lines, named [topName, bottomName] on their left, with a tick for each [at, top, bottom] in
+   ticks. Ticks are placed by `at` (the last one sits at the end, `length` units along); top and bottom are the words by the
+   tick on each line, null for none or "_" for a box to fill in. hl: the `at`s whose words are blue (the ones worked out). */
+function doubleLine([topName, bottomName], ticks, label, { length = 8, scale = 40, hl = [] } = {}) {
+  /* the top line is at y = topY and the bottom at y = 0; both run on `arrow` units past the last tick to their arrowheads */
+  const max = ticks[ticks.length - 1][0],
+    xOf = (at) => (length * at) / max,
+    topY = 1.6,
+    arrow = 0.5,
+    end = length + arrow,
+    tickHalf = 0.18,
+    d = new Diagram(0, end + 0.3, -0.9, topY + 0.9, scale, { pad: 12, label, left: namesWidth([topName, bottomName]) });
+  [topY, 0].forEach((y) =>
+    d.line([0, y], [end, y]).poly(
+      [
+        [end + 0.3, y],
+        [end - 0.05, y + 0.16],
+        [end - 0.05, y - 0.16],
+      ],
+      "tip",
+    ),
+  );
+  ticks.forEach(([at, top, bottom]) => {
+    const x = xOf(at),
+      cls = hl.includes(at) ? "lb hl" : "lb";
+    d.line([x, topY - tickHalf], [x, topY + tickHalf]).line([x, -tickHalf], [x, tickHalf]);
+    /* the top line's words go above it, the bottom line's below; a box to fill in takes their place */
+    if (top === "_") d.box(x - 0.45, topY + 0.3, 0.9, 0.5, "frame");
+    else if (top !== null) d.text([x, topY], top, { dy: -12, cls });
+    if (bottom === "_") d.box(x - 0.45, -0.8, 0.9, 0.5, "frame");
+    else if (bottom !== null) d.text([x, 0], bottom, { dy: 24, cls });
+  });
+  return d
+    .text([0, topY], topName, { dx: -12, dy: 5, cls: "lb sm", anchor: "end" })
+    .text([0, 0], bottomName, { dx: -12, dy: 5, cls: "lb sm", anchor: "end" })
+    .svg();
 }

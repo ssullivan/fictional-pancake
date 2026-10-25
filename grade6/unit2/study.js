@@ -1,10 +1,7 @@
 /* The Unit 2 study guide (study.html): its diagrams. Each <figure data-fig="name"> in the page gets the picture FIGURES[name]
-   draws, with shared/study.js's Diagram: laid out in units with y going up, and drawn as inline SVG with the classes styled in
-   shared/study.css and study.html (sh and sh2 the two kinds of thing in a ratio, frame a dashed outline, tip an arrowhead, lb a
-   label, …). Nothing else uses this file. */
-
-/* pixels to leave on the left for row or line names written there (small labels are about 7.4 pixels a letter) */
-const namesWidth = (names) => 14 + Math.ceil(7.4 * Math.max(...names.map((name) => name.length)));
+   draws, with shared/study.js's Diagram and doubleLine: laid out in units with y going up, and drawn as inline SVG with the
+   classes styled in shared/study.css (sh and sh2 the two kinds of thing in a ratio, frame a dashed outline, lb a label, …).
+   Nothing else uses this file. */
 
 /* A diagram of a ratio as shapes: `groups` equal groups, each with `circles` circles over `squares` squares, in dashed
    frames when `framed`. names: the two rows' names, written to their left. */
@@ -32,44 +29,6 @@ function groupsFig(
   return d
     .text([-0.2, circleY], names[0], { dx: -8, dy: 5, cls: "lb sm", anchor: "end" })
     .text([-0.2, squareY], names[1], { dx: -8, dy: 5, cls: "lb sm", anchor: "end" })
-    .svg();
-}
-
-/* A double number line: two lines, named [topName, bottomName] on their left, with a tick for each [at, top, bottom] in
-   ticks. Ticks are placed by `at` (the last one sits at the end, `length` units along); top and bottom are the words by the
-   tick on each line, null for none or "_" for a box to fill in. hl: the `at`s whose words are blue (the ones worked out). */
-function doubleLine([topName, bottomName], ticks, label, { length = 8, scale = 40, hl = [] } = {}) {
-  /* the top line is at y = topY and the bottom at y = 0; both run on `arrow` units past the last tick to their arrowheads */
-  const max = ticks[ticks.length - 1][0],
-    xOf = (at) => (length * at) / max,
-    topY = 1.6,
-    arrow = 0.5,
-    end = length + arrow,
-    tickHalf = 0.18,
-    d = new Diagram(0, end + 0.3, -0.9, topY + 0.9, scale, { pad: 12, label, left: namesWidth([topName, bottomName]) });
-  [topY, 0].forEach((y) =>
-    d.line([0, y], [end, y]).poly(
-      [
-        [end + 0.3, y],
-        [end - 0.05, y + 0.16],
-        [end - 0.05, y - 0.16],
-      ],
-      "tip",
-    ),
-  );
-  ticks.forEach(([at, top, bottom]) => {
-    const x = xOf(at),
-      cls = hl.includes(at) ? "lb hl" : "lb";
-    d.line([x, topY - tickHalf], [x, topY + tickHalf]).line([x, -tickHalf], [x, tickHalf]);
-    /* the top line's words go above it, the bottom line's below; a box to fill in takes their place */
-    if (top === "_") d.box(x - 0.45, topY + 0.3, 0.9, 0.5, "frame");
-    else if (top !== null) d.text([x, topY], top, { dy: -12, cls });
-    if (bottom === "_") d.box(x - 0.45, -0.8, 0.9, 0.5, "frame");
-    else if (bottom !== null) d.text([x, 0], bottom, { dy: 24, cls });
-  });
-  return d
-    .text([0, topY], topName, { dx: -12, dy: 5, cls: "lb sm", anchor: "end" })
-    .text([0, 0], bottomName, { dx: -12, dy: 5, cls: "lb sm", anchor: "end" })
     .svg();
 }
 

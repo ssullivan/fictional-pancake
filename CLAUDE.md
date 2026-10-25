@@ -30,7 +30,7 @@ shared/                   used by every grade; each file's header comment docume
   hanger.css, .js         hanger diagrams for solving equations (hanger): Grade 6 Unit 6 and Grade 7 Unit 6
   stats.css, .js          means, medians, MADs, quartiles, dot plots, box plots, and histograms: Grade 6 Unit 8 and Grade 7 Unit 8
   landing.css             grade cards (root page) and unit cards (grade pages)
-  study.css, study.js     printable study guides: the page (white, dark ink) and Diagram, which draws their pictures
+  study.css, study.js     printable study guides: the page (white, dark ink), ratio tables, and Diagram and doubleLine, which draw their pictures
   study-print.css         study guides on paper (media="print"): letter pages, one part to a page, room to work
   util.js                 R, pick, range, shuffle, miscOf, mcOf, problemKey, gcd, lcm, exact fractions (frac, fAdd, fSub, fMul, fDiv, fVal, fInv, isWhole), roundTo, $, Q, parseNum, and Learn controls (seg, press, onPick, segHit, stepper)
   vendor/katex/           KaTeX, copied in unchanged (its README says which version and how to update); only tex.js calls it
@@ -56,7 +56,7 @@ grade6/
   unit1/learn/chapters.js the unit's chapters (UNIT) and their icons, loaded by learn.html and every chapter page
   unit1/learn/<id>.html   one page per chapter (Learn.chapter); its widgets and steps are in learn/<id>.js
   unit1/learn/common.js   code more than one of the unit's chapters uses; learn/unit.css holds the unit's styles
-  unit2/study.html        printable study guide for the whole unit; its diagrams are drawn by unit2/study.js (see Study guides)
+  unit3/study.html        printable study guide for the whole unit; its diagrams are drawn by unit3/study.js (see Study guides)
 grade4/unit1/figs.js      pictures a unit's game and its Learn pages both use, and nothing else does (figs.css for their styles)
 ```
 
@@ -131,7 +131,7 @@ Interactive tutorials live next to each game. A unit's `grade<N>/unit<M>/learn.h
 
 ## Study guides
 
-A unit can have a printable study guide, `grade<N>/unit<M>/study.html`, linked from its card on the grade page as `<a class="study">Study guide →</a>`. Grade 6 Units 1 and 2 have one; Unit 2's is the template (one part per Learn chapter, each linking to it). A guide has a formula sheet (or a unit's key ideas), one part per IM section or Learn chapter (what to know, a worked example, the mistake to watch for, practice), a practice test, and an answer key. Its text is in the HTML and its diagrams are drawn by the unit's `study.js` into `<figure data-fig="name">` placeholders, with `Diagram` from `shared/study.js`; styles only one unit's diagrams use go in its page. Unlike the rest of the site, it's a plain white page with dark ink, on screen just as on paper (`shared/study.css` loads `theme.css` only for the fonts and resets, and turns off the navy grid).
+A unit can have a printable study guide, `grade<N>/unit<M>/study.html`, linked from its card on the grade page as `<a class="study">Study guide →</a>`. Grade 6 Units 1, 2, and 3 have one; Unit 3's is the template (one part per Learn chapter, each linking to it). A guide has a formula sheet (or a unit's key ideas), one part per IM section or Learn chapter (what to know, a worked example, the mistake to watch for, practice), a practice test, and an answer key. Its text is in the HTML and its diagrams are drawn by the unit's `study.js` into `<figure data-fig="name">` placeholders, with `Diagram` and `doubleLine` from `shared/study.js`; pictures and styles only one unit's guide uses stay in that unit. Unlike the rest of the site, it's a plain white page with dark ink, on screen just as on paper (`shared/study.css` loads `theme.css` only for the fonts and resets, and turns off the navy grid).
 - Paper has its own stylesheet, `shared/study-print.css`, loaded right after `study.css` with `media="print"`: letter paper with page numbers, the cover and sheet on page 1, each part on a page of its own (it may run onto a second), the test (with a name line) and the key on new pages, room to work above each answer line, and no links or printing tips.
 - When you add or change a guide, print it (to PDF) and look at every page: no part should leave a problem or two alone on a page, and no page should be mostly empty but a part's last page. Tighten the problems (or split a part) rather than shrinking the print styles for one guide.
 - `tests/study.spec.js` checks every study guide, on screen and with print styles on.

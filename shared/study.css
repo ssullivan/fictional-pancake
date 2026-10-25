@@ -9,8 +9,13 @@
    .prob             a practice problem: span.num, then .pbody (its words, a figure, an .answer-line with a .blank)
    section.test      the practice test (p.name-line: a line for a name and date, printed only), and section.answers the key (.keygroup: an h3 and an ol.key of li > .num + span)
    .m, .m.f          math in the mono font, and a formula to remember on a tint
+   a.ch              in header.th, after a div of the eyebrow and h2: a link to the part's Learn chapter (left off paper)
+   main.keep-math    each .m stays on one line (for a guide whose math is short: ratios, a step of work)
+   table.rt          a table of equivalent amounts: th headings, td.note beside a row (× 4), td.fill a box to fill in;
+                     .wide fills its column
    figure, .pair     a diagram (drawn by the unit's study.js into <figure data-fig>), and diagrams side by side
-   svg classes       .g grid lines, .sh a shape, .frame a dashed outline, .ed an edge, .lb a label (.sm smaller, .hl blue) */
+   svg classes       .g grid lines, .sh a shape, .sh2 a second kind of shape (blue), .frame a dashed outline, .ed an edge,
+                     .tip an arrowhead, .lb a label (.sm smaller, .hl blue) */
 :root{color-scheme:light}
 html,body{background:#fff}
 body{background-image:none;color:#111a2b}
@@ -42,8 +47,11 @@ body{background-image:none;color:#111a2b}
 .vocab p{margin:0}
 .m{font-family:var(--mono);font-weight:500;font-size:.92em;font-variant-numeric:tabular-nums}
 .m.f{font-weight:700;background:var(--tint);padding:1px 5px;border-radius:4px}
+.keep-math .m{white-space:nowrap}
 .topic{padding-top:26px;border-top:1px solid var(--rule);margin-top:26px}
 .th h2{font-size:28px;font-weight:800}
+.th:has(> .ch){display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:4px 16px}
+.th .ch{font:700 13px var(--mono);color:var(--hl)}
 .ke{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;margin-top:14px}
 .ke h3,.try{font:700 14px var(--mono);text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:6px}
 .know ul{margin:0;padding-left:20px}
@@ -63,6 +71,14 @@ body{background-image:none;color:#111a2b}
 .guide figure svg{display:block;max-width:100%;height:auto}
 .guide figcaption{font:700 13px var(--mono);color:var(--muted)}
 .pair{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end}
+table.rt{border-collapse:collapse;margin-top:8px;font-size:15px}
+.rt th,.rt td{border:1.5px solid var(--ink);padding:4px 14px;text-align:center;min-width:64px}
+.rt th{background:var(--wash);font-size:13.5px}
+.rt th:empty{border:none;background:none}
+.rt td{font-family:var(--mono);font-variant-numeric:tabular-nums;height:28px}
+.rt td.note{border:none;text-align:left;color:var(--hl);font-weight:700;min-width:0;padding-left:8px}
+.rt td.fill{background:#fff}
+.rt.wide{width:100%}
 .test,.answers{margin-top:40px;padding-top:24px;border-top:2px solid var(--rule)}
 .test h2,.answers h2{font-size:30px;font-weight:800}
 .test .sub,.answers .sub{color:var(--muted);margin:6px 0 16px}
@@ -76,8 +92,10 @@ ol.key .num{flex:none;min-width:30px;font:700 13px/1.7 var(--mono);color:var(--a
 /* diagrams (drawn by the unit's study.js) */
 .guide svg .g{stroke:var(--grid);stroke-width:1}
 .guide svg .sh{fill:var(--tint);stroke:var(--ink);stroke-width:2;stroke-linejoin:round}
+.guide svg .sh2{fill:#dcebf7;stroke:var(--ink);stroke-width:2;stroke-linejoin:round}
 .guide svg .frame{fill:none;stroke:var(--muted);stroke-width:1.5;stroke-dasharray:5 4}
 .guide svg .ed{stroke:var(--ink);stroke-width:2;stroke-linecap:round}
+.guide svg .tip{fill:var(--ink)}
 .guide svg .lb{fill:var(--ink);font:700 14px var(--mono)}
 .guide svg .lb.sm{font-size:12px}
 .guide svg .lb.hl{fill:var(--hl)}
