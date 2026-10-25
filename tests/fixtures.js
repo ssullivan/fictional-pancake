@@ -19,14 +19,16 @@ exports.test = base.test.extend({
           body: Buffer.from(body, "base64"),
         });
       }
-      /* not cached yet (as on CI): fetch it. A test can end before the file arrives, which closes its page and throws the
-         response away; nothing is waiting for the file then, so that isn't an error */
+      /* not cached yet (as on CI): fetch it. A test can end, or its page move on, before the file arrives, and Playwright
+         throws the response away ("Response has been disposed"), sometimes before the page counts as closed; nothing is
+         waiting for the file then, so that isn't an error */
+      const abandoned = (e) => page.isClosed() || /disposed/i.test(e.message);
       let res, body;
       try {
         res = await route.fetch();
         body = await res.body();
       } catch (e) {
-        if (page.isClosed()) return;
+        if (abandoned(e)) return;
         throw e;
       }
       if (res.status() === 200) {
@@ -37,7 +39,7 @@ exports.test = base.test.extend({
         fs.writeFileSync(file, JSON.stringify({ headers, body: body.toString("base64") }));
       }
       return route.fulfill({ status: res.status(), headers: res.headers(), body }).catch((e) => {
-        if (!page.isClosed()) throw e;
+        if (!abandoned(e)) throw e;
       });
     });
     const errors = [];
