@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Introducing Ratios Study Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=JetBrains+Mono:wght@500;700&display=swap">
+<link rel="stylesheet" href="../../shared/theme.css?v=c2e276bb">
+<link rel="stylesheet" href="../../shared/study.css?v=7b57d3ba">
+<link rel="stylesheet" href="../../shared/study-print.css?v=a99e288a" media="print">
+<style>
+/* this unit's diagrams (drawn by study.js): the second kind of thing in a ratio in blue, and arrowheads on double number lines */
+.guide svg .sh2{fill:#dcebf7;stroke:var(--ink);stroke-width:2;stroke-linejoin:round}
+.guide svg .tip{fill:var(--ink)}
+/* a ratio or a step of work stays on one line */
+.guide .m{white-space:nowrap}
+/* each part links to its Learn chapter (study-print.css leaves it off paper) */
+.th{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:4px 16px}
+.th .ch{font:700 13px var(--mono);color:var(--hl)}
+/* tables of equivalent ratios: a column for each amount, a note beside a row saying how it was made, and boxes to fill in */
+table.rt{border-collapse:collapse;margin-top:8px;font-size:15px}
+.rt th,.rt td{border:1.5px solid var(--ink);padding:4px 14px;text-align:center;min-width:64px}
+.rt th{background:var(--wash);font-size:13.5px}
+.rt th:empty{border:none;background:none}
+.rt td{font-family:var(--mono);font-variant-numeric:tabular-nums;height:28px}
+.rt td.note{border:none;text-align:left;color:var(--hl);font-weight:700;min-width:0;padding-left:8px}
+.rt td.fill{background:#fff}
+.rt.wide{width:100%}
+</style>
+</head>
+<body>
+
+<main class="guide">
+  <a class="back" href="../">← Grade 6</a>
+  <header class="cover">
+    <p class="eyebrow">Study guide · Illustrative Mathematics · Grade 6 · Unit 2</p>
+    <h1>Introducing Ratios</h1>
+    <p class="sub">One part for each chapter of the unit: what to know, a worked example, the mistake to watch for, and practice. A 15-question practice test and a worked answer key are at the end.</p>
+    <p class="howto"><b>To print:</b> use your browser’s Print (Ctrl+P, or ⌘P on a Mac). It prints in dark ink on white letter paper, and the practice test and the answer key each start on a new page, so you can print them separately.</p>
+    <ul class="plan">
+      <li><b>Night 1</b><span>The ratio toolkit, then Parts A–C: ratios, equivalent ratios, double number lines.</span></li>
+      <li><b>Night 2</b><span>Parts D–F: better deals, tables, part-part-whole.</span></li>
+      <li><b>Night 3</b><span>Take the practice test without notes, check it, and redo anything missed.</span></li>
+    </ul>
+  </header>
+
+<section class="sheet" aria-labelledby="sheet-h">
+  <h2 id="sheet-h">Ratio toolkit</h2>
+  <div class="formulas">
+    <div><span>Ratio of a to b</span><span class="m">a : b</span></div>
+    <div><span>Equivalent ratio</span><span class="m">(a × n)&nbsp;:&nbsp;(b × n)</span></div>
+    <div><span>Price for one</span><span class="m">cost ÷ how many</span></div>
+    <div><span>Constant speed</span><span class="m">distance ÷ time</span></div>
+    <div><span>Go through 1</span><span class="m">÷ to 1, then ×</span></div>
+    <div><span>One tape box</span><span class="m">total ÷ (a + b)</span></div>
+  </div>
+  <div class="vocab">
+    <p><b>Ratio:</b> compares two amounts: 3&nbsp;:&nbsp;2, “3 to 2,” “for every 3, there are 2.”</p>
+    <p><b>Order:</b> the first amount named goes first.</p>
+    <p><b>Batch:</b> one full recipe; more batches keep the ratio.</p>
+    <p><b>Equivalent ratios:</b> both numbers times (or divided by) the same number.</p>
+    <p><b>Double number line:</b> two lines whose ticks pair amounts in the same ratio.</p>
+    <p><b>Unit price:</b> the price of one (one pound, one ticket, …).</p>
+    <p><b>Table:</b> one pair of equivalent amounts in each row.</p>
+    <p><b>Tape diagram:</b> equal boxes for each part, all adding up to the total.</p>
+  </div>
+</section>
+
+<section class="topic" id="a">
+  <header class="th"><div><p class="eyebrow">Part A · Lessons 1–2</p><h2>Ratios</h2></div><a class="ch" href="learn/ratios.html">Learn chapter →</a></header>
+  <div class="ke">
+    <div class="know"><h3>Know it</h3><ul>
+<li>A <b>ratio</b> compares two amounts. 3 cups of flour and 2 cups of sugar make the ratio <b>3&nbsp;:&nbsp;2</b>, said “3 to 2.”</li>
+<li><b>Order matters.</b> “Sugar to flour” puts the sugar first: <span class="m">2&nbsp;:&nbsp;3</span>.</li>
+<li>Ratios can often be split into <b>equal groups</b>. Each group says “for every …”: for every 3 cups of flour, there are 2 cups of sugar.</li>
+<li>A ratio can compare a part to the whole, too: 2 cups of sugar out of 5 cups in all is <span class="m">2&nbsp;:&nbsp;5</span>.</li>
+</ul></div>
+    <div class="example"><h3>Example</h3><figure data-fig="groupsExample"></figure><p>6 circles and 9 squares: the ratio of circles to squares is <span class="m">6&nbsp;:&nbsp;9</span>.</p>
+<p>They make 3 equal groups of 2 circles and 3 squares, so for every 2 circles, there are 3 squares.</p></div>
+  </div>
+  <p class="watch"><b>Watch out:</b> 9&nbsp;:&nbsp;6 is squares to circles, the other order. And “3 more squares” is a difference, not a ratio.</p>
+  <h3 class="try">Try it</h3>
+  <div class="probs">
+      <div class="prob"><span class="num">A1</span><div class="pbody"><p>Write the ratio of squares to circles. Then circle equal groups and finish: for every ___ squares, there are ___ circles.</p><figure data-fig="shapesA1"></figure><span class="answer-line">Answer: <span class="blank"></span></span></div></div>
+      <div class="prob"><span class="num">A2</span><div class="pbody"><p>A jar has 15 red beads and 10 blue beads. Finish the sentence with the smallest numbers you can: for every ___ red beads, there are ___ blue beads.</p><span class="answer-line">Answer: <span class="blank"></span></span></div></div>
+      <div class="prob"><span class="num">A3</span><div class="pbody"><p>In a class, 12 students walk to school and 16 ride the bus. Write the ratio of bus riders to walkers, and the ratio of walkers to all the students.</p><span class="answer-line">Answer: <span class="blank"></span></span></div></div>
+      <div class="prob"><span class="num">A4</span><div class="pbody"><p>Draw a diagram of shapes that shows the ratio 4&nbsp;:&nbsp;1. Then write a sentence that uses the ratio.</p><span class="answer-line">Answer: <span class="blank"></span></span></div></div>
+  </div>
+</section>
+<section class="topic" id="b">
+  <header class="th"><div><p class="eyebrow">Part B · Lessons 3–5</p><h2>Equivalent ratios</h2></div><a class="ch" href="learn/equivalent.html">Learn chapter →</a></header>
+  <div class="ke">
+    <div class="know"><h3>Know it</h3><ul>
+<li>A <b>batch</b> is one full recipe. More batches use more of everything, but it tastes the same.</li>
+<li>Two paint mixes are the same color when their ratios are equivalent.</li>
+<li>Ratios are <b>equivalent</b> when you <b>multiply</b> (or divide) <b>both</b> numbers by the same number: <span class="m f">2&nbsp;:&nbsp;3 = 4&nbsp;:&nbsp;6 = 10&nbsp;:&nbsp;15</span>.</li>
+<li>To check two ratios, find what one number was multiplied by, then see if the other number was multiplied by the same.</li>
+</ul></div>
+    <div class="example"><h3>Example</h3><p>Lemonade uses 2 scoops of mix for 5 cups of water. 3 batches:</p><figure data-fig="batches"></figure>
+<p><span class="m">3 × 2 = 6</span> scoops and <span class="m">3 × 5 = 15</span> cups: <span class="m">6&nbsp;:&nbsp;15</span>, equivalent to <span class="m">2&nbsp;:&nbsp;5</span>.</p></div>
+  </div>
+  <p class="watch"><b>Watch out:</b> adding the same amount to both is <i>not</i> an equivalent ratio. 2&nbsp;:&nbsp;5 plus 2 each is 4&nbsp;:&nbsp;7, weaker lemonade. Two batches is 4&nbsp;:&nbsp;10.</p>
+  <h3 class="try">Try it</h3>
+  <div class="probs">
+      <div class="prob"><span class="num">B1</span><div class="pbody"><p>A pancake recipe uses 3 cups of flour for 2 eggs. How many cups of flour go with 6 eggs?</p><span class="answer-line">Answer: <span class="blank"></span></span></div></div>
+      <div class="prob"><span class="num">B2</span><div class="pbody"><p>Green paint is 3 cups of blue to 4 cups of yellow. Which mixes are the same green? Circle them: <b>6&nbsp;:&nbsp;8 · 4&nbsp;:&nbsp;5 · 9&nbsp;:&nbsp;12 · 4&nbsp;:&nbsp;3</b></p><span class="answer-line">Answer: <span class="blank"></span></span></div></div>
+      <div class="prob"><span class="num">B3</span><div class="pbody"><p>Is 5&nbsp;:&nbsp;2 equivalent to 15&nbsp;:&nbsp;6? Explain how you know.</p><span class="answer-line">Answer: <span class="blank"></span></span></div></div>
+      <div class="prob"><span class="num">B4</span><div class="pbody"><p>Write three ratios that are equivalent to 7&nbsp;:&nbsp;3.</p><span class="answer-line">Answer: <span class="blank"></span></span></div></div>
+  </div>
+</section>
+<section class="topic" id="c">
+  <header class="th"><div><p class="eyebrow">Part C · Lessons 6–9</p><h2>Double number lines</h2></div><a class="ch" href="learn/double-number-lines.html">Learn chapter →</a></header>
+  <div class="ke">
+    <div class="know"><h3>Know it</h3><ul>
+<li>A <b>double number line</b> shows equivalent ratios: one amount on the top line, the other on the bottom, and each tick pairs amounts in the same ratio.</li>
+<li>Ticks are evenly spaced, and both lines start at 0.</li>
+<li><b>How much for one?</b> Split both lines into the same number of equal parts. The price for one is the <b>unit price</b>.</li>
+<li>At a <b>constant speed</b>, something goes the same distance every minute (or second, or hour). Find the distance in 1 minute, then multiply.</li>
+</ul></div>
+    <div class="example"><h3>Example</h3><p>5 pounds of apples cost $15. How much do 2 pounds cost?</p><figure data-fig="apples"></figure>
+<p>1 pound: <span class="m">$15 ÷ 5 = $3</span>. 2 pounds: <span class="m">2 × $3 = $6</span>.</p></div>
+  </div>
+  <p class="watch"><b>Watch out:</b> 3 fewer pounds doesn’t mean $3 less ($12 is wrong). Find the amount for 1 first, then multiply.</p>
+  <h3 class="try">Try it</h3>
+  <div class="probs">
+      <div class="prob"><span class="num">C1</span><div class="pbody"><p>A recipe uses 3 cups of flour for every 2 cups of sugar. Fill in the boxes. How much sugar goes with 12 cups of flour?</p><figure data-fig="flourC1"></figure><span class="answer-line">Answer: <span class="blank"></span></span></div></div>
+      <div class="prob"><span class="num">C2</span><div class="pbody"><p>8 movie tickets cost $24. How much does 1 ticket cost? How much do 5 tickets cost?</p><span class="answer-line">Answer: <span class="blank"></span></span></div></div>
+      <div class="prob"><span class="num">C3</span><div class="pbody"><p>A cyclist rides 30 km in 2 hours at a constant speed. How far does the cyclist ride in 5 hours?</p><span class="answer-line">Answer: <span class="blank"></span></span></div></div>
+      <div class="prob"><span class="num">C4</span><div class="pbody"><p>3 pounds of grapes cost $4.50. What is the price for 1 pound?</p><span class="answer-line">Answer: <span class="blank"></span></span></div></div>
+  </div>
+</section>
+<section class="topic" id="d">
+  <header class="th"><div><p class="eyebrow">Part D · Lessons 8–10</p><h2>Better deals</h2></div><a class="ch" href="learn/better-deals.html">Learn chapter →</a></header>
+  <div class="ke">
+    <div class="know"><h3>Know it</h3><ul>
+<li>To compare two prices, find the price for <b>one</b> in each. Less for each is the better deal, even when the total is more.</li>
+<li>To compare two speeds, find the distance each goes in <b>one</b> second (or minute, or hour). More for each is faster.</li>
+<li>Another way: make one amount the same in both (the same number of cups of white paint), then compare the other.</li>
+</ul></div>
+    <div class="example"><h3>Example</h3><p>Which is the better deal: 3 bags of chips for $6, or 5 bags for $8?</p>
+<table class="rt wide"><thead><tr><th>Offer</th><th>Price for 1 bag</th></tr></thead><tbody>
+<tr><td>3 for $6</td><td>$6 ÷ 3 = $2.00</td></tr>
+<tr><td>5 for $8</td><td>$8 ÷ 5 = $1.60</td></tr>
+</tbody></table>
+<p><b>5 bags for $8</b> is the better deal: it costs more in all, but less for each bag.</p></div>
+  </div>
+  <p class="watch"><b>Watch out:</b> the smaller total isn’t always the better deal, and the longer distance isn’t always the faster runner. Compare the amounts for one.</p>
+  <h3 class="try">Try it</h3>
+  <div class="probs">
+      <div class="prob"><span class="num">D1</span><div class="pbody"><p>Which is the better deal: a 12-ounce box of cereal for $3, or a 20-ounce box for $4?</p><span class="answer-line">Answer: <span class="blank"></span></span></div></div>
+      <div class="prob"><span class="num">D2</span><div class="pbody"><p>Lin runs 200 meters in 40 seconds. Andre runs 180 meters in 30 seconds. Who is faster?</p><span class="answer-line">Answer: <span class="blank"></span></span></div></div>
+      <div class="prob"><span class="num">D3</span><div class="pbody"><p>Mix A is 2 cups of blue paint to 3 cups of white. Mix B is 3 cups of blue to 5 cups of white. Which mix is bluer? (Hint: make both use 15 cups of white.)</p><span class="answer-line">Answer: <span class="blank"></span></span></div></div>
+      <div class="prob"><span class="num">D4</span><div class="pbody"><p>Car A goes 150 miles on 5 gallons of gas. Car B goes 120 miles on 3 gallons. Which car goes farther on 1 gallon?</p><span class="answer-line">Answer: <span class="blank"></span></span></div></div>
+  </div>
+</section>
+<section class="topic" id="e">
+  <header class="th"><div><p class="eyebrow">Part E · Lessons 11–14</p><h2>Tables</h2></div><a class="ch" href="learn/tables.html">Learn chapter →</a></header>
+  <div class="ke">
+    <div class="know"><h3>Know it</h3><ul>
+<li>A <b>table</b> of equivalent ratios has one pair in each row. Every row is another row times the same number, on <b>both</b> sides.</li>
+<li>Rows can go in any order, and they don’t have to go up by the same amount.</li>
+<li><b>Go through 1</b> when the numbers don’t multiply evenly: divide to find the amount for one, then multiply. 4 notebooks cost $10, so 1 costs <span class="m">$10 ÷ 4 = $2.50</span>, and 6 cost <span class="m">6 × $2.50 = $15</span>.</li>
+<li>A table and a double number line show the same pairs.</li>
+</ul></div>
+    <div class="example"><h3>Example</h3><p>Juice is mixed 3 cups of juice to 5 cups of water. How much water goes with 12 cups of juice?</p>
+<table class="rt"><thead><tr><th>cups of juice</th><th>cups of water</th><th></th></tr></thead><tbody>
+<tr><td>3</td><td>5</td><td class="note"></td></tr>
+<tr><td>6</td><td>10</td><td class="note">× 2</td></tr>
+<tr><td>12</td><td>20</td><td class="note">× 4</td></tr>
+</tbody></table>
+<p><span class="m">3 × 4 = 12</span>, so the water is <span class="m">5 × 4 = 20</span> cups.</p></div>
+  </div>
+  <p class="watch"><b>Watch out:</b> don’t add across. 12 cups of juice is 9 more than 3, but 5 + 9 = 14 cups of water is wrong. Multiply both columns by the same number.</p>
+  <h3 class="try">Try it</h3>
+  <div class="probs">
+      <div class="prob"><span class="num">E1</span><div class="pbody"><p>Elena reads at a constant rate: 3 pages every 2 minutes. Fill in the table.</p>
+<table class="rt"><thead><tr><th>minutes</th><th>pages</th></tr></thead><tbody>
+<tr><td>2</td><td>3</td></tr>
+<tr><td>4</td><td class="fill"></td></tr>
+<tr><td class="fill"></td><td>15</td></tr>
+<tr><td>1</td><td class="fill"></td></tr>
+<tr><td>30</td><td class="fill"></td></tr>
+</tbody></table></div></div>
+      <div class="prob"><span class="num">E2</span><div class="pbody"><p>5 pounds of rice cost $8. How much do 15 pounds cost? How much do 20 pounds cost?</p><span class="answer-line">Answer: <span class="blank"></span></span></div></div>
+      <div class="prob"><span class="num">E3</span><div class="pbody"><p>6 pencils cost $3. How much do 10 pencils cost? (Go through 1.)</p><span class="answer-line">Answer: <span class="blank"></span></span></div></div>
+      <div class="prob"><span class="num">E4</span><div class="pbody"><p>3 cups of rice make 4 servings. How many cups of rice make 10 servings?</p><span class="answer-line">Answer: <span class="blank"></span></span></div></div>
+  </div>
+</section>
+<section class="topic" id="f">
+  <header class="th"><div><p class="eyebrow">Part F · Lessons 15–16</p><h2>Part-part-whole</h2></div><a class="ch" href="learn/part-part-whole.html">Learn chapter →</a></header>
+  <div class="ke">
+    <div class="know"><h3>Know it</h3><ul>
+<li>A <b>tape diagram</b> shows a ratio as equal boxes: 2&nbsp;:&nbsp;3 is 2 boxes and 3 boxes, 5 boxes in all.</li>
+<li><b>From the total:</b> split it evenly into all the boxes. <span class="m f">one box = total ÷ (a + b)</span>.</li>
+<li><b>From one part:</b> divide it by that part’s boxes to find one box. Then multiply to find the other part, or the total.</li>
+</ul></div>
+    <div class="example"><h3>Example</h3><p>A shelter has dogs and cats in the ratio 2&nbsp;:&nbsp;3, 25 animals in all. How many are cats?</p><figure data-fig="tapeExample"></figure>
+<p><span class="m">2 + 3 = 5</span> boxes, so each box is <span class="m">25 ÷ 5 = 5</span>. Cats: <span class="m">3 × 5 = 15</span>. (Dogs: 10.)</p></div>
+  </div>
+  <p class="watch"><b>Watch out:</b> divide the total by <i>all</i> the boxes (5), not by one part’s boxes. 25 ÷ 3 doesn’t give a box.</p>
+  <h3 class="try">Try it</h3>
+  <div class="probs">
+      <div class="prob"><span class="num">F1</span><div class="pbody"><p>Trail mix is 3 cups of raisins to 4 cups of peanuts. A big bowl holds 28 cups. How many cups are peanuts?</p><figure data-fig="trailMix"></figure><span class="answer-line">Answer: <span class="blank"></span></span></div></div>
+      <div class="prob"><span class="num">F2</span><div class="pbody"><p>Pink paint is 2 cups of red to 3 cups of white. Kiran uses 10 cups of red. How much white? How many cups of paint in all?</p><span class="answer-line">Answer: <span class="blank"></span></span></div></div>
+      <div class="prob"><span class="num">F3</span><div class="pbody"><p>The ratio of students who walk to students who bike is 5&nbsp;:&nbsp;1. There are 36 students. How many bike?</p><span class="answer-line">Answer: <span class="blank"></span></span></div></div>
+      <div class="prob"><span class="num">F4</span><div class="pbody"><p>Lemonade is 1 cup of lemon juice to 4 cups of water. Draw a tape diagram for 20 cups of lemonade. How much is lemon juice?</p><span class="answer-line">Answer: <span class="blank"></span></span></div></div>
+  </div>
+</section>
+  <section class="test" id="test">
+    <p class="eyebrow">Practice test · about 40 minutes</p>
+    <h2>Practice test</h2>
+    <p class="sub">Show your work: a diagram, a double number line, a table, or a tape diagram. Write units with every answer.</p>
+    <p class="name-line"><span>Name <span class="blank"></span></span><span>Date <span class="blank short"></span></span></p>
+    <div class="probs">
+      <div class="prob"><span class="num">1</span><div class="pbody"><p>A drawer has 5 red socks and 7 black socks. Write the ratio of black socks to red socks, and of red socks to all the socks.</p><span class="answer-line">Answer: <span class="blank"></span></span></div></div>
+      <div class="prob"><span class="num">2</span><div class="pbody"><p>Finish with the smallest numbers you can: for every ___ circles, there are ___ squares.</p><figure data-fig="test2"></figure><span class="answer-line">Answer: <span class="blank"></span></span></div></div>
+      <div class="prob"><span class="num">3</span><div class="pbody"><p>Which ratios are equivalent to 3&nbsp;:&nbsp;4? Circle them: <b>6&nbsp;:&nbsp;8 · 4&nbsp;:&nbsp;5 · 9&nbsp;:&nbsp;12 · 12&nbsp;:&nbsp;16 · 4&nbsp;:&nbsp;3</b></p><span class="answer-line">Answer: <span class="blank"></span></span></div></div>
+      <div class="prob"><span class="num">4</span><div class="pbody"><p>A recipe uses 2 cups of rice for 3 cups of water. How much water goes with 8 cups of rice?</p><span class="answer-line">Answer: <span class="blank"></span></span></div></div>
+      <div class="prob"><span class="num">5</span><div class="pbody"><p>Noah says 4&nbsp;:&nbsp;7 and 6&nbsp;:&nbsp;9 are equivalent, because you add 2 to each number. Is that right? Explain.</p><span class="answer-line">Answer: <span class="blank"></span></span></div></div>
+      <div class="prob"><span class="num">6</span><div class="pbody"><p>A swimmer swims 3 laps every 4 minutes at a constant speed. Fill in the boxes. How many laps in 20 minutes?</p><figure data-fig="test6"></figure><span class="answer-line">Answer: <span class="blank"></span></span></div></div>
+      <div class="prob"><span class="num">7</span><div class="pbody"><p>8 tickets cost $24. What is the price for 1 ticket? For 5 tickets?</p><span class="answer-line">Answer: <span class="blank"></span></span></div></div>
+      <div class="prob"><span class="num">8</span><div class="pbody"><p>A train goes 180 miles in 3 hours at a constant speed. How far does it go in 5 hours?</p><span class="answer-line">Answer: <span class="blank"></span></span></div></div>
+      <div class="prob"><span class="num">9</span><div class="pbody"><p>Which is the better deal: 6 cans of soup for $3, or 10 cans for $4?</p><span class="answer-line">Answer: <span class="blank"></span></span></div></div>
+      <div class="prob"><span class="num">10</span><div class="pbody"><p>Diego runs 100 meters in 20 seconds. Jada runs 160 meters in 40 seconds. Who is faster? How do you know?</p><span class="answer-line">Answer: <span class="blank"></span></span></div></div>
+      <div class="prob"><span class="num">11</span><div class="pbody"><p>Muffins use 4 cups of flour for 3 cups of milk. Fill in the table.</p>
+<table class="rt"><thead><tr><th>cups of flour</th><th>cups of milk</th></tr></thead><tbody>
+<tr><td>4</td><td>3</td></tr>
+<tr><td>8</td><td class="fill"></td></tr>
+<tr><td class="fill"></td><td>12</td></tr>
+<tr><td>2</td><td class="fill"></td></tr>
+</tbody></table></div></div>
+      <div class="prob"><span class="num">12</span><div class="pbody"><p>4 pounds of apples cost $6. How much do 10 pounds cost?</p><span class="answer-line">Answer: <span class="blank"></span></span></div></div>
+      <div class="prob"><span class="num">13</span><div class="pbody"><p>A shelf has fiction and nonfiction books in the ratio 4&nbsp;:&nbsp;1, 30 books in all. How many of each?</p><figure data-fig="test13"></figure><span class="answer-line">Answer: <span class="blank"></span></span></div></div>
+      <div class="prob"><span class="num">14</span><div class="pbody"><p>Punch is 3 cups of juice to 2 cups of soda. Elena uses 9 cups of juice. How much soda? How many cups of punch in all?</p><span class="answer-line">Answer: <span class="blank"></span></span></div></div>
+      <div class="prob"><span class="num">15</span><div class="pbody"><p>A bag has green and yellow marbles in the ratio 2&nbsp;:&nbsp;5. Clare says the bag must have 7 marbles. Is that right? Give two totals the bag could have.</p><span class="answer-line">Answer: <span class="blank"></span></span></div></div>
+    </div>
+  </section>
+  <section class="answers" id="answers">
+    <p class="eyebrow">For checking</p>
+    <h2>Answer key</h2>
+    <p class="sub">Worked answers for every practice problem and the practice test.</p>
+    <div class="keygroup"><h3>Part A</h3><ol class="key">
+<li><span class="num">A1</span><span><b>6&nbsp;:&nbsp;4</b>. Two groups of 3 squares and 2 circles: for every <b>3 squares, there are 2 circles</b>.</span></li>
+<li><span class="num">A2</span><span>15&nbsp;:&nbsp;10 makes 5 groups of 3 red and 2 blue: for every <b>3 red beads, there are 2 blue beads</b>.</span></li>
+<li><span class="num">A3</span><span>Riders to walkers <b>16&nbsp;:&nbsp;12</b>. Walkers to all students <b>12&nbsp;:&nbsp;28</b> (<span class="m">12 + 16 = 28</span>).</span></li>
+<li><span class="num">A4</span><span>Any drawing with 4 of one shape for every 1 of another, like 4 circles and 1 square, or 8 and 2. “For every 4 circles, there is 1 square.”</span></li>
+</ol></div>
+    <div class="keygroup"><h3>Part B</h3><ol class="key">
+<li><span class="num">B1</span><span>6 eggs is <span class="m">6 ÷ 2 = 3</span> batches, so <span class="m">3 × 3 =</span> <b>9 cups of flour</b>.</span></li>
+<li><span class="num">B2</span><span><b>6&nbsp;:&nbsp;8 and 9&nbsp;:&nbsp;12</b> (3&nbsp;:&nbsp;4 times 2 and times 3). 4&nbsp;:&nbsp;5 adds 1 to each, and 4&nbsp;:&nbsp;3 has the colors switched.</span></li>
+<li><span class="num">B3</span><span><b>Yes.</b> <span class="m">5 × 3 = 15</span> and <span class="m">2 × 3 = 6</span>: both numbers times 3.</span></li>
+<li><span class="num">B4</span><span>Any three like <b>14&nbsp;:&nbsp;6, 21&nbsp;:&nbsp;9, 28&nbsp;:&nbsp;12</b> (7&nbsp;:&nbsp;3 times 2, 3, and 4).</span></li>
+</ol></div>
+    <div class="keygroup"><h3>Part C</h3><ol class="key">
+<li><span class="num">C1</span><span>The boxes are <b>4, 6, 8</b>. 12 cups of flour go with <b>8 cups of sugar</b> (<span class="m">3 × 4 = 12</span>, <span class="m">2 × 4 = 8</span>).</span></li>
+<li><span class="num">C2</span><span>1 ticket: <span class="m">$24 ÷ 8 =</span> <b>$3</b>. 5 tickets: <span class="m">5 × $3 =</span> <b>$15</b>.</span></li>
+<li><span class="num">C3</span><span>1 hour: <span class="m">30 ÷ 2 = 15</span> km. 5 hours: <span class="m">5 × 15 =</span> <b>75 km</b>.</span></li>
+<li><span class="num">C4</span><span><span class="m">$4.50 ÷ 3 =</span> <b>$1.50</b> a pound.</span></li>
+</ol></div>
+    <div class="keygroup"><h3>Part D</h3><ol class="key">
+<li><span class="num">D1</span><span>12 oz: <span class="m">$3 ÷ 12 = $0.25</span> an ounce. 20 oz: <span class="m">$4 ÷ 20 = $0.20</span> an ounce. <b>The 20-ounce box</b>.</span></li>
+<li><span class="num">D2</span><span>Lin: <span class="m">200 ÷ 40 = 5</span> m a second. Andre: <span class="m">180 ÷ 30 = 6</span> m a second. <b>Andre</b>.</span></li>
+<li><span class="num">D3</span><span>A: <span class="m">2&nbsp;:&nbsp;3 = 10&nbsp;:&nbsp;15</span>. B: <span class="m">3&nbsp;:&nbsp;5 = 9&nbsp;:&nbsp;15</span>. With the same white, A has more blue: <b>Mix A</b>.</span></li>
+<li><span class="num">D4</span><span>A: <span class="m">150 ÷ 5 = 30</span> miles a gallon. B: <span class="m">120 ÷ 3 = 40</span> miles a gallon. <b>Car B</b>.</span></li>
+</ol></div>
+    <div class="keygroup"><h3>Part E</h3><ol class="key">
+<li><span class="num">E1</span><span>4 minutes: <b>6</b> pages. 15 pages: <b>10</b> minutes. 1 minute: <b>1.5</b> pages. 30 minutes: <b>45</b> pages.</span></li>
+<li><span class="num">E2</span><span>15 pounds is <span class="m">5 × 3</span>: <span class="m">$8 × 3 =</span> <b>$24</b>. 20 pounds is <span class="m">5 × 4</span>: <span class="m">$8 × 4 =</span> <b>$32</b>.</span></li>
+<li><span class="num">E3</span><span>1 pencil: <span class="m">$3 ÷ 6 = $0.50</span>. 10 pencils: <span class="m">10 × $0.50 =</span> <b>$5</b>.</span></li>
+<li><span class="num">E4</span><span>1 serving: <span class="m">3 ÷ 4 = 0.75</span> cup. 10 servings: <span class="m">10 × 0.75 =</span> <b>7.5 cups</b>.</span></li>
+</ol></div>
+    <div class="keygroup"><h3>Part F</h3><ol class="key">
+<li><span class="num">F1</span><span><span class="m">3 + 4 = 7</span> boxes, each <span class="m">28 ÷ 7 = 4</span> cups. Peanuts: <span class="m">4 × 4 =</span> <b>16 cups</b>.</span></li>
+<li><span class="num">F2</span><span>Each box: <span class="m">10 ÷ 2 = 5</span> cups. White: <span class="m">3 × 5 =</span> <b>15 cups</b>. In all: <span class="m">10 + 15 =</span> <b>25 cups</b>.</span></li>
+<li><span class="num">F3</span><span><span class="m">5 + 1 = 6</span> boxes, each <span class="m">36 ÷ 6 = 6</span>. <b>6 students</b> bike (and 30 walk).</span></li>
+<li><span class="num">F4</span><span>1 box of juice and 4 of water, 5 boxes for 20 cups: each <span class="m">20 ÷ 5 = 4</span>. <b>4 cups</b> of lemon juice (and 16 of water).</span></li>
+</ol></div>
+    <div class="keygroup"><h3>Practice test</h3><ol class="key">
+<li><span class="num">1</span><span>Black to red <b>7&nbsp;:&nbsp;5</b>. Red to all <b>5&nbsp;:&nbsp;12</b> (<span class="m">5 + 7 = 12</span>).</span></li>
+<li><span class="num">2</span><span>8&nbsp;:&nbsp;12 makes 4 groups of 2 circles and 3 squares: for every <b>2 circles, there are 3 squares</b>.</span></li>
+<li><span class="num">3</span><span><b>6&nbsp;:&nbsp;8, 9&nbsp;:&nbsp;12, and 12&nbsp;:&nbsp;16</b> (3&nbsp;:&nbsp;4 times 2, 3, and 4).</span></li>
+<li><span class="num">4</span><span>8 cups of rice is <span class="m">8 ÷ 2 = 4</span> batches: <span class="m">4 × 3 =</span> <b>12 cups of water</b>.</span></li>
+<li><span class="num">5</span><span><b>No.</b> Equivalent ratios multiply both numbers by the same number; adding doesn’t keep the ratio. (4&nbsp;:&nbsp;7 times 2 is 8&nbsp;:&nbsp;14.)</span></li>
+<li><span class="num">6</span><span>The boxes are <b>6, 9, 12, 15</b>. In 20 minutes: <b>15 laps</b> (<span class="m">4 × 5 = 20</span>, <span class="m">3 × 5 = 15</span>).</span></li>
+<li><span class="num">7</span><span><span class="m">$24 ÷ 8 =</span> <b>$3</b> a ticket. 5 tickets: <span class="m">5 × $3 =</span> <b>$15</b>.</span></li>
+<li><span class="num">8</span><span>1 hour: <span class="m">180 ÷ 3 = 60</span> miles. 5 hours: <span class="m">5 × 60 =</span> <b>300 miles</b>.</span></li>
+<li><span class="num">9</span><span>6 for $3: <span class="m">$0.50</span> a can. 10 for $4: <span class="m">$0.40</span> a can. <b>10 cans for $4</b>.</span></li>
+<li><span class="num">10</span><span>Diego: <span class="m">100 ÷ 20 = 5</span> m a second. Jada: <span class="m">160 ÷ 40 = 4</span> m a second. <b>Diego</b>.</span></li>
+<li><span class="num">11</span><span>8 cups of flour: <b>6</b> cups of milk. 12 cups of milk: <b>16</b> cups of flour. 2 cups of flour: <b>1.5</b> cups of milk.</span></li>
+<li><span class="num">12</span><span>1 pound: <span class="m">$6 ÷ 4 = $1.50</span>. 10 pounds: <span class="m">10 × $1.50 =</span> <b>$15</b>.</span></li>
+<li><span class="num">13</span><span><span class="m">4 + 1 = 5</span> boxes, each <span class="m">30 ÷ 5 = 6</span>. <b>24 fiction</b> and <b>6 nonfiction</b>.</span></li>
+<li><span class="num">14</span><span>Each box: <span class="m">9 ÷ 3 = 3</span> cups. Soda: <span class="m">2 × 3 =</span> <b>6 cups</b>. In all: <span class="m">9 + 6 =</span> <b>15 cups</b>.</span></li>
+<li><span class="num">15</span><span><b>No.</b> The bag could have any number of groups of 2 green and 5 yellow: <b>14, 21, 28, …</b> marbles (or 7).</span></li>
+</ol></div>
+  </section>
+</main>
+
+<script src="../../shared/study.js?v=e2f2775d"></script>
+<script src="study.js?v=01c76db1"></script>
+</body>
+</html>

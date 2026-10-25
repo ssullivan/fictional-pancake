@@ -1,0 +1,43 @@
+/* Study guides on paper: load right after study.css with media="print". A guide prints on letter paper with a page number at
+   the foot of each page. The cover and its sheet share page 1; then each part of the unit starts a new page, so it prints as a
+   handout of its own (what to know, the example, the mistake to watch for, and its practice stay together), and the practice
+   test and the answer key each start a new page too. Every answer line has room above it to work the problem. Links that only
+   work on screen (back to the grade, a part's Learn chapter, .ch) and the printing tips are left off. */
+@page{
+  size:letter;margin:.55in .55in .7in;
+  @bottom-right{content:"Page " counter(page) " of " counter(pages);font:9pt "JetBrains Mono",monospace;color:#4a5568}
+}
+body{min-height:0;font-size:10pt}
+.guide{max-width:none;padding:0}
+.back,.howto,.guide .ch{display:none}
+.cover h1{font-size:30px}
+/* tints print even when the browser leaves out background colors */
+.plan li,.sheet,.example,.watch,.m.f,.guide th,.guide svg{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+
+/* one part to a page; a heading never ends a page, and the example and the warning aren't split */
+.topic{break-before:page;border-top:none;margin-top:0;padding-top:0}
+.th,.ke h3,.try{break-after:avoid}
+.example,.watch{break-inside:avoid}
+.ke{grid-template-columns:1.1fr 1fr}
+
+/* practice: two columns, each problem kept whole, with room to work above its answer line (more on the test) */
+.probs,.test .probs{grid-template-columns:repeat(2,1fr);gap:12px 26px}
+.answer-line{margin-top:.4in}
+.test .answer-line{margin-top:.6in}
+/* a diagram is narrower than its column, so there's room to work beside it */
+.pbody figure + .answer-line,.pbody .pair + .answer-line,.pbody [data-fig] + .answer-line{margin-top:.15in}
+.test .pbody figure + .answer-line{margin-top:.4in}
+.guide figure svg{max-height:1.5in;width:auto}
+/* diagrams side by side stay side by side, smaller, so the problem isn't as tall as both */
+.pair{flex-wrap:nowrap}
+.pair figure{flex:1 1 0;min-width:0}
+.pair figure svg{max-width:100%}
+
+.test,.answers{break-before:page;border-top:none;margin-top:0;padding-top:0}
+/* the key runs on from page to page, but never splits an answer or leaves a heading at the foot of a page */
+.keygroup h3{break-after:avoid}
+ol.key li{break-inside:avoid}
+.name-line{display:flex;gap:28px;margin:4px 0 14px;font-size:10.5pt}
+.name-line span{display:flex;align-items:flex-end;gap:8px}
+.name-line .blank{width:2.4in;flex:none;max-width:none}
+.name-line .blank.short{width:1.2in}

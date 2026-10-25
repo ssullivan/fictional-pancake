@@ -451,7 +451,7 @@ for (const home of globSync("grade*/unit*/learn.html", { cwd: ROOT }).sort()) {
     deps = {};
   for (const f of files) {
     const src = readFileSync(join(ROOT, `shared/${f}.js`), "utf8");
-    for (const [, name] of src.matchAll(/^(?:const|let|var|function)\s+([A-Za-z_$][\w$]*)/gm)) {
+    for (const [, name] of src.matchAll(/^(?:const|let|var|function|class)\s+([A-Za-z_$][\w$]*)/gm)) {
       if (owner.has(name) && owner.get(name) !== f)
         fail(`${name} is declared in both shared/${owner.get(name)}.js and shared/${f}.js`);
       owner.set(name, f);
