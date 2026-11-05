@@ -1,5 +1,5 @@
-/* Styles for the math facts pages: the big fact and its four answers, the set and table pickers, the fact map, and the
-   summary. Loaded after theme.css and game.css. */
+/* Styles for the math facts pages: the big fact and its four answers, finding every factor, the set and table pickers,
+   the fact map, and the summary. Loaded after theme.css and game.css. */
 /* the fact, big, and four answers in a 2 × 2 grid, big enough for a finger */
 .fact{font:800 clamp(44px,12vw,72px)/1 var(--display);margin:4px 0;text-align:center;letter-spacing:.01em}
 .fchoices{grid-template-columns:1fr 1fr}
@@ -50,3 +50,22 @@ h3.fsub{font:700 15px var(--mono);color:var(--dim);margin:4px 0 0}
 /* the summary's facts to work on */
 .worklist{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:0}
 .worklist span{font:700 17px var(--mono);background:rgba(255,154,134,.12);border:1.5px solid var(--bad);border-radius:10px;padding:6px 12px}
+/* finding every factor: the pairs found so far, a note on the last number tried (bad when it isn't a factor), a button for
+   each number 10 to a row (yes found, no not a factor, miss a factor not found, outlined once the fact is over), and Done */
+.finder{display:flex;flex-direction:column;gap:10px}
+.fpairs{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;min-height:38px}
+.fpairs span{font:700 17px var(--mono);background:rgba(95,224,168,.15);border:1.5px solid var(--good);border-radius:10px;padding:5px 10px}
+.fpairs span.none{background:none;border-color:transparent;color:var(--dim)}
+.trynote{margin:0;text-align:center;color:var(--dim);min-height:1.5em}
+.trynote.bad{color:var(--bad)}
+.fgrid{display:grid;grid-template-columns:repeat(10,1fr);gap:4px;max-width:520px;width:100%;margin-inline:auto}
+.fgrid button{background:#0a2340;border:1.5px solid rgba(170,205,255,.35);border-radius:8px;padding:8px 0;font:700 16px var(--mono);color:var(--chalk);min-width:0}
+@media (hover:hover){.fgrid button:hover:not(:disabled){border-color:var(--gold)}}
+.fgrid button.yes{background:var(--good);border-color:var(--good);color:#0a2340}
+.fgrid button.no{background:rgba(255,154,134,.25);border-color:var(--bad);text-decoration:line-through}
+.fgrid button.miss{border:2.5px solid var(--gold);color:var(--gold)}
+.fgrid button:disabled{cursor:default}
+.donerow{justify-content:center}
+/* a factor rainbow: an arc for each factor pair, in four colors from the outside in */
+.rainbow path,.rainbow circle{fill:none;stroke-width:3}
+.rainbow .rb0{stroke:var(--gold)}.rainbow .rb1{stroke:var(--cyan)}.rainbow .rb2{stroke:var(--good)}.rainbow .rb3{stroke:var(--pink)}

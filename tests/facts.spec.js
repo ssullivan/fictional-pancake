@@ -1,6 +1,7 @@
 // Math facts (facts/): the main page links to it, the hub links to each operation, and Quick Pick plays with real clicks and
 // taps: right answers move on by themselves, a wrong one shows the answer and brings the fact back soon, the hint helps,
-// tables and sets are saved, the fact map opens a fact to practice, and Stop shows a summary. No page scrolls sideways.
+// tables and sets are saved, the fact map opens a fact to practice, and Stop shows a summary. Factors are found by tapping
+// or typing each one, then Done, and prime or composite by picking the word. No page scrolls sideways.
 const { test, expect } = require("./fixtures");
 
 // a fact as the page writes it, solved: "7 + 8 = ?", "7 + ? = 15", or "? + 8 = 15" → {a, sign, b, value: the number asked for}
@@ -53,6 +54,7 @@ test("the main page and the hub link to every operation", async ({ page }) => {
     ["Multiplication", "mult"],
     ["Division", "div"],
     ["Simplifying Fractions", "simp"],
+    ["Factors", "fac"],
   ])
     await expect(page.getByRole("link", { name: new RegExp(name) })).toHaveAttribute("href", `practice.html#${hash}`);
   await noSideways(page);
@@ -391,5 +393,180 @@ test("simplifying fractions: sets, the map, a fraction already simplest, and typ
     }
     last = text;
   }
+  await noSideways(page);
+});
+
+// the factors of n, smallest first
+const factorsOf = (n) => Array.from({ length: n }, (_, i) => i + 1).filter((d) => n % d === 0);
+// the number a factor fact is about: "Factors of 24" or "24: prime or composite?" → 24
+const numberOf = (text) => +text.match(/\d+/)[0];
+
+test("factors: sets, the map, and finding every factor by tapping", async ({ page, hasTouch }) => {
+  const press = (loc) => (hasTouch ? loc.tap() : loc.click());
+  await fresh(page, "facts/practice.html#fac");
+  await expect(page.locator("h1")).toHaveText("Factors and primes");
+  await expect(page.locator("#known")).toHaveText("You know 0 of these 23 facts.");
+  await expect(page.locator(".fm")).toHaveCount(23);
+  await press(page.getByRole("button", { name: "Up to 100" }));
+  await expect(page.locator("#known")).toHaveText("You know 0 of these 99 facts.");
+  await expect(page.locator(".fm")).toHaveCount(99);
+  await press(page.locator('.fm[data-a="36"]'));
+  await expect(page.locator("#mapInfo")).toContainText("Factors of 36: 1, 2, 3, 4, 6, 9, 12, 18, 36 (composite)");
+  await expect(page.locator("#mapInfo")).toContainText("Stop at 7: 7 × 7 = 49 is more than 36");
+  await press(page.getByRole("button", { name: "Up to 24" }));
+  await press(page.getByRole("button", { name: "Start" }));
+  // Done with nothing tried does nothing
+  await press(page.getByRole("button", { name: "Done" }));
+  await expect(page.locator("#feedback")).toBeEmpty();
+  let last = "";
+  for (let i = 0; i < 10; i++) {
+    await expect(page.locator("#fact")).not.toHaveText(last, { timeout: 5000 });
+    const text = await page.locator("#fact").textContent(),
+      n = numberOf(text);
+    expect(text).toBe(`Factors of ${n}`);
+    await expect(page.locator(".fgrid button")).toHaveCount(n);
+    await expect(page.locator("#pairs")).toHaveText("No factors yet");
+    // tap the smaller factor of each pair: its partner fills in
+    for (const d of factorsOf(n).filter((d) => d * d <= n)) await press(page.locator(`.fgrid [data-n="${d}"]`));
+    await expect(page.locator(".fgrid button.yes")).toHaveCount(factorsOf(n).length);
+    await expect(page.locator("#pairs")).toContainText(`1 × ${n}`);
+    // a partner tapped again is already on the list
+    await press(page.locator(`.fgrid [data-n="${n}"]`));
+    await expect(page.locator("#tryNote")).toHaveText(`${n} is already on your list.`);
+    await press(page.getByRole("button", { name: "Done" }));
+    await expect(page.locator(".fb.good")).toContainText(`Factors of ${n}: ${factorsOf(n).join(", ")}`);
+    last = text;
+  }
+  await expect(page.locator("#right")).toHaveText("10");
+  await noSideways(page);
+});
+
+test("factors: a wrong tap says why, Done too early shows what's missing, and the fact comes back", async ({
+  page,
+  hasTouch,
+}) => {
+  const press = (loc) => (hasTouch ? loc.tap() : loc.click());
+  // answer the factor fact on screen right: the smaller factor of each pair, then Done
+  const findAll = async () => {
+    const n = numberOf(await page.locator("#fact").textContent());
+    for (const d of factorsOf(n).filter((d) => d * d <= n)) await press(page.locator(`.fgrid [data-n="${d}"]`));
+    await press(page.getByRole("button", { name: "Done" }));
+    await expect(page.locator(".fb.good")).toBeVisible();
+  };
+  await fresh(page, "facts/practice.html#fac");
+  await press(page.getByRole("button", { name: "Up to 100" }));
+  await press(page.locator('.fm[data-a="96"]'));
+  await press(page.getByRole("button", { name: "Practice this fact" }));
+  await expect(page.locator("#fact")).toHaveText("Factors of 96");
+  await expect(page.locator(".fgrid button")).toHaveCount(96);
+  await noSideways(page);
+  // the hint says how without the factors (or a rainbow)
+  await press(page.getByRole("button", { name: "Show me how" }));
+  await expect(page.locator("#hint")).toContainText("Stop once a number times itself is more than 96.");
+  await expect(page.locator("#hint svg")).toHaveCount(0);
+  // a number that isn't a factor says why, once
+  await press(page.locator('.fgrid [data-n="5"]'));
+  await expect(page.locator("#tryNote")).toHaveText("5 × 19 = 95 and 5 × 20 = 100: no number times 5 makes 96.");
+  await expect(page.locator("#tryNote")).toHaveClass(/bad/);
+  await expect(page.locator('.fgrid [data-n="5"]')).toHaveClass(/no/);
+  await press(page.locator('.fgrid [data-n="5"]'));
+  await expect(page.locator("#tryNote")).toHaveText("You already tried 5.");
+  // Done after only 1 × 96: what's still to find, and what isn't a factor
+  await press(page.locator('.fgrid [data-n="1"]'));
+  await expect(page.locator("#pairs")).toHaveText("1 × 96");
+  await press(page.getByRole("button", { name: "Done" }));
+  await expect(page.locator(".fb.bad")).toContainText("Still to find: 2, 3, 4, 6, 8, 12, 16, 24, 32, 48.");
+  await expect(page.locator(".fb.bad")).toContainText("Not factors of 96: 5.");
+  await expect(page.locator(".fb.bad svg")).toBeVisible();
+  await expect(page.locator(".fgrid .miss")).toHaveCount(10);
+  await expect(page.locator(".fgrid button:not(:disabled)")).toHaveCount(0);
+  await expect(page.locator("#streak")).toContainText("0");
+  // it comes back (it's the fact being practiced, too), and is right this time
+  await press(page.getByRole("button", { name: "Next fact →" }));
+  let back = false;
+  for (let i = 0; i < 5 && !back; i++) {
+    const text = await page.locator("#fact").textContent();
+    back = text === "Factors of 96";
+    await findAll();
+    await expect(page.locator("#fact")).not.toHaveText(text, { timeout: 5000 });
+  }
+  expect(back, "Factors of 96 came back").toBe(true);
+  await press(page.getByRole("button", { name: "← Stop" }));
+  await expect(page.locator(".worklist")).toContainText("Factors of 96: 1, 2, 3, 4, 6, 8, 12, 16, 24, 32, 48, 96");
+});
+
+test("factors: prime or composite, and typing each factor", async ({ page, hasTouch }) => {
+  const press = (loc) => (hasTouch ? loc.tap() : loc.click());
+  await fresh(page, "facts/practice.html#fac");
+  await press(page.getByRole("button", { name: "Up to 50" }));
+  await press(page.locator("#show [data-m='missing']"));
+  await press(page.getByRole("button", { name: "Start" }));
+  let last = "";
+  for (let i = 0; i < 10; i++) {
+    await expect(page.locator("#fact")).not.toHaveText(last, { timeout: 5000 });
+    const text = await page.locator("#fact").textContent(),
+      n = numberOf(text),
+      prime = factorsOf(n).length === 2;
+    expect(text).toBe(`${n}: prime or composite?`);
+    await expect(page.locator(".choice")).toHaveText(["Prime", "Composite"]);
+    // the first one wrong: the reason, then Next
+    const pickWord = i === 0 ? !prime : prime;
+    await press(page.getByRole("button", { name: pickWord ? "Prime" : "Composite", exact: true }));
+    if (i === 0) {
+      await expect(page.locator(".fb.bad")).toContainText(prime ? "so it isn’t composite" : "so it isn’t prime");
+      await press(page.getByRole("button", { name: "Next fact →" }));
+    } else await expect(page.locator(".fb.good")).toContainText(`(${prime ? "prime" : "composite"})`);
+    last = text;
+  }
+  // typing: prime or composite still shows the two words
+  await press(page.getByRole("button", { name: "← Stop" }));
+  await press(page.getByRole("button", { name: "Change facts" }));
+  await press(page.locator("#input [data-m='type']"));
+  await press(page.getByRole("button", { name: "Start" }));
+  await expect(page.locator(".choice")).toHaveCount(2);
+  await expect(page.locator(".pad")).toHaveCount(0);
+  // finding factors by typing: each one, then Add; Done at the end
+  await press(page.getByRole("button", { name: "← Stop" }));
+  await press(page.getByRole("button", { name: "Change facts" }));
+  await press(page.locator("#show [data-m='plain']"));
+  await press(page.getByRole("button", { name: "Start" }));
+  const padType = async (n) => {
+    for (const digit of String(n)) await press(page.locator(`.pad [data-key="${digit}"]`));
+  };
+  last = "";
+  for (let i = 0; i < 6; i++) {
+    await expect(page.locator("#fact")).not.toHaveText(last, { timeout: 5000 });
+    const text = await page.locator("#fact").textContent(),
+      n = numberOf(text);
+    await expect(page.getByRole("button", { name: "Add" })).toBeVisible();
+    // the first one: 0 and a number past n aren't factors (so it's missed)
+    if (i === 0) {
+      await padType(0);
+      await press(page.getByRole("button", { name: "Add" }));
+      await expect(page.locator("#tryNote")).toContainText("0 isn’t a factor");
+      await padType(n + 1);
+      await press(page.getByRole("button", { name: "Add" }));
+      await expect(page.locator("#tryNote")).toHaveText(`${n + 1} is more than ${n}, so it can’t be a factor of ${n}.`);
+      await expect(page.locator("#typed")).toHaveText("?");
+    }
+    // the smaller factor of each pair, on the pad (on a desktop after the first, a real keyboard)
+    for (const d of factorsOf(n).filter((d) => d * d <= n))
+      if (hasTouch || i === 0) {
+        await padType(d);
+        await press(page.getByRole("button", { name: "Add" }));
+      } else {
+        await page.keyboard.type(String(d));
+        await page.keyboard.press("Enter");
+      }
+    await expect(page.locator("#pairs span")).toHaveCount(factorsOf(n).filter((d) => d * d <= n).length);
+    await press(page.getByRole("button", { name: "Done" }));
+    if (i === 0) {
+      await expect(page.locator(".fb.bad")).toContainText(`Not factors of ${n}: 0, ${n + 1}.`);
+      await expect(page.locator(".fb.bad")).not.toContainText("You typed");
+      await press(page.getByRole("button", { name: "Next fact →" }));
+    } else await expect(page.locator(".fb.good")).toContainText(`Factors of ${n}: ${factorsOf(n).join(", ")}`);
+    last = text;
+  }
+  await expect(page.locator("#right")).toHaveText("5");
   await noSideways(page);
 });

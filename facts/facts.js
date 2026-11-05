@@ -1,18 +1,25 @@
 /* Math facts: the facts in each set, the choices for a fact, how to work it out, and which fact to practice next. Used by
-   facts/practice.html and by tools/facts.mjs. Needs util.js (R, pick, shuffle, range, gcd); the pictures in factHelp need
-   pictures.js (cellsOf), blocks.js (tenFrames), multiply.js (arrayFig), shapes.js (splitFig), and fractions.js (strips,
-   hundredGrid).
+   facts/practice.html and by tools/facts.mjs. Needs util.js (R, pick, shuffle, range, gcd), figures.js (svgWrap), and
+   multiply.js (factors, pairsOf, isPrime); the pictures in factHelp need pictures.js (cellsOf), blocks.js (tenFrames),
+   multiply.js (arrayFig), shapes.js (splitFig), and fractions.js (strips, hundredGrid).
 
    FACT_OPS                          the operations: their sign, name, and sets (addition and subtraction) or tables
                                      (multiplication and division)
    factKey(fact), factAnswer(fact), factText(fact)   "7×8", 56, and "7 × 8"
    factsIn(op, pick)                 every fact in a set ('10' or '20'), or in a list of tables: [{op, a, b}]
                                      (a division fact is a ÷ b: 56 ÷ 7 is {a: 56, b: 7}; a fraction to simplify is a/b:
-                                     6/8 is {a: 6, b: 8}, and its answer is text, "3/4")
+                                     6/8 is {a: 6, b: 8}, and its answer is text, "3/4"; a number to find the
+                                     factors of is {a: 24}, with no b, and its answer is every factor as text,
+                                     "1, 2, 3, 4, 6, 8, 12, 24")
    A fact can hide a number instead of its answer (fact.ask 'a' or 'b': 7 + ? = 15 hides b). askable(fact, ask) says
    whether that has one answer (0 × ? = 0 doesn't); factPrompt(fact) is "7 + ? = 15", factValue(fact) the number asked
    for (8), and factFull(fact) the whole fact, "7 + 8 = 15". The functions below follow ask.
-   factChoices(fact)                 4 different answers to pick from, one right: [{value, why}] (why is null for the right one)
+   A number to find the factors of can ask whether it's prime or composite instead (fact.ask 'kind'; the answer is 'Prime'
+   or 'Composite').
+   factChoices(fact)                 4 different answers to pick from, one right: [{value, why}] (why is null for the right
+                                     one); 2 for prime or composite; for finding factors, every number 1 to n (why is
+                                     null for a factor)
+   factorWhy(n, tried)               why a number tried isn't a factor of n (null when it is)
    factHelp(fact)                    how to work it out: {text, fig} (fig is svg markup, or '')
    factHint(fact)                    the same strategy as a hint, without the answer
    factStatus(memory, key)           'new', 'missed', 'learning', or 'known' from what was saved about the fact
@@ -48,35 +55,59 @@ const FACT_OPS = {
       ["100", "Hundredths"],
     ],
   },
+  /* every factor of a number from 2 up (1 has just one factor, and is neither prime nor composite), or whether it's prime */
+  fac: {
+    sign: "",
+    name: "Factors",
+    sets: [
+      ["24", "Up to 24"],
+      ["50", "Up to 50"],
+      ["100", "Up to 100"],
+    ],
+  },
 };
 /* a fraction a/b in simplest form, [numerator, denominator]: both divided by their greatest common factor */
 const simplest = (a, b) => [a / gcd(a, b), b / gcd(a, b)];
-/* a fact's key: "7+8", "15−7", "7×8" (a multiplication fact and its turnaround share one key, smaller factor first) */
+/* a fact's key: "7+8", "15−7", "7×8" (a multiplication fact and its turnaround share one key, smaller factor first), "f24" */
 const factKey = ({ op, a, b }) =>
-  op === "mult" ? `${Math.min(a, b)}×${Math.max(a, b)}` : `${a}${FACT_OPS[op].sign}${b}`;
-/* the answer: a number, or for a fraction to simplify its simplest form as text ("3/4") */
-const factAnswer = ({ op, a, b }) =>
-  op === "add" ? a + b : op === "sub" ? a - b : op === "mult" ? a * b : op === "div" ? a / b : simplest(a, b).join("/");
-const factText = ({ op, a, b }) => (op === "simp" ? `${a}/${b}` : `${a} ${FACT_OPS[op].sign} ${b}`);
+  op === "mult" ? `${Math.min(a, b)}×${Math.max(a, b)}` : op === "fac" ? `f${a}` : `${a}${FACT_OPS[op].sign}${b}`;
+/* every factor of n as text, smallest first: "1, 2, 3, 4, 6, 8, 12, 24" */
+const factorList = (n) => factors(n).join(", ");
+/* the answer: a number, for a fraction to simplify its simplest form as text ("3/4"), or a number's factors as text */
+const factAnswer = ({ op, a, b }) => {
+  if (op === "fac") return factorList(a);
+  if (op === "simp") return simplest(a, b).join("/");
+  return op === "add" ? a + b : op === "sub" ? a - b : op === "mult" ? a * b : a / b;
+};
+const factText = ({ op, a, b }) =>
+  op === "simp" ? `${a}/${b}` : op === "fac" ? String(a) : `${a} ${FACT_OPS[op].sign} ${b}`;
 /* can the fact hide a (or b) and still have one answer? Not 0 × ? = 0, ? × 0 = 0, or 0 ÷ ? = 0 */
-/* A fraction to simplify hides a number of its simplest form instead (6/8 = ?/4), so only one that simplifies can. */
+/* A fraction to simplify hides a number of its simplest form instead (6/8 = ?/4), so only one that simplifies can. A number
+   to find the factors of asks 'kind' (prime or composite) instead, and hides nothing. */
 const askable = ({ op, a, b }, ask) =>
-  !ask ||
-  !(
-    (op === "mult" && (a === 0 || b === 0)) ||
-    (op === "div" && a === 0 && ask === "b") ||
-    (op === "simp" && gcd(a, b) === 1)
-  );
-/* the number a fact asks for: its answer, or the number it hides */
+  op === "fac"
+    ? !ask || ask === "kind"
+    : !ask ||
+      !(
+        (op === "mult" && (a === 0 || b === 0)) ||
+        (op === "div" && a === 0 && ask === "b") ||
+        (op === "simp" && gcd(a, b) === 1)
+      );
+/* is n prime or composite, as the answer is written ('Prime' or 'Composite') */
+const kindOf = (n) => (isPrime(n) ? "Prime" : "Composite");
+/* the number a fact asks for: its answer, or the number it hides (or for factors, 'Prime' or 'Composite') */
 const factValue = (fact) => {
   const { op, a, b, ask } = fact;
+  if (op === "fac" && ask) return kindOf(a);
   if (op === "simp" && ask) return simplest(a, b)[ask === "a" ? 0 : 1];
   return ask === "a" ? a : ask === "b" ? b : factAnswer(fact);
 };
-/* the fact as asked: "7 + 8 = ?", "7 + ? = 15", "? + 8 = 15", "6/8 = ?", "6/8 = ?/4" */
+/* the fact as asked: "7 + 8 = ?", "7 + ? = 15", "? + 8 = 15", "6/8 = ?", "6/8 = ?/4", "Factors of 24",
+   "24: prime or composite?" */
 const factPrompt = (fact) => {
   const { op, a, b, ask } = fact,
     sign = FACT_OPS[op].sign;
+  if (op === "fac") return ask ? `${a}: prime or composite?` : `Factors of ${a}`;
   if (op === "simp") {
     const [n, d] = simplest(a, b);
     return `${a}/${b} = ${!ask ? "?" : ask === "a" ? `?/${d}` : `${n}/?`}`;
@@ -85,15 +116,19 @@ const factPrompt = (fact) => {
     ? `${ask === "a" ? "?" : a} ${sign} ${ask === "b" ? "?" : b} = ${factAnswer(fact)}`
     : `${a} ${sign} ${b} = ?`;
 };
-/* the whole fact: "7 + 8 = 15", "6/8 = 3/4", or "5/8 is already simplest" */
+/* the whole fact: "7 + 8 = 15", "6/8 = 3/4", "5/8 is already simplest", or "Factors of 24: 1, 2, 3, 4, 6, 8, 12, 24
+   (composite)" */
 const factFull = (fact) =>
-  fact.op === "simp" && gcd(fact.a, fact.b) === 1
-    ? `${factText(fact)} is already simplest`
-    : `${factText(fact)} = ${factAnswer(fact)}`;
+  fact.op === "fac"
+    ? `Factors of ${fact.a}: ${factorList(fact.a)} (${kindOf(fact.a).toLowerCase()})`
+    : fact.op === "simp" && gcd(fact.a, fact.b) === 1
+      ? `${factText(fact)} is already simplest`
+      : `${factText(fact)} = ${factAnswer(fact)}`;
 /* Every fact in a set. Addition: within 10, both numbers adding to 10 or less; within 20, any two numbers 0 to 10.
    Subtraction: the same facts turned around (from 10 or less; from 20 or less, taking away 0 to 10 and leaving 0 to 10).
    Multiplication: each table t in the list times 0 to 12, each fact once (3 × 7 and 7 × 3 are one fact).
-   Division: the same facts turned around, divided by each table t: 0 ÷ t to (12 × t) ÷ t. */
+   Division: the same facts turned around, divided by each table t: 0 ÷ t to (12 × t) ÷ t.
+   Factors: every number from 2 up to the set's top. */
 function factsIn(op, choice) {
   const facts = [];
   if (op === "add")
@@ -121,6 +156,7 @@ function factsIn(op, choice) {
     );
   }
   if (op === "div") choice.forEach((t) => range(13).forEach((n) => facts.push({ op, a: t * n, b: t })));
+  if (op === "fac") return range(+choice - 1).map((i) => ({ op, a: i + 2 }));
   if (op === "simp") {
     /* every fraction less than 1 that simplifies, and about 1 in 6 already in simplest form, spread evenly */
     const denominators = choice === "100" ? [100] : range(+choice - 1).map((i) => i + 2),
@@ -140,6 +176,7 @@ function factsIn(op, choice) {
    that land on the right answer, or below 0, are left out, and numbers near the answer fill any gap. */
 function factChoices(fact) {
   if (fact.op === "simp") return simpChoices(fact);
+  if (fact.op === "fac") return factorChoices(fact);
   const { op, a, b, ask } = fact,
     answer = factValue(fact),
     near = pick([1, -1]),
@@ -261,6 +298,7 @@ function missingMistakes(fact, near) {
    broken into two easier facts. */
 function factHelp(fact) {
   if (fact.op === "simp") return simpHelp(fact);
+  if (fact.op === "fac") return factorHelp(fact);
   if (fact.ask) return { text: missingHelp(fact), fig: factHelp({ ...fact, ask: null }).fig };
   const { op, a, b } = fact,
     answer = factAnswer(fact);
@@ -377,6 +415,7 @@ function factHelp(fact) {
 /* The strategy factHelp uses, said as a hint that doesn't give the answer away. */
 function factHint(fact) {
   if (fact.op === "simp") return simpHint(fact);
+  if (fact.op === "fac") return factorHint(fact);
   if (fact.ask) return missingHint(fact);
   const { op, a, b } = fact,
     answer = factAnswer(fact);
@@ -573,6 +612,107 @@ function simpHint(fact) {
   if (ask === "a") return `What did you divide ${b} by to get ${d}? Divide ${a} by the same number.`;
   if (ask === "b") return `What did you divide ${a} by to get ${n}? Divide ${b} by the same number.`;
   return `What’s the biggest number that divides both ${a} and ${b}?`;
+}
+
+/* ---------- factors ---------- */
+/* Why a number tried isn't a factor of n, or null when it is: 0 and numbers past n never are, and any other shows the two
+   products it falls between (5 × 4 = 20 and 5 × 5 = 25, so nothing times 5 makes 24). */
+function factorWhy(n, tried) {
+  if (tried === 0) return `0 isn’t a factor: 0 times any number is 0, not ${n}.`;
+  if (tried > n) return `${tried} is more than ${n}, so it can’t be a factor of ${n}.`;
+  if (n % tried === 0) return null;
+  const times = Math.floor(n / tried);
+  return `${tried} × ${times} = ${tried * times} and ${tried} × ${times + 1} = ${tried * (times + 1)}: no number times ${tried} makes ${n}.`;
+}
+/* The choices for a number's factors. Prime or composite: the two words, the wrong one with why (how many factors it has;
+   the help shows them). Finding every factor: each number from 1 to n, with why for each one that isn't a factor. */
+function factorChoices(fact) {
+  const n = fact.a;
+  if (!fact.ask) return range(n).map((i) => ({ value: i + 1, why: factorWhy(n, i + 1) }));
+  const prime = isPrime(n);
+  return [
+    { value: "Prime", why: prime ? null : `${n} has more than two factors, so it isn’t prime.` },
+    { value: "Composite", why: prime ? `${n} has just two factors, 1 and ${n}, so it isn’t composite.` : null },
+  ];
+}
+/* the first number that times itself is more than n: checking for factors can stop there, since every factor past it is
+   already the partner of a smaller one */
+const factorStop = (n) => Math.floor(Math.sqrt(n)) + 1;
+/* "2", "2 or 3", "2, 3, or 5" */
+const orList = (items) =>
+  items.length < 3 ? items.join(" or ") : `${items.slice(0, -1).join(", ")}, or ${items[items.length - 1]}`;
+/* How to find every factor: check 1, 2, 3, … in order, writing each pair, until a number times itself is past n. Prime or
+   composite: a second factor pair, or (prime) that nothing up to the stop goes in. The picture is a factor rainbow. */
+function factorHelp(fact) {
+  const n = fact.a,
+    pairs = pairsOf(n),
+    stop = factorStop(n),
+    fig = factorRainbow(n);
+  if (fact.ask && pairs.length > 1) {
+    const [small, big] = pairs[1];
+    return {
+      text: `${small} × ${big} = ${n}: ${n} has a factor pair besides 1 × ${n}, so it’s composite. Its factors are ${factorList(n)}.`,
+      fig,
+    };
+  }
+  if (fact.ask && n <= 3) return { text: `The only factors of ${n} are 1 and ${n}, so it’s prime.`, fig };
+  if (fact.ask) {
+    const checked = stop - 1 === 2 ? "2 doesn’t go" : `No number from 2 to ${stop - 1} goes`;
+    return {
+      text: `${checked} into ${n} evenly, and ${stop} × ${stop} = ${stop * stop} is more than ${n}, so 1 × ${n} is its only factor pair: ${n} is prime.`,
+      fig,
+    };
+  }
+  const kind =
+    pairs.length > 1
+      ? `${n} has more than two factors, so it’s composite.`
+      : `${n} has only two factors, 1 and itself, so it’s prime.`;
+  return {
+    text: `Check 1, 2, 3, … in order, and write each pair: ${pairs.map(([small, big]) => `${small} × ${big}`).join(", ")}. Stop at ${stop}: ${stop} × ${stop} = ${stop * stop} is more than ${n}, so every factor left is already in a pair. The factors of ${n} are ${factorList(n)}. ${kind}`,
+    fig,
+  };
+}
+/* the same, as a hint that doesn't give the factors away (or say whether it's prime) */
+function factorHint(fact) {
+  const n = fact.a;
+  if (fact.ask) {
+    /* the primes worth trying: for numbers to 100, a factor pair besides 1 × n has 2, 3, 5, or 7 in it */
+    const tries = [2, 3, 5, 7].filter((p) => p * p <= n);
+    return tries.length
+      ? `Look for a factor pair besides 1 × ${n}: does ${orList(tries)} go into ${n} evenly?`
+      : `Does any number besides 1 and ${n} go into ${n} evenly?`;
+  }
+  return `${n % 2 ? "" : `${n} is even, so 2 is a factor. `}Check each number from 1 in order: does it go into ${n} with none left over? Each factor brings its partner. Stop once a number times itself is more than ${n}.`;
+}
+/* A factor rainbow for n (svg): its factors in a row, smallest first, with an arc joining each factor pair (the outside
+   pair tallest), and a ring around a factor paired with itself (6 in 36). */
+function factorRainbow(n) {
+  /* slotW: room for each number (narrow, so 12 factors stay big on a phone); rise: how much taller each pair further out
+     is than the one inside it */
+  const list = factors(n),
+    pairs = pairsOf(n),
+    slotW = 36,
+    left = 20,
+    rise = 16,
+    numberY = rise * pairs.length + 30,
+    colX = (i) => left + i * slotW;
+  let markup = "";
+  pairs.forEach(([small, big], i) => {
+    const from = colX(list.indexOf(small)),
+      to = colX(list.indexOf(big)),
+      cls = `rb${i % 4}`;
+    markup +=
+      small === big
+        ? `<circle class="${cls}" cx="${from}" cy="${numberY}" r="17"/>`
+        : `<path class="${cls}" d="M${from} ${numberY - 12} A${(to - from) / 2} ${rise * (pairs.length - i) + 6} 0 0 1 ${to} ${numberY - 12}"/>`;
+  });
+  list.forEach((v, i) => (markup += `<text class="lbl" x="${colX(i)}" y="${numberY}">${v}</text>`));
+  return svgWrap(
+    2 * left + (list.length - 1) * slotW,
+    numberY + 18,
+    `<g class="rainbow">${markup}</g>`,
+    `A factor rainbow for ${n}: ${pairs.map(([small, big]) => `${small} × ${big}`).join(", ")}`,
+  );
 }
 
 /* ---------- which fact next ---------- */

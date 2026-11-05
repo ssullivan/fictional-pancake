@@ -3,7 +3,9 @@
 //   node tools/facts.mjs                (tools/check.mjs runs it too)
 //
 // For each fact: 4 different whole-number choices, exactly one of them the answer, every wrong one with a reason; help and a
-// hint that never show a broken value, whose every equation is true, and a hint that never gives the answer away. For each
+// hint that never show a broken value, whose every equation is true, and a hint that never gives the answer away. Factors:
+// every factor found again here, prime or composite right, each number 1 to n to try with a true reason when it isn't a
+// factor, and a rainbow arc for each factor pair. For each
 // set: the facts are the ones it should have, and the picker never deals the same fact twice in a row, deals only facts
 // from the set, and brings a missed fact back within 3 to 5 facts. Loads the scripts facts/practice.html loads, except
 // practice.js, which needs a page.
@@ -29,6 +31,7 @@ const names = [
     "factChoices",
     "factHelp",
     "factHint",
+    "factorWhy",
     "makePicker",
   ],
   {
@@ -43,6 +46,7 @@ const names = [
     factChoices,
     factHelp,
     factHint,
+    factorWhy,
     makePicker,
   } = vm.runInContext(`({${names.join(", ")}})`, ctx);
 
@@ -76,6 +80,11 @@ function evaluate(expression) {
   for (let i = 1; i < terms.length; i += 2) value += (terms[i] === "+" ? 1 : -1) * product(terms[i + 1]);
   return value;
 }
+// every equation in some words ("7 × 5 + 7 × 3 = 56") that isn't true
+const falseEquations = (text) =>
+  [...text.matchAll(/(\d+(?: [+−×÷] \d+)+) = (\d+)\b(?! [+−×÷])/g)]
+    .filter(([, left, right]) => evaluate(left) !== +right)
+    .map(([statement]) => statement);
 
 // every set: addition and subtraction within 10 and 20, each times table alone, and all of them together
 const sets = [
@@ -91,11 +100,17 @@ const sets = [
   ["simp", "12", 25],
   ["simp", "24", 116],
   ["simp", "100", 71],
+  // factors: every number from 2 to the top
+  ["fac", "24", 23],
+  ["fac", "50", 49],
+  ["fac", "100", 99],
 ];
 // the greatest common factor, worked out here again rather than taken from util.js
 const greatest = (x, y) => (y ? greatest(y, x % y) : x);
 // "6/8" → [6, 8]
 const parts = (text) => text.split("/").map(Number);
+// 1 to n
+const upTo = (n) => Array.from({ length: n }, (_, i) => i + 1);
 for (const [op, choice, expected] of sets) {
   const facts = factsIn(op, choice),
     name = `${op} ${choice}`;
@@ -112,6 +127,13 @@ for (const [op, choice, expected] of sets) {
       fail(`${name}: ${text} isn't in it`, text);
     if (op === "div" && !(choice.includes(fact.b) && Number.isInteger(answer) && answer <= 12))
       fail(`${name}: ${text} isn't in it`, text);
+    // the factors of a number, found again here, and whether it's prime
+    const divisors = op === "fac" ? upTo(fact.a).filter((d) => fact.a % d === 0) : [],
+      kind = divisors.length === 2 ? "Prime" : "Composite";
+    if (op === "fac") {
+      if (!(fact.a >= 2 && fact.a <= +choice)) fail(`${name}: ${text} isn't in it`, text);
+      if (answer !== divisors.join(", ")) fail(`${name}: the factors of ${text} aren't ${answer}`, text);
+    }
     if (op === "simp") {
       const g = greatest(fact.a, fact.b);
       if (!(fact.a > 0 && fact.a < fact.b && (choice === "100" ? fact.b === 100 : fact.b <= +choice)))
@@ -119,24 +141,54 @@ for (const [op, choice, expected] of sets) {
       if (answer !== `${fact.a / g}/${fact.b / g}`) fail(`${name}: ${text} isn't ${answer} in simplest form`, text);
     }
     // both orders of a multiplication fact, each asked for its answer and with each number hidden (when that has one
-    // answer), many deals each
+    // answer), many deals each; factors asked for every factor, and prime or composite
     const orders = op === "mult" ? [fact, { ...fact, a: fact.b, b: fact.a }] : [fact],
-      asked = orders.flatMap((f) => [null, "a", "b"].filter((ask) => askable(f, ask)).map((ask) => ({ ...f, ask })));
+      asks = op === "fac" ? [null, "kind"] : [null, "a", "b"],
+      asked = orders.flatMap((f) => asks.filter((ask) => askable(f, ask)).map((ask) => ({ ...f, ask })));
     for (const f of asked) {
       const value = factValue(f),
         prompt = factPrompt(f);
       // the number asked for: the hidden one, or the answer (a fraction's hidden number is from its simplest form)
       const expected =
-        op === "simp" && f.ask
-          ? parts(answer)[f.ask === "a" ? 0 : 1]
-          : f.ask === "a"
-            ? f.a
-            : f.ask === "b"
-              ? f.b
-              : answer;
+        op === "fac"
+          ? f.ask
+            ? kind
+            : divisors.join(", ")
+          : op === "simp" && f.ask
+            ? parts(answer)[f.ask === "a" ? 0 : 1]
+            : f.ask === "a"
+              ? f.a
+              : f.ask === "b"
+                ? f.b
+                : answer;
       if (expected !== value) fail(`${name}: ${prompt} asks for the wrong number`, prompt);
-      if (prompt.split("?").length !== 2) fail(`${name}: ${prompt} doesn't hide one number`, prompt);
-      for (let k = 0; k < 40; k++) {
+      if (op === "fac") {
+        if (prompt !== (f.ask ? `${f.a}: prime or composite?` : `Factors of ${f.a}`))
+          fail(`${name}: ${prompt} isn't how a factor fact is asked`, prompt);
+      } else if (prompt.split("?").length !== 2) fail(`${name}: ${prompt} doesn't hide one number`, prompt);
+      // factors: the two words, or each number from 1 to n, with a true reason on each that isn't right (and on numbers
+      // typed that are 0 or past n)
+      if (op === "fac") {
+        const choices = factChoices(f),
+          values = choices.map((c) => c.value);
+        if (values.join() !== (f.ask ? "Prime,Composite" : upTo(f.a).join()))
+          fail(`${name}: the choices are ${values}`, prompt);
+        choices.forEach((c) => {
+          const right = f.ask ? c.value === kind : divisors.includes(c.value);
+          if (right !== (c.why === null))
+            fail(`${name}: a reason is missing or on a right choice`, `${prompt}: ${c.value}`);
+        });
+        const reasons = [
+          ...choices.filter((c) => c.why).map((c) => c.why),
+          ...[0, f.a + 1, f.a + 7].map((tried) => factorWhy(f.a, tried)),
+        ];
+        if (reasons.some((why) => !why)) fail(`${name}: no reason a number past ${f.a} or 0 isn't a factor`, prompt);
+        for (const why of reasons.filter(Boolean)) {
+          for (const statement of falseEquations(why)) fail(`${name}: a reason says ${statement}`, `${prompt}: ${why}`);
+          if (BROKEN.test(why)) fail(`${name}: a reason shows a broken value`, `${prompt}: ${why}`);
+        }
+      }
+      for (let k = 0; k < (op === "fac" ? 0 : 40); k++) {
         const choices = factChoices(f),
           values = choices.map((c) => c.value);
         if (choices.length !== 4) fail(`${name}: ${choices.length} choices`, prompt);
@@ -170,18 +222,28 @@ for (const [op, choice, expected] of sets) {
       ])
         if (BROKEN.test(words)) fail(`${name}: ${what} shows a broken value`, `${prompt}: ${words}`);
       if (/÷ 0\b/.test(words(f))) fail(`${name}: something is divided by 0`, prompt);
-      if (!help.text.includes(String(value))) fail(`${name}: help doesn't give the answer`, `${prompt}: ${help.text}`);
+      if (!help.text.toLowerCase().includes(String(value).toLowerCase()))
+        fail(`${name}: help doesn't give the answer`, `${prompt}: ${help.text}`);
+      if (op === "fac") {
+        // help says prime or composite, rightly; the hint says neither, and doesn't list the factors; the rainbow has an
+        // arc (or a ring) for each factor pair
+        const other = kind === "Prime" ? "composite" : "prime";
+        if (!help.text.includes(kind.toLowerCase()) || help.text.includes(other))
+          fail(`${name}: help doesn't say it's ${kind.toLowerCase()}`, `${prompt}: ${help.text}`);
+        if (/prime|composite/i.test(hint) || hint.includes(divisors.join(", ")))
+          fail(`${name}: the hint gives the answer away`, `${prompt}: ${hint}`);
+        const arcs = (help.fig.match(/<path|<circle/g) || []).length;
+        if (arcs !== Math.ceil(divisors.length / 2)) fail(`${name}: the rainbow has ${arcs} arcs`, prompt);
+      }
       // (rules like times 0 or a number divided by itself can't hide their answer, and neither can a hidden number that's
       // the same as the one shown, as in ? × 1 = 7)
       const rule =
+        op === "fac" ||
         (!f.ask && (((op === "mult" || op === "div") && answer === 0) || (op === "div" && f.a === f.b))) ||
         (f.ask && value === answer);
       if (!rule && new RegExp(`(= |\\bis )${value}\\b(?!\\d)`).test(hint))
         fail(`${name}: the hint gives the answer away`, `${prompt}: ${hint}`);
-      for (const [statement, left, right] of `${help.text} ${hint}`.matchAll(
-        /(\d+(?: [+−×÷] \d+)+) = (\d+)\b(?! [+−×÷])/g,
-      ))
-        if (evaluate(left) !== +right) fail(`${name}: says ${statement}`, prompt);
+      for (const statement of falseEquations(`${help.text} ${hint}`)) fail(`${name}: says ${statement}`, prompt);
     }
   }
   // the picker: 3,000 deals, missing every 7th fact

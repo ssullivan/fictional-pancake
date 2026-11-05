@@ -1,13 +1,14 @@
 /* Quick Pick (facts/practice.html): pick which facts to practice, then answer them for as long as you like, picking one of
-   four answers or typing it. The operation comes from the link: practice.html#add, #sub, #mult, #div, or #simp (simplifying
-   fractions). Facts, choices, help, and which fact comes next are in facts.js; this file draws the screens and saves progress
-   on this device. */
+   four answers or typing it. The operation comes from the link: practice.html#add, #sub, #mult, #div, #simp (simplifying
+   fractions), or #fac (factors: tap or type every factor of a number, then Done; or say whether it's prime or composite).
+   Facts, choices, help, and which fact comes next are in facts.js; this file draws the screens and saves progress on this
+   device. */
 const SAVE_KEY = "facts-save";
-/* the operation: 'add', 'sub', 'mult', 'div', or 'simp' */
+/* the operation: 'add', 'sub', 'mult', 'div', 'simp', or 'fac' */
 const op = Object.keys(FACT_OPS).includes(location.hash.slice(1)) ? location.hash.slice(1) : "add";
 /* does this operation practice tables (multiplication and division), not sets? */
 const byTables = !!FACT_OPS[op].tables;
-/* Saved progress for every operation: {add: {set, memory, best, …}, sub, mult: {tables, memory, best, …}, div, simp} */
+/* Saved progress for every operation: {add: {set, memory, best, …}, sub, mult: {tables, memory, best, …}, div, simp, fac} */
 let save = {};
 try {
   save = JSON.parse(localStorage.getItem(SAVE_KEY) || "{}") || {};
@@ -19,7 +20,7 @@ const mine = (save[op] = save[op] || {}),
     } catch (e) {}
   };
 mine.memory = mine.memory || {};
-/* how facts are shown: 'plain' (7 + 8 = ?), 'missing' (7 + ? = 15), or 'mix' */
+/* how facts are shown: 'plain' (7 + 8 = ?), 'missing' (7 + ? = 15; for factors, prime or composite), or 'mix' */
 mine.show = mine.show || "plain";
 /* how answers are given: 'pick' one of four, or 'type' it on the number pad (or a keyboard) */
 mine.input = mine.input || "pick";
@@ -31,7 +32,7 @@ const SPRINT_MS = 60000;
 const setKey = () => (byTables ? `tables ${mine.tables.join(",")}` : `set ${mine.set}`);
 mine.best = mine.best || 0;
 if (byTables) mine.tables = mine.tables || [2, 3, 4, 5];
-else mine.set = mine.set || (op === "simp" ? "12" : "20");
+else mine.set = mine.set || { simp: "12", fac: "24" }[op] || "20";
 /* an example of each way to show a fact, for the "Show facts as" buttons */
 const SHOW_EXAMPLES = {
   add: ["7 + 8 = ?", "7 + ? = 15"],
@@ -39,6 +40,7 @@ const SHOW_EXAMPLES = {
   mult: ["6 × 7 = ?", "6 × ? = 42"],
   div: ["42 ÷ 6 = ?", "42 ÷ ? = 7"],
   simp: ["6/8 = ?", "6/8 = ?/4"],
+  fac: ["Factors of 24", "Prime or composite?"],
 };
 /* text with every fraction in it ("6/8", "?/4") written stacked; other text is unchanged */
 const stack = (text) => String(text).replace(/(\d+|\?)\/(\d+|\?)/g, (match, top, bottom) => fr(top, bottom));
@@ -51,7 +53,12 @@ let mapPick = null;
 function drawSetup() {
   const opInfo = FACT_OPS[op];
   document.title = `${opInfo.name} · Quick Pick · Math Facts`;
-  $("opTitle").innerHTML = op === "simp" ? "Simplifying <span>fractions</span>" : `${opInfo.name} <span>facts</span>`;
+  $("opTitle").innerHTML =
+    op === "simp"
+      ? "Simplifying <span>fractions</span>"
+      : op === "fac"
+        ? "Factors <span>and primes</span>"
+        : `${opInfo.name} <span>facts</span>`;
   /* addition and subtraction pick a set; multiplication and division tick the tables */
   const tableWord = op === "mult" ? "Times" : "Divided by";
   $("sets").innerHTML = byTables
@@ -76,7 +83,7 @@ function drawSetup() {
   ]);
   press($("show"), mine.show);
   $("input").innerHTML = seg("Answer by", [
-    ["pick", "Picking from 4"],
+    ["pick", op === "fac" ? "Tapping them" : "Picking from 4"],
     ["type", "Typing it"],
   ]);
   press($("input"), mine.input);
@@ -134,8 +141,20 @@ $("input").addEventListener("click", (e) => {
    r and column number c (null where there's none), what each square says, and its size.
    Addition: a down the side, b along the top. Subtraction: the number taken away, and the answer. Multiplication: 0 to 12
    both ways. Division: the number divided by (1 to 12), and the answer. Simplifying: the denominator down the side and the
-   numerator along the top, a triangle, since the top is smaller; hundredths: tens down the side and ones along the top. */
+   numerator along the top, a triangle, since the top is smaller; hundredths: tens down the side and ones along the top.
+   Factors: the same, tens and ones, from 2 to the set's top. */
 function mapLayout() {
+  if (op === "fac") {
+    const most = +mine.set;
+    return {
+      rows: range(Math.floor(most / 10) + 1).map((i) => i * 10),
+      cols: range(10),
+      factAt: (r, c) => (r + c >= 2 && r + c <= most ? { op, a: r + c } : null),
+      text: (fact) => fact.a,
+      corner: "",
+      cellSize: 30,
+    };
+  }
   if (op === "simp" && mine.set === "100")
     return {
       rows: range(10).map((i) => i * 10),
@@ -196,13 +215,15 @@ function factMap() {
       squares++;
       const key = factKey(fact),
         status = factStatus(mine.memory, key),
-        picked = mapPick && factKey(mapPick) === key && mapPick.a === fact.a && mapPick.b === fact.b;
+        picked = mapPick && factKey(mapPick) === key && mapPick.a === fact.a && mapPick.b === fact.b,
+        /* a number to find the factors of has no b */
+        bAttr = "b" in fact ? ` data-b="${fact.b}"` : "";
       markup += square(
         row,
         col,
         `fm ${status}${inSet.has(key) ? "" : " out"}${picked ? " cur" : ""}`,
         text(fact),
-        ` data-a="${fact.a}" data-b="${fact.b}" role="button" tabindex="0" aria-label="${factText(fact)}, ${status}"`,
+        ` data-a="${fact.a}"${bAttr} role="button" tabindex="0" aria-label="${factText(fact)}, ${status}"`,
       );
     }),
   );
@@ -236,7 +257,7 @@ function drawMap() {
 function pickSquare(e) {
   const square = e.target.closest("[data-a]");
   if (!square) return;
-  mapPick = { op, a: +square.dataset.a, b: +square.dataset.b };
+  mapPick = { op, a: +square.dataset.a, ...("b" in square.dataset ? { b: +square.dataset.b } : {}) };
   drawMap();
 }
 $("map").addEventListener("click", pickSquare);
@@ -286,42 +307,118 @@ function tickSprint() {
   if (!left) finish(true);
 }
 /* The number pad for typing an answer: 1 to 9, then delete, 0, and Go. fraction: a / key after 0, to go from the top
-   number to the bottom one, with Go on a row of its own. */
-const padHtml = (fraction) =>
+   number to the bottom one, with Go on a row of its own. goWord: what the Go key says ('Add' when finding factors). */
+const padHtml = (fraction, goWord = "Go") =>
   `<div class="typed" id="typed" aria-live="polite">?</div><div class="pad">` +
   [1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => `<button type="button" data-key="${n}">${n}</button>`).join("") +
   `<button type="button" data-key="del" aria-label="Delete">⌫</button><button type="button" data-key="0">0</button>` +
   (fraction
-    ? `<button type="button" data-key="/" aria-label="Fraction bar">/</button><button type="button" class="go wide" data-key="go">Go</button>`
-    : `<button type="button" class="go" data-key="go">Go</button>`) +
+    ? `<button type="button" data-key="/" aria-label="Fraction bar">/</button><button type="button" class="go wide" data-key="go">${goWord}</button>`
+    : `<button type="button" class="go" data-key="go">${goWord}</button>`) +
   `</div>`;
 /* does the fact on screen want a fraction typed (a fraction to simplify, with no number hidden)? */
 const wantsFraction = () => play.fact.op === "simp" && !play.fact.ask;
-/* deal the next fact, and its four answers or the number pad */
+/* is the fact on screen finding every factor of a number (each one tapped or typed, then Done)? */
+const findingFactors = () => play.fact.op === "fac" && !play.fact.ask;
+/* is the fact on screen answered on the number pad? Not prime or composite, which is always two words to pick from */
+const typing = () => mine.input === "type" && !(play.fact.op === "fac" && play.fact.ask);
+/* deal the next fact, and its four answers or the number pad (finding factors: a button for each number, or the pad, and
+   Done) */
 function nextFact() {
   if (play.over) return;
   const dealt = play.picker.next(),
-    /* hide a number instead of the answer when the setup says to, and the fact still has one answer */
-    hide = mine.show === "missing" || (mine.show === "mix" && R(0, 1)) ? pick(["a", "b"]) : null,
+    /* hide a number instead of the answer when the setup says to, and the fact still has one answer (factors ask prime or
+       composite instead) */
+    hide =
+      mine.show === "missing" || (mine.show === "mix" && R(0, 1)) ? (op === "fac" ? "kind" : pick(["a", "b"])) : null,
     fact = { ...dealt, ask: askable(dealt, hide) ? hide : null };
   play.fact = fact;
   play.done = false;
   play.hinted = false;
   play.typed = "";
-  play.choices = mine.input === "type" ? [] : factChoices(fact);
+  /* finding factors: the numbers found so far (each with its partner), and the ones tried that aren't factors */
+  play.found = new Set();
+  play.wrong = [];
+  play.choices = typing() ? [] : factChoices(fact);
   $("fact").innerHTML = stack(factPrompt(fact));
-  $("factNote").textContent = op === "simp" && !fact.ask ? "Write it in simplest form." : "";
-  $("choices").className = mine.input === "type" ? "typing" : "choices fchoices";
-  $("choices").innerHTML =
-    mine.input === "type"
-      ? padHtml(wantsFraction())
+  $("factNote").textContent = findingFactors()
+    ? `${typing() ? "Add" : "Tap"} each factor you find, then Done.`
+    : op === "simp" && !fact.ask
+      ? "Write it in simplest form."
+      : "";
+  $("choices").className = findingFactors() ? "finder" : typing() ? "typing" : "choices fchoices";
+  const answerArea = typing()
+    ? padHtml(wantsFraction(), findingFactors() ? "Add" : "Go")
+    : findingFactors()
+      ? `<div class="fgrid" role="group" aria-label="Numbers 1 to ${fact.a}">${play.choices
+          .map((c) => `<button type="button" data-n="${c.value}">${c.value}</button>`)
+          .join("")}</div>`
       : play.choices
           .map((c) => `<button type="button" class="choice" data-v="${c.value}">${stack(c.value)}</button>`)
           .join("");
+  /* finding factors: the pairs found so far and a note on the last number tried, above the numbers; Done below */
+  $("choices").innerHTML = findingFactors()
+    ? `<div class="fpairs" id="pairs" aria-live="polite"></div><p class="trynote" id="tryNote" aria-live="polite"></p>` +
+      answerArea +
+      `<div class="row donerow"><button type="button" class="btn" id="doneBtn">Done</button></div>`
+    : answerArea;
+  if (findingFactors()) drawFound();
   $("hint").hidden = true;
   $("hintBtn").disabled = false;
   $("feedback").innerHTML = "";
   drawCounts();
+}
+/* finding factors: the pairs found so far ("1 × 24", "2 × 12"), and each number's button marked found or not a factor */
+function drawFound() {
+  const pairs = pairsOf(play.fact.a).filter(([small]) => play.found.has(small));
+  $("pairs").innerHTML = pairs.length
+    ? pairs.map(([small, big]) => `<span>${small} × ${big}</span>`).join("")
+    : `<span class="none">No factors yet</span>`;
+  $("choices")
+    .querySelectorAll("[data-n]")
+    .forEach((b) => {
+      b.classList.toggle("yes", play.found.has(+b.dataset.n));
+      b.classList.toggle("no", play.wrong.includes(+b.dataset.n));
+    });
+}
+/* Finding factors: try a number, tapped or typed. A factor joins the list with its partner; a number that isn't one says
+   why, and the fact will count as missed. A number already tried just says so. */
+function tryFactor(tried) {
+  if (play.done) return;
+  const n = play.fact.a;
+  if (play.found.has(tried) || play.wrong.includes(tried)) {
+    $("tryNote").textContent = play.found.has(tried)
+      ? `${tried} is already on your list.`
+      : `You already tried ${tried}.`;
+    $("tryNote").className = "trynote";
+    return;
+  }
+  const why = factorWhy(n, tried);
+  if (why) play.wrong.push(tried);
+  else {
+    play.found.add(tried);
+    play.found.add(n / tried);
+  }
+  $("tryNote").textContent = why || "";
+  $("tryNote").className = `trynote${why ? " bad" : ""}`;
+  drawFound();
+}
+/* finding factors: Done checks everything tried, which is right when it's every factor and nothing else (nothing tried yet:
+   Done does nothing) */
+function doneFactors() {
+  const tried = [...play.found, ...play.wrong].sort((x, y) => x - y);
+  if (tried.length) answer(tried.join(", "));
+}
+/* finding factors: why a list that isn't right is wrong: the factors not found, and the numbers that aren't factors */
+function foundWhy() {
+  const n = play.fact.a,
+    missing = factors(n).filter((f) => !play.found.has(f));
+  return [
+    missing.length ? `Still to find: ${missing.join(", ")}.` : "",
+    play.wrong.length ? `Not factors of ${n}: ${play.wrong.join(", ")}.` : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
 }
 function drawCounts() {
   $("right").textContent = play.right;
@@ -350,11 +447,21 @@ function answer(value) {
   }
   persist();
   /* typed: the answer box turns green or red; picked: the right choice turns green, a wrong pick red */
-  if (mine.input === "type") {
+  if (typing()) {
     $("typed").classList.add(ok ? "yes" : "no");
     $("choices")
       .querySelectorAll("[data-key]")
       .forEach((b) => (b.disabled = true));
+  }
+  /* finding factors: the factors not found are outlined, and nothing more can be tried */
+  if (findingFactors()) {
+    $("choices")
+      .querySelectorAll("[data-n]")
+      .forEach((b) => {
+        if (!play.found.has(+b.dataset.n) && fact.a % +b.dataset.n === 0) b.classList.add("miss");
+        b.disabled = true;
+      });
+    $("doneBtn").disabled = true;
   }
   $("choices")
     .querySelectorAll(".choice")
@@ -363,16 +470,18 @@ function answer(value) {
       else if (b.dataset.v === value) b.classList.add("no");
       b.disabled = true;
     });
-  /* why a wrong answer is wrong: the picked choice's reason, or for a typed fraction equal to the right one, that it
-     isn't simplest */
-  const picked = play.choices.find((c) => String(c.value) === value),
+  /* why a wrong answer is wrong: the picked choice's reason, for a typed fraction equal to the right one, that it isn't
+     simplest, or for factors, what's missing and what isn't a factor */
+  const picked = findingFactors() ? null : play.choices.find((c) => String(c.value) === value),
     [top, bottom] = value.split("/").map(Number),
     equalButNot = wantsFraction() && bottom && top * fact.b === bottom * fact.a,
-    why = picked
-      ? picked.why
-      : equalButNot
-        ? `${value} is equal to ${factText(fact)}, but not simplest: divide again.`
-        : "";
+    why = findingFactors()
+      ? foundWhy()
+      : picked
+        ? picked.why
+        : equalButNot
+          ? `${value} is equal to ${factText(fact)}, but not simplest: divide again.`
+          : "";
   drawCounts();
   const help = factHelp(fact);
   if (ok) {
@@ -385,7 +494,7 @@ function answer(value) {
   } else {
     $("feedback").innerHTML =
       `<div class="fb bad"><h4>${stack(factFull(fact))}</h4>` +
-      (mine.input === "type" ? `<p>You typed ${stack(value)}.</p>` : "") +
+      (typing() && !findingFactors() ? `<p>You typed ${stack(value)}.</p>` : "") +
       (why ? `<p>${stack(why)}</p>` : "") +
       `<p>${stack(help.text)}</p>` +
       (help.fig ? `<div class="fig">${help.fig}</div>` : "") +
@@ -396,16 +505,26 @@ function answer(value) {
 }
 $("choices").addEventListener("click", (e) => {
   const b = e.target.closest(".choice"),
-    key = e.target.closest("[data-key]");
+    key = e.target.closest("[data-key]"),
+    number = e.target.closest("[data-n]");
   if (b && !b.disabled) answer(b.dataset.v);
   if (key && !key.disabled) typeKey(key.dataset.key);
+  if (number && !number.disabled) tryFactor(+number.dataset.n);
+  if (e.target.closest("#doneBtn:not(:disabled)")) doneFactors();
 });
 /* A key on the number pad (or keyboard): a digit (at most 3 in a number), 'del', '/' to go from the top of a fraction to
-   the bottom, or 'go' to check what's typed. A 0 on its own is replaced by the next digit. */
+   the bottom, or 'go' to check what's typed (finding factors: to try it, and start the next number). A 0 on its own is
+   replaced by the next digit. */
 function typeKey(key) {
-  if (!play || play.done || mine.input !== "type") return;
+  if (!play || play.done || !typing()) return;
   const fraction = wantsFraction(),
     [top, bottom] = play.typed.split("/");
+  if (key === "go" && findingFactors()) {
+    if (play.typed) tryFactor(+play.typed);
+    play.typed = "";
+    $("typed").textContent = "?";
+    return;
+  }
   if (key === "go") {
     /* a fraction needs both numbers */
     if (fraction ? top && bottom : play.typed) answer(fraction ? `${+top}/${+bottom}` : String(+play.typed));
@@ -424,7 +543,7 @@ function typeKey(key) {
 }
 /* a keyboard types too: digits, Backspace, and Enter (only while a fact is waiting for its answer) */
 document.addEventListener("keydown", (e) => {
-  if ($("play").hidden || !play || play.done || mine.input !== "type") return;
+  if ($("play").hidden || !play || play.done || !typing()) return;
   if (/^[0-9/]$/.test(e.key)) typeKey(e.key);
   else if (e.key === "Backspace") typeKey("del");
   else if (e.key === "Enter") {
@@ -434,10 +553,11 @@ document.addEventListener("keydown", (e) => {
   e.preventDefault();
 });
 $("hintBtn").onclick = () => {
-  const help = factHelp(play.fact);
+  /* (a factor rainbow would give the factors away) */
+  const fig = op === "fac" ? "" : factHelp(play.fact).fig;
   play.hinted = true;
   $("hintBtn").disabled = true;
-  $("hint").innerHTML = `<p>${stack(factHint(play.fact))}</p>` + (help.fig ? `<div class="fig">${help.fig}</div>` : "");
+  $("hint").innerHTML = `<p>${stack(factHint(play.fact))}</p>` + (fig ? `<div class="fig">${fig}</div>` : "");
   $("hint").hidden = false;
 };
 /* The end of playing: a summary of this time. finished: a sprint ran its full minute (only then can it be a new best). */
